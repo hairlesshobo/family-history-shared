@@ -294,13 +294,26 @@ namespace Archiver
 
         private static void CreateISOFile(DestinationDisc disc, Stopwatch masterSw)
         {
+            Status.WriteDiscIso(disc, masterSw.Elapsed, 0);
             string isoRoot = Globals._stagingDir + "/iso";
 
             if (!Directory.Exists(isoRoot))
                 Directory.CreateDirectory(isoRoot);
 
-            Helpers.CreateISOFromDisc(disc, masterSw);
-            Directory.Delete(disc.RootStagingPath, true);
+            ISO_Creator creator = new ISO_Creator(disc.DiscName, disc.RootStagingPath, disc.IsoPath);
+
+            creator.OnProgressChanged += (currentPercent) => {
+                Status.WriteDiscIso(disc, masterSw.Elapsed, currentPercent);
+            };
+
+            creator.OnComplete += () => {
+                disc.IsoCreated = true;
+                Directory.Delete(disc.RootStagingPath, true);
+            };
+
+            Thread isoThread = new Thread(creator.CreateISO);
+            isoThread.Start();
+            isoThread.Join();
         }
 
         private static void ReadIsoHash(DestinationDisc disc, Stopwatch masterSw)

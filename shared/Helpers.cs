@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace DiscArchiver.Shared
 {
@@ -103,76 +104,28 @@ namespace DiscArchiver.Shared
             Console.WriteLine();
 
             string isoPath = Globals._stagingDir + "/iso/index.iso";
+            string isoName = "Archive Index";
 
-            string procArgs = $"--burn-data -folder[\\]:\"{Helpers.DirtyPath(Globals._indexDiscDir)}\" -name:\"Archive Index\" -udf:2.5 -iso:\"{Helpers.DirtyPath(isoPath)}\"";
+            ISO_Creator creator = new ISO_Creator(isoName, Helpers.DirtyPath(Globals._indexDiscDir), isoPath);
 
-            Process process = new Process();
-            process.StartInfo.FileName = Globals._cdbxpPath;
-            process.StartInfo.Arguments = procArgs;
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.CreateNoWindow = false;
-            process.StartInfo.RedirectStandardOutput = true;
-            process.Start();
+            creator.OnProgressChanged += (currentPercent) => {
+                string line = Status.GeneratePercentBar(Console.WindowWidth, 0, 0, currentPercent, (currentPercent == 100));
+                Console.CursorLeft = 0;
+                Console.Write(line);
+            };
 
-            while (process.HasExited == false)
-            {
-                string output = process.StandardOutput.ReadLine();
+            creator.OnComplete += () => {
+                string line = Status.GeneratePercentBar(Console.WindowWidth, 0, 0, 100, true);
+                Console.CursorLeft = 0;
+                Console.Write(line);
+            };
 
-                if (output != null && output.EndsWith("%"))
-                {
-                    output = output.TrimEnd('%');
-
-                    int currentPercent = Int32.Parse(output);
-
-                    string line = Status.GeneratePercentBar(Console.WindowWidth, 0, 0, currentPercent, (currentPercent == 100));
-                    Console.CursorLeft = 0;
-                    Console.Write(line);
-                }
-
-            }
-
-            process.StandardOutput.ReadToEnd();
-
-            process.WaitForExit();
+            Thread isoThread = new Thread(creator.CreateISO);
+            isoThread.Start();
+            isoThread.Join();
 
             Console.CursorLeft = 0;
             Console.CursorTop = Console.CursorTop+2;
-        }
-
-        public static void CreateISOFromDisc(DestinationDisc disc, Stopwatch masterSw)
-        {
-            Status.WriteDiscIso(disc, masterSw.Elapsed, 0);
-
-            string procArgs = $"--burn-data -folder[\\]:\"{Helpers.DirtyPath(disc.RootStagingPath)}\" -name:\"{disc.DiscName}\" -udf:2.5 -iso:\"{Helpers.DirtyPath(disc.IsoPath)}\"";
-
-            Process process = new Process();
-            process.StartInfo.FileName = Globals._cdbxpPath;
-            process.StartInfo.Arguments = procArgs;
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.CreateNoWindow = false;
-            process.StartInfo.RedirectStandardOutput = true;
-            process.Start();
-
-            while (process.HasExited == false)
-            {
-                string output = process.StandardOutput.ReadLine();
-
-                if (output != null && output.EndsWith("%"))
-                {
-                    output = output.TrimEnd('%');
-
-                    int currentPercent = Int32.Parse(output);
-
-                    Status.WriteDiscIso(disc, masterSw.Elapsed, currentPercent);
-                }
-
-            }
-
-            process.StandardOutput.ReadToEnd();
-
-            process.WaitForExit();
-
-            disc.IsoCreated = true;
         }
 
         public static string GetFileName(string FullPath)
