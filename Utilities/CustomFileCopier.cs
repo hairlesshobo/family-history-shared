@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 
-namespace DiscArchiver.Shared
+namespace DiscArchiver.Archiver.Utilities
 {
 
     public delegate void ProgressChangedDelegate(CustomFileCopier.Progress progress);

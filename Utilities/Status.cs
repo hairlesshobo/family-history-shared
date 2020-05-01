@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using DiscArchiver.Shared;
 
-namespace DiscArchiver.Shared
+namespace DiscArchiver.Archiver.Utilities
 {
     public static class Status
     {

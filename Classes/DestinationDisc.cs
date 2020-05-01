@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 
-namespace DiscArchiver.Shared
+namespace DiscArchiver.Archiver.Classes
 {
     public class DestinationDisc 
     {

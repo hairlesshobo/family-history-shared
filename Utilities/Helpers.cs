@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 
-namespace DiscArchiver.Shared
+namespace DiscArchiver.Archiver.Utilities
 {
     public class Helpers
     {

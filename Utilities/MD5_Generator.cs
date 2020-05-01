@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 
-namespace Archiver
+namespace DiscArchiver.Archiver.Utilities
 {
     public delegate void MD5_ProgressChangedDelegate(double currentPercent);
     public delegate void MD5_CompleteDelegate(string hash);

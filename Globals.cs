@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DiscArchiver.Archiver.Classes;
 
-namespace DiscArchiver.Shared
+namespace DiscArchiver.Archiver
 {
     public static class Globals
     {
