@@ -1,10 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using DiscArchiver.Archiver.Utilities;
+using DiscArchiver.Utilities;
 using Newtonsoft.Json;
 
-namespace DiscArchiver.Archiver.Classes
+namespace DiscArchiver.Classes
 {
 public class SourceFile
     {

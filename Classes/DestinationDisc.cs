@@ -1,13 +1,15 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 
-namespace DiscArchiver.Archiver.Classes
+namespace DiscArchiver.Classes
 {
     public class DestinationDisc 
     {
         public int DiscNumber { get; set; }
         public long BytesCopied { get; set; }
+        public DateTime ArchiveDTM { get; set; }
         public string Hash { get; set; }
         [JsonIgnore]
         public bool NewDisc { get; set; } = true;

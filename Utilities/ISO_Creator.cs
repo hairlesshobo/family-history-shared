@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 
-namespace DiscArchiver.Archiver.Utilities
+namespace DiscArchiver.Utilities
 {
     public delegate void ISO_ProgressChangedDelegate(int currentPercent);
     public delegate void ISO_CompleteDelegate();
@@ -28,7 +28,7 @@ namespace DiscArchiver.Archiver.Utilities
 
         public void CreateISO()
         {
-            string procArgs = $"--burn-data -folder[\\]:\"{Helpers.DirtyPath(_sourceDirectory)}\" -name:\"{_discName}\" -udf:2.5 -iso:\"{Helpers.DirtyPath(_destinationPath)}\"";
+            string procArgs = $" --burn-data -folder[\\]:\"{Helpers.DirtyPath(_sourceDirectory)}\" -name:\"{_discName}\" -udf:2.5 -iso:\"{Helpers.DirtyPath(_destinationPath)}\"";
 
             Process process = new Process();
             process.StartInfo.FileName = Globals._cdbxpPath;

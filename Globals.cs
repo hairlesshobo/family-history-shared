@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using DiscArchiver.Archiver.Classes;
+using DiscArchiver.Classes;
 
-namespace DiscArchiver.Archiver
+namespace DiscArchiver
 {
     public static class Globals
     {
@@ -25,6 +25,7 @@ namespace DiscArchiver.Archiver
         public static long _discCapacityLimit = 0;
         public static string _stagingDir;
         public static string  _cdbxpPath;
+        public static string _ddPath;
 
     }
 }

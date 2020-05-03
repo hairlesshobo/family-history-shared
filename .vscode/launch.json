@@ -5,25 +5,12 @@
    "version": "0.2.0",
    "configurations": [
         {
-            "name": "Launch Archiver",
+            "name": "Launch",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build archiver",
+            "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/archiver/bin/Debug/netcoreapp3.1/archiver.dll",
-            "args": [],
-            "cwd": "${workspaceFolder}",
-            // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
-            "console": "externalTerminal",
-            "stopAtEntry": false
-        },
-        {
-            "name": "Launch Validator",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build validator",
-            // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/validator/bin/Debug/netcoreapp3.1/archiver.dll",
+            "program": "${workspaceFolder}/bin/Debug/netcoreapp3.1/disc_archiver.dll",
             "args": [],
             "cwd": "${workspaceFolder}",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console

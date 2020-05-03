@@ -1,8 +1,8 @@
 using System;
 using System.Linq;
-using DiscArchiver.Shared;
+using DiscArchiver.Classes;
 
-namespace DiscArchiver.Archiver.Utilities
+namespace DiscArchiver.Utilities
 {
     public static class Status
     {

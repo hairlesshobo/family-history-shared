@@ -2,49 +2,37 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build archiver",
+            "label": "build",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/archiver/archiver.csproj",
+                "${workspaceFolder}/disc_archiver.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "build validator",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "build",
-                "${workspaceFolder}/validator/validator.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
-            ],
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "publish archiver",
+            "label": "publish",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/archiver/archiver.csproj",
+                "${workspaceFolder}/disc_archiver.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "watch archiver",
+            "label": "watch",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "watch",
                 "run",
-                "${workspaceFolder}/archiver/archiver.csproj",
+                "${workspaceFolder}/disc_archiver.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
