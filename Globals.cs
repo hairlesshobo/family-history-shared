@@ -16,6 +16,7 @@ namespace DiscArchiver
         public static long _totalSize = 0;
         public static string _indexDiscDir;
         public static long _excludedFileCount = 0;
+        public static int _leftHeaderWidth = 11;
 
 
 

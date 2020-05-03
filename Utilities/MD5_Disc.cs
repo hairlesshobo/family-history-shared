@@ -142,7 +142,8 @@ namespace DiscArchiver.Utilities
 
                 progress.TotalBytes = progress.TotalCopiedBytes;
                 progress.PercentCopied = 100.0;
-                //Console.SetCursorPosition(0, Console.CursorTop+2);
+                OnProgressChanged(progress);
+
                 md5.TransformFinalBlock(new byte [] {}, 0, 0);
                 this.Hash = BitConverter.ToString(md5.Hash).Replace("-","").ToLower();
                 sw.Stop();

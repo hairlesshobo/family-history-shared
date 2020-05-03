@@ -17,10 +17,6 @@ namespace DiscArchiver.Utilities
 
         private static int _discLine = -1;
 
-        private static volatile string _lock = "lock";
-
-        private const int _leftHeaderWidth = 11;
-
         private const string _scanningLabel = "Scanning";
         private const string _sizingLabel = "Size";
         private const string _distrubuteLabel = "Distribute";
@@ -31,8 +27,11 @@ namespace DiscArchiver.Utilities
                 _nextLine = Console.CursorTop;
         }
 
-        public static void InitDiscLines()
+        public static void InitDiscLines(string header = null)
         {
+            if (header == null)
+                header = "Preparing archive discs...";
+
             if (_discLine == -1)
             {
                 _existingDiscCount = Globals._destinationDiscs.Where(x => x.NewDisc == false).Count();
@@ -50,7 +49,7 @@ namespace DiscArchiver.Utilities
                 Console.ForegroundColor = ConsoleColor.Magenta;
                 Console.CursorTop = _discLine;
                 Console.CursorLeft = 0;
-                Console.Write("Preparing archive discs...");
+                Console.Write(header);
                 Console.ResetColor();
 
                 foreach (DestinationDisc disc in Globals._destinationDiscs.Where(x => x.Finalized == false).OrderBy(x => x.DiscNumber))
@@ -58,39 +57,23 @@ namespace DiscArchiver.Utilities
             }
         }
 
-        private static string FormatElapsedTime(TimeSpan elapsed)
-        {
-            if (elapsed == default(TimeSpan))
-                return "--:--:--";
-            else
-                return elapsed.ToString(@"hh\:mm\:ss");
-        }
-
-        private static string GetDiscName(DestinationDisc disc)
-        {
-            return $"Disc {disc.DiscNumber.ToString("0000")}";
-        }
-
+        
         private static void WriteDiscPendingLine(
             DestinationDisc disc, 
             TimeSpan elapsed = default(TimeSpan))
         {
 
             string line = "";
-            line += FormatElapsedTime(elapsed);
+            line += Formatting.FormatElapsedTime(elapsed);
             line += " ";
             line += "Pending".PadRight(12);
             line += " ";
             line += $"{disc.TotalFiles.ToString().PadLeft(7)} files assigned";
             line += "   ";
-            line += $"{Helpers.GetFriendlySize(disc.DataSize).PadLeft(10)} data size";
+            line += $"{Formatting.GetFriendlySize(disc.DataSize).PadLeft(10)} data size";
 
-            lock (_lock)
-            {
-                Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
-
-                WriteStatusLine(GetDiscName(disc), line, ConsoleColor.Blue);
-            }
+            Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
+            StatusHelpers.WriteStatusLine(Formatting.GetDiscName(disc), line, ConsoleColor.Blue);
         }
 
         public static void WriteDiscCopyLine(
@@ -104,58 +87,45 @@ namespace DiscArchiver.Utilities
 
             string line = "";
 
-            line += FormatElapsedTime(elapsed);
+            double currentPercent = ((double)disc.BytesCopied / (double)disc.DataSize) * 100.0;
+
+            line += Formatting.FormatElapsedTime(elapsed);
             line += " Copy: ";
-            line += $"{Helpers.GetFriendlySize(disc.BytesCopied).PadLeft(10)}";
+            line += $"{Formatting.GetFriendlySize(disc.BytesCopied).PadLeft(10)}";
             line += " ";
             line += FileCountPosition(currentFile, disc.TotalFiles, _copyWidth);
             line += " ";
-
-            double currentPercent = ((double)disc.BytesCopied / (double)disc.DataSize) * 100.0;
-            
-            line += "[" + Helpers.GetFriendlyTransferRate(instantTransferRate).PadLeft(12) + "]";
+            line += "[" + Formatting.GetFriendlyTransferRate(instantTransferRate).PadLeft(12) + "]";
             line += " ";
-            line += "[" + Helpers.GetFriendlyTransferRate(averageTransferRate).PadLeft(12) + "]";
+            line += "[" + Formatting.GetFriendlyTransferRate(averageTransferRate).PadLeft(12) + "]";
 
             if (disc.BytesCopied == disc.DataSize)
                 complete = true;
 
-            lock (_lock)
-            {
-                Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
-
-                WriteStatusLineWithPct(GetDiscName(disc), line, currentPercent, complete, ConsoleColor.DarkYellow);
-            }
+            Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
+            StatusHelpers.WriteStatusLineWithPct(Formatting.GetDiscName(disc), line, currentPercent, complete, ConsoleColor.DarkYellow);
         }
 
         public static void WriteDiscIndex(DestinationDisc disc, TimeSpan elapsed, double currentPercent)
         {
             string line = "";
-            line += FormatElapsedTime(elapsed);
+            line += Formatting.FormatElapsedTime(elapsed);
             line += " ";
             line += "Writing disc index:";
 
-            lock (_lock)
-            {
-                Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
-
-                WriteStatusLineWithPct(GetDiscName(disc), line, currentPercent, (currentPercent == 100.0), ConsoleColor.DarkYellow);
-            }  
+            Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
+            StatusHelpers.WriteStatusLineWithPct(Formatting.GetDiscName(disc), line, currentPercent, (currentPercent == 100.0), ConsoleColor.DarkYellow);
         }
 
         public static void WriteDiscHashListFile(DestinationDisc disc, TimeSpan elapsed, double currentPercent)
         {
             string line = "";
-            line += FormatElapsedTime(elapsed);
+            line += Formatting.FormatElapsedTime(elapsed);
             line += " ";
             line += "Writing disc hash file:";
 
-            lock (_lock)
-            {
-                Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
-
-                WriteStatusLineWithPct(GetDiscName(disc), line, currentPercent, (currentPercent == 100.0), ConsoleColor.DarkYellow);
-            }  
+            Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
+            StatusHelpers.WriteStatusLineWithPct(Formatting.GetDiscName(disc), line, currentPercent, (currentPercent == 100.0), ConsoleColor.DarkYellow);
         }
 
         public static void WriteDiscIso(DestinationDisc disc, TimeSpan elapsed, int currentPercent)
@@ -163,61 +133,45 @@ namespace DiscArchiver.Utilities
             bool complete = (currentPercent == 100);
 
             string line = "";
-            line += FormatElapsedTime(elapsed);
+            line += Formatting.FormatElapsedTime(elapsed);
             line += " ";
             line += "Creating ISO:";
 
-            lock (_lock)
-            {
-                Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
-
-                WriteStatusLineWithPct(GetDiscName(disc), line, currentPercent, complete, ConsoleColor.DarkYellow);
-            }
+            Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
+            StatusHelpers.WriteStatusLineWithPct(Formatting.GetDiscName(disc), line, currentPercent, complete, ConsoleColor.DarkYellow);
         }
         
         public static void WriteDiscIsoHash(DestinationDisc disc, TimeSpan elapsed, double currentPercent = 0.0)
         {
             string line = "";
-            line += FormatElapsedTime(elapsed);
+            line += Formatting.FormatElapsedTime(elapsed);
             line += " ";
             line += "Reading ISO MD5:";
 
-            lock (_lock)
-            {
-                Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
-
-                WriteStatusLineWithPct(GetDiscName(disc), line, currentPercent, (currentPercent == 100.0), ConsoleColor.DarkYellow);
-            }  
+            Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
+            StatusHelpers.WriteStatusLineWithPct(Formatting.GetDiscName(disc), line, currentPercent, (currentPercent == 100.0), ConsoleColor.DarkYellow);
         }
 
         public static void WriteDiscJsonLine(DestinationDisc disc, TimeSpan elapsed)
         {
             string line = "";
-            line += FormatElapsedTime(elapsed);
+            line += Formatting.FormatElapsedTime(elapsed);
             line += " ";
             line += "Saving disc details to json file ...";
 
-            lock (_lock)
-            {
-                Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
-
-                WriteStatusLine(GetDiscName(disc), line, ConsoleColor.DarkYellow);
-            }  
+            Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
+            StatusHelpers.WriteStatusLine(Formatting.GetDiscName(disc), line, ConsoleColor.DarkYellow);
         }
 
         public static void WriteDiscComplete(DestinationDisc disc, TimeSpan elapsed)
         {
             string line = "";
-            line += FormatElapsedTime(elapsed);
+            line += Formatting.FormatElapsedTime(elapsed);
             line += " ";
             line += "Complete!";
 
-            lock (_lock)
-            {
-                Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
-
-                WriteStatusLine(GetDiscName(disc), line, ConsoleColor.DarkGreen);
-            }  
+            Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
+            StatusHelpers.WriteStatusLine(Formatting.GetDiscName(disc), line, ConsoleColor.DarkGreen);
         }
 
 
@@ -226,52 +180,6 @@ namespace DiscArchiver.Utilities
 
 
 
-
-
-
-
-        private static void WriteStatusLineWithPct(string left, string right, double percent, bool complete)
-        {
-            WriteStatusLineWithPct(left, right, percent, complete, Console.ForegroundColor);
-        }
-
-        private static void WriteStatusLineWithPct(string left, string right, double percent, bool complete, ConsoleColor color)
-        {
-            string line = right;
-
-            if (!line.EndsWith(" "))
-                line += " ";
-
-            int leftWidth = line.Length + 1;
-
-            if (left != null)
-                leftWidth += _leftHeaderWidth + 2;
-
-            line += GeneratePercentBar(Console.WindowWidth, leftWidth, 0, percent, complete);
-
-            WriteStatusLine(left, line, color);
-        }
-
-        private static void WriteStatusLine(string left, string right)
-        {
-            WriteStatusLine(left, right, Console.ForegroundColor);
-        }
-
-        private static void WriteStatusLine(string left, string right, ConsoleColor rightColor)
-        {
-            int padRight = Console.WindowWidth - _leftHeaderWidth - 2 - 1;
-
-            if (left != null)
-            {
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
-                Console.Write($"{left.PadLeft(_leftHeaderWidth)}: ");
-                Console.ResetColor();
-            }
-
-            Console.ForegroundColor = rightColor;
-            Console.Write($"{right.PadRight(padRight)}");
-            Console.ResetColor();
-        }
 
         public static void FileScanned(long newFiles, long existingFiles, long excludedFiles, bool complete = false)
         {
@@ -288,11 +196,8 @@ namespace DiscArchiver.Utilities
             if (complete)
                 line += "   **Complete**";
 
-            lock (_lock)
-            {
-                Console.SetCursorPosition(0, _fileCountLine);
-                WriteStatusLine(_scanningLabel, line);
-            }
+            Console.SetCursorPosition(0, _fileCountLine);
+            StatusHelpers.WriteStatusLine(_scanningLabel, line);
         }
         
 
@@ -301,7 +206,7 @@ namespace DiscArchiver.Utilities
             if (_sizeLine == -1)
                 _sizeLine = _nextLine++;
 
-            string currentSizeFriendly = Helpers.GetFriendlySize(Globals._totalSize);
+            string currentSizeFriendly = Formatting.GetFriendlySize(Globals._totalSize);
             
             string line = FileCountPosition(fileCount);
             line += $" [{currentSizeFriendly.PadLeft(12)}]";
@@ -309,11 +214,8 @@ namespace DiscArchiver.Utilities
 
             double currentPercent = ((double)fileCount / (double)Globals._newlyFoundFiles) * 100.0;
 
-            lock (_lock)
-            {
-                Console.SetCursorPosition(0, _sizeLine);
-                WriteStatusLineWithPct(_sizingLabel, line, currentPercent, complete);
-            }
+            Console.SetCursorPosition(0, _sizeLine);
+            StatusHelpers.WriteStatusLineWithPct(_sizingLabel, line, currentPercent, complete);
         }
 
         public static void FileDistributed(long fileCount, int discCount, bool complete = false)
@@ -327,11 +229,8 @@ namespace DiscArchiver.Utilities
 
             double currentPercent = ((double)fileCount / (double)Globals._newlyFoundFiles) * 100.0;
 
-            lock (_lock)
-            {
-                Console.SetCursorPosition(0, _distributeLine);
-                WriteStatusLineWithPct(_distrubuteLabel, line, currentPercent, complete);
-            }
+            Console.SetCursorPosition(0, _distributeLine);
+            StatusHelpers.WriteStatusLineWithPct(_distrubuteLabel, line, currentPercent, complete);
         }
 
         
@@ -342,26 +241,6 @@ namespace DiscArchiver.Utilities
             Console.SetCursorPosition(0, _nextLine+2);
         }
 
-        public static string GeneratePercentBar (int AvailableSpace, int LeftLength, int RightLength, double CurrentPercent, bool Complete)
-        {
-            string percentLeft = "[";
-            string percentRight = "] " + Math.Round(CurrentPercent, 0).ToString().PadLeft(3) + "%";
-
-            int totalSegments = AvailableSpace - LeftLength - RightLength - percentRight.Length - percentLeft.Length - 1;
-            int completeSegments = (int)Math.Floor(totalSegments * (CurrentPercent/100.0));
-
-            string progressBar = "";
-
-            for (int i = 0; i < completeSegments; i++)
-                progressBar += "=";
-
-            if (Complete == false)
-                progressBar += ">";
-
-            string line = percentLeft + progressBar.PadRight(totalSegments) + percentRight;
-
-            return line;
-        }
 
         private static string FileCountPosition (long currentFile, long totalFiles = -1, int width = 0)
         {

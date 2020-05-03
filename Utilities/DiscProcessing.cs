@@ -171,7 +171,7 @@ namespace DiscArchiver.Utilities
 
             JsonSerializerSettings settings = new JsonSerializerSettings() {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                Formatting = Formatting.Indented
+                Formatting = Newtonsoft.Json.Formatting.Indented
             };
 
             string indexDir = Globals._indexDiscDir + "/json";
@@ -316,6 +316,11 @@ namespace DiscArchiver.Utilities
             }
 
             Status.ProcessComplete();
+        }
+
+        public static void VerifyDiscs()
+        {
+
         }
     }
 }

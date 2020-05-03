@@ -127,52 +127,6 @@ namespace DiscArchiver.Utilities
                 return matchingDisc;
         }
 
-        public static string GetFriendlyTransferRate(double Rate)
-        {
-            return GetFriendlySize(Rate, true);
-        }
-
-        public static string GetFriendlySize(long Size)
-        {
-            return GetFriendlySize((double)Size);
-        }
-
-        private static string GetFriendlySize(double Size, bool IsRate = false)
-        {
-            string suffix = "B";
-
-            if (Size > 1024)
-            {
-                suffix = "KiB";
-                Size /= 1024.0;
-            }
-
-            if (Size > 1024)
-            {
-                suffix = "MiB";
-                Size /= 1024.0;
-            }
-
-            if (Size > 1024)
-            {
-                suffix = "GiB";
-                Size /= 1024.0;
-            }
-
-            if (Size > 1024)
-            {
-                suffix = "TiB";
-                Size /= 1024.0;
-            }
-
-            string currentSizeFriendly = $"{Math.Round((double)Size, 1).ToString("0.0")} {suffix}";
-
-            if (IsRate == true)
-                currentSizeFriendly += "/s";
-
-            return currentSizeFriendly;
-        }
-
         public static void CreateIndexIso()
         {
             Console.WriteLine();
@@ -187,13 +141,13 @@ namespace DiscArchiver.Utilities
             ISO_Creator creator = new ISO_Creator(isoName, Helpers.DirtyPath(Globals._indexDiscDir), isoPath);
 
             creator.OnProgressChanged += (currentPercent) => {
-                string line = Status.GeneratePercentBar(Console.WindowWidth, 0, 0, currentPercent, (currentPercent == 100));
+                string line = StatusHelpers.GeneratePercentBar(Console.WindowWidth, 0, 0, currentPercent, (currentPercent == 100));
                 Console.CursorLeft = 0;
                 Console.Write(line);
             };
 
             creator.OnComplete += () => {
-                string line = Status.GeneratePercentBar(Console.WindowWidth, 0, 0, 100, true);
+                string line = StatusHelpers.GeneratePercentBar(Console.WindowWidth, 0, 0, 100, true);
                 Console.CursorLeft = 0;
                 Console.Write(line);
             };

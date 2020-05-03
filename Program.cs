@@ -12,7 +12,6 @@ using DiscArchiver.Utilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.FileExtensions;
 using Microsoft.Extensions.Configuration.Json;
-using Newtonsoft.Json;
 
 namespace DiscArchiver
 {
@@ -33,8 +32,6 @@ namespace DiscArchiver
                 DiscProcessing.DistributeFiles();
 
                 DiscProcessing.ProcessDiscs();
-
-                Helpers.CreateIndexIso();
 
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Process complete... don't forget to burn the ISOs to disc!");
@@ -61,10 +58,18 @@ namespace DiscArchiver
 
             Console.WriteLine($"                Discs: {existingDiscs.Count()}");
             Console.WriteLine($"                Files: {existingDiscs.Sum(x => x.Files.Count())}");
-            Console.WriteLine($"            Data Size: {Helpers.GetFriendlySize(existingDiscs.Sum(x => x.DataSize))}");
+            Console.WriteLine($"            Data Size: {Formatting.GetFriendlySize(existingDiscs.Sum(x => x.DataSize))}");
             Console.WriteLine($"    Last Archive Date: {existingDiscs.Max(x => x.ArchiveDTM).ToShortDateString()}");
         }
 
+        private static void VerifyDiscs()
+        {
+            Console.WriteLine("Disc verification process beginning...");
+            Console.WriteLine();
+
+            string selectedDrive = Helpers.SelectDrive();
+            DiscVerification verifier = new DiscVerification(selectedDrive);
+        }
 
         static void Main(string[] args)
         {
@@ -77,36 +82,12 @@ namespace DiscArchiver
             CliMenu menu = new CliMenu(new List<CliMenuEntry>()
             {
                 new CliMenuEntry() {
-                    Name = "Read Disc MD5",
-                    Action = () => {
-                        string selectedDrive = Helpers.SelectDrive();
-                        MD5_Disc disc = new MD5_Disc(selectedDrive);
-
-                        disc.OnProgressChanged += (progress) => {
-                            Console.CursorLeft = 0;
-                            int fieldWidth = progress.TotalBytes.ToString().Length;
-                            Console.Write($"{Math.Round(progress.PercentCopied, 0).ToString().PadLeft(3)}% {progress.TotalCopiedBytes.ToString().PadLeft(fieldWidth)} / {progress.TotalBytes.ToString().PadLeft(fieldWidth)}");
-                        };
-
-                        disc.OnComplete += (hash) => {
-                            Console.SetCursorPosition(0, Console.CursorTop+2);
-                            Console.WriteLine(hash);
-                        };
-
-                        Thread generateThread = new Thread(disc.GenerateHash);
-                        generateThread.Start();
-                        generateThread.Join();
-                    }
-                },
-                new CliMenuEntry() {
                     Name = "View Archive Summary",
                     Action = ViewArchiveSummary
                 },
                 new CliMenuEntry() {
                     Name = "Verify Discs",
-                    Action = () => {
-                        Console.WriteLine("meow!!");
-                    }
+                    Action = VerifyDiscs
                 },
                 new CliMenuEntry() {
                     Name = "Scan For Changes"
@@ -116,10 +97,12 @@ namespace DiscArchiver
                     Action = RunArchiver
                 },
                 new CliMenuEntry() {
+                    Name = "Create Index ISO",
+                    Action = Helpers.CreateIndexIso
+                },
+                new CliMenuEntry() {
                     Name = "Exit",
-                    Action = () => {
-                        Environment.Exit(0);
-                    }
+                    Action = () => Environment.Exit(0)
                 }
             });
 
