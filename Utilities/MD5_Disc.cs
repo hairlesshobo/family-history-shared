@@ -31,7 +31,7 @@ namespace DiscArchiver.Utilities
 
         public event MD5_CompleteDelegate OnComplete;
         public event ProgressChangedDelegate OnProgressChanged;
-        public int SampleDurationMs { get; set; } = 250;
+        public int SampleDurationMs { get; set; } = 500;
 
         public MD5_Disc (string DriveLetter)
         {
@@ -83,6 +83,7 @@ namespace DiscArchiver.Utilities
             Progress progress = new Progress();
             progress.TotalBytes = _driveInfo.TotalSize + 555008;
             int fieldWidth = progress.TotalBytes.ToString().Length;
+            progress.TotalCopiedBytes = 0;
 
             using (var md5 = System.Security.Cryptography.MD5.Create())
             {
@@ -124,17 +125,18 @@ namespace DiscArchiver.Utilities
                         progress.BytesCopiedSinceLastupdate = progress.TotalCopiedBytes - lastSampleCopyTotal;
                         double timeSinceLastUpdate = (double)(sw.ElapsedMilliseconds - lastSample) / 1000.0;
                         lastSampleCopyTotal = progress.TotalCopiedBytes;
-                        double instantTransferRate = (double)progress.BytesCopiedSinceLastupdate / timeSinceLastUpdate;
 
-                        progress.InstantTransferRate = instantTransferRate;
+                        progress.InstantTransferRate = (double)progress.BytesCopiedSinceLastupdate / timeSinceLastUpdate;;
 
                         if (sampleCount == 1)
-                            progress.AverageTransferRate = instantTransferRate;
+                            progress.AverageTransferRate = progress.InstantTransferRate;
                         else
-                            progress.AverageTransferRate = progress.AverageTransferRate + (instantTransferRate - progress.AverageTransferRate) / sampleCount;
+                            progress.AverageTransferRate = progress.AverageTransferRate + (progress.InstantTransferRate - progress.AverageTransferRate) / sampleCount;
 
                         progress.ElapsedTime = sw.Elapsed;
+
                         OnProgressChanged(progress);
+                        lastSample = sw.ElapsedMilliseconds;
                     }
 
                     md5.TransformBlock(buffer, 0, currentBlockSize, buffer, 0);

@@ -8,7 +8,7 @@ using DiscArchiver.Classes;
 
 namespace DiscArchiver.Utilities
 {
-    public class DiscVerification
+    public class DiscVerifier
     {
         private static int _nextLine = -1;
         private static int _discLine = -1;
@@ -18,14 +18,14 @@ namespace DiscArchiver.Utilities
         private List<int> _pendingDiscs;
         private string _driveLetter;
 
-        public DiscVerification(string DriveLetter)
+        public DiscVerifier(string DriveLetter)
         {
             _discsToVerify = Globals._destinationDiscs.Where(x => x.NewDisc == false).OrderBy(x => x.DiscNumber).ToList();
 
             Initialize(DriveLetter);
         }
 
-        public DiscVerification(string DriveLetter, DestinationDisc disc)
+        public DiscVerifier(string DriveLetter, DestinationDisc disc)
         {
             _discsToVerify = new List<DestinationDisc>();
             _discsToVerify.Add(disc);
@@ -77,10 +77,14 @@ namespace DiscArchiver.Utilities
 
             if (di != null)
             {
+                string append = "";
+
+                if (_pendingDiscs.Count() == 1)
+                    append = " " + _pendingDiscs[0].ToString();
                 while (1 == 1)
                 {
                     if (di.IsReady == false)
-                        SetStatus("Please insert disc...");
+                        SetStatus($"Please insert archive disc{append}...");
 
                     else
                     {
@@ -93,9 +97,18 @@ namespace DiscArchiver.Utilities
                             int discId = Int32.Parse(discIdStr);
 
                             if (_pendingDiscs.Contains(discId))
+                            {
+                                SetStatus($"Verifying disc {discId}");
+                                _pendingDiscs.Remove(discId);
                                 return _discsToVerify.FirstOrDefault(x => x.DiscNumber == discId);
+                            }
                             else
-                                SetStatus($"Archive disc {discId} does not need to be verified, please insert different disc");
+                            {
+                                if (_pendingDiscs.Count() == 1)
+                                    SetStatus($"Archive disc {discId} does not need to be verified, please insert disc {_pendingDiscs[0].ToString()}");
+                                else
+                                    SetStatus($"Archive disc {discId} does not need to be verified, please insert another disc");
+                            }
                         }
                     }
 
@@ -107,29 +120,35 @@ namespace DiscArchiver.Utilities
         }
 
         public void StartVerification()
-        {            
-            DestinationDisc disc = WaitForDisc();
+        {
+            while (_pendingDiscs.Count() > 0)
+            {
+                DestinationDisc disc = WaitForDisc();
 
-            Stopwatch sw = Stopwatch.StartNew();
+                Stopwatch sw = Stopwatch.StartNew();
 
-            MD5_Disc md5disc = new MD5_Disc(_driveLetter);
+                MD5_Disc md5disc = new MD5_Disc(_driveLetter);
 
-            md5disc.OnProgressChanged += (progress) => {
-                WriteDiscVerifyingLine(disc, sw.Elapsed, progress.PercentCopied, progress.TotalCopiedBytes, progress.InstantTransferRate, progress.AverageTransferRate);
-            };
+                md5disc.OnProgressChanged += (progress) => {
+                    WriteDiscVerifyingLine(disc, sw.Elapsed, progress.PercentCopied, progress.TotalCopiedBytes, progress.InstantTransferRate, progress.AverageTransferRate);
+                };
 
-            md5disc.OnComplete += (hash) => {
-                sw.Stop();
+                md5disc.OnComplete += (hash) => {
+                    sw.Stop();
 
-                if (disc.Hash.ToLower() == hash.ToLower())
-                    WriteDiscVerificationPassed(disc, sw.Elapsed);
-                else
-                    WriteDiscVerificationFailed(disc, sw.Elapsed);
-            };
+                    if (disc.Hash.ToLower() == hash.ToLower())
+                        WriteDiscVerificationPassed(disc, sw.Elapsed);
+                    else
+                        WriteDiscVerificationFailed(disc, sw.Elapsed);
+                };
 
-            Thread generateThread = new Thread(md5disc.GenerateHash);
-            generateThread.Start();
-            generateThread.Join();
+                Thread generateThread = new Thread(md5disc.GenerateHash);
+                generateThread.Start();
+                generateThread.Join();
+            }
+
+            SetStatus("All Discs have been verified, review results above.");
+            Console.SetCursorPosition(0, _nextLine);
         }
 
         private int GetDiscIndex(DestinationDisc disc)
@@ -166,7 +185,7 @@ namespace DiscArchiver.Utilities
             line += " ";
             line += "Reading:";
             line += " ";
-            line += $"{Formatting.GetFriendlySize(disc.BytesCopied).PadLeft(10)}";
+            line += $"{Formatting.GetFriendlySize(bytesRead).PadLeft(10)}";
             line += " ";
             line += "[" + Formatting.GetFriendlyTransferRate(instantTransferRate).PadLeft(12) + "]";
             line += " ";

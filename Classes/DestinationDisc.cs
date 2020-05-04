@@ -5,22 +5,15 @@ using Newtonsoft.Json;
 
 namespace DiscArchiver.Classes
 {
-    public class DestinationDisc 
+    public class DestinationDisc : DiscInfo
     {
-        public int DiscNumber { get; set; }
         public long BytesCopied { get; set; }
-        public DateTime ArchiveDTM { get; set; }
         public string Hash { get; set; }
         [JsonIgnore]
         public bool NewDisc { get; set; } = true;
         [JsonIgnore]
         public bool IsoCreated { get; set; } = false;
-        public string DiscName { 
-            get
-            {
-                return $"archive {this.DiscNumber.ToString("0000")}";
-            }
-        }
+        
         [JsonIgnore]
         public string IsoPath { 
             get
@@ -35,6 +28,7 @@ namespace DiscArchiver.Classes
                 return Globals._stagingDir + $"/stage/disc {this.DiscNumber.ToString("0000")}";
             }
         }
+
         public int FilesCopied 
         { 
             get
@@ -42,33 +36,26 @@ namespace DiscArchiver.Classes
                 return this.Files.Where(x => x.Copied == true).Count();
             }
         }
-        public int TotalFiles 
-        {
-            get
-            {
-                return this.Files.Count();
-            }
-        }
-        public long DataSize 
-        { 
-            get
-            {
-                return this.Files.Sum(x => x.Size);
-            } 
-        }
+        
         public bool Finalized { get; set; } = false;
-        public List<SourceFile> Files { get; set; }
+        
 
-        public DestinationDisc()
+        public DestinationDisc() : base()
         {
             this.NewDisc = false;
-            this.Files = new List<SourceFile>();
         }
 
-        public DestinationDisc(int discNumber)
+        public DestinationDisc(int discNumber) : base(discNumber)
+        { }
+
+        public DiscInfo GetDiscInfo()
         {
-            this.Files = new List<SourceFile>();
-            this.DiscNumber = discNumber;
+            return new DiscInfo()
+            {
+                ArchiveDTM = this.ArchiveDTM,
+                DiscNumber = this.DiscNumber,
+                Files = this.Files
+            };
         }
     }
 }

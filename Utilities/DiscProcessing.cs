@@ -250,6 +250,24 @@ namespace DiscArchiver.Utilities
             Status.WriteDiscIndex(disc, masterSw.Elapsed, 100.0);
         }
 
+        private static void WriteDiscInfo(DestinationDisc disc, Stopwatch masterSw)
+        {
+            Status.WriteDiscJsonLine(disc, masterSw.Elapsed);
+
+            DiscInfo discInfo = disc.GetDiscInfo();
+
+            JsonSerializerSettings settings = new JsonSerializerSettings() {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                Formatting = Newtonsoft.Json.Formatting.Indented
+            };
+
+            string jsonFilePath = disc.RootStagingPath + $"/disc_info.json";
+            string json = JsonConvert.SerializeObject(discInfo, settings);
+            File.WriteAllText(jsonFilePath, json, Encoding.UTF8);
+
+            Status.WriteDiscJsonLine(disc, masterSw.Elapsed);
+        }
+
         public static void CreateISOFile(DestinationDisc disc, Stopwatch masterSw)
         {
             Status.WriteDiscIso(disc, masterSw.Elapsed, 0);
@@ -307,6 +325,7 @@ namespace DiscArchiver.Utilities
                 CopyFiles(disc, masterSw);
                 GenerateIndexFiles(disc, masterSw);
                 GenerateHashFile(disc, masterSw);
+                WriteDiscInfo(disc, masterSw);
                 CreateISOFile(disc, masterSw);
                 ReadIsoHash(disc, masterSw);
                 SaveJsonData(disc, masterSw);

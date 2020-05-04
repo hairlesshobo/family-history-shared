@@ -57,11 +57,14 @@ namespace DiscArchiver.Utilities
             {
                 string cleanFile = Helpers.CleanPath(file);
 
-                if (Globals._excludeFiles.Any(x => x.ToLower() == Helpers.GetFileName(cleanFile).ToLower()))
+                if (Globals._excludePaths.Any(x => cleanFile.ToLower().StartsWith(x.ToLower())))
                     Globals._excludedFileCount++;
+
+                else if (Globals._excludeFiles.Any(x => Helpers.GetFileName(cleanFile).ToLower().EndsWith(x.ToLower())))
+                    Globals._excludedFileCount++;
+
                 else
-                    if (!(Globals._excludePaths.Any(x => cleanFile.ToLower().StartsWith(x.ToLower()))))
-                        new SourceFile(cleanFile);
+                    new SourceFile(cleanFile);
 
                 if (_sw.ElapsedMilliseconds - _lastSample > _sampleDurationMs)
                 {
