@@ -1,4 +1,12 @@
 {
-    "TapeName": "Studio"
-
+    "Name": "Studio",
+    "Description": "",
+    "SourcePaths": [
+        "//nas/Studio"
+    ],
+    "ExcludePaths": [],
+    "ExcludeFiles": [
+        "Thumbs.db",
+        ".DS_Store"
+    ]
 }

@@ -1,0 +1,25 @@
+Tape Name: <%TAPE_NAME%>
+
+Date captured: <%CAPTURE_DATE%>
+
+Files: <%FILE_COUNT%>
+Uncompressed Size: <%SIZE_FRIENDLY%> (<%SIZE_BYTES%>> bytes)
+
+How to read list of files:
+  mt -f /dev/nst0 asf 1
+  tar tvf /dev/nst0 --blocking-factor=512
+
+How to read list of files on tape, and save the list to a file:
+  mt -f /dev/nst0 asf 1
+  tar tvf /dev/nst0 --blocking-factor=512 2> /dev/null > file_list.txt
+
+How to extract all files on tape to current directory
+  mt -f /dev/nst0 asf 1
+  tar xvf /dev/nst0 --blocking-factor=512
+
+Copy tape to local tar file:
+  mt -f /dev/nst0 asf 1
+  dd if=/dev/nst0 of=tape.tar bs=256K status=progress
+
+List of directories (4 levels):
+<%DIRECTORY_LIST%>
