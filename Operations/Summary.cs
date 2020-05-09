@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using DiscArchiver.Classes;
-using DiscArchiver.Utilities;
+using Archiver.Classes;
+using Archiver.Utilities;
 
-namespace DiscArchiver.Operations
+namespace Archiver.Operations
 {
     public static class Summary
     {
@@ -28,7 +28,7 @@ namespace DiscArchiver.Operations
             Console.WriteLine();
             WriteHeader("Current Archive Statistics...");
 
-            IEnumerable<DestinationDisc> existingDiscs = Globals._destinationDiscs.Where(x => x.NewDisc == false);
+            IEnumerable<DiscDetail> existingDiscs = Globals._destinationDiscs.Where(x => x.NewDisc == false);
             if (existingDiscs.Count() > 0)
             {
 

@@ -1,8 +1,8 @@
 using System;
 using System.Linq;
-using DiscArchiver.Classes;
+using Archiver.Classes;
 
-namespace DiscArchiver.Utilities
+namespace Archiver.Utilities
 {
     public static class Status
     {
@@ -52,14 +52,14 @@ namespace DiscArchiver.Utilities
                 Console.Write(header);
                 Console.ResetColor();
 
-                foreach (DestinationDisc disc in Globals._destinationDiscs.Where(x => x.Finalized == false).OrderBy(x => x.DiscNumber))
+                foreach (DiscDetail disc in Globals._destinationDiscs.Where(x => x.Finalized == false).OrderBy(x => x.DiscNumber))
                     WriteDiscPendingLine(disc, default(TimeSpan));
             }
         }
 
         
         private static void WriteDiscPendingLine(
-            DestinationDisc disc, 
+            DiscDetail disc, 
             TimeSpan elapsed = default(TimeSpan))
         {
 
@@ -77,7 +77,7 @@ namespace DiscArchiver.Utilities
         }
 
         public static void WriteDiscCopyLine(
-            DestinationDisc disc, 
+            DiscDetail disc, 
             TimeSpan elapsed = default(TimeSpan),
             int currentFile = 0, 
             double instantTransferRate = 0.0, 
@@ -106,7 +106,7 @@ namespace DiscArchiver.Utilities
             StatusHelpers.WriteStatusLineWithPct(Formatting.GetDiscName(disc), line, currentPercent, complete, ConsoleColor.DarkYellow);
         }
 
-        public static void WriteDiscIndex(DestinationDisc disc, TimeSpan elapsed, double currentPercent)
+        public static void WriteDiscIndex(DiscDetail disc, TimeSpan elapsed, double currentPercent)
         {
             string line = "";
             line += Formatting.FormatElapsedTime(elapsed);
@@ -117,7 +117,7 @@ namespace DiscArchiver.Utilities
             StatusHelpers.WriteStatusLineWithPct(Formatting.GetDiscName(disc), line, currentPercent, (currentPercent == 100.0), ConsoleColor.DarkYellow);
         }
 
-        public static void WriteDiscHashListFile(DestinationDisc disc, TimeSpan elapsed, double currentPercent)
+        public static void WriteDiscHashListFile(DiscDetail disc, TimeSpan elapsed, double currentPercent)
         {
             string line = "";
             line += Formatting.FormatElapsedTime(elapsed);
@@ -128,7 +128,7 @@ namespace DiscArchiver.Utilities
             StatusHelpers.WriteStatusLineWithPct(Formatting.GetDiscName(disc), line, currentPercent, (currentPercent == 100.0), ConsoleColor.DarkYellow);
         }
 
-        public static void WriteDiscIso(DestinationDisc disc, TimeSpan elapsed, int currentPercent)
+        public static void WriteDiscIso(DiscDetail disc, TimeSpan elapsed, int currentPercent)
         {
             bool complete = (currentPercent == 100);
 
@@ -141,7 +141,7 @@ namespace DiscArchiver.Utilities
             StatusHelpers.WriteStatusLineWithPct(Formatting.GetDiscName(disc), line, currentPercent, complete, ConsoleColor.DarkYellow);
         }
         
-        public static void WriteDiscIsoHash(DestinationDisc disc, TimeSpan elapsed, double currentPercent = 0.0)
+        public static void WriteDiscIsoHash(DiscDetail disc, TimeSpan elapsed, double currentPercent = 0.0)
         {
             string line = "";
             line += Formatting.FormatElapsedTime(elapsed);
@@ -152,7 +152,7 @@ namespace DiscArchiver.Utilities
             StatusHelpers.WriteStatusLineWithPct(Formatting.GetDiscName(disc), line, currentPercent, (currentPercent == 100.0), ConsoleColor.DarkYellow);
         }
 
-        public static void WriteDiscJsonLine(DestinationDisc disc, TimeSpan elapsed)
+        public static void WriteDiscJsonLine(DiscDetail disc, TimeSpan elapsed)
         {
             string line = "";
             line += Formatting.FormatElapsedTime(elapsed);
@@ -163,7 +163,7 @@ namespace DiscArchiver.Utilities
             StatusHelpers.WriteStatusLine(Formatting.GetDiscName(disc), line, ConsoleColor.DarkYellow);
         }
 
-        public static void WriteDiscComplete(DestinationDisc disc, TimeSpan elapsed)
+        public static void WriteDiscComplete(DiscDetail disc, TimeSpan elapsed)
         {
             string line = "";
             line += Formatting.FormatElapsedTime(elapsed);

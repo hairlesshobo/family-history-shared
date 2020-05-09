@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using DiscArchiver.Classes;
-using DiscArchiver.Utilities;
+using Archiver.Classes;
+using Archiver.Utilities;
 
-namespace DiscArchiver.Operations
+namespace Archiver.Operations
 {
     public static class DiscVerification
     {
@@ -12,7 +12,7 @@ namespace DiscArchiver.Operations
         {
             bool verifyAll = false;
 
-            CliMenu menu = new CliMenu(new List<CliMenuEntry>()
+            CliMenu<string> menu = new CliMenu<string>(new List<CliMenuEntry<string>>()
             {
                 new CliMenuEntry() {
                     Name = "All Discs",
@@ -25,33 +25,32 @@ namespace DiscArchiver.Operations
             });
 
             menu.MenuLabel = "What do you want to verify?";
+            menu.OnCancel += Operations.MainMenu.StartOperation;
             menu.Show(true);
 
             return verifyAll;
         }
 
-        private static DestinationDisc AskDiskToVerify()
+        public static List<DiscDetail> AskDiskToVerify()
         {
-            DestinationDisc selectedDisc = Globals._destinationDiscs.FirstOrDefault(x => x.NewDisc);
-            List<CliMenuEntry> entries = new List<CliMenuEntry>();
+            List<CliMenuEntry<DiscDetail>> entries = new List<CliMenuEntry<DiscDetail>>();
 
-            foreach (DestinationDisc disc in Globals._destinationDiscs.Where(x => x.NewDisc == false).OrderBy(x => x.DiscNumber))
+            foreach (DiscDetail disc in Globals._destinationDiscs.Where(x => x.NewDisc == false).OrderBy(x => x.DiscNumber))
             {
-                CliMenuEntry newEntry = new CliMenuEntry();
-                newEntry.Name = $"{Formatting.GetDiscName(disc)} | Data Size: {Formatting.GetFriendlySize(disc.DataSize)}";
-                newEntry.Action = () => {
-                    selectedDisc = disc;
-                };
-
-                entries.Add(newEntry);
+                entries.Add(new CliMenuEntry<DiscDetail>()
+                {
+                    Name = $"{Formatting.GetDiscName(disc)} | Date Archived: {disc.ArchiveDTM.ToString("MM-dd-yyyy")} | Data Size: {Formatting.GetFriendlySize(disc.DataSize).PadLeft(10)}",
+                    SelectedValue = disc
+                });
             }
 
-            CliMenu menu = new CliMenu(entries);
-            menu.MenuLabel = "Select disc to verify...";
+            CliMenu<DiscDetail> menu = new CliMenu<DiscDetail>(entries, true);
+            menu.MenuLabel = "Select disc(s) to verify...";
+            menu.OnCancel += Operations.MainMenu.StartOperation;
 
-            menu.Show(true);
+            List<DiscDetail> discsToVerify = menu.Show(true);
 
-            return selectedDisc;
+            return discsToVerify;
         }
 
         public static void StartOperation()
@@ -68,10 +67,7 @@ namespace DiscArchiver.Operations
             if (verifyAll)
                 verifier = new DiscVerifier(selectedDrive);
             else
-            {
-                DestinationDisc selectedDisc = AskDiskToVerify();
-                verifier = new DiscVerifier(selectedDrive, selectedDisc);
-            }
+                verifier = new DiscVerifier(selectedDrive, AskDiskToVerify());
 
             verifier.StartVerification();
         }

@@ -5,10 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using DiscArchiver.Classes;
+using Archiver.Classes;
 using Newtonsoft.Json;
 
-namespace DiscArchiver.Utilities
+namespace Archiver.Utilities
 {
     public static class DiscProcessing
     {
@@ -68,7 +68,7 @@ namespace DiscArchiver.Utilities
             distributeThread.Join();
         }
 
-        public static void CopyFiles(DestinationDisc disc, Stopwatch masterSw)
+        public static void CopyFiles(DiscDetail disc, Stopwatch masterSw)
         {
             long bytesCopied = 0;
             int currentFile = 1;
@@ -137,7 +137,7 @@ namespace DiscArchiver.Utilities
             sw.Stop();
         }
 
-        public static void GenerateHashFile(DestinationDisc disc, Stopwatch masterSw)
+        public static void GenerateHashFile(DiscDetail disc, Stopwatch masterSw)
         {
             Status.WriteDiscHashListFile(disc, masterSw.Elapsed, 0.0);
 
@@ -165,27 +165,14 @@ namespace DiscArchiver.Utilities
             Status.WriteDiscHashListFile(disc, masterSw.Elapsed, 100.0);
         }
 
-        public static void SaveJsonData(DestinationDisc disc, Stopwatch masterSw)
+        public static void SaveJsonData(DiscDetail disc, Stopwatch masterSw)
         {
             Status.WriteDiscJsonLine(disc, masterSw.Elapsed);
 
-            JsonSerializerSettings settings = new JsonSerializerSettings() {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                Formatting = Newtonsoft.Json.Formatting.Indented
-            };
-
-            string indexDir = Globals._indexDiscDir + "/json";
-
-            if (!Directory.Exists(indexDir))
-                Directory.CreateDirectory(indexDir);
-
-            // Write the json data needed for future runs of this app
-            string jsonFilePath = indexDir + $"/disc_{disc.DiscNumber.ToString("0000")}.json";
-            string json = JsonConvert.SerializeObject(disc, settings);
-            File.WriteAllText(jsonFilePath, json, Encoding.UTF8);
+            Helpers.SaveDestinationDisc(disc);
         }
 
-        public static void GenerateIndexFiles(DestinationDisc disc, Stopwatch masterSw)
+        public static void GenerateIndexFiles(DiscDetail disc, Stopwatch masterSw)
         {
             Status.WriteDiscIndex(disc, masterSw.Elapsed, 0.0);
 
@@ -250,11 +237,11 @@ namespace DiscArchiver.Utilities
             Status.WriteDiscIndex(disc, masterSw.Elapsed, 100.0);
         }
 
-        private static void WriteDiscInfo(DestinationDisc disc, Stopwatch masterSw)
+        private static void WriteDiscInfo(DiscDetail disc, Stopwatch masterSw)
         {
             Status.WriteDiscJsonLine(disc, masterSw.Elapsed);
 
-            DiscInfo discInfo = disc.GetDiscInfo();
+            DiscSummary discInfo = disc.GetDiscInfo();
 
             JsonSerializerSettings settings = new JsonSerializerSettings() {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
@@ -268,10 +255,10 @@ namespace DiscArchiver.Utilities
             Status.WriteDiscJsonLine(disc, masterSw.Elapsed);
         }
 
-        public static void CreateISOFile(DestinationDisc disc, Stopwatch masterSw)
+        public static void CreateISOFile(DiscDetail disc, Stopwatch masterSw)
         {
             Status.WriteDiscIso(disc, masterSw.Elapsed, 0);
-            string isoRoot = Globals._stagingDir + "/iso";
+            string isoRoot = Globals._discStagingDir + "/iso";
 
             if (!Directory.Exists(isoRoot))
                 Directory.CreateDirectory(isoRoot);
@@ -292,7 +279,7 @@ namespace DiscArchiver.Utilities
             isoThread.Join();
         }
 
-        public static void ReadIsoHash(DestinationDisc disc, Stopwatch masterSw)
+        public static void ReadIsoHash(DiscDetail disc, Stopwatch masterSw)
         {
             Status.WriteDiscIsoHash(disc, masterSw.Elapsed, 0.0);
 
@@ -302,13 +289,11 @@ namespace DiscArchiver.Utilities
                 Status.WriteDiscIsoHash(disc, masterSw.Elapsed, currentPercent);
             };
 
-            md5.OnComplete += (hash) => {
-                disc.Hash = hash;
-            };
-
             Thread generateThread = new Thread(md5.GenerateHash);
             generateThread.Start();
             generateThread.Join();
+
+            disc.Hash = md5.MD5_Hash;
 
             Status.WriteDiscIsoHash(disc, masterSw.Elapsed, 100.0);
         }
@@ -317,7 +302,7 @@ namespace DiscArchiver.Utilities
         {
             Status.InitDiscLines();
 
-            foreach (DestinationDisc disc in Globals._destinationDiscs.Where(x => x.NewDisc == true).OrderBy(x => x.DiscNumber))
+            foreach (DiscDetail disc in Globals._destinationDiscs.Where(x => x.NewDisc == true).OrderBy(x => x.DiscNumber))
             {
                 Stopwatch masterSw = new Stopwatch();
                 masterSw.Start();
@@ -335,11 +320,6 @@ namespace DiscArchiver.Utilities
             }
 
             Status.ProcessComplete();
-        }
-
-        public static void VerifyDiscs()
-        {
-
         }
     }
 }

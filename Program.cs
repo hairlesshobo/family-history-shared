@@ -1,20 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using DiscArchiver.Classes;
-using DiscArchiver.Operations;
-using DiscArchiver.Utilities;
+using System.Threading;
+using Archiver.Classes;
+using Archiver.Operations;
+using Archiver.Utilities;
 using Newtonsoft.Json;
 
-namespace DiscArchiver
+namespace Archiver
 {
     class Program
     {
-        private static void NotImplemented()
-        {
-            Console.WriteLine("This operation has not yet been implemented.");
-        }
-
         // private static void DoScanOnly()
         // {
         //     Status.Initialize();
@@ -30,46 +26,19 @@ namespace DiscArchiver
         {
             Console.BackgroundColor = ConsoleColor.Black;
 
+            Console.Write("Reading configuration... ");
             Config.ReadConfig();
+            Console.WriteLine("done");
+
+            Console.Write("Reading disc index... ");
             Helpers.ReadIndex();
+            Console.WriteLine("done");
 
-            CliMenu menu = new CliMenu(new List<CliMenuEntry>()
-            {
-                new CliMenuEntry() {
-                    Name = "Run Archive process",
-                    Action = Archiver.StartOperation
-                },
-                new CliMenuEntry() {
-                    Name = "Verify Discs",
-                    Action = DiscVerification.StartOperation
-                },
-                new CliMenuEntry() {
-                    Name = "View Archive Summary",
-                    Action = Summary.StartOperation
-                },
-                new CliMenuEntry() {
-                    Name = "Create Index ISO",
-                    Action = Helpers.CreateIndexIso
-                },
-                new CliMenuEntry() {
-                    Name = "Scan For Changes",
-                    Action = NotImplemented
-                },
-                new CliMenuEntry() {
-                    Name = "Exit",
-                    Action = () => Environment.Exit(0)
-                }
-            });
+            Console.Clear();
 
-            menu.MenuLabel = "Disc Archiver, main menu...";
+            MainMenu.StartOperation();
 
-            while (1 == 1)
-            {
-                menu.Show(true);
-                Console.WriteLine();
-                Console.WriteLine("Process complete, press enter to return to the main menu...");
-                Console.ReadLine();
-            }
+            Console.ReadLine();
         }
     }
 }

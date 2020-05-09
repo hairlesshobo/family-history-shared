@@ -1,11 +1,11 @@
 using System;
-using DiscArchiver.Classes;
+using Archiver.Classes;
 
-namespace DiscArchiver.Utilities
+namespace Archiver.Utilities
 {
     public static class Formatting
     {
-        public static string GetDiscName(DestinationDisc disc)
+        public static string GetDiscName(DiscDetail disc)
         {
             return $"Disc {disc.DiscNumber.ToString("0000")}";
         }

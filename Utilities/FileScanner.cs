@@ -1,9 +1,9 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using DiscArchiver.Classes;
+using Archiver.Classes;
 
-namespace DiscArchiver.Utilities
+namespace Archiver.Utilities
 {
     public delegate void Scanner_ProgressChangedDelegate(long newFiles, long existingFiles, long excludedFiles);
     public delegate void Scanner_CompleteDelegate();

@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 
-namespace DiscArchiver.Utilities
+namespace Archiver.Utilities
 {
     public delegate void ISO_ProgressChangedDelegate(int currentPercent);
     public delegate void ISO_CompleteDelegate();

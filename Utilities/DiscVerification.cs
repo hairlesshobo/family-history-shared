@@ -4,9 +4,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using DiscArchiver.Classes;
+using Archiver.Classes;
 
-namespace DiscArchiver.Utilities
+namespace Archiver.Utilities
 {
     public class DiscVerifier
     {
@@ -14,8 +14,9 @@ namespace DiscArchiver.Utilities
         private static int _discLine = -1;
         private static int _statusLine = -1;
         private static int _discCount = 0;
-        private List<DestinationDisc> _discsToVerify;
+        private List<DiscDetail> _discsToVerify;
         private List<int> _pendingDiscs;
+        private List<int> _completedDiscs;
         private string _driveLetter;
 
         public DiscVerifier(string DriveLetter)
@@ -25,17 +26,24 @@ namespace DiscArchiver.Utilities
             Initialize(DriveLetter);
         }
 
-        public DiscVerifier(string DriveLetter, DestinationDisc disc)
+        public DiscVerifier(string DriveLetter, List<DiscDetail> discsToVerify)
         {
-            _discsToVerify = new List<DestinationDisc>();
-            _discsToVerify.Add(disc);
+            _discsToVerify = discsToVerify;
 
             Initialize(DriveLetter);
         }
 
         private void Initialize (string DriveLetter)
         {
-            _pendingDiscs = _discsToVerify.Select(x => x.DiscNumber).ToList();
+            // we only want to verify discs that haven't been verified in the past week, 
+            // or have never been verified at all
+            _pendingDiscs = _discsToVerify.Where(x => x.DaysSinceLastVerify > 7)
+                                          .Select(x => x.DiscNumber)
+                                          .ToList();
+                                    
+            _completedDiscs = _discsToVerify.Where(x => x.DaysSinceLastVerify <= 7)
+                                            .Select(x => x.DiscNumber)
+                                            .ToList();
 
             _driveLetter = DriveLetter;
 
@@ -57,8 +65,18 @@ namespace DiscArchiver.Utilities
             Console.Write("Verifying discs...");
             Console.ResetColor();
 
-            foreach (DestinationDisc disc in _discsToVerify)
-                WriteDiscPendingLine(disc, default(TimeSpan));
+            foreach (DiscDetail disc in _discsToVerify)
+            {
+                if (disc.DaysSinceLastVerify > 7)
+                    WriteDiscPendingLine(disc, default(TimeSpan));
+                else
+                {
+                    if (disc.LastVerifySuccess)
+                        WriteDiscVerificationPassed(disc, default(TimeSpan));
+                    else
+                        WriteDiscVerificationFailed(disc, default(TimeSpan));
+                }
+            }
 
             SetStatus("Starting...");
         }
@@ -69,9 +87,9 @@ namespace DiscArchiver.Utilities
             StatusHelpers.WriteStatusLine("Status", status);
         }
 
-        private DestinationDisc WaitForDisc()
+        private DiscDetail WaitForDisc()
         {
-            DestinationDisc insertedDisc = default(DestinationDisc);
+            DiscDetail insertedDisc = default(DiscDetail);
 
             DriveInfo di = DriveInfo.GetDrives().Where(x => x.Name.TrimEnd('\\').ToUpper() == _driveLetter.ToUpper()).FirstOrDefault();
 
@@ -99,8 +117,14 @@ namespace DiscArchiver.Utilities
                             if (_pendingDiscs.Contains(discId))
                             {
                                 SetStatus($"Verifying disc {discId}");
-                                _pendingDiscs.Remove(discId);
                                 return _discsToVerify.FirstOrDefault(x => x.DiscNumber == discId);
+                            }
+                            else if (_completedDiscs.Contains(discId))
+                            {
+                                if (_pendingDiscs.Count() == 1)
+                                    SetStatus($"Archive disc {discId} has already been verified, please insert disc {_pendingDiscs[0].ToString()}");
+                                else
+                                    SetStatus($"Archive disc {discId} has already been verified, please insert another disc");
                             }
                             else
                             {
@@ -123,7 +147,7 @@ namespace DiscArchiver.Utilities
         {
             while (_pendingDiscs.Count() > 0)
             {
-                DestinationDisc disc = WaitForDisc();
+                DiscDetail disc = WaitForDisc();
 
                 Stopwatch sw = Stopwatch.StartNew();
 
@@ -136,7 +160,15 @@ namespace DiscArchiver.Utilities
                 md5disc.OnComplete += (hash) => {
                     sw.Stop();
 
-                    if (disc.Hash.ToLower() == hash.ToLower())
+                    bool discValid = (disc.Hash.ToLower() == hash.ToLower());
+
+                    disc.RecordVerification(DateTime.UtcNow, discValid);
+                    Helpers.SaveDestinationDisc(disc);
+
+                    _pendingDiscs.Remove(disc.DiscNumber);
+                    _completedDiscs.Add(disc.DiscNumber);
+
+                    if (discValid)
                         WriteDiscVerificationPassed(disc, sw.Elapsed);
                     else
                         WriteDiscVerificationFailed(disc, sw.Elapsed);
@@ -151,13 +183,13 @@ namespace DiscArchiver.Utilities
             Console.SetCursorPosition(0, _nextLine);
         }
 
-        private int GetDiscIndex(DestinationDisc disc)
+        private int GetDiscIndex(DiscDetail disc)
         {
             return _discsToVerify.IndexOf(disc)+1;
         }
 
         private void WriteDiscPendingLine(
-            DestinationDisc disc, 
+            DiscDetail disc, 
             TimeSpan elapsed = default(TimeSpan))
         {
             string line = "";
@@ -172,7 +204,7 @@ namespace DiscArchiver.Utilities
         }
 
         public void WriteDiscVerifyingLine(
-            DestinationDisc disc, 
+            DiscDetail disc, 
             TimeSpan elapsed, 
             double currentPercent,
             long bytesRead,
@@ -196,20 +228,22 @@ namespace DiscArchiver.Utilities
         }
 
         private void WriteDiscVerificationPassed(
-            DestinationDisc disc, 
+            DiscDetail disc, 
             TimeSpan elapsed = default(TimeSpan))
         {
             string line = "";
             line += Formatting.FormatElapsedTime(elapsed);
             line += " ";
-            line += "Verification Passed!".PadRight(12);
+            line += "Verification Passed!";
+            line += "   ";
+            line += "(" + disc.Verifications.OrderBy(x => x.VerificationDTM).Last().VerificationDTM.ToString("MM/dd/yyyy") + ")";
 
             Console.SetCursorPosition(0, _discLine + GetDiscIndex(disc));
             StatusHelpers.WriteStatusLine(Formatting.GetDiscName(disc), line, ConsoleColor.Green);
         }
 
         private void WriteDiscVerificationFailed(
-            DestinationDisc disc, 
+            DiscDetail disc, 
             TimeSpan elapsed = default(TimeSpan))
         {
             string line = "";

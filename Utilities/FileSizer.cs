@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using System.Linq;
-using DiscArchiver.Classes;
+using Archiver.Classes;
 
-namespace DiscArchiver.Utilities
+namespace Archiver.Utilities
 {
     public delegate void Sizer_ProgressChangedDelegate(long currentFile, long totalSize);
     public delegate void Sizer_CompleteDelegate();

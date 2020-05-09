@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 
-namespace DiscArchiver.Utilities
+namespace Archiver.Utilities
 {
     public delegate void MD5_ProgressChangedDelegate(double currentPercent);
     public delegate void MD5_CompleteDelegate(string hash);
@@ -40,28 +40,29 @@ namespace DiscArchiver.Utilities
                     long lastSample = sw.ElapsedMilliseconds;
                     long totalBytesRead = 0;
                     int md5Offset = 0;
+                    double currentPercent = 0.0;
 
                     while ((currentBlockSize = source.Read(buffer, 0, buffer.Length)) > 0)
                     {
                         totalBytesRead += currentBlockSize;
 
-                        double currentPercent = ((double)totalBytesRead / (double)fileLength) * 100.0;
+                        currentPercent = ((double)totalBytesRead / (double)fileLength) * 100.0;
                         md5Offset += md5.TransformBlock(buffer, 0, currentBlockSize, buffer, 0);
                         
                         if (sw.ElapsedMilliseconds - lastSample > _sampleDurationMs || currentBlockSize < buffer.Length)
                         {
-                            if (currentBlockSize < buffer.Length)
-                            {
-                                sw.Stop();
-                                md5.TransformFinalBlock(new byte[] { }, 0, 0);
-
-                                this.MD5_Hash = BitConverter.ToString(md5.Hash).Replace("-","").ToLower();
-                            }
-
                             OnProgressChanged(currentPercent);
                             lastSample = sw.ElapsedMilliseconds;
                         }
                     }
+
+                    OnProgressChanged(currentPercent);
+                    lastSample = sw.ElapsedMilliseconds;
+
+                    sw.Stop();
+                    md5.TransformFinalBlock(new byte[] { }, 0, 0);
+
+                    this.MD5_Hash = BitConverter.ToString(md5.Hash).Replace("-","").ToLower();
 
                     OnComplete(this.MD5_Hash);
                 }

@@ -2,12 +2,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DiscArchiver.Utilities
+namespace Archiver.Utilities
 {
-    public class CliMenuEntry
+    public delegate void CliMenuCanceled();
+
+    public class CliMenuEntry : CliMenuEntry<string>
+    {
+        public CliMenuEntry():base()
+        {}
+    }
+
+    public class CliMenuEntry<TKey>
     {
         public string Name { get; set; }
         public Action Action { get; set; }
+        public bool Disabled { get; set; } = false;
+        public TKey SelectedValue { get; set; }
         public bool Selected { 
             get
             {
@@ -22,38 +32,72 @@ namespace DiscArchiver.Utilities
         private bool _selected;
     }
 
-    public class CliMenu
+    public class CliMenu<TKey>
     {
-        private List<CliMenuEntry> _entries;
+        public event CliMenuCanceled OnCancel;
         public string MenuLabel { get; set; }
-        public ConsoleColor _foregroundColor;
+        public Boolean MultiSelect { 
+            get
+            {
+                return _multiSelect;
+            }
+            private set
+            {
+                _multiSelect = value;
+            } 
+        }
+        public List<TKey> SelectedEntries {
+            get {
+                return _entries.Where(x => x.Selected).Select(x => x.SelectedValue).ToList();
+            }
+        }
+
+        private List<CliMenuEntry<TKey>> _entries;
+        private ConsoleColor _foregroundColor;
+        private bool _multiSelect;
+        private int _cursorIndex = -1;
+        private bool _canceled = false;
 
         private int _startLine;
-        
-        public CliMenu (List<CliMenuEntry> Entries)
+
+        public CliMenu (List<CliMenuEntry<TKey>> entries, bool multiSelect)
         {
+            Initalize(entries, multiSelect);
+        }
+
+        public CliMenu (List<CliMenuEntry<TKey>> Entries)
+        {
+            Initalize(Entries, false);
+        }
+        
+        public void Initalize (List<CliMenuEntry<TKey>> Entries, bool multiSelect)
+        {
+            this.MultiSelect = multiSelect;
             _entries = Entries;
+            _cursorIndex = _entries.IndexOf(_entries.First(x => x.Disabled == false));
 
             if (_entries != null)
             {
-                if (!(_entries.Any(x => x.Selected)))
-                    _entries.First().Selected = true;
+                if (_multiSelect == false && (!_entries.Any(x => x.Selected && x.Disabled == false)))
+                    _entries.First(x => x.Disabled == false).Selected = true;
 
-                // make sure there is only one selected by default
-                if (_entries.Count(x => x.Selected == true) > 1)
+                // if this isn't a multiselect menu, make sure there is only one selected by default
+                if (this.MultiSelect == false && _entries.Count(x => x.Selected == true) > 1)
                 {
                     _entries.ForEach(x => x.Selected = false);
                     _entries.First().Selected = true;
                 }
             }
+
+            this.OnCancel += delegate {};
         }
 
-        public void Show()
+        public List<TKey> Show()
         {
-            Show(false);
+            return Show(false);
         }
 
-        public void Show(bool ClearScreen)
+        public List<TKey> Show(bool ClearScreen)
         {
             Console.CursorVisible = false;
             _foregroundColor = Console.ForegroundColor;
@@ -73,50 +117,102 @@ namespace DiscArchiver.Utilities
 
             _startLine = Console.CursorTop;
 
-            foreach (CliMenuEntry entry in _entries)
+            foreach (CliMenuEntry<TKey> entry in _entries)
             {
                 WriteMenuEntry(entry);
             }
+
+            ConsoleColor keyColor = ConsoleColor.DarkYellow;
+            Console.SetCursorPosition(0, _startLine + _entries.Count() + 1);
+            
+            if (_multiSelect == true)
+            {
+                Console.Write("Press ");
+                Console.ForegroundColor = keyColor;
+                Console.Write("<space>");
+                Console.ForegroundColor = _foregroundColor;
+                Console.Write(" to select entry, ");
+                Console.ForegroundColor = keyColor;
+                Console.Write("<Shift>-A");
+                Console.ForegroundColor = _foregroundColor;
+                Console.Write(" to select all, ");
+                Console.ForegroundColor = keyColor;
+                Console.Write("<Shift>-D");
+                Console.ForegroundColor = _foregroundColor;
+                Console.Write(" to deselect all");
+                Console.WriteLine();
+            }
+
+            Console.WriteLine();
+            Console.Write("Press ");
+            Console.ForegroundColor = keyColor;
+            Console.Write("<enter>");
+            Console.ForegroundColor = _foregroundColor;
+            Console.Write(" when finished, ");
+            Console.ForegroundColor = keyColor;
+            Console.Write("<esc>");
+            Console.ForegroundColor = _foregroundColor;
+            Console.Write(" to cancel");
 
             while (1 == 1)
             {
                 ConsoleKeyInfo key = Console.ReadKey(true);
 
-                CliMenuEntry selectedEntry = _entries.First(x => x.Selected);
+                CliMenuEntry<TKey> selectedEntry = _entries[_cursorIndex];
+                CliMenuEntry<TKey> previousEntry = selectedEntry;
 
-                int currentSelection = _entries.IndexOf(selectedEntry);
-
-                if (key.Key == ConsoleKey.UpArrow || key.Key == ConsoleKey.DownArrow)
-                {
+                if (_multiSelect == false && (key.Key == ConsoleKey.UpArrow || key.Key == ConsoleKey.DownArrow))
                     selectedEntry.Selected = false;
-                    WriteMenuEntry(selectedEntry);
+
+                if (_multiSelect == true)
+                {
+                    if (key.Key == ConsoleKey.Spacebar)
+                    {
+                        selectedEntry.Selected = !selectedEntry.Selected;
+                        WriteMenuEntry(selectedEntry);
+                    }
+                    else if (key.Modifiers == ConsoleModifiers.Shift)
+                    {
+                        if (key.Key == ConsoleKey.A)
+                        {
+                            foreach (CliMenuEntry<TKey> entry in _entries)
+                            {
+                                entry.Selected = true;
+                                WriteMenuEntry(entry);
+                            }
+                        }
+                        else if (key.Key == ConsoleKey.D)
+                        {
+                            foreach (CliMenuEntry<TKey> entry in _entries)
+                            {
+                                entry.Selected = false;
+                                WriteMenuEntry(entry);
+                            }
+                        }
+                    }
                 }
 
-                if (key.Key == ConsoleKey.DownArrow)
+                if (key.Key == ConsoleKey.Escape)
                 {
-                    if (currentSelection < (_entries.Count()-1))
-                        currentSelection++;
-                    else
-                        currentSelection = 0;
+                    _canceled = true;
+                    break;
                 }
+                else if (key.Key == ConsoleKey.DownArrow)
+                    MoveCursor(selectedEntry, true);
+                else if (key.Key == ConsoleKey.UpArrow)
+                    MoveCursor(selectedEntry, false);
 
-                if (key.Key == ConsoleKey.UpArrow)
+                if (_multiSelect == false && (key.Key == ConsoleKey.UpArrow || key.Key == ConsoleKey.DownArrow))
                 {
-                    selectedEntry.Selected = false;
-                    WriteMenuEntry(selectedEntry);
-
-                    if (currentSelection > 0)
-                        currentSelection--;
-                    else
-                        currentSelection = _entries.Count()-1;
-                        
-                }
-
-                if (key.Key == ConsoleKey.UpArrow || key.Key == ConsoleKey.DownArrow)
-                {
-                    selectedEntry = _entries[currentSelection];
+                    WriteMenuEntry(previousEntry);
+                    selectedEntry = _entries[_cursorIndex];
                     selectedEntry.Selected = true;
                     WriteMenuEntry(selectedEntry);
+                }
+                else
+                {
+                    WriteMenuEntry(previousEntry);
+                    WriteMenuEntry(_entries[_cursorIndex]);
                 }
 
                 if (key.Key == ConsoleKey.Enter)
@@ -126,30 +222,90 @@ namespace DiscArchiver.Utilities
             Console.CursorVisible = true;
             Console.SetCursorPosition(0, _startLine+_entries.Count()+1);
 
-            CliMenuEntry finalEntry = _entries.First(x => x.Selected);
+            if (_canceled == false)
+            {
+                if (_multiSelect == false)
+                {
+                    CliMenuEntry<TKey> finalEntry = _entries.First(x => x.Selected);
 
-            if (ClearScreen)
-                Console.Clear();
+                    if (ClearScreen)
+                        Console.Clear();
 
-            if (finalEntry != null && finalEntry.Action != null)
-                finalEntry.Action();
+                    if (finalEntry != null && finalEntry.Action != null)
+                        finalEntry.Action();
+
+                    return new List<TKey>() {
+                        finalEntry.SelectedValue
+                    };
+                }
+                else
+                    return this.SelectedEntries;
+            }
+            else
+            {
+                this.OnCancel();
+                return null;
+            }
         }
 
-        private void WriteMenuEntry(CliMenuEntry Entry)
+        private void MoveCursor(CliMenuEntry<TKey> entry, bool down)
         {
+            if (down == true)
+            {
+                if (_cursorIndex < (_entries.Count()-1))
+                    _cursorIndex++;
+                else
+                    _cursorIndex = 0;
+
+                if (_entries[_cursorIndex].Disabled == true)
+                    MoveCursor(_entries[_cursorIndex], down);
+            }
+            else
+            {
+                if (_cursorIndex > 0)
+                    _cursorIndex--;
+                else
+                    _cursorIndex = _entries.Count()-1;
+
+                if (_entries[_cursorIndex].Disabled == true)
+                    MoveCursor(_entries[_cursorIndex], down);
+            }
+        }
+
+        private void WriteMenuEntry(CliMenuEntry<TKey> Entry)
+        {
+            int entryIndex = _entries.IndexOf(Entry);
+
             Console.CursorLeft = 0;
-            Console.CursorTop = _startLine + _entries.IndexOf(Entry);
+            Console.CursorTop = _startLine + entryIndex;
             Console.Write("    ");
 
-            if (Entry.Selected)
+            if (entryIndex == _cursorIndex)
             {
-                Console.BackgroundColor = ConsoleColor.Blue;
+                Console.BackgroundColor = ConsoleColor.DarkGray;
                 Console.ForegroundColor = ConsoleColor.Gray;
                 Console.Write("> ");
                 Console.ForegroundColor = _foregroundColor;
             }
+            else if (Entry.Disabled)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("  ");
+            }
             else
                 Console.Write("  ");
+
+            if (_multiSelect == true)
+            {
+                Console.Write("[");
+            
+                if (Entry.Selected == true)
+                    Console.Write("X");
+                else
+                    Console.Write(" ");
+            
+                Console.Write("] ");
+            }
 
             Console.Write(Entry.Name);
             Console.CursorLeft = 0;

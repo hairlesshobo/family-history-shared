@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using Microsoft.Win32.SafeHandles;
-using static DiscArchiver.Utilities.CustomFileCopier;
+using static Archiver.Utilities.CustomFileCopier;
 
-namespace DiscArchiver.Utilities
+namespace Archiver.Utilities
 {
     public class MD5_Disc
     {

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using DiscArchiver.Utilities;
+using Archiver.Utilities;
 using Newtonsoft.Json;
 
-namespace DiscArchiver.Classes
+namespace Archiver.Classes
 {
 public class SourceFile
     {
@@ -45,7 +45,7 @@ public class SourceFile
         public DateTime CreationTimeUtc { get; set; }
         public FileAttributes Attributes { get; set; }
         [JsonIgnore]
-        public DestinationDisc DestinationDisc { get; set; } = null;
+        public DiscDetail DestinationDisc { get; set; } = null;
 
         public SourceFile()
         {

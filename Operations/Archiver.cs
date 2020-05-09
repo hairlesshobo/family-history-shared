@@ -1,7 +1,7 @@
 using System;
-using DiscArchiver.Utilities;
+using Archiver.Utilities;
 
-namespace DiscArchiver.Operations
+namespace Archiver.Operations
 {
     public static class Archiver
     {

@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Management;
+using System.Text;
 using System.Threading;
-using DiscArchiver.Classes;
+using Archiver.Classes;
 using Newtonsoft.Json;
 
-namespace DiscArchiver.Utilities
+namespace Archiver.Utilities
 {
     public class Helpers
     {
@@ -39,20 +40,20 @@ namespace DiscArchiver.Utilities
 
         public static string SelectDrive()
         {
-            DriveInfo[] drives = DriveInfo.GetDrives();
+            List<DriveInfo> drives = DriveInfo.GetDrives().Where(x => x.DriveType == DriveType.CDRom).ToList();
+            string selectedDrive = drives[0].Name.TrimEnd('\\');
 
-            if (drives.Length == 0)
+            if (drives.Count() == 0)
                 throw new DriveNotFoundException("No optical drives were detected on this system!");
             
-            if (drives.Length == 1)
-                return drives[0].Name.TrimEnd('\\');
+            if (drives.Count() == 1)
+                return selectedDrive;
 
-            string selectedDrive = drives[0].Name.TrimEnd('\\');
-            List<CliMenuEntry> entries = new List<CliMenuEntry>();
+            List<CliMenuEntry<string>> entries = new List<CliMenuEntry<string>>();
 
-            foreach (DriveInfo drive in drives.Where(x => x.DriveType == DriveType.CDRom))
+            foreach (DriveInfo drive in drives)
             {
-                CliMenuEntry newEntry = new CliMenuEntry();
+                CliMenuEntry<string> newEntry = new CliMenuEntry<string>();
                 newEntry.Name = drive.Name.TrimEnd('\\') + " (Disc Loaded: ";
                 newEntry.Action = () => {
                     selectedDrive = drive.Name.TrimEnd('\\');
@@ -66,8 +67,9 @@ namespace DiscArchiver.Utilities
                     entries.Add(newEntry);
             }
 
-            CliMenu menu = new CliMenu(entries);
+            CliMenu<string> menu = new CliMenu<string>(entries);
             menu.MenuLabel = "Select drive...";
+            menu.OnCancel += Operations.MainMenu.StartOperation;
 
             menu.Show(true);
 
@@ -83,7 +85,7 @@ namespace DiscArchiver.Utilities
                 string[] jsonFiles = Directory.GetFiles(jsonDir, "*.json");
 
                 foreach (string jsonFile in jsonFiles)
-                    Globals._destinationDiscs.Add(JsonConvert.DeserializeObject<DestinationDisc>(File.ReadAllText(jsonFile)));
+                    Globals._destinationDiscs.Add(JsonConvert.DeserializeObject<DiscDetail>(File.ReadAllText(jsonFile)));
             }
         }
 
@@ -108,9 +110,9 @@ namespace DiscArchiver.Utilities
             return inPath.Split(':')[1];
         }
 
-        public static DestinationDisc GetDestinationDisc(long FileSize)
+        public static DiscDetail GetDestinationDisc(long FileSize)
         {
-            DestinationDisc matchingDisc = Globals._destinationDiscs.FirstOrDefault(x => x.NewDisc == true && (x.DataSize + FileSize) < Globals._discCapacityLimit);
+            DiscDetail matchingDisc = Globals._destinationDiscs.FirstOrDefault(x => x.NewDisc == true && (x.DataSize + FileSize) < Globals._discCapacityLimit);
 
             if (matchingDisc == null)
             {
@@ -119,7 +121,7 @@ namespace DiscArchiver.Utilities
                 if (Globals._destinationDiscs.Count() > 0)
                     nextDiscNumber = Globals._destinationDiscs.Max(x => x.DiscNumber) + 1;
 
-                DestinationDisc newDisc = new DestinationDisc(nextDiscNumber);
+                DiscDetail newDisc = new DiscDetail(nextDiscNumber);
                 Globals._destinationDiscs.Add(newDisc);
                 return newDisc;
             }
@@ -135,7 +137,7 @@ namespace DiscArchiver.Utilities
             Console.ResetColor();
             Console.WriteLine();
 
-            string isoPath = Globals._stagingDir + "/iso/index.iso";
+            string isoPath = Globals._discStagingDir + "/iso/index.iso";
             string isoName = "Archive Index";
 
             ISO_Creator creator = new ISO_Creator(isoName, Helpers.DirtyPath(Globals._indexDiscDir), isoPath);
@@ -167,6 +169,28 @@ namespace DiscArchiver.Utilities
             string[] nameParts = FullPath.Split('/');
             
             return nameParts[nameParts.Length-1];
+        }
+
+        public static void SaveDestinationDisc(DiscDetail disc, string destinationDir = null, string fileName = null)
+        {
+            if (destinationDir == null)
+                destinationDir = Globals._indexDiscDir + "/json";
+
+            if (fileName == null)
+                fileName = $"disc_{disc.DiscNumber.ToString("0000")}.json";
+
+            if (!Directory.Exists(destinationDir))
+                Directory.CreateDirectory(destinationDir);
+
+            string jsonFilePath = destinationDir + "/" + fileName;
+
+            string json = JsonConvert.SerializeObject(disc, new JsonSerializerSettings() {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                Formatting = Newtonsoft.Json.Formatting.Indented
+            });
+
+            // Write the json data needed for future runs of this app
+            File.WriteAllText(jsonFilePath, json, Encoding.UTF8);
         }
     }
 }

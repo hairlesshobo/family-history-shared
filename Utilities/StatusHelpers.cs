@@ -1,6 +1,6 @@
 using System;
 
-namespace DiscArchiver.Utilities
+namespace Archiver.Utilities
 {
     public static class StatusHelpers
     {

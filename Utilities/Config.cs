@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
 
-namespace DiscArchiver.Utilities
+namespace Archiver.Utilities
 {
     public static class Config
     {
@@ -11,11 +11,11 @@ namespace DiscArchiver.Utilities
         {
             IConfiguration _config = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", true, true)
+                .AddJsonFile("./config/appsettings.json", true, true)
                 .Build();
 
             Globals._discCapacityLimit = _config.GetSection("DiscCapacityLimit").Get<long>();
-            Globals._stagingDir = _config["StagingDir"];
+            Globals._discStagingDir = _config["DiscStagingDir"];
             Globals._cdbxpPath = _config["CdbxpPath"];
             Globals._ddPath = _config["DdPath"];
             Globals._excludeFiles = _config.GetSection("ExcludeFiles").Get<string[]>().ToList();
@@ -30,7 +30,7 @@ namespace DiscArchiver.Utilities
                     Globals._excludePaths.Add(cleanExcPath);
             }
 
-            Globals._indexDiscDir = Globals._stagingDir + $"/index";
+            Globals._indexDiscDir = Globals._discStagingDir + $"/index";
         }
     }
 }

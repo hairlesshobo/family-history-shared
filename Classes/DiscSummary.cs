@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DiscArchiver.Classes
+namespace Archiver.Classes
 {
-    public class DiscInfo
+    public class DiscSummary
     {
         public int DiscNumber { get; set; }
         public DateTime ArchiveDTM { get; set; }
@@ -30,12 +30,12 @@ namespace DiscArchiver.Classes
         }
         public List<SourceFile> Files { get; set; }
         
-        public DiscInfo()
+        public DiscSummary()
         {
             this.Files = new List<SourceFile>();
         }
 
-        public DiscInfo(int discNumber)
+        public DiscSummary(int discNumber)
         {
             this.Files = new List<SourceFile>();
             this.DiscNumber = discNumber;
