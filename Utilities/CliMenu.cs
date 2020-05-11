@@ -17,6 +17,7 @@ namespace Archiver.Utilities
         public string Name { get; set; }
         public Action Action { get; set; }
         public bool Disabled { get; set; } = false;
+        public bool Header { get; set; } = false;
         public TKey SelectedValue { get; set; }
         public bool Selected { 
             get
@@ -74,12 +75,12 @@ namespace Archiver.Utilities
         {
             this.MultiSelect = multiSelect;
             _entries = Entries;
-            _cursorIndex = _entries.IndexOf(_entries.First(x => x.Disabled == false));
+            _cursorIndex = _entries.IndexOf(_entries.First(x => !x.Disabled && !x.Header));
 
             if (_entries != null)
             {
-                if (_multiSelect == false && (!_entries.Any(x => x.Selected && x.Disabled == false)))
-                    _entries.First(x => x.Disabled == false).Selected = true;
+                if (_multiSelect == false && (!_entries.Any(x => x.Selected && !x.Disabled && !x.Header)))
+                    _entries.First(x => !x.Disabled && !x.Header).Selected = true;
 
                 // if this isn't a multiselect menu, make sure there is only one selected by default
                 if (this.MultiSelect == false && _entries.Count(x => x.Selected == true) > 1)
@@ -109,7 +110,7 @@ namespace Archiver.Utilities
 
             if (this.MenuLabel != null)
             {
-                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.ForegroundColor = ConsoleColor.Magenta;
                 Console.WriteLine(this.MenuLabel);
                 Console.WriteLine();
                 Console.ForegroundColor = _foregroundColor;
@@ -257,7 +258,7 @@ namespace Archiver.Utilities
                 else
                     _cursorIndex = 0;
 
-                if (_entries[_cursorIndex].Disabled == true)
+                if (_entries[_cursorIndex].Disabled || _entries[_cursorIndex].Header)
                     MoveCursor(_entries[_cursorIndex], down);
             }
             else
@@ -267,7 +268,7 @@ namespace Archiver.Utilities
                 else
                     _cursorIndex = _entries.Count()-1;
 
-                if (_entries[_cursorIndex].Disabled == true)
+                if (_entries[_cursorIndex].Disabled || _entries[_cursorIndex].Header)
                     MoveCursor(_entries[_cursorIndex], down);
             }
         }
@@ -278,22 +279,30 @@ namespace Archiver.Utilities
 
             Console.CursorLeft = 0;
             Console.CursorTop = _startLine + entryIndex;
-            Console.Write("    ");
+            
 
-            if (entryIndex == _cursorIndex)
-            {
-                Console.BackgroundColor = ConsoleColor.DarkGray;
-                Console.ForegroundColor = ConsoleColor.Gray;
-                Console.Write("> ");
-                Console.ForegroundColor = _foregroundColor;
-            }
-            else if (Entry.Disabled)
-            {
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write("  ");
-            }
+            if (Entry.Header)
+                Console.ForegroundColor = ConsoleColor.Cyan;
+
             else
-                Console.Write("  ");
+            {
+                Console.Write("    ");
+
+                if (entryIndex == _cursorIndex)
+                {
+                    Console.BackgroundColor = ConsoleColor.DarkGray;
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.Write("> ");
+                    Console.ForegroundColor = _foregroundColor;
+                }
+                else if (Entry.Disabled)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write("  ");
+                }
+                else
+                    Console.Write("  ");
+            }
 
             if (_multiSelect == true)
             {
@@ -307,7 +316,13 @@ namespace Archiver.Utilities
                 Console.Write("] ");
             }
 
-            Console.Write(Entry.Name);
+
+            if (Entry.Header && Entry.Name != null)
+                Console.Write($"----- {Entry.Name} -----");
+
+            else
+                Console.Write(Entry.Name);
+
             Console.CursorLeft = 0;
 
             Console.ResetColor();

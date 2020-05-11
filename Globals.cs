@@ -28,6 +28,8 @@ namespace Archiver
         public static string _discStagingDir;
         public static string  _cdbxpPath;
         public static string _ddPath;
+        public static string _tapeDrive;
+        public static int _tapeBlockingFactor;
 
     }
 }

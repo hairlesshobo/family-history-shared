@@ -18,6 +18,8 @@ namespace Archiver.Utilities
             Globals._discStagingDir = _config["DiscStagingDir"];
             Globals._cdbxpPath = _config["CdbxpPath"];
             Globals._ddPath = _config["DdPath"];
+            Globals._tapeDrive = _config["Tape:Drive"];
+            Globals._tapeBlockingFactor = _config.GetSection("Tape:BlockingFactor").Get<int>();
             Globals._excludeFiles = _config.GetSection("ExcludeFiles").Get<string[]>().ToList();
             Globals._sourcePaths = _config.GetSection("SourcePaths").Get<string[]>();
             Array.Sort(Globals._sourcePaths);
