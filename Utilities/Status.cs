@@ -206,13 +206,13 @@ namespace Archiver.Utilities
             if (_sizeLine == -1)
                 _sizeLine = _nextLine++;
 
-            string currentSizeFriendly = Formatting.GetFriendlySize(Globals._totalSize);
+            string currentSizeFriendly = Formatting.GetFriendlySize(Globals._scannedTotalSize);
             
             string line = FileCountPosition(fileCount);
             line += $" [{currentSizeFriendly.PadLeft(12)}]";
             line += " ";
 
-            double currentPercent = ((double)fileCount / (double)Globals._newlyFoundFiles) * 100.0;
+            double currentPercent = ((double)fileCount / (double)Globals._scannedNewlyFoundFiles) * 100.0;
 
             Console.SetCursorPosition(0, _sizeLine);
             StatusHelpers.WriteStatusLineWithPct(_sizingLabel, line, currentPercent, complete);
@@ -227,7 +227,7 @@ namespace Archiver.Utilities
             line += $" [ {discCount.ToString().PadLeft(3)} Disc(s)]";
             line += " ";
 
-            double currentPercent = ((double)fileCount / (double)Globals._newlyFoundFiles) * 100.0;
+            double currentPercent = ((double)fileCount / (double)Globals._scannedNewlyFoundFiles) * 100.0;
 
             Console.SetCursorPosition(0, _distributeLine);
             StatusHelpers.WriteStatusLineWithPct(_distrubuteLabel, line, currentPercent, complete);
@@ -245,7 +245,7 @@ namespace Archiver.Utilities
         private static string FileCountPosition (long currentFile, long totalFiles = -1, int width = 0)
         {
             if (totalFiles == -1)
-                totalFiles = Globals._newlyFoundFiles;
+                totalFiles = Globals._scannedNewlyFoundFiles;
 
             string totalFilesStr = totalFiles.ToString();
 

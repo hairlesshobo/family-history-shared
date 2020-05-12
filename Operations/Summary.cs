@@ -40,7 +40,7 @@ namespace Archiver.Operations
             }
             
             WriteHeader("File Type Statistics...");
-            IEnumerable<FileType> fileCounts = Globals._sourceFiles
+            IEnumerable<FileType> fileCounts = Globals._discSourceFiles
                                                       .GroupBy(x => x.Extension)
                                                       .Select(x => new FileType() { Extension = x.Key, Count = x.Count()})
                                                       .OrderByDescending(x => x.Count);

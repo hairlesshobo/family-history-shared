@@ -31,7 +31,7 @@ namespace Archiver.Utilities
 
             long fileCount = 0;
 
-            foreach (SourceFile sourceFile in Globals._sourceFiles.Where(x => x.Archived == false).OrderByDescending(x => x.Size))
+            foreach (DiscSourceFile sourceFile in Globals._discSourceFiles.Where(x => x.Archived == false).OrderByDescending(x => x.Size))
             {
                 sourceFile.AssignDisc();
 

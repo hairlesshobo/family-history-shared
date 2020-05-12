@@ -28,16 +28,16 @@ namespace Archiver.Classes
                 return this.Files.Sum(x => x.Size);
             } 
         }
-        public List<SourceFile> Files { get; set; }
+        public List<DiscSourceFile> Files { get; set; }
         
         public DiscSummary()
         {
-            this.Files = new List<SourceFile>();
+            this.Files = new List<DiscSourceFile>();
         }
 
         public DiscSummary(int discNumber)
         {
-            this.Files = new List<SourceFile>();
+            this.Files = new List<DiscSourceFile>();
             this.DiscNumber = discNumber;
         }
     }

@@ -29,7 +29,7 @@ namespace Archiver.Utilities
         {
             _sw.Start();
 
-            foreach (string dirtySourcePath in Globals._sourcePaths)
+            foreach (string dirtySourcePath in Globals._discSourcePaths)
             {
                 string sourcePath = Helpers.CleanPath(dirtySourcePath);
 
@@ -49,7 +49,7 @@ namespace Archiver.Utilities
             {
                 string cleanDir = Helpers.CleanPath(dir);
 
-                if (!(Globals._excludePaths.Any(x => cleanDir.ToLower().StartsWith(x.ToLower()))))
+                if (!(Globals._discExcludePaths.Any(x => cleanDir.ToLower().StartsWith(x.ToLower()))))
                     ScanDirectory(dir);
             }
 
@@ -57,18 +57,18 @@ namespace Archiver.Utilities
             {
                 string cleanFile = Helpers.CleanPath(file);
 
-                if (Globals._excludePaths.Any(x => cleanFile.ToLower().StartsWith(x.ToLower())))
-                    Globals._excludedFileCount++;
+                if (Globals._discExcludePaths.Any(x => cleanFile.ToLower().StartsWith(x.ToLower())))
+                    Globals._scannedExcludedFileCount++;
 
-                else if (Globals._excludeFiles.Any(x => Helpers.GetFileName(cleanFile).ToLower().EndsWith(x.ToLower())))
-                    Globals._excludedFileCount++;
+                else if (Globals._discExcludeFiles.Any(x => Helpers.GetFileName(cleanFile).ToLower().EndsWith(x.ToLower())))
+                    Globals._scannedExcludedFileCount++;
 
                 else
-                    new SourceFile(cleanFile);
+                    new DiscSourceFile(cleanFile);
 
                 if (_sw.ElapsedMilliseconds - _lastSample > _sampleDurationMs)
                 {
-                    OnProgressChanged(Globals._newlyFoundFiles, Globals._existingFilesArchived, Globals._excludedFileCount);
+                    OnProgressChanged(Globals._scannedNewlyFoundFiles, Globals._scannedExistingFilesArchived, Globals._scannedExcludedFileCount);
                     _lastSample = _sw.ElapsedMilliseconds;
                 }
             }

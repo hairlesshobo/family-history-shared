@@ -14,7 +14,7 @@ namespace Archiver.Operations
 
             DiscProcessing.IndexAndCountFiles();
 
-            if (Globals._newlyFoundFiles > 0)
+            if (Globals._scannedNewlyFoundFiles > 0)
             {
                 DiscProcessing.SizeFiles();
                 DiscProcessing.DistributeFiles();

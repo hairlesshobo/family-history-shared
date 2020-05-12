@@ -27,7 +27,13 @@ namespace Archiver
         //     Summary.StartOperation();
         // }
 
-        
+        public static long RoundToNextMultiple(long value, int multiple)
+        {
+            long nearestMultiple = (long)Math.Round((value / (double)multiple), MidpointRounding.ToPositiveInfinity) * multiple;
+
+            return nearestMultiple;
+        }
+
 
         static void Main(string[] args)
         {
@@ -45,10 +51,21 @@ namespace Archiver
 
             //Console.WriteLine(ReadSummary());
 
+            uint fileSize = 768;
+
+            Console.WriteLine(RoundToNextMultiple(fileSize, 512));
+
+            Console.ReadLine();
+            return;
+
+
             // we can calculate the exact amount if we factor in the file and directory headers. 
-            // headers are 512 bytes each, but need to also know exactly how many directories exist as well. 
-            // hopefully we can accurately capture this information prior to generating the tar and store
-            // it in the tape json file
+            // each file headers is 512 bytes each
+            // each file is padded to the next 512 byte multiple
+            // each directory is 512 bytes each
+            // the end of the file has 1024 bytes of padding
+            // the total size is rounded up to the next block size multiple 
+            //    if blocking factor is 512 this means that the output size is rounded to the next (512*512)
             long dataSize = 48469841375;
             dataSize += 140 * 512;
             dataSize += 12 * 512; // estimate about 12 directories

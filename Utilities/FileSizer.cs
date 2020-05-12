@@ -30,13 +30,13 @@ namespace Archiver.Utilities
 
             long fileCount = 0;
 
-            foreach (SourceFile sourceFile in Globals._sourceFiles.Where(x => x.Archived == false))
+            foreach (DiscSourceFile sourceFile in Globals._discSourceFiles.Where(x => x.Archived == false))
             {
                 sourceFile.ReadSizeAndAttribs();
 
                 if (_sw.ElapsedMilliseconds - _lastSample > _sampleDurationMs)
                 {
-                    OnProgressChanged(fileCount, Globals._totalSize);
+                    OnProgressChanged(fileCount, Globals._scannedTotalSize);
                     _lastSample = _sw.ElapsedMilliseconds;
                 }
 

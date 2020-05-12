@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace Archiver.Classes
 {
-public class SourceFile
+public class DiscSourceFile
     {
         private string _FullPath;
         public string Name { get; set; }
@@ -47,12 +47,12 @@ public class SourceFile
         [JsonIgnore]
         public DiscDetail DestinationDisc { get; set; } = null;
 
-        public SourceFile()
+        public DiscSourceFile()
         {
-            Globals._sourceFiles.Add(this);
+            Globals._discSourceFiles.Add(this);
         }
 
-        public SourceFile(string sourcePath)
+        public DiscSourceFile(string sourcePath)
         {
             this.FullPath = sourcePath;
 
@@ -60,16 +60,16 @@ public class SourceFile
                 throw new DirectoryNotFoundException($"Source file does not exist: {sourcePath}");
 
             // we found a file on the filesystem, but it is already in the archive
-            if (Globals._sourceFiles.Any(x => x.Archived == true && x.RelativePath == this.RelativePath))
+            if (Globals._discSourceFiles.Any(x => x.Archived == true && x.RelativePath == this.RelativePath))
             {
-                Globals._existingFilesArchived += 1;
+                Globals._scannedExistingFilesArchived += 1;
             }
 
             // we only add the file to the index if it hasn't yet been archived
             else
             {
-                Globals._newlyFoundFiles += 1;
-                Globals._sourceFiles.Add(this);
+                Globals._scannedNewlyFoundFiles += 1;
+                Globals._discSourceFiles.Add(this);
             }
         }
 
@@ -83,7 +83,7 @@ public class SourceFile
             this.CreationTimeUtc = fileInfo.CreationTimeUtc;
             this.Attributes = fileInfo.Attributes;
 
-            Globals._totalSize += this.Size;
+            Globals._scannedTotalSize += this.Size;
         }
 
         public void AssignDisc()

@@ -23,7 +23,7 @@ namespace Archiver.Utilities
             };
 
             scanner.OnComplete += () => {
-                Status.FileScanned(Globals._newlyFoundFiles, Globals._existingFilesArchived, Globals._excludedFileCount, true);
+                Status.FileScanned(Globals._scannedNewlyFoundFiles, Globals._scannedExistingFilesArchived, Globals._scannedExcludedFileCount, true);
             };
 
             Thread scanThread = new Thread(scanner.ScanFiles);
@@ -42,7 +42,7 @@ namespace Archiver.Utilities
             };
 
             sizer.OnComplete += () => {
-                Status.FileSized(Globals._newlyFoundFiles, Globals._totalSize, true);
+                Status.FileSized(Globals._scannedNewlyFoundFiles, Globals._scannedTotalSize, true);
             };
 
             Thread sizeThread = new Thread(sizer.SizeFiles);
@@ -60,7 +60,7 @@ namespace Archiver.Utilities
 
             distributor.OnComplete += () => {
                 int discCount = Globals._destinationDiscs.Where(x => x.Finalized == false).Count();
-                Status.FileDistributed(Globals._newlyFoundFiles, discCount, true);
+                Status.FileDistributed(Globals._scannedNewlyFoundFiles, discCount, true);
             };
 
             Thread distributeThread = new Thread(distributor.DistributeFiles);
@@ -83,12 +83,12 @@ namespace Archiver.Utilities
 
             disc.ArchiveDTM = DateTime.UtcNow;
 
-            IEnumerable<SourceFile> sourceFiles = disc.Files.Where(x => x.Archived == false).OrderBy(x => x.RelativePath);
+            IEnumerable<DiscSourceFile> sourceFiles = disc.Files.Where(x => x.Archived == false).OrderBy(x => x.RelativePath);
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
-            foreach (SourceFile file in sourceFiles)
+            foreach (DiscSourceFile file in sourceFiles)
             {
                 // if we moved to another disc, we reset the disc counter
                 if (file.DestinationDisc.DiscNumber > currentDisc)
@@ -150,7 +150,7 @@ namespace Archiver.Utilities
                     sw.WriteLine($"{"MD5 Hash".PadRight(32)}   File");
 
                     int currentLine = 1;
-                    foreach (SourceFile file in disc.Files.Where(x => x.Size > 0 && x.Hash != null).OrderBy(x => x.RelativePath))
+                    foreach (DiscSourceFile file in disc.Files.Where(x => x.Size > 0 && x.Hash != null).OrderBy(x => x.RelativePath))
                     {
                         double currentPercent = ((double)currentLine / (double)disc.TotalFiles) * 100.0;
                         sw.WriteLine($"{file.Hash.PadRight(32)}   {file.RelativePath}");
@@ -206,7 +206,7 @@ namespace Archiver.Utilities
                             int currentLine = 1;
 
                             // Write the human readable index
-                            foreach (SourceFile file in disc.Files.OrderBy(x => x.RelativePath))
+                            foreach (DiscSourceFile file in disc.Files.OrderBy(x => x.RelativePath))
                             {
                                 string line = "";
                                 line += disc.DiscNumber.ToString("0000");
