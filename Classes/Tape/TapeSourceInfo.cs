@@ -1,6 +1,6 @@
 namespace Archiver.Classes.Tape
 {
-    public class TapeSource
+    public class TapeSourceInfo
     {
         public string Name { get; set; }
         public string Description { get; set; }

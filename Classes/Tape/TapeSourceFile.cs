@@ -9,6 +9,7 @@ namespace Archiver.Classes.Tape
 public class TapeSourceFile
     {
         private string _FullPath;
+
         public string Name { get; set; }
         public string Extension { 
             get
@@ -48,7 +49,6 @@ public class TapeSourceFile
 
         public TapeSourceFile()
         {
-            TapeGlobals._sourceFiles.Add(this);
         }
 
         public TapeSourceFile(string sourcePath)
@@ -57,12 +57,9 @@ public class TapeSourceFile
 
             if (!File.Exists(this.FullPath))
                 throw new DirectoryNotFoundException($"Source file does not exist: {sourcePath}");
-
-            TapeGlobals._foundFiles += 1;
-            TapeGlobals._sourceFiles.Add(this);
         }
 
-        public void ReadSizeAndAttribs()
+        public void ReadSizeAndAttribs(TapeDetail tape)
         {
             FileInfo fileInfo = new FileInfo(this.FullPath);
 
@@ -72,13 +69,13 @@ public class TapeSourceFile
             this.CreationTimeUtc = fileInfo.CreationTimeUtc;
             this.Attributes = fileInfo.Attributes;
 
-            TapeGlobals._totalSize += (ulong)this.Size;
+            tape.Stats.TotalSize += this.Size;
             
             // add the data size with padding
-            TapeGlobals._totalArchiveSize += (ulong)Helpers.RoundToNextMultiple(this.Size, 512);
+            tape.Stats.TotalArchiveSize += Helpers.RoundToNextMultiple(this.Size, 512);
 
             // add the header size
-            TapeGlobals._totalArchiveSize += 512;
+            tape.Stats.TotalArchiveSize += 512;
         }
 
         // public CustomFileCopier ActivateCopy()

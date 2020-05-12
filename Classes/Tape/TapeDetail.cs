@@ -13,10 +13,12 @@ namespace Archiver.Classes.Tape
 
     public class TapeDetail : TapeSummary
     {
-        public long BytesCopied { get; set; }
+        public long BytesCopied { get; set; } = 0;
         public List<TapeVerificationResult> Verifications { get; set; }
-        public string Hash { get; set; }
-        public double CompressionRatio { get; set; }
+        public string Hash { get; set; } = null;
+        public double CompressionRatio { get; set; } = 0.0;
+        public TapeSourceInfo SourceInfo { get; set; }
+        public long ExcludedFiles { get; set; }
         public int FilesCopied 
         { 
             get
@@ -24,7 +26,7 @@ namespace Archiver.Classes.Tape
                 return this.Files.Where(x => x.Copied == true).Count();
             }
         }
-        public List<TapeSourceFile> Files { get; set; }
+        
 
         [JsonIgnore]
         public int DaysSinceLastVerify {

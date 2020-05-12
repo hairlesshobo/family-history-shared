@@ -11,6 +11,7 @@ using Archiver.Utilities;
 using Archiver.Utilities.Tape;
 using ICSharpCode.SharpZipLib.Tar;
 using Archiver.Utilities.Shared;
+using Archiver.Classes.Tape;
 
 namespace Archiver
 {
@@ -46,9 +47,9 @@ namespace Archiver
 
             //Console.WriteLine(ReadSummary());
 
-            uint fileSize = 768;
-
-            Console.WriteLine(Helpers.RoundToNextMultiple(fileSize, 512));
+            TapeProcessor processor = new TapeProcessor();
+            processor.ProcessTape();
+            
 
             Console.ReadLine();
             return;

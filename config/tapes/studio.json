@@ -7,6 +7,7 @@
     "ExcludePaths": [],
     "ExcludeFiles": [
         "Thumbs.db",
-        ".DS_Store"
+        ".DS_Store",
+        "desktop.ini"
     ]
 }

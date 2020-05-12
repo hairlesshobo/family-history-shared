@@ -1,14 +1,51 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text;
+using Archiver.Classes.Tape;
+using Archiver.Utilities.Shared;
 using ICSharpCode.SharpZipLib.Tar;
+using Newtonsoft.Json;
 
 namespace Archiver.Utilities.Tape
 {
     public static class TapeUtils
     {
+        public static TapeSourceInfo SelectTape()
+        {
+            TapeSourceInfo tape = default(TapeSourceInfo);
+
+            string searchPath = Path.Join(Directory.GetCurrentDirectory(), "config", "tapes");
+
+            string[] files = Directory.GetFiles(searchPath, "*.json");
+
+            List<CliMenuEntry<TapeSourceInfo>> entries = new List<CliMenuEntry<TapeSourceInfo>>();
+
+            foreach (string file in files)
+            {
+                TapeSourceInfo source = JsonConvert.DeserializeObject<TapeSourceInfo>(File.ReadAllText(file));
+
+                entries.Add(new CliMenuEntry<TapeSourceInfo>() {
+                    Name = source.Name,
+                    SelectedValue = source
+                });
+            }
+
+            CliMenu<TapeSourceInfo> menu = new CliMenu<TapeSourceInfo>(entries);
+            menu.MenuLabel = "Select tape...";
+            
+            List<TapeSourceInfo> selectedItems = menu.Show(true);
+
+            if (selectedItems != null && selectedItems.Count() >= 1)
+                return selectedItems.First();
+
+            return tape;
+        }
+
         public static bool TapeHasJsonRecord()
         {
-            using (TapeOperator tape = new TapeOperator(TapeGlobals._tapeDrive))
+            using (TapeOperator tape = new TapeOperator(Config.TapeDrive))
             {
                 // lets test if the second file record is the start of a tar, or a json file. if
                 // a json file, then we know that the tape is a new style with the tar located
@@ -31,7 +68,7 @@ namespace Archiver.Utilities.Tape
 
         public static string ReadSummaryFromTape()
         {
-            using (TapeOperator tape = new TapeOperator(TapeGlobals._tapeDrive))
+            using (TapeOperator tape = new TapeOperator(Config.TapeDrive))
             {
                 byte[] buffer = new byte[tape.BlockSize];
 
@@ -60,14 +97,14 @@ namespace Archiver.Utilities.Tape
         {
             bool hasJson = TapeHasJsonRecord();
 
-            using (TapeOperator tape = new TapeOperator(TapeGlobals._tapeDrive, TapeGlobals._tapeBlockingFactor * 512))
+            using (TapeOperator tape = new TapeOperator(Config.TapeDrive, Config.TapeBlockingFactor * 512))
             {
                 byte[] buffer = new byte[tape.BlockSize];
 
                 // seek the tape to the beginning of the file marker
                 tape.SetTapeFilePosition(hasJson ? 2 : 1);
 
-                TarArchive archive = TarArchive.CreateInputTarArchive(tape.Stream, TapeGlobals._tapeBlockingFactor);
+                TarArchive archive = TarArchive.CreateInputTarArchive(tape.Stream, Config.TapeBlockingFactor);
                 archive.ProgressMessageEvent += ShowTarProgressMessage;
                 archive.ListContents();
             }

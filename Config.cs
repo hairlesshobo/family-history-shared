@@ -1,12 +1,16 @@
 using System;
 using System.IO;
 using System.Linq;
+using Archiver.Utilities.Shared;
 using Microsoft.Extensions.Configuration;
 
-namespace Archiver.Utilities.Shared
+namespace Archiver
 {
     public static class Config
     {
+        public static string TapeDrive { get; set; }
+        public static int TapeBlockingFactor { get; set; }
+
         public static void ReadConfig()
         {
             IConfiguration _config = new ConfigurationBuilder()
@@ -18,8 +22,8 @@ namespace Archiver.Utilities.Shared
             DiscGlobals._discStagingDir = _config["Disc:StagingDir"];
             Globals._cdbxpPath = _config["CdbxpPath"];
             Globals._ddPath = _config["DdPath"];
-            TapeGlobals._tapeDrive = _config["Tape:Drive"];
-            TapeGlobals._tapeBlockingFactor = _config.GetSection("Tape:BlockingFactor").Get<int>();
+            Archiver.Config.TapeDrive = _config["Tape:Drive"];
+            Archiver.Config.TapeBlockingFactor = _config.GetSection("Tape:BlockingFactor").Get<int>();
             DiscGlobals._discExcludeFiles = _config.GetSection("Disc:ExcludeFiles").Get<string[]>().ToList();
             DiscGlobals._discSourcePaths = _config.GetSection("Disc:SourcePaths").Get<string[]>();
             Array.Sort(DiscGlobals._discSourcePaths);
