@@ -55,7 +55,7 @@ namespace Archiver.Utilities.Tape
             if (!Directory.Exists(directory.FullPath))
                 throw new DirectoryNotFoundException($"Source directory does not exist: {directory.FullPath}");
 
-            _tapeDetail.Stats.DirectoryCount++;
+            // _tapeDetail.Stats.DirectoryCount++;
 
             foreach (string dir in Directory.GetDirectories(directory.FullPath))
             {
@@ -70,23 +70,23 @@ namespace Archiver.Utilities.Tape
                 string cleanFile = Helpers.CleanPath(file);
 
                 if (_tapeDetail.SourceInfo.ExcludePaths.Any(x => cleanFile.ToLower().StartsWith(x.ToLower())))
-                    _tapeDetail.Stats.ExcludedFileCount++;
+                    _tapeDetail.ExcludedFileCount++;
 
                 else if (_tapeDetail.SourceInfo.ExcludeFiles.Any(x => Helpers.GetFileName(cleanFile).ToLower().EndsWith(x.ToLower())))
-                    _tapeDetail.Stats.ExcludedFileCount++;
+                    _tapeDetail.ExcludedFileCount++;
 
                 else
                 {
                     TapeSourceFile sourceFile = new TapeSourceFile(cleanFile);
                     
-                    _tapeDetail.Stats.FileCount++;
+                    //_tapeDetail.Stats.FileCount++;
 
                     directory.Files.Add(sourceFile);
                 }
 
                 if (_sw.ElapsedMilliseconds - _lastSample > _sampleDurationMs)
                 {
-                    OnProgressChanged(_tapeDetail.Stats.FileCount, _tapeDetail.Stats.ExcludedFileCount);
+                    OnProgressChanged(_tapeDetail.FileCount, _tapeDetail.ExcludedFileCount);
                     _lastSample = _sw.ElapsedMilliseconds;
                 }
             }

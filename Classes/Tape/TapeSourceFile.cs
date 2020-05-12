@@ -69,13 +69,13 @@ public class TapeSourceFile
             this.CreationTimeUtc = fileInfo.CreationTimeUtc;
             this.Attributes = fileInfo.Attributes;
 
-            tape.Stats.TotalSize += this.Size;
+            // tape.Stats.TotalSize += this.Size;
             
             // add the data size with padding
-            tape.Stats.TotalArchiveSize += Helpers.RoundToNextMultiple(this.Size, 512);
+            // tape.Stats.TotalArchiveSize += Helpers.RoundToNextMultiple(this.Size, 512);
 
             // add the header size
-            tape.Stats.TotalArchiveSize += 512;
+            // tape.Stats.TotalArchiveSize += 512;
         }
 
         // public CustomFileCopier ActivateCopy()

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Archiver.Utilities.Shared;
 
 namespace Archiver.Classes.Tape
 {
@@ -8,13 +9,20 @@ namespace Archiver.Classes.Tape
     {
         public string Name { get; set; }
         public int BlockingFactor { get; set; }
-        public DateTime LastWriteDTM { get; set; }
-        public long DataSizeBytes { get; set; }
+        public DateTime WriteDTM { get; set; }
+        public long ExcludedFileCount { get; set; } = 0;
+        public long DataSizeBytes 
+        { 
+            get
+            {
+                return FlattenFiles().Sum(x => x.Size);
+            }
+        }
         public int FileCount 
         { 
             get
             {
-                return this.FlattenDirectories(this.Directories).SelectMany(x => x.Files).Count();
+                return FlattenFiles().Count();
             }
         }
         public int DirectoryCount 
@@ -24,10 +32,37 @@ namespace Archiver.Classes.Tape
                 return this.FlattenDirectories(this.Directories).Count();
             }
         }
-        public long TotalArchiveBytes { get; set; }
+        public long TotalArchiveBytes 
+        { 
+            get
+            {
+                long size = 0;
+
+                foreach (TapeSourceFile file in FlattenFiles())
+                {
+                    // header
+                    size += 512;
+
+                    // data, rounded to next 512 bytes.. only if the file is greater than 0 bytes
+                    if (file.Size > 0)
+                        size += Helpers.RoundToNextMultiple(file.Size, 512);
+                }
+
+                // account for directory entries
+                size += 512 * FlattenDirectories(this.Directories).Count();
+
+                // end of archive marker
+                size += 1024;
+
+                // round to next block size
+                size = Helpers.RoundToNextMultiple(size, (512 * Config.TapeBlockingFactor));
+
+                return size;
+            }
+        }
         public List<TapeSourceDirectory> Directories { get; set; }
         public List<TapeSourceFile> Files { get; set; }
-        public TapeStats Stats { get; set; }
+        //public TapeStats Stats { get; set; }
 
         public TapeSummary()
         {
@@ -46,6 +81,13 @@ namespace Archiver.Classes.Tape
             }
 
             return dirEnum;
+        }
+
+        private IEnumerable<TapeSourceFile> FlattenFiles()
+        {
+            return this.FlattenDirectories(this.Directories)
+                       .SelectMany(x => x.Files)
+                       .Union(this.Directories.SelectMany(x => x.Files));
         }
     }
 }

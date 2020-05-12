@@ -10,7 +10,7 @@ namespace Archiver.Utilities.Tape
         private TapeSourceInfo _sourceInfo;
         private TapeDetail _tapeDetail;
 
-        private TapeStats _tapeStats;
+        //private TapeStats _tapeStats;
 
         public TapeProcessor()
         {
@@ -24,13 +24,13 @@ namespace Archiver.Utilities.Tape
 
         private void Initialize(TapeSourceInfo sourceInfo)
         {
-            _tapeStats = new TapeStats();
+            //_tapeStats = new TapeStats();
             _sourceInfo = sourceInfo;
             _tapeDetail = new TapeDetail()
             {
                 Name = sourceInfo.Name,
                 SourceInfo = sourceInfo,
-                Stats = _tapeStats
+                //Stats = _tapeStats
             };
         }
 
@@ -54,7 +54,7 @@ namespace Archiver.Utilities.Tape
             };
 
             scanner.OnComplete += () => {
-                status.FileScanned(_tapeStats.FileCount, _tapeStats.ExcludedFileCount, true);
+                status.FileScanned(_tapeDetail.FileCount, _tapeDetail.ExcludedFileCount, true);
             };
 
             Thread scanThread = new Thread(scanner.ScanFiles);
@@ -73,7 +73,7 @@ namespace Archiver.Utilities.Tape
             };
 
             sizer.OnComplete += () => {
-                status.FileSized(_tapeStats.FileCount, true);
+                status.FileSized(_tapeDetail.FileCount, true);
             };
 
             Thread sizeThread = new Thread(sizer.SizeFiles);
@@ -81,13 +81,13 @@ namespace Archiver.Utilities.Tape
             sizeThread.Join();
 
             // factor in the headers for all the directories
-            _tapeStats.TotalArchiveSize += (_tapeStats.DirectoryCount * 512);
+            // _tapeStats.TotalArchiveSize += (_tapeStats.DirectoryCount * 512);
 
             // factor in the end of archive padding
-            _tapeStats.TotalArchiveSize += 1024;
+            // _tapeStats.TotalArchiveSize += 1024;
 
             // and round up to the next block size
-            _tapeStats.TotalArchiveSize = Helpers.RoundToNextMultiple(_tapeStats.TotalArchiveSize, (512 * Config.TapeBlockingFactor));
+            // _tapeStats.TotalArchiveSize = Helpers.RoundToNextMultiple(_tapeStats.TotalArchiveSize, (512 * Config.TapeBlockingFactor));
         }
     }
 }

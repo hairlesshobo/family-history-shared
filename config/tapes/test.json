@@ -1,0 +1,13 @@
+{
+    "Name": "Test",
+    "Description": "",
+    "SourcePaths": [
+        "//nas/Videos/Finals/Sonnenthal"
+    ],
+    "ExcludePaths": [],
+    "ExcludeFiles": [
+        "Thumbs.db",
+        ".DS_Store",
+        "desktop.ini"
+    ]
+}

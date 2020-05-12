@@ -161,13 +161,13 @@ namespace Archiver.Utilities.Tape
             if (_sizeLine == -1)
                 _sizeLine = _nextLine++;
 
-            string currentSizeFriendly = Formatting.GetFriendlySize(_tapeDetail.Stats.TotalSize);
+            string currentSizeFriendly = Formatting.GetFriendlySize(_tapeDetail.DataSizeBytes);
             
             string line = FileCountPosition(fileCount);
             line += $" [{currentSizeFriendly.PadLeft(12)}]";
             line += " ";
 
-            double currentPercent = ((double)fileCount / (double)_tapeDetail.Stats.FileCount) * 100.0;
+            double currentPercent = ((double)fileCount / (double)_tapeDetail.FileCount) * 100.0;
 
             Console.SetCursorPosition(0, _sizeLine);
             StatusHelpers.WriteStatusLineWithPct(_sizingLabel, line, currentPercent, complete);
@@ -183,7 +183,7 @@ namespace Archiver.Utilities.Tape
         private string FileCountPosition (long currentFile, long totalFiles = -1, int width = 0)
         {
             if (totalFiles == -1)
-                totalFiles = _tapeDetail.Stats.FileCount;
+                totalFiles = _tapeDetail.FileCount;
 
             string totalFilesStr = totalFiles.ToString();
 
