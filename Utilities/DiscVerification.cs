@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using Archiver.Classes;
+using Archiver.Classes.Disc;
 
 namespace Archiver.Utilities
 {
@@ -21,7 +22,7 @@ namespace Archiver.Utilities
 
         public DiscVerifier(string DriveLetter)
         {
-            _discsToVerify = Globals._destinationDiscs.Where(x => x.NewDisc == false).OrderBy(x => x.DiscNumber).ToList();
+            _discsToVerify = DiscGlobals._destinationDiscs.Where(x => x.NewDisc == false).OrderBy(x => x.DiscNumber).ToList();
 
             Initialize(DriveLetter);
         }

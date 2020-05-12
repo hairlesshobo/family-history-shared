@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Archiver.Classes;
+using Archiver.Classes.Disc;
 
 namespace Archiver.Utilities
 {
@@ -34,8 +35,8 @@ namespace Archiver.Utilities
 
             if (_discLine == -1)
             {
-                _existingDiscCount = Globals._destinationDiscs.Where(x => x.NewDisc == false).Count();
-                _newDiscs = Globals._destinationDiscs.Where(x => x.NewDisc == true).Count();
+                _existingDiscCount = DiscGlobals._destinationDiscs.Where(x => x.NewDisc == false).Count();
+                _newDiscs = DiscGlobals._destinationDiscs.Where(x => x.NewDisc == true).Count();
 
                 _nextLine++;
                 _discLine = _nextLine++;
@@ -44,7 +45,7 @@ namespace Archiver.Utilities
                 _nextLine++;
                 //_copyTotalLine = _nextLine;
 
-                _copyWidth = Globals._destinationDiscs.Where(x => x.NewDisc == true).Max(x => x.TotalFiles).ToString().Length;
+                _copyWidth = DiscGlobals._destinationDiscs.Where(x => x.NewDisc == true).Max(x => x.TotalFiles).ToString().Length;
 
                 Console.ForegroundColor = ConsoleColor.Magenta;
                 Console.CursorTop = _discLine;
@@ -52,7 +53,7 @@ namespace Archiver.Utilities
                 Console.Write(header);
                 Console.ResetColor();
 
-                foreach (DiscDetail disc in Globals._destinationDiscs.Where(x => x.Finalized == false).OrderBy(x => x.DiscNumber))
+                foreach (DiscDetail disc in DiscGlobals._destinationDiscs.Where(x => x.Finalized == false).OrderBy(x => x.DiscNumber))
                     WriteDiscPendingLine(disc, default(TimeSpan));
             }
         }
@@ -206,13 +207,13 @@ namespace Archiver.Utilities
             if (_sizeLine == -1)
                 _sizeLine = _nextLine++;
 
-            string currentSizeFriendly = Formatting.GetFriendlySize(Globals._scannedTotalSize);
+            string currentSizeFriendly = Formatting.GetFriendlySize(DiscGlobals._totalSize);
             
             string line = FileCountPosition(fileCount);
             line += $" [{currentSizeFriendly.PadLeft(12)}]";
             line += " ";
 
-            double currentPercent = ((double)fileCount / (double)Globals._scannedNewlyFoundFiles) * 100.0;
+            double currentPercent = ((double)fileCount / (double)DiscGlobals._newlyFoundFiles) * 100.0;
 
             Console.SetCursorPosition(0, _sizeLine);
             StatusHelpers.WriteStatusLineWithPct(_sizingLabel, line, currentPercent, complete);
@@ -227,7 +228,7 @@ namespace Archiver.Utilities
             line += $" [ {discCount.ToString().PadLeft(3)} Disc(s)]";
             line += " ";
 
-            double currentPercent = ((double)fileCount / (double)Globals._scannedNewlyFoundFiles) * 100.0;
+            double currentPercent = ((double)fileCount / (double)DiscGlobals._newlyFoundFiles) * 100.0;
 
             Console.SetCursorPosition(0, _distributeLine);
             StatusHelpers.WriteStatusLineWithPct(_distrubuteLabel, line, currentPercent, complete);
@@ -245,7 +246,7 @@ namespace Archiver.Utilities
         private static string FileCountPosition (long currentFile, long totalFiles = -1, int width = 0)
         {
             if (totalFiles == -1)
-                totalFiles = Globals._scannedNewlyFoundFiles;
+                totalFiles = DiscGlobals._newlyFoundFiles;
 
             string totalFilesStr = totalFiles.ToString();
 

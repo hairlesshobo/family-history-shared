@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Archiver.Classes;
+using Archiver.Classes.Disc;
 
 namespace Archiver.Utilities
 {
@@ -31,13 +32,13 @@ namespace Archiver.Utilities
 
             long fileCount = 0;
 
-            foreach (DiscSourceFile sourceFile in Globals._discSourceFiles.Where(x => x.Archived == false).OrderByDescending(x => x.Size))
+            foreach (DiscSourceFile sourceFile in DiscGlobals._discSourceFiles.Where(x => x.Archived == false).OrderByDescending(x => x.Size))
             {
                 sourceFile.AssignDisc();
 
                 if (_sw.ElapsedMilliseconds - _lastSample > _sampleDurationMs)
                 {
-                    int discCount = Globals._destinationDiscs.Where(x => x.Finalized == false).Count();
+                    int discCount = DiscGlobals._destinationDiscs.Where(x => x.Finalized == false).Count();
                     OnProgressChanged(fileCount, discCount);
                     _lastSample = _sw.ElapsedMilliseconds;
                 }

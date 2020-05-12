@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 
-namespace Archiver.Classes
+namespace Archiver.Classes.Tape
 {
     public class TapeVerificationResult
     {
@@ -24,7 +24,7 @@ namespace Archiver.Classes
                 return this.Files.Where(x => x.Copied == true).Count();
             }
         }
-        public List<DiscSourceFile> Files { get; set; }
+        public List<TapeSourceFile> Files { get; set; }
 
         [JsonIgnore]
         public int DaysSinceLastVerify {
@@ -57,7 +57,7 @@ namespace Archiver.Classes
 
         public TapeDetail() : base()
         {
-            this.Files = new List<DiscSourceFile>();
+            this.Files = new List<TapeSourceFile>();
             this.Verifications = new List<TapeVerificationResult>();
         }
     }

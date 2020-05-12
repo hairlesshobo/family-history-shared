@@ -4,9 +4,9 @@ using System.Linq;
 using Archiver.Utilities;
 using Newtonsoft.Json;
 
-namespace Archiver.Classes.Disc
+namespace Archiver.Classes.Tape
 {
-public class DiscSourceFile
+public class TapeSourceFile
     {
         private string _FullPath;
         public string Name { get; set; }
@@ -35,8 +35,7 @@ public class DiscSourceFile
         }
         public string RelativePath { get; set; }
         public string RelativeDirectory { get; set; }
-        public long Size { get; set; } = -1;
-        public bool Archived { get; set; }
+        public long Size { get; set; } = 0;
         public string Hash { get; set; }
         public bool Copied { get; set; }
         public DateTime ArchiveTimeUtc { get; set; }
@@ -45,32 +44,22 @@ public class DiscSourceFile
         public DateTime CreationTimeUtc { get; set; }
         public FileAttributes Attributes { get; set; }
         [JsonIgnore]
-        public DiscDetail DestinationDisc { get; set; } = null;
+        public TapeDetail Tape { get; set; } = null;
 
-        public DiscSourceFile()
+        public TapeSourceFile()
         {
-            DiscGlobals._discSourceFiles.Add(this);
+            TapeGlobals._sourceFiles.Add(this);
         }
 
-        public DiscSourceFile(string sourcePath)
+        public TapeSourceFile(string sourcePath)
         {
             this.FullPath = sourcePath;
 
             if (!File.Exists(this.FullPath))
                 throw new DirectoryNotFoundException($"Source file does not exist: {sourcePath}");
 
-            // we found a file on the filesystem, but it is already in the archive
-            if (DiscGlobals._discSourceFiles.Any(x => x.Archived == true && x.RelativePath == this.RelativePath))
-            {
-                DiscGlobals._existingFilesArchived += 1;
-            }
-
-            // we only add the file to the index if it hasn't yet been archived
-            else
-            {
-                DiscGlobals._newlyFoundFiles += 1;
-                DiscGlobals._discSourceFiles.Add(this);
-            }
+            TapeGlobals._foundFiles += 1;
+            TapeGlobals._sourceFiles.Add(this);
         }
 
         public void ReadSizeAndAttribs()
@@ -83,27 +72,24 @@ public class DiscSourceFile
             this.CreationTimeUtc = fileInfo.CreationTimeUtc;
             this.Attributes = fileInfo.Attributes;
 
-            DiscGlobals._totalSize += this.Size;
+            TapeGlobals._totalSize += (ulong)this.Size;
+            
+            // add the data size with padding
+            TapeGlobals._totalArchiveSize += (ulong)Helpers.RoundToNextMultiple(this.Size, 512);
+
+            // add the header size
+            TapeGlobals._totalArchiveSize += 512;
         }
 
-        public void AssignDisc()
-        {
-            if (this.Size >= 0)
-            {
-                this.DestinationDisc = Helpers.GetDestinationDisc(this.Size);
-                this.DestinationDisc.Files.Add(this);
-            }
-        }
+        // public CustomFileCopier ActivateCopy()
+        // {
+        //     string destinationDir = $"{this.DestinationDisc.RootStagingPath}/data" + this.RelativeDirectory;
 
-        public CustomFileCopier ActivateCopy()
-        {
-            string destinationDir = $"{this.DestinationDisc.RootStagingPath}/data" + this.RelativeDirectory;
+        //     CustomFileCopier copier = new CustomFileCopier(this.FullPath, destinationDir);
+        //     copier.OverwriteDestination = true;
+        //     copier.Preserve = true;
 
-            CustomFileCopier copier = new CustomFileCopier(this.FullPath, destinationDir);
-            copier.OverwriteDestination = true;
-            copier.Preserve = true;
-
-            return copier;
-        }
+        //     return copier;
+        // }
     }
 }

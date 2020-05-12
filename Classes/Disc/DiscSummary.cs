@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Archiver.Classes
+namespace Archiver.Classes.Disc
 {
     public class DiscSummary
     {

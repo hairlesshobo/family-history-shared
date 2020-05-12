@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Linq;
 using Archiver.Classes;
+using Archiver.Classes.Disc;
 
 namespace Archiver.Utilities
 {
@@ -30,13 +31,13 @@ namespace Archiver.Utilities
 
             long fileCount = 0;
 
-            foreach (DiscSourceFile sourceFile in Globals._discSourceFiles.Where(x => x.Archived == false))
+            foreach (DiscSourceFile sourceFile in DiscGlobals._discSourceFiles.Where(x => x.Archived == false))
             {
                 sourceFile.ReadSizeAndAttribs();
 
                 if (_sw.ElapsedMilliseconds - _lastSample > _sampleDurationMs)
                 {
-                    OnProgressChanged(fileCount, Globals._scannedTotalSize);
+                    OnProgressChanged(fileCount, DiscGlobals._totalSize);
                     _lastSample = _sw.ElapsedMilliseconds;
                 }
 

@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using Archiver.Classes;
+using Archiver.Classes.Disc;
 using Newtonsoft.Json;
 
 namespace Archiver.Utilities
@@ -23,7 +23,7 @@ namespace Archiver.Utilities
             };
 
             scanner.OnComplete += () => {
-                Status.FileScanned(Globals._scannedNewlyFoundFiles, Globals._scannedExistingFilesArchived, Globals._scannedExcludedFileCount, true);
+                Status.FileScanned(DiscGlobals._newlyFoundFiles, DiscGlobals._existingFilesArchived, DiscGlobals._excludedFileCount, true);
             };
 
             Thread scanThread = new Thread(scanner.ScanFiles);
@@ -42,7 +42,7 @@ namespace Archiver.Utilities
             };
 
             sizer.OnComplete += () => {
-                Status.FileSized(Globals._scannedNewlyFoundFiles, Globals._scannedTotalSize, true);
+                Status.FileSized(DiscGlobals._newlyFoundFiles, DiscGlobals._totalSize, true);
             };
 
             Thread sizeThread = new Thread(sizer.SizeFiles);
@@ -59,8 +59,8 @@ namespace Archiver.Utilities
             };
 
             distributor.OnComplete += () => {
-                int discCount = Globals._destinationDiscs.Where(x => x.Finalized == false).Count();
-                Status.FileDistributed(Globals._scannedNewlyFoundFiles, discCount, true);
+                int discCount = DiscGlobals._destinationDiscs.Where(x => x.Finalized == false).Count();
+                Status.FileDistributed(DiscGlobals._newlyFoundFiles, discCount, true);
             };
 
             Thread distributeThread = new Thread(distributor.DistributeFiles);
@@ -258,7 +258,7 @@ namespace Archiver.Utilities
         public static void CreateISOFile(DiscDetail disc, Stopwatch masterSw)
         {
             Status.WriteDiscIso(disc, masterSw.Elapsed, 0);
-            string isoRoot = Globals._discStagingDir + "/iso";
+            string isoRoot = DiscGlobals._discStagingDir + "/iso";
 
             if (!Directory.Exists(isoRoot))
                 Directory.CreateDirectory(isoRoot);
@@ -302,7 +302,7 @@ namespace Archiver.Utilities
         {
             Status.InitDiscLines();
 
-            foreach (DiscDetail disc in Globals._destinationDiscs.Where(x => x.NewDisc == true).OrderBy(x => x.DiscNumber))
+            foreach (DiscDetail disc in DiscGlobals._destinationDiscs.Where(x => x.NewDisc == true).OrderBy(x => x.DiscNumber))
             {
                 Stopwatch masterSw = new Stopwatch();
                 masterSw.Start();

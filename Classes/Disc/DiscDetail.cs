@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 
-namespace Archiver.Classes
+namespace Archiver.Classes.Disc
 {
     public class DiscVerificationResult
     {
@@ -23,14 +23,14 @@ namespace Archiver.Classes
         public string IsoPath { 
             get
             {
-                return Globals._discStagingDir + $"/iso/{this.DiscName}.iso";
+                return DiscGlobals._discStagingDir + $"/iso/{this.DiscName}.iso";
             }
         }
         [JsonIgnore]
         public string RootStagingPath { 
             get
             {
-                return Globals._discStagingDir + $"/stage/disc {this.DiscNumber.ToString("0000")}";
+                return DiscGlobals._discStagingDir + $"/stage/disc {this.DiscNumber.ToString("0000")}";
             }
         }
 

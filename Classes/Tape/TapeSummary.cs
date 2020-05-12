@@ -1,6 +1,6 @@
 using System;
 
-namespace Archiver.Classes
+namespace Archiver.Classes.Tape
 {
     public class TapeSummary
     {

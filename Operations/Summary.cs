@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Archiver.Classes;
+using Archiver.Classes.Disc;
 using Archiver.Utilities;
 
 namespace Archiver.Operations
@@ -28,7 +29,7 @@ namespace Archiver.Operations
             Console.WriteLine();
             WriteHeader("Current Archive Statistics...");
 
-            IEnumerable<DiscDetail> existingDiscs = Globals._destinationDiscs.Where(x => x.NewDisc == false);
+            IEnumerable<DiscDetail> existingDiscs = DiscGlobals._destinationDiscs.Where(x => x.NewDisc == false);
             if (existingDiscs.Count() > 0)
             {
 
@@ -40,7 +41,7 @@ namespace Archiver.Operations
             }
             
             WriteHeader("File Type Statistics...");
-            IEnumerable<FileType> fileCounts = Globals._discSourceFiles
+            IEnumerable<FileType> fileCounts = DiscGlobals._discSourceFiles
                                                       .GroupBy(x => x.Extension)
                                                       .Select(x => new FileType() { Extension = x.Key, Count = x.Count()})
                                                       .OrderByDescending(x => x.Count);

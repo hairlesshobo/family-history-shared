@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Archiver.Classes;
+using Archiver.Classes.Disc;
 
 namespace Archiver.Utilities
 {
@@ -29,7 +30,7 @@ namespace Archiver.Utilities
         {
             _sw.Start();
 
-            foreach (string dirtySourcePath in Globals._discSourcePaths)
+            foreach (string dirtySourcePath in DiscGlobals._discSourcePaths)
             {
                 string sourcePath = Helpers.CleanPath(dirtySourcePath);
 
@@ -49,7 +50,7 @@ namespace Archiver.Utilities
             {
                 string cleanDir = Helpers.CleanPath(dir);
 
-                if (!(Globals._discExcludePaths.Any(x => cleanDir.ToLower().StartsWith(x.ToLower()))))
+                if (!(DiscGlobals._discExcludePaths.Any(x => cleanDir.ToLower().StartsWith(x.ToLower()))))
                     ScanDirectory(dir);
             }
 
@@ -57,18 +58,18 @@ namespace Archiver.Utilities
             {
                 string cleanFile = Helpers.CleanPath(file);
 
-                if (Globals._discExcludePaths.Any(x => cleanFile.ToLower().StartsWith(x.ToLower())))
-                    Globals._scannedExcludedFileCount++;
+                if (DiscGlobals._discExcludePaths.Any(x => cleanFile.ToLower().StartsWith(x.ToLower())))
+                    DiscGlobals._excludedFileCount++;
 
-                else if (Globals._discExcludeFiles.Any(x => Helpers.GetFileName(cleanFile).ToLower().EndsWith(x.ToLower())))
-                    Globals._scannedExcludedFileCount++;
+                else if (DiscGlobals._discExcludeFiles.Any(x => Helpers.GetFileName(cleanFile).ToLower().EndsWith(x.ToLower())))
+                    DiscGlobals._excludedFileCount++;
 
                 else
                     new DiscSourceFile(cleanFile);
 
                 if (_sw.ElapsedMilliseconds - _lastSample > _sampleDurationMs)
                 {
-                    OnProgressChanged(Globals._scannedNewlyFoundFiles, Globals._scannedExistingFilesArchived, Globals._scannedExcludedFileCount);
+                    OnProgressChanged(DiscGlobals._newlyFoundFiles, DiscGlobals._existingFilesArchived, DiscGlobals._excludedFileCount);
                     _lastSample = _sw.ElapsedMilliseconds;
                 }
             }

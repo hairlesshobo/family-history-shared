@@ -8,7 +8,7 @@ namespace Archiver.Utilities.Tape
     {
         public static bool TapeHasJsonRecord()
         {
-            using (TapeOperator tape = new TapeOperator(Globals._tapeDrive))
+            using (TapeOperator tape = new TapeOperator(TapeGlobals._tapeDrive))
             {
                 // lets test if the second file record is the start of a tar, or a json file. if
                 // a json file, then we know that the tape is a new style with the tar located
@@ -31,7 +31,7 @@ namespace Archiver.Utilities.Tape
 
         public static string ReadSummaryFromTape()
         {
-            using (TapeOperator tape = new TapeOperator(Globals._tapeDrive))
+            using (TapeOperator tape = new TapeOperator(TapeGlobals._tapeDrive))
             {
                 byte[] buffer = new byte[tape.BlockSize];
 
@@ -60,14 +60,14 @@ namespace Archiver.Utilities.Tape
         {
             bool hasJson = TapeHasJsonRecord();
 
-            using (TapeOperator tape = new TapeOperator(Globals._tapeDrive, Globals._tapeBlockingFactor * 512))
+            using (TapeOperator tape = new TapeOperator(TapeGlobals._tapeDrive, TapeGlobals._tapeBlockingFactor * 512))
             {
                 byte[] buffer = new byte[tape.BlockSize];
 
                 // seek the tape to the beginning of the file marker
                 tape.SetTapeFilePosition(hasJson ? 2 : 1);
 
-                TarArchive archive = TarArchive.CreateInputTarArchive(tape.Stream, Globals._tapeBlockingFactor);
+                TarArchive archive = TarArchive.CreateInputTarArchive(tape.Stream, TapeGlobals._tapeBlockingFactor);
                 archive.ProgressMessageEvent += ShowTarProgressMessage;
                 archive.ListContents();
             }

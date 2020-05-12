@@ -6,12 +6,20 @@ using System.Management;
 using System.Text;
 using System.Threading;
 using Archiver.Classes;
+using Archiver.Classes.Disc;
 using Newtonsoft.Json;
 
 namespace Archiver.Utilities
 {
     public class Helpers
     {
+        public static long RoundToNextMultiple(long value, int multiple)
+        {
+            long nearestMultiple = (long)Math.Round((value / (double)multiple), MidpointRounding.ToPositiveInfinity) * multiple;
+
+            return nearestMultiple;
+        }
+
         public static int GetCdromId(string DriveLetter)
         {
             DriveLetter = DriveLetter.Trim('/');
@@ -85,7 +93,7 @@ namespace Archiver.Utilities
                 string[] jsonFiles = Directory.GetFiles(jsonDir, "*.json");
 
                 foreach (string jsonFile in jsonFiles)
-                    Globals._destinationDiscs.Add(JsonConvert.DeserializeObject<DiscDetail>(File.ReadAllText(jsonFile)));
+                    DiscGlobals._destinationDiscs.Add(JsonConvert.DeserializeObject<DiscDetail>(File.ReadAllText(jsonFile)));
             }
         }
 
@@ -112,17 +120,17 @@ namespace Archiver.Utilities
 
         public static DiscDetail GetDestinationDisc(long FileSize)
         {
-            DiscDetail matchingDisc = Globals._destinationDiscs.FirstOrDefault(x => x.NewDisc == true && (x.DataSize + FileSize) < Globals._discCapacityLimit);
+            DiscDetail matchingDisc = DiscGlobals._destinationDiscs.FirstOrDefault(x => x.NewDisc == true && (x.DataSize + FileSize) < DiscGlobals._discCapacityLimit);
 
             if (matchingDisc == null)
             {
                 int nextDiscNumber = 1;
 
-                if (Globals._destinationDiscs.Count() > 0)
-                    nextDiscNumber = Globals._destinationDiscs.Max(x => x.DiscNumber) + 1;
+                if (DiscGlobals._destinationDiscs.Count() > 0)
+                    nextDiscNumber = DiscGlobals._destinationDiscs.Max(x => x.DiscNumber) + 1;
 
                 DiscDetail newDisc = new DiscDetail(nextDiscNumber);
-                Globals._destinationDiscs.Add(newDisc);
+                DiscGlobals._destinationDiscs.Add(newDisc);
                 return newDisc;
             }
             else
@@ -137,7 +145,7 @@ namespace Archiver.Utilities
             Console.ResetColor();
             Console.WriteLine();
 
-            string isoPath = Globals._discStagingDir + "/iso/index.iso";
+            string isoPath = DiscGlobals._discStagingDir + "/iso/index.iso";
             string isoName = "Archive Index";
 
             ISO_Creator creator = new ISO_Creator(isoName, Helpers.DirtyPath(Globals._indexDiscDir), isoPath);

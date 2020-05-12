@@ -27,7 +27,7 @@ namespace Archiver.Utilities.Tape
         {
             bool hasJson = TapeUtils.TapeHasJsonRecord();
 
-            using (TapeOperator tape = new TapeOperator(Globals._tapeDrive, Globals._tapeBlockingFactor * 512))
+            using (TapeOperator tape = new TapeOperator(TapeGlobals._tapeDrive, TapeGlobals._tapeBlockingFactor * 512))
             using (MD5 md5 = MD5.Create())
             {
                 Progress progress = new Progress();

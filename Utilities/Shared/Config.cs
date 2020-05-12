@@ -14,25 +14,25 @@ namespace Archiver.Utilities
                 .AddJsonFile("./config/appsettings.json", true, true)
                 .Build();
 
-            Globals._discCapacityLimit = _config.GetSection("Disc:CapacityLimit").Get<long>();
-            Globals._discStagingDir = _config["Disc:StagingDir"];
+            DiscGlobals._discCapacityLimit = _config.GetSection("Disc:CapacityLimit").Get<long>();
+            DiscGlobals._discStagingDir = _config["Disc:StagingDir"];
             Globals._cdbxpPath = _config["CdbxpPath"];
             Globals._ddPath = _config["DdPath"];
-            Globals._tapeDrive = _config["Tape:Drive"];
-            Globals._tapeBlockingFactor = _config.GetSection("Tape:BlockingFactor").Get<int>();
-            Globals._discExcludeFiles = _config.GetSection("Disc:ExcludeFiles").Get<string[]>().ToList();
-            Globals._discSourcePaths = _config.GetSection("Disc:SourcePaths").Get<string[]>();
-            Array.Sort(Globals._discSourcePaths);
+            TapeGlobals._tapeDrive = _config["Tape:Drive"];
+            TapeGlobals._tapeBlockingFactor = _config.GetSection("Tape:BlockingFactor").Get<int>();
+            DiscGlobals._discExcludeFiles = _config.GetSection("Disc:ExcludeFiles").Get<string[]>().ToList();
+            DiscGlobals._discSourcePaths = _config.GetSection("Disc:SourcePaths").Get<string[]>();
+            Array.Sort(DiscGlobals._discSourcePaths);
 
             foreach (string excPath in _config.GetSection("Disc:ExcludePaths").Get<string[]>())
             {
                 string cleanExcPath = Helpers.CleanPath(excPath);
 
                 if (File.Exists(cleanExcPath) || Directory.Exists(cleanExcPath))
-                    Globals._discExcludePaths.Add(cleanExcPath);
+                    DiscGlobals._discExcludePaths.Add(cleanExcPath);
             }
 
-            Globals._indexDiscDir = Globals._discStagingDir + $"/index";
+            Globals._indexDiscDir = DiscGlobals._discStagingDir + $"/index";
         }
     }
 }

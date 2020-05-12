@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Archiver.Classes;
+using Archiver.Classes.Disc;
 using Archiver.Utilities;
 
 namespace Archiver.Operations
@@ -35,7 +36,7 @@ namespace Archiver.Operations
         {
             List<CliMenuEntry<DiscDetail>> entries = new List<CliMenuEntry<DiscDetail>>();
 
-            foreach (DiscDetail disc in Globals._destinationDiscs.Where(x => x.NewDisc == false).OrderBy(x => x.DiscNumber))
+            foreach (DiscDetail disc in DiscGlobals._destinationDiscs.Where(x => x.NewDisc == false).OrderBy(x => x.DiscNumber))
             {
                 entries.Add(new CliMenuEntry<DiscDetail>()
                 {

@@ -27,12 +27,7 @@ namespace Archiver
         //     Summary.StartOperation();
         // }
 
-        public static long RoundToNextMultiple(long value, int multiple)
-        {
-            long nearestMultiple = (long)Math.Round((value / (double)multiple), MidpointRounding.ToPositiveInfinity) * multiple;
 
-            return nearestMultiple;
-        }
 
 
         static void Main(string[] args)
@@ -53,7 +48,7 @@ namespace Archiver
 
             uint fileSize = 768;
 
-            Console.WriteLine(RoundToNextMultiple(fileSize, 512));
+            Console.WriteLine(Helpers.RoundToNextMultiple(fileSize, 512));
 
             Console.ReadLine();
             return;
