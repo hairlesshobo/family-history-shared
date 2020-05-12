@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Archiver.Utilities;
+using Archiver.Utilities.Shared;
 
 namespace Archiver.Operations
 {

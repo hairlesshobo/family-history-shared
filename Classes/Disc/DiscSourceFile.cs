@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using Archiver.Utilities;
+using Archiver.Utilities.Shared;
 using Newtonsoft.Json;
 
 namespace Archiver.Classes.Disc

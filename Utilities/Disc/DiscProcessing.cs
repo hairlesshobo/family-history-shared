@@ -7,8 +7,9 @@ using System.Text;
 using System.Threading;
 using Archiver.Classes.Disc;
 using Newtonsoft.Json;
+using Archiver.Utilities.Shared;
 
-namespace Archiver.Utilities
+namespace Archiver.Utilities.Disc
 {
     public static class DiscProcessing
     {

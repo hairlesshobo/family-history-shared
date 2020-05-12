@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
 
-namespace Archiver.Utilities
+namespace Archiver.Utilities.Shared
 {
     public static class Config
     {

@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Archiver.Classes;
 using Archiver.Classes.Disc;
+using Archiver.Utilities.Shared;
 
 namespace Archiver.Utilities
 {

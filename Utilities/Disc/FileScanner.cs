@@ -3,8 +3,9 @@ using System.IO;
 using System.Linq;
 using Archiver.Classes;
 using Archiver.Classes.Disc;
+using Archiver.Utilities.Shared;
 
-namespace Archiver.Utilities
+namespace Archiver.Utilities.Disc
 {
     public delegate void Scanner_ProgressChangedDelegate(long newFiles, long existingFiles, long excludedFiles);
     public delegate void Scanner_CompleteDelegate();

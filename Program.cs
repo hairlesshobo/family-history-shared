@@ -10,7 +10,7 @@ using Archiver.Operations;
 using Archiver.Utilities;
 using Archiver.Utilities.Tape;
 using ICSharpCode.SharpZipLib.Tar;
-using Newtonsoft.Json;
+using Archiver.Utilities.Shared;
 
 namespace Archiver
 {
@@ -70,11 +70,11 @@ namespace Archiver
                 Console.CursorLeft = 0;
 
                 string left = String.Empty;
-                left += Utilities.Formatting.GetFriendlySize(progress.TotalCopiedBytes).PadLeft(10);
+                left += Formatting.GetFriendlySize(progress.TotalCopiedBytes).PadLeft(10);
                 left += " ";
-                left += $"[{Utilities.Formatting.GetFriendlyTransferRate(progress.InstantTransferRate).PadLeft(12)}]";
+                left += $"[{Formatting.GetFriendlyTransferRate(progress.InstantTransferRate).PadLeft(12)}]";
                 left += " ";
-                left += $"[{Utilities.Formatting.GetFriendlyTransferRate(progress.AverageTransferRate).PadLeft(12)}]";
+                left += $"[{Formatting.GetFriendlyTransferRate(progress.AverageTransferRate).PadLeft(12)}]";
 
                 Console.Write(left + StatusHelpers.GeneratePercentBar(Console.BufferWidth, left.Length, 0, progress.PercentCopied, (progress.PercentCopied == 100.0)));
             };

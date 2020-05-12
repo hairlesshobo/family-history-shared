@@ -2,7 +2,7 @@ using System;
 using Archiver.Classes;
 using Archiver.Classes.Disc;
 
-namespace Archiver.Utilities
+namespace Archiver.Utilities.Shared
 {
     public static class Formatting
     {

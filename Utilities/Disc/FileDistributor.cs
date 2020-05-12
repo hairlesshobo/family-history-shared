@@ -4,7 +4,7 @@ using System.Linq;
 using Archiver.Classes;
 using Archiver.Classes.Disc;
 
-namespace Archiver.Utilities
+namespace Archiver.Utilities.Disc
 {
     public delegate void Distributor_ProgressChangedDelegate(long currentFile, int discCount);
     public delegate void Distributor_CompleteDelegate();

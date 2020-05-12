@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
+using Archiver.Utilities.Shared;
 using static Archiver.Utilities.CustomFileCopier;
 
 namespace Archiver.Utilities.Tape

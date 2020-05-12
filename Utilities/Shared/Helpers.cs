@@ -7,9 +7,10 @@ using System.Text;
 using System.Threading;
 using Archiver.Classes;
 using Archiver.Classes.Disc;
+using Archiver.Utilities.Disc;
 using Newtonsoft.Json;
 
-namespace Archiver.Utilities
+namespace Archiver.Utilities.Shared
 {
     public class Helpers
     {

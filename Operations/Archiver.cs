@@ -1,5 +1,6 @@
 using System;
 using Archiver.Utilities;
+using Archiver.Utilities.Disc;
 
 namespace Archiver.Operations
 {

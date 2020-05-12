@@ -5,10 +5,10 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
-using Microsoft.Win32.SafeHandles;
+using Archiver.Utilities.Shared;
 using static Archiver.Utilities.CustomFileCopier;
 
-namespace Archiver.Utilities
+namespace Archiver.Utilities.Disc
 {
     public class MD5_Disc
     {

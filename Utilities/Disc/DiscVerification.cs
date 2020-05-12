@@ -6,8 +6,9 @@ using System.Linq;
 using System.Threading;
 using Archiver.Classes;
 using Archiver.Classes.Disc;
+using Archiver.Utilities.Shared;
 
-namespace Archiver.Utilities
+namespace Archiver.Utilities.Disc
 {
     public class DiscVerifier
     {
