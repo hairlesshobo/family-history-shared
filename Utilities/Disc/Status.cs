@@ -4,7 +4,7 @@ using Archiver.Classes;
 using Archiver.Classes.Disc;
 using Archiver.Utilities.Shared;
 
-namespace Archiver.Utilities
+namespace Archiver.Utilities.Disc
 {
     public static class Status
     {

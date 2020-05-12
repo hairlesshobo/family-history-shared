@@ -4,7 +4,7 @@ using System.IO;
 using System.Security.Cryptography;
 using Archiver.Utilities.Shared;
 
-namespace Archiver.Utilities
+namespace Archiver.Utilities.Shared
 {
 
     public delegate void ProgressChangedDelegate(CustomFileCopier.Progress progress);

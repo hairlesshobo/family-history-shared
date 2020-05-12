@@ -1,6 +1,6 @@
 using System;
 
-namespace Archiver.Utilities
+namespace Archiver.Utilities.Shared
 {
     public static class StatusHelpers
     {

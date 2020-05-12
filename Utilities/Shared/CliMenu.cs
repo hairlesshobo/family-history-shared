@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Archiver.Utilities
+namespace Archiver.Utilities.Shared
 {
     public delegate void CliMenuCanceled();
 

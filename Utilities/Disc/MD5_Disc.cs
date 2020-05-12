@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using Archiver.Utilities.Shared;
-using static Archiver.Utilities.CustomFileCopier;
+using static Archiver.Utilities.Shared.CustomFileCopier;
 
 namespace Archiver.Utilities.Disc
 {

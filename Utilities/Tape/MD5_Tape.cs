@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 using Archiver.Utilities.Shared;
-using static Archiver.Utilities.CustomFileCopier;
+using static Archiver.Utilities.Shared.CustomFileCopier;
 
 namespace Archiver.Utilities.Tape
 {
