@@ -66,6 +66,11 @@ namespace Archiver.Utilities
         private const int TAPE_LOAD = 0;
         private const int TAPE_UNLOAD = 1;
 
+        private const int TAPE_SETMARKS = 0;
+        private const int TAPE_FILEMARKS = 1;
+        private const int TAPE_SHORT_FILEMARKS = 2;
+        private const int TAPE_LONG_FILEMARKS = 3;
+
 
 
         private const int TAPE_REWIND = 0;
@@ -125,6 +130,14 @@ namespace Archiver.Utilities
             out int partition,
             out int offsetLow,
             out int offsetHigh
+            );
+
+        [DllImport( "kernel32", SetLastError = true )]
+        private static extern int WriteTapemark(
+            SafeFileHandle handle,
+            int tapemarkType,
+            int tapemarkCount,
+            BOOL isImmediate
             );
 
         [DllImport( "kernel32", SetLastError = true )]
@@ -208,16 +221,10 @@ namespace Archiver.Utilities
         /// </summary>
         /// <param name="startPos"></param>
         /// <param name="stream"></param>
-        public void Write(long startPos, byte[] stream)
+        public void Write(byte[] stream)
         {
-            // Get number of blocks that will be nned to perform write
-            uint numberOfBlocks = GetBlocksNumber( stream.Length );
-
-            // Updates tape's current position
-            SetTapeBlockPosition( startPos );
-            
-            byte[] arrayToWrite = new byte[ numberOfBlocks * BlockSize ];
-            Array.Copy( stream, arrayToWrite, stream.Length );
+            if (stream.Length != BlockSize)
+                throw new InvalidOperationException("The bytes to write must be equal to the block size");
 
             // Write data to the device
             m_stream.Write( stream, 0, stream.Length );
@@ -277,7 +284,18 @@ namespace Archiver.Utilities
             int errorCode = 0;
 
             // TODO: reapit it
-            if ((errorCode = SetTapePosition(m_handleValue, TAPE_SPACE_FILEMARKS, 0, (int)fileNumber, 0, TRUE)) != NO_ERROR)
+            if ((errorCode = SetTapePosition(m_handleValue, TAPE_SPACE_FILEMARKS, 0, (int)fileNumber, 0, FALSE)) != NO_ERROR)
+                throw new TapeOperatorWin32Exception("SetTapePosition", Marshal.GetLastWin32Error());
+        }
+
+        /// <summary>
+        /// Sets new tape position to end of data
+        /// </summary>
+        public void SetTapeToEndOfData()
+        {
+            int errorCode = 0;
+
+            if ((errorCode = SetTapePosition(m_handleValue, TAPE_SPACE_END_OF_DATA, 0, 0, 0, FALSE)) != NO_ERROR)
                 throw new TapeOperatorWin32Exception("SetTapePosition", Marshal.GetLastWin32Error());
         }
 
@@ -290,8 +308,16 @@ namespace Archiver.Utilities
             int errorCode = 0;
 
             // TODO: reapit it
-            if ((errorCode = SetTapePosition(m_handleValue, TAPE_LOGICAL_BLOCK, 0, (int)logicalBlock, 0, TRUE)) != NO_ERROR)
+            if ((errorCode = SetTapePosition(m_handleValue, TAPE_LOGICAL_BLOCK, 0, (int)logicalBlock, 0, FALSE)) != NO_ERROR)
                 throw new TapeOperatorWin32Exception("SetTapePosition", Marshal.GetLastWin32Error());
+        }
+
+        public void WriteFilemark()
+        {
+            int errorCode = 0;
+
+            if ((errorCode = WriteTapemark(m_handleValue, TAPE_FILEMARKS, 1, FALSE)) != NO_ERROR)
+                throw new TapeOperatorWin32Exception("WriteTapemark", Marshal.GetLastWin32Error());
         }
 
         /// <summary>

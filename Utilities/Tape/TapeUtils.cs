@@ -130,5 +130,30 @@ namespace Archiver.Utilities.Tape
                 //}
             }
         }
+
+        public static void WriteStringToTape(TapeOperator tape, string input, bool beginningOfTape)
+        {
+            byte[] rawData = Encoding.UTF8.GetBytes(input);
+            int lengthNeeded = (int)Helpers.RoundToNextMultiple(rawData.Length, (int)tape.BlockSize);
+            Array.Resize(ref rawData, lengthNeeded);
+
+            if (beginningOfTape)
+                tape.SetTapeFilePosition(0);
+            else
+                tape.SetTapeToEndOfData();
+
+            using (MemoryStream reader = new MemoryStream(rawData, 0, rawData.Length, false))
+            {
+                int currentPosition = 0;
+                byte[] buffer = new byte[tape.BlockSize];
+
+                while (reader.Read(buffer, 0, (int)tape.BlockSize) > 0)
+                {
+                    currentPosition += (int)tape.BlockSize;
+
+                    tape.Write(buffer);
+                }
+            }
+        }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -20,7 +21,6 @@ namespace Archiver.Utilities.Tape
         private Stopwatch _sw;
         private long _lastSample;
         private TapeDetail _tapeDetail;
-        private TapeStats _tapeStats;
 
         public FileScanner(TapeDetail tapeDetail)
         {
@@ -38,10 +38,109 @@ namespace Archiver.Utilities.Tape
             _tapeDetail.Directories = new List<TapeSourceDirectory>();
 
             foreach (string dirtySourcePath in _tapeDetail.SourceInfo.SourcePaths)
-                _tapeDetail.Directories.Add(ScanDirectory(dirtySourcePath));
+                _tapeDetail.Directories.Add(ScanRootDirectory(dirtySourcePath));
 
             _sw.Stop();
             OnComplete();
+        }
+
+        private TapeSourceDirectory ScanRootDirectory(string sourcePath)
+        {
+            sourcePath = Helpers.CleanPath(sourcePath);
+            string relativePath = Helpers.GetRelativePath(sourcePath);
+
+            DirectoryInfo sourceDirInfo = new DirectoryInfo(sourcePath);
+            List<DirectoryInfo> directoryParts = new List<DirectoryInfo>() {
+                sourceDirInfo 
+            };
+            
+            DirectoryInfo parentInfo = sourceDirInfo.Parent;
+            TapeSourceDirectory existingDir = null;
+
+            while (parentInfo != null)
+            {
+                existingDir = FindExistingDirectoryByAboslutePath(parentInfo.FullName);
+
+                if (existingDir != null)
+                    break;
+
+                directoryParts.Add(parentInfo);
+                parentInfo = parentInfo.Parent;
+            }
+
+            if (existingDir != null)
+            {
+                existingDir.Directories.Add(ScanDirectory(new TapeSourceDirectory(sourcePath)));
+                return existingDir;
+            }
+            else
+            {
+                directoryParts.Reverse();
+
+                if (directoryParts.Count() > 1)
+                {
+                    TapeSourceDirectory topLevelDir = new TapeSourceDirectory(directoryParts[0].FullName);
+                    TapeSourceDirectory subDir = default(TapeSourceDirectory);
+
+                    for (int i = 1; i < directoryParts.Count()-1; i++)
+                    {
+                        DirectoryInfo dirInfo = directoryParts[i];
+                        TapeSourceDirectory newSubDir = new TapeSourceDirectory(dirInfo.FullName);
+
+                            if (i == 1)
+                            {
+                                subDir = newSubDir;
+                                topLevelDir.Directories.Add(subDir);
+                            }
+                            else
+                            {
+                                subDir.Directories.Add(newSubDir);
+                                subDir = newSubDir;
+                            }
+                    }
+
+                    if (subDir != null)
+                        subDir.Directories.Add(ScanDirectory(new TapeSourceDirectory(directoryParts[directoryParts.Count()-1].FullName)));
+                    else
+                        topLevelDir.Directories.Add(ScanDirectory(new TapeSourceDirectory(directoryParts[directoryParts.Count()-1].FullName)));
+                        
+                
+                    return topLevelDir;
+                }
+                else
+                    return ScanDirectory(new TapeSourceDirectory(directoryParts[0].FullName));
+            }
+        }
+
+        private TapeSourceDirectory FindExistingDirectoryByAboslutePath(string absolutePath)
+        {
+            string relativePath = Helpers.GetRelativePath(Helpers.CleanPath(absolutePath));
+            return FindExistingDirectory(relativePath);
+        }
+
+        private TapeSourceDirectory FindExistingDirectory(string relativePath, int currentLevel = 1, IEnumerable<TapeSourceDirectory> searchInput = default(IEnumerable<TapeSourceDirectory>))
+        {
+            IEnumerable<TapeSourceDirectory> search = _tapeDetail.Directories;
+
+            if (searchInput != null)
+                search = searchInput;
+
+            string relativePathClean = relativePath.TrimEnd('/');
+
+            string[] relativePathParts = relativePath.Split('/');
+
+            int levels = relativePathParts.Length-1;
+
+            if (currentLevel < levels)
+            {
+                currentLevel++;
+                return FindExistingDirectory(String.Join('/', relativePathParts[0..(currentLevel+1)]), currentLevel, search.SelectMany(x => x.Directories));
+            }
+
+            if (currentLevel == levels)
+                return search.FirstOrDefault(x => x.RelativePath.ToLower() == relativePathClean.ToLower());
+
+            return null;
         }
 
         private TapeSourceDirectory ScanDirectory(string sourcePath)
@@ -54,8 +153,6 @@ namespace Archiver.Utilities.Tape
         {
             if (!Directory.Exists(directory.FullPath))
                 throw new DirectoryNotFoundException($"Source directory does not exist: {directory.FullPath}");
-
-            // _tapeDetail.Stats.DirectoryCount++;
 
             foreach (string dir in Directory.GetDirectories(directory.FullPath))
             {
@@ -76,13 +173,7 @@ namespace Archiver.Utilities.Tape
                     _tapeDetail.ExcludedFileCount++;
 
                 else
-                {
-                    TapeSourceFile sourceFile = new TapeSourceFile(cleanFile);
-                    
-                    //_tapeDetail.Stats.FileCount++;
-
-                    directory.Files.Add(sourceFile);
-                }
+                    directory.Files.Add(new TapeSourceFile(cleanFile));
 
                 if (_sw.ElapsedMilliseconds - _lastSample > _sampleDurationMs)
                 {

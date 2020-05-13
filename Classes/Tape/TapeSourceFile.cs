@@ -39,7 +39,6 @@ public class TapeSourceFile
         public long Size { get; set; } = 0;
         public string Hash { get; set; }
         public bool Copied { get; set; }
-        public DateTime ArchiveTimeUtc { get; set; }
         public DateTime LastAccessTimeUtc { get; set; }
         public DateTime LastWriteTimeUtc { get; set; }
         public DateTime CreationTimeUtc { get; set; }
@@ -68,14 +67,6 @@ public class TapeSourceFile
             this.LastWriteTimeUtc = fileInfo.LastWriteTimeUtc;
             this.CreationTimeUtc = fileInfo.CreationTimeUtc;
             this.Attributes = fileInfo.Attributes;
-
-            // tape.Stats.TotalSize += this.Size;
-            
-            // add the data size with padding
-            // tape.Stats.TotalArchiveSize += Helpers.RoundToNextMultiple(this.Size, 512);
-
-            // add the header size
-            // tape.Stats.TotalArchiveSize += 512;
         }
 
         // public CustomFileCopier ActivateCopy()

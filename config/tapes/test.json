@@ -2,7 +2,7 @@
     "Name": "Test",
     "Description": "",
     "SourcePaths": [
-        "//nas/Videos/Finals/Sonnenthal"
+        "//nas/Videos/Web/Sonnenthal"
     ],
     "ExcludePaths": [],
     "ExcludeFiles": [

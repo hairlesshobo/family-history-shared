@@ -25,10 +25,6 @@ namespace Archiver.Classes.Tape
             }
         }
         public string RelativePath { get; set; }
-        public DateTime ArchiveTimeUtc { get; set; }
-        public DateTime LastAccessTimeUtc { get; set; }
-        public DateTime LastWriteTimeUtc { get; set; }
-        public DateTime CreationTimeUtc { get; set; }
         public List<TapeSourceDirectory> Directories { get; set; }
         public List<TapeSourceFile> Files { get; set; }
 
@@ -37,7 +33,7 @@ namespace Archiver.Classes.Tape
             this.Files = new List<TapeSourceFile>();
             this.Directories = new List<TapeSourceDirectory>();
 
-            this.FullPath = sourcePath;
+            this.FullPath = Helpers.CleanPath(sourcePath);
 
             if (!Directory.Exists(this.FullPath))
                 throw new DirectoryNotFoundException($"Source directory does not exist: {sourcePath}");

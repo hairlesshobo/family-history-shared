@@ -62,5 +62,10 @@ namespace Archiver.Classes.Tape
             this.Files = new List<TapeSourceFile>();
             this.Verifications = new List<TapeVerificationResult>();
         }
+
+        public TapeSummary GetSummary()
+        {
+            return (TapeSummary)this;
+        }
     }
 }

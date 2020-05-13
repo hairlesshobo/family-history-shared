@@ -29,7 +29,7 @@ namespace Archiver.Classes.Tape
         {
             get
             {
-                return this.FlattenDirectories(this.Directories).Count();
+                return this.FlattenDirectories().Count();
             }
         }
         public long TotalArchiveBytes 
@@ -49,7 +49,7 @@ namespace Archiver.Classes.Tape
                 }
 
                 // account for directory entries
-                size += 512 * FlattenDirectories(this.Directories).Count();
+                size += 512 * FlattenDirectories().Count();
 
                 // end of archive marker
                 size += 1024;
@@ -71,6 +71,13 @@ namespace Archiver.Classes.Tape
             this.Files = new List<TapeSourceFile>();
         }
 
+        public IEnumerable<TapeSourceDirectory> FlattenDirectories()
+        {
+            return this.Directories
+                       .Union(this.FlattenDirectories(this.Directories))
+                       .OrderBy(x => x.RelativePath);
+        }
+
         private IEnumerable<TapeSourceDirectory> FlattenDirectories(IEnumerable<TapeSourceDirectory> directory)
         {
             IEnumerable<TapeSourceDirectory> dirEnum = directory.SelectMany(x => x.Directories);
@@ -83,7 +90,7 @@ namespace Archiver.Classes.Tape
             return dirEnum;
         }
 
-        private IEnumerable<TapeSourceFile> FlattenFiles()
+        public IEnumerable<TapeSourceFile> FlattenFiles()
         {
             return this.FlattenDirectories(this.Directories)
                        .SelectMany(x => x.Files)
