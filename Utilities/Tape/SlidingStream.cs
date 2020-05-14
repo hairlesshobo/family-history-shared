@@ -8,23 +8,54 @@ namespace Archiver.Utilities.Tape
     public class SlidingStream : Stream
     {
         #region Other stream member implementations
-        public override bool CanRead => throw new NotImplementedException();
+        public override bool CanRead
+        {
+            get
+            {
+                return true;
+            }
+        }
 
-        public override bool CanSeek => throw new NotImplementedException();
+        public override bool CanSeek {
+            get {
+                return false;
+            }
+        }
 
-        public override bool CanWrite => throw new NotImplementedException();
+        public override bool CanWrite
+        {
+            get
+            {
+                return true;
+            }
+        }
 
-        public override long Length => throw new NotImplementedException();
+        public override long Length
+        {
+            get
+            {
+                return (long)_currentBufferSize;
+            }
+        }
 
-        public override long Position { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public override long Position 
+        { 
+            get => throw new InvalidOperationException(); 
+            set => throw new InvalidOperationException(); 
+        }
         #endregion Other stream member implementations
 
         private const uint DefaultBufferSize = (1024 * 1024 * 256); // 256 MB
+        private const uint DefaultStartPercent = 98;
 
         public SlidingStream()
         {
             ReadTimeout = -1;
-            _bufferFilled = false;
+            _bufferFull = false;
+            _bufferEmpty = true;
+            _bufferActive = false;
+            _enableWrites.Set();
+            _enableReads.Reset();
         }
 
         public SlidingStream(ulong BufferSize): this()
@@ -32,26 +63,59 @@ namespace Archiver.Utilities.Tape
             _bufferMaxSize = BufferSize;
         }
 
-        private bool _bufferFilled = false;
+        public SlidingStream(ulong BufferSize, uint StartPercent) : this(BufferSize)
+        {
+            _startPercent = StartPercent;
+        }
+
+        private bool _bufferActive = false;
+        private bool _bufferFull = false;
+        private bool _bufferEmpty = true;
+        private bool _endOfStream = false;
+        private bool _inputComplete = false;
         private ulong _currentBufferSize = 0;
         private ulong _bufferMaxSize = DefaultBufferSize;
+        private uint _startPercent = DefaultStartPercent;
         private readonly object _sizeSyncRoot = new object();
         private readonly object _writeSyncRoot = new object();
         private readonly object _readSyncRoot = new object();
+
         private readonly LinkedList<ArraySegment<byte>> _pendingSegments = new LinkedList<ArraySegment<byte>>();
-        private readonly ManualResetEventSlim _dataAvailableResetEvent = new ManualResetEventSlim();
+        private readonly ManualResetEventSlim _enableReads = new ManualResetEventSlim();
+        private readonly ManualResetEventSlim _enableWrites = new ManualResetEventSlim();
 
         public override int ReadTimeout { get; set; }
+        public bool EndOfStream { 
+            get
+            {
+                return _endOfStream;
+            }
+        }
+
+        public double CurrentBufferPercent {
+            get
+            {
+                return ((double)_bufferMaxSize / (double)_currentBufferSize) * 100.0;
+            }
+        }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            if (_dataAvailableResetEvent.Wait(ReadTimeout))
-                throw new TimeoutException("No data available");
+            // we want to make sure we do not allow reads until there is data to be read
+            if (_currentBufferSize == 0)
+                _enableReads.Reset();
+
+            _enableReads.Wait(-1);
 
             lock (_readSyncRoot)
             {
                 int currentCount = 0;
                 int currentOffset = 0;
+
+                lock (_sizeSyncRoot)
+                {
+                    _currentBufferSize -= (ulong)count;
+                }
 
                 while (currentCount != count)
                 {
@@ -80,9 +144,26 @@ namespace Archiver.Utilities.Tape
                         }
                     }
 
+                    // our buffer ran empty
+                    lock (_sizeSyncRoot)
+                    {
+                        if (_currentBufferSize == 0)
+                        {
+                            _bufferEmpty = true;
+                            _bufferActive = false;
+                            _bufferFull = false;
+                            _enableWrites.Set();
+                            _enableReads.Reset();
+
+                            // buffer is empty and we reached the end of the stream
+                            if (_inputComplete == true)
+                                _endOfStream = true;
+                        }
+                    }
+
                     if (_pendingSegments.Count == 0)
                     {
-                        _dataAvailableResetEvent.Reset();
+                        _enableReads.Reset();
 
                         return currentCount;
                     }
@@ -94,6 +175,21 @@ namespace Archiver.Utilities.Tape
 
         public override void Write(byte[] buffer, int offset, int count)
         {
+            lock (_sizeSyncRoot)
+            {
+                if (_inputComplete)
+                    throw new EndOfStreamException("Input has already been closed, no more data can be accepted");
+
+                // if we got here but the buffer is full, lets make sure we don't allow any 
+                // more to be written to it
+                // if (_bufferFull == true)
+                    // _enableWrites.Reset();
+            }
+
+            // make sure writes are enabled. if disabled, that means the buffer is full
+            // and cannot hold any more
+            _enableWrites.Wait(-1);
+
             lock (_writeSyncRoot)
             {
                 byte[] copy = new byte[count];
@@ -104,30 +200,52 @@ namespace Archiver.Utilities.Tape
                 // we wait until the buffer fills before we open it up for reading
                 lock (_sizeSyncRoot)
                 {
+                    _bufferEmpty = false;
+
                     _currentBufferSize += (uint)count;
 
-                    if (!_bufferFilled && _currentBufferSize >= _bufferMaxSize)
+                    if (_bufferFull == false && _currentBufferSize >= _bufferMaxSize)
                     {
-                        _bufferFilled = true;
-                        _dataAvailableResetEvent.Set();
+                        _bufferFull = true;
+                        _enableWrites.Reset();
+                    }
+
+                    // we filled the buffer enough, enable reads
+                    if (_bufferActive == false && this.CurrentBufferPercent > _startPercent)
+                    {
+                        _bufferActive = true;
+                        _enableReads.Set();
                     }
                 }
             }   
         }
 
+        public void InputStreamComplete()
+        {
+            lock (_sizeSyncRoot)
+            {
+                if (_inputComplete == false && _currentBufferSize > 0)
+                {
+                    _bufferEmpty = false;
+                    _inputComplete = true;
+                    
+                    _enableReads.Set();
+                }
+            }
+        }
+
         public override void Flush()
         {
-            throw new NotImplementedException();
         }
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public override void SetLength(long value)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
     }
 }

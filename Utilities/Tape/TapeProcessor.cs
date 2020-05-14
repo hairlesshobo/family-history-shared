@@ -128,43 +128,23 @@ namespace Archiver.Utilities.Tape
                 tape.WriteFilemark();
             }
         }
+
+        
         
         private void ArchiveFiles(TapeStatus status)
         {
-            using (FileStream stream = new FileStream(@"D:\tape\test.tar", FileMode.Create, FileAccess.Write))
-            // using (SlidingStream bufferStream = new SlidingStream())
-            using (TarOutputStream tarOut = new TarOutputStream(stream, Config.TapeBlockingFactor))
-            using (CustomTarArchive archive = new CustomTarArchive(tarOut))
+            using (FileStream fileStream = new FileStream(@"D:\tape\test.tar", FileMode.Create, FileAccess.Write))
             {
-                ArchiveTapeSourceFiles(_tapeDetail.Files, archive);
+                TapeTarWriter writer = new TapeTarWriter(_tapeDetail, fileStream, (512 * Config.TapeBlockingFactor));
+                
+                Thread tarThread = new Thread(writer.StartCreatingTar);
+                Thread writeThread = new Thread(writer.StartWriting);
 
-                ArchiveTapeSourceDirectory(_tapeDetail.Directories, archive);
-            }
-        }
+                tarThread.Start();
+                writeThread.Start();
 
-        private void ArchiveTapeSourceDirectory(IEnumerable<TapeSourceDirectory> directories, CustomTarArchive archive)
-        {
-            foreach (TapeSourceDirectory dir in directories)
-            {
-                ArchiveTapeSourceDirectory(dir, archive);
-            }
-        }
-
-        private void ArchiveTapeSourceDirectory(TapeSourceDirectory directory, CustomTarArchive archive)
-        {
-            TarEntry dirEntry = TarEntry.CreateEntryFromFile(directory.FullPath);
-            archive.WriteDirectoryEntry(dirEntry);
-
-            ArchiveTapeSourceDirectory(directory.Directories, archive);
-            ArchiveTapeSourceFiles(directory.Files, archive);
-        }
-
-        private void ArchiveTapeSourceFiles(IEnumerable<TapeSourceFile> files, CustomTarArchive archive)
-        {
-            foreach (TapeSourceFile file in files)
-            {
-                TarEntry entry = TarEntry.CreateEntryFromFile(file.FullPath);
-                archive.WriteFileEntry(entry, file);
+                tarThread.Join();
+                writeThread.Join();
             }
         }
     }
