@@ -9,7 +9,17 @@ namespace Archiver.Utilities.Shared
             WriteStatusLineWithPct(left, right, percent, complete, Console.ForegroundColor);
         }
 
+        public static void WriteStatusLineWithPct(string left, string right, double percent, bool complete, bool increasing)
+        {
+            WriteStatusLineWithPct(left, right, percent, complete, Console.ForegroundColor, increasing);
+        }
+
         public static void WriteStatusLineWithPct(string left, string right, double percent, bool complete, ConsoleColor color)
+        {
+            WriteStatusLineWithPct(left, right, percent, complete, Console.ForegroundColor, true);
+        }
+
+        public static void WriteStatusLineWithPct(string left, string right, double percent, bool complete, ConsoleColor color, bool increasing)
         {
             string line = right;
 
@@ -21,7 +31,7 @@ namespace Archiver.Utilities.Shared
             if (left != null)
                 leftWidth += Globals._leftHeaderWidth + 2;
 
-            line += GeneratePercentBar(Console.WindowWidth, leftWidth, 0, percent, complete);
+            line += GeneratePercentBar(Console.WindowWidth, leftWidth, 0, percent, complete, increasing);
 
             WriteStatusLine(left, line, color);
         }
@@ -49,6 +59,11 @@ namespace Archiver.Utilities.Shared
 
         public static string GeneratePercentBar (int AvailableSpace, int LeftLength, int RightLength, double CurrentPercent, bool Complete)
         {
+            return GeneratePercentBar(AvailableSpace, LeftLength, RightLength, CurrentPercent, Complete, true);
+        }
+
+        public static string GeneratePercentBar (int AvailableSpace, int LeftLength, int RightLength, double CurrentPercent, bool Complete, bool Increasing)
+        {
             string percentLeft = "[";
             string percentRight = "] " + Math.Round(CurrentPercent, 0).ToString().PadLeft(3) + "%";
 
@@ -60,12 +75,22 @@ namespace Archiver.Utilities.Shared
             for (int i = 0; i < completeSegments; i++)
                 progressBar += "=";
 
-            if (Complete == false)
-                progressBar += ">";
+            if (Complete == false && completeSegments > 0)
+                progressBar += (Increasing == true ? ">" : "<");
 
             string line = percentLeft + progressBar.PadRight(totalSegments) + percentRight;
 
             return line;
+        }
+
+        public static string FileCountPosition (long currentFile, long totalFiles, int width = 0)
+        {
+            string totalFilesStr = totalFiles.ToString();
+
+            if (width == 0)
+                width = totalFilesStr.Length;
+
+            return $"[{currentFile.ToString().PadLeft(width)} / {totalFiles.ToString().PadLeft(width)}]";
         }
     }
 }

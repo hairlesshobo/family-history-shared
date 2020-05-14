@@ -216,6 +216,11 @@ namespace Archiver.Utilities
             m_stream = new FileStream(m_handleValue, FileAccess.ReadWrite, (int)_blockSize, false);
         }
 
+        public void RewindTape()
+        {
+            SetTapeBlockPosition(0);
+        }
+
         /// <summary>
         /// Writes to the tape given stream starting from given postion
         /// </summary>

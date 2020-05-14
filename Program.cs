@@ -47,26 +47,17 @@ namespace Archiver
 
             //Console.WriteLine(ReadSummary());
 
-            TapeProcessor processor = new TapeProcessor();
-            processor.ProcessTape();
+            TapeSummary summary = TapeUtils.ReadTapeSummaryFromTape();
+
+            //TapeProcessor processor = new TapeProcessor();
+            //processor.ProcessTape();
             
 
-            Console.ReadLine();
-            return;
+            // Console.ReadLine();
+            // return;
 
 
-            // we can calculate the exact amount if we factor in the file and directory headers. 
-            // each file headers is 512 bytes each
-            // each file is padded to the next 512 byte multiple
-            // each directory is 512 bytes each
-            // the end of the file has 1024 bytes of padding
-            // the total size is rounded up to the next block size multiple 
-            //    if blocking factor is 512 this means that the output size is rounded to the next (512*512)
-            long dataSize = 48469841375;
-            dataSize += 140 * 512;
-            dataSize += 12 * 512; // estimate about 12 directories
-            
-            MD5_Tape md5 = new MD5_Tape(dataSize);
+            MD5_Tape md5 = new MD5_Tape();
             md5.OnProgressChanged += (progress) => {
                 Console.CursorLeft = 0;
 

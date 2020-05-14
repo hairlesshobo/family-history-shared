@@ -16,6 +16,7 @@ namespace Archiver.Utilities.Tape
     {
         private TapeSourceInfo _sourceInfo;
         private TapeDetail _tapeDetail;
+        private TapeStatus _status;
 
         public TapeProcessor()
         {
@@ -40,30 +41,60 @@ namespace Archiver.Utilities.Tape
 
         public void ProcessTape()
         {
-            using (TapeStatus status = new TapeStatus(_tapeDetail))
+            _status = new TapeStatus(_tapeDetail);
+            _status.StartTimer();
+
+            Thread rewindThread = new Thread(RewindTape);
+            rewindThread.Start();
+
+            IndexAndCountFiles();
+            SizeFiles();
+
+            if (rewindThread.IsAlive)
             {
-                IndexAndCountFiles(status);
-                SizeFiles(status);
-                //WriteTapeSummary(status);
-                //WriteTapeJsonSummary(status);
-                ArchiveFiles(status);
+                lock (_status)
+                {
+                    _status.WriteStatus("Rewinding tape");
+                }
+                rewindThread.Join();
             }
 
-            Console.WriteLine(_tapeDetail.TotalArchiveBytes);
+            WriteTapeSummary();
+            WriteTapeJsonSummary();
+            ArchiveFiles();
+            RewindTape();
+
+            _status.Dispose();
+        }
+
+        private void RewindTape()
+        {
+            lock (_status)
+            {
+                _status.WriteStatus("Rewinding tape");
+            }
+
+            using (TapeOperator tape = new TapeOperator(Config.TapeDrive))
+            {
+                tape.RewindTape();
+            }
         }
         
-        private void IndexAndCountFiles(TapeStatus status)
+        private void IndexAndCountFiles()
         {
-            Console.WriteLine();
+            lock (_status)
+            {
+                _status.WriteStatus("Counting source files");
+            }
 
             FileScanner scanner = new FileScanner(_tapeDetail);
 
             scanner.OnProgressChanged += (newFiles, excludedFiles) => {
-                status.FileScanned(newFiles, excludedFiles);
+                _status.FileScanned(newFiles, excludedFiles);
             };
 
             scanner.OnComplete += () => {
-                status.FileScanned(_tapeDetail.FileCount, _tapeDetail.ExcludedFileCount, true);
+                _status.FileScanned(_tapeDetail.FileCount, _tapeDetail.ExcludedFileCount, true);
             };
 
             Thread scanThread = new Thread(scanner.ScanFiles);
@@ -71,18 +102,21 @@ namespace Archiver.Utilities.Tape
             scanThread.Join();
         }
 
-        private void SizeFiles(TapeStatus status)
+        private void SizeFiles()
         {
-            Console.WriteLine();
+            lock (_status)
+            {
+                _status.WriteStatus("Calculating source file sizes");
+            }
 
             FileSizer sizer = new FileSizer(_tapeDetail);
 
             sizer.OnProgressChanged += (currentFile) => {
-                status.FileSized(currentFile);
+                _status.FileSized(currentFile);
             };
 
             sizer.OnComplete += () => {
-                status.FileSized(_tapeDetail.FileCount, true);
+                _status.FileSized(_tapeDetail.FileCount, true);
             };
 
             Thread sizeThread = new Thread(sizer.SizeFiles);
@@ -90,9 +124,14 @@ namespace Archiver.Utilities.Tape
             sizeThread.Join();
         }
 
-        private void WriteTapeSummary(TapeStatus status)
+        private void WriteTapeSummary()
         {
-            using (TapeOperator tape = new TapeOperator(Config.TapeDrive))
+            lock (_status)
+            {
+                _status.WriteStatus("Writing summary to tape");
+            }
+
+            using (TapeOperator tape = new TapeOperator(Config.TapeDrive, 64 * 1024))
             {
                 string templatePath = Path.Join(Directory.GetCurrentDirectory(), "templates", "tape_summary.txt");
                 string[] lines = File.ReadAllLines(templatePath);
@@ -113,38 +152,66 @@ namespace Archiver.Utilities.Tape
                                          + "\n";
                 }
 
-                TapeUtils.WriteStringToTape(tape, summaryOutput, true);
+                TapeUtils.WriteStringToTape(tape, summaryOutput, false);
                 tape.WriteFilemark();
             }
         }
 
-        private void WriteTapeJsonSummary(TapeStatus status)
+        private void WriteTapeJsonSummary()
         {
-            using (TapeOperator tape = new TapeOperator(Config.TapeDrive))
+            lock (_status)
+            {
+                _status.WriteStatus("Writing json record to tape");
+            }
+
+            using (TapeOperator tape = new TapeOperator(Config.TapeDrive, 64 * 1024))
             {
                 string json = JsonConvert.SerializeObject(_tapeDetail.GetSummary(), Newtonsoft.Json.Formatting.Indented);
 
-                TapeUtils.WriteStringToTape(tape, json, false);
+                TapeUtils.WriteStringToTape(tape, json, true);
                 tape.WriteFilemark();
             }
         }
 
         
         
-        private void ArchiveFiles(TapeStatus status)
+        private void ArchiveFiles()
         {
-            using (FileStream fileStream = new FileStream(@"D:\tape\test.tar", FileMode.Create, FileAccess.Write))
+            uint blockSize = (uint)(512 * Config.TapeBlockingFactor);
+            uint bufferBlockCount = 4096 * 3; // results in a 3gb buffer
+
+            using (TapeOperator tape = new TapeOperator(Config.TapeDrive, blockSize))
+            // using (FileStream fileStream = new FileStream(@"D:\tape\test.tar", FileMode.Create, FileAccess.Write))
             {
-                TapeTarWriter writer = new TapeTarWriter(_tapeDetail, fileStream, (512 * Config.TapeBlockingFactor));
+                lock (_status)
+                {
+                    _status.WriteStatus("Positioning tape");
+                }
+
+                tape.SetTapeToEndOfData();
+
+                lock (_status)
+                {
+                    _status.WriteStatus("Allocating memory buffer");
+                }
+
+                TapeTarWriter writer = new TapeTarWriter(_tapeDetail, tape, blockSize, bufferBlockCount);
+
+                lock (_status)
+                {
+                    _status.WriteStatus("Writing data to tape");
+                }
+
+                writer.OnProgressChanged += (progress) => {
+                    _status.WriteElapsed();
+                    _status.UpdateBuffer(progress);
+                    _status.UpdateTarInput(progress);
+                    _status.UpdateTarWrite(progress);
+                    _status.UpdateTapeWrite(progress);
+                };
                 
-                Thread tarThread = new Thread(writer.StartCreatingTar);
-                Thread writeThread = new Thread(writer.StartWriting);
-
-                tarThread.Start();
-                writeThread.Start();
-
-                tarThread.Join();
-                writeThread.Join();
+                writer.Start();
+                tape.WriteFilemark();
             }
         }
     }

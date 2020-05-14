@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using Archiver.Classes;
 using Archiver.Classes.Disc;
@@ -9,140 +10,140 @@ namespace Archiver.Utilities.Tape
 {
     public class TapeStatus : IDisposable
     {
-        private int _copyWidth = 0;
-        private int _nextLine = -1;
-        private int _fileCountLine = -1;
-        private int _sizeLine = -1;
-        private int _distributeLine = -1;
-        private int _existingDiscCount = 0;
-        private int _newDiscs = 0;
-
-        private int _discLine = -1;
-
         private const string _scanningLabel = "Scanning";
         private const string _sizingLabel = "Size";
+        private const string _elapsedLabel = "Elapsed";
+        private const string _statusLabel = "Status";
+        private const string _bufferLabel = "Buffer";
+        private const string _tarInputLabel = "Tar Input";
+        private const string _tarWriteLabel = "Creating Tar";
+        private const string _writeTapeLabel = "Writing Tape";
+
+        private int _topLine = -1;
+
+        private int _elapsedLine = 1;
+        private int _statusLine = 2;
+
+        private int _scanLine = 4;
+        private int _sizeLine = 5;
+
+        private int _tarInputLine = 7;
+        private int _tarWriteLine = 8;
+        
+        private int _bufferLine = 10;
+        private int _writeTapeLine = 11;
+
+        private int _bottomLine = 13;
+
+        private double _bufferLastPercent = 0.0;
 
         private TapeDetail _tapeDetail;
+        private Stopwatch _stopwatch;
 
         public TapeStatus(TapeDetail tapeDetail)
         {
             _tapeDetail = tapeDetail;
-            _nextLine = Console.CursorTop;
+            _topLine = Console.CursorTop;
+            _stopwatch = new Stopwatch();
+            Console.CursorVisible = false;
         }
 
-        public void InitDiscLines(string header = null)
+        public void StartTimer()
         {
-            if (header == null)
-                header = "Preparing archive discs...";
+            _stopwatch.Start();
+        }
 
-            if (_discLine == -1)
+        public void WriteStatus(string statusMessage)
+        {
+            WriteElapsed();
+            Console.SetCursorPosition(0, _topLine + _statusLine);
+            StatusHelpers.WriteStatusLine(_statusLabel, statusMessage);
+        }
+
+        public void UpdateBuffer(TapeTarWriterProgress progress)
+        {
+            string line = String.Empty;
+
+            if (progress != null)
+                line += Shared.Formatting.GetFriendlySize(progress.BufferFilledBytes).PadLeft(10);
+
+            bool increasing = progress.BufferPercent > _bufferLastPercent;
+
+            _bufferLastPercent = progress.BufferPercent;
+
+            Console.SetCursorPosition(0, _topLine + _bufferLine);
+            StatusHelpers.WriteStatusLineWithPct(_bufferLabel, line, progress.BufferPercent, (progress.BufferPercent == 100), increasing);
+        }
+
+        public void UpdateTarInput(TapeTarWriterProgress progress)
+        {
+            string line = String.Empty;
+
+            if (progress != null)
             {
-                _existingDiscCount = DiscGlobals._destinationDiscs.Where(x => x.NewDisc == false).Count();
-                _newDiscs = DiscGlobals._destinationDiscs.Where(x => x.NewDisc == true).Count();
 
-                _nextLine++;
-                _discLine = _nextLine++;
+                line += StatusHelpers.FileCountPosition(progress.TarCurrentFileCount, progress.TarTotalFiles);
+                line += " ";
 
-                _nextLine = _discLine + _newDiscs;
-                _nextLine++;
-                //_copyTotalLine = _nextLine;
+                if (progress.TarStatus == TapeTarWriterStatus.Complete)
+                    line += "".PadLeft(10);
+                else
+                    line += Shared.Formatting.GetFriendlySize(progress.TarCurrentFileSizeBytes).PadLeft(10);
 
-                _copyWidth = DiscGlobals._destinationDiscs.Where(x => x.NewDisc == true).Max(x => x.TotalFiles).ToString().Length;
-
-                Console.ForegroundColor = ConsoleColor.Magenta;
-                Console.CursorTop = _discLine;
-                Console.CursorLeft = 0;
-                Console.Write(header);
-                Console.ResetColor();
-
-                foreach (DiscDetail disc in DiscGlobals._destinationDiscs.Where(x => x.Finalized == false).OrderBy(x => x.DiscNumber))
-                    WriteDiscPendingLine(disc, default(TimeSpan));
+                line += "   ";
+                line += progress.TarCurrentFileName;
             }
+
+            Console.SetCursorPosition(0, _topLine + _tarInputLine);
+            StatusHelpers.WriteStatusLine(_tarInputLabel, line);
         }
 
-        
-        private void WriteDiscPendingLine(
-            DiscDetail disc, 
-            TimeSpan elapsed = default(TimeSpan))
+        public void WriteElapsed()
         {
-
-            string line = "";
-            line += Formatting.FormatElapsedTime(elapsed);
-            line += " ";
-            line += "Pending".PadRight(12);
-            line += " ";
-            line += $"{disc.TotalFiles.ToString().PadLeft(7)} files assigned";
-            line += "   ";
-            line += $"{Formatting.GetFriendlySize(disc.DataSize).PadLeft(10)} data size";
-
-            Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
-            StatusHelpers.WriteStatusLine(Formatting.GetDiscName(disc), line, ConsoleColor.Blue);
+            Console.SetCursorPosition(0, _topLine + _elapsedLine);
+            StatusHelpers.WriteStatusLine(_elapsedLabel, _stopwatch.Elapsed.ToString(@"hh\:mm\:ss"));
         }
 
-        public void WriteDiscCopyLine(
-            DiscDetail disc, 
-            TimeSpan elapsed = default(TimeSpan),
-            int currentFile = 0, 
-            double instantTransferRate = 0.0, 
-            double averageTransferRate = 0.0)
+        public void UpdateTarWrite(TapeTarWriterProgress progress)
         {
-            bool complete = false;
+            string line = String.Empty;
 
-            string line = "";
+            if (progress != null)
+            {
+                line += Shared.Formatting.GetFriendlySize(progress.TarBytesWritten).PadLeft(10);
+                line += " ";
+                line += $"[{progress.TarStatus.ToString().PadRight(8)}]";
+                line += " ";
+                line += $"[{Shared.Formatting.GetFriendlyTransferRate(progress.TarInstantTransferRate).PadLeft(12)}]";
+                line += " ";
+                line += $"[{Shared.Formatting.GetFriendlyTransferRate(progress.TarAverageTransferRate).PadLeft(12)}]";
+            }
 
-            double currentPercent = ((double)disc.BytesCopied / (double)disc.DataSize) * 100.0;
-
-            line += Formatting.FormatElapsedTime(elapsed);
-            line += " Copy: ";
-            line += $"{Formatting.GetFriendlySize(disc.BytesCopied).PadLeft(10)}";
-            line += " ";
-            line += FileCountPosition(currentFile, disc.TotalFiles, _copyWidth);
-            line += " ";
-            line += "[" + Formatting.GetFriendlyTransferRate(instantTransferRate).PadLeft(12) + "]";
-            line += " ";
-            line += "[" + Formatting.GetFriendlyTransferRate(averageTransferRate).PadLeft(12) + "]";
-
-            if (disc.BytesCopied == disc.DataSize)
-                complete = true;
-
-            Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
-            StatusHelpers.WriteStatusLineWithPct(Formatting.GetDiscName(disc), line, currentPercent, complete, ConsoleColor.DarkYellow);
+            Console.SetCursorPosition(0, _topLine + _tarWriteLine);
+            StatusHelpers.WriteStatusLineWithPct(_tarWriteLabel, line, progress.TarWritePercent, (progress.TarBytesWritten == progress.TotalBytes));
         }
 
-        public void WriteDiscJsonLine(DiscDetail disc, TimeSpan elapsed)
+        public void UpdateTapeWrite(TapeTarWriterProgress progress)
         {
-            string line = "";
-            line += Formatting.FormatElapsedTime(elapsed);
-            line += " ";
-            line += "Saving tape details to json file ...";
+            string line = String.Empty;
 
-            Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
-            StatusHelpers.WriteStatusLine(Formatting.GetDiscName(disc), line, ConsoleColor.DarkYellow);
+            if (progress != null)
+            {
+                line += Shared.Formatting.GetFriendlySize(progress.TapeBytesWritten).PadLeft(10);
+                line += " ";
+                line += $"[{progress.TapeStatus.ToString().PadRight(8)}]";
+                line += " ";
+                line += $"[{Shared.Formatting.GetFriendlyTransferRate(progress.TapeInstantTransferRate).PadLeft(12)}]";
+                line += " ";
+                line += $"[{Shared.Formatting.GetFriendlyTransferRate(progress.TapeAverageTransferRate).PadLeft(12)}]";
+            }
+
+            Console.SetCursorPosition(0, _topLine + _writeTapeLine);
+            StatusHelpers.WriteStatusLineWithPct(_writeTapeLabel, line, progress.TapeWritePercent, (progress.TapeBytesWritten == progress.TotalBytes));
         }
-
-        public void WriteDiscComplete(DiscDetail disc, TimeSpan elapsed)
-        {
-            string line = "";
-            line += Formatting.FormatElapsedTime(elapsed);
-            line += " ";
-            line += "Complete!";
-
-            Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
-            StatusHelpers.WriteStatusLine(Formatting.GetDiscName(disc), line, ConsoleColor.DarkGreen);
-        }
-
-
-
-
-
-
-
 
         public void FileScanned(long newFiles, long excludedFiles, bool complete = false)
         {
-            if (_fileCountLine == -1)
-                _fileCountLine = _nextLine++;
-
             string line = "";
             line += $"New: {newFiles.ToString().PadLeft(7)}";
             line += "   ";
@@ -151,46 +152,31 @@ namespace Archiver.Utilities.Tape
             if (complete)
                 line += "   **Complete**";
 
-            Console.SetCursorPosition(0, _fileCountLine);
+            Console.SetCursorPosition(0, _topLine + _scanLine);
             StatusHelpers.WriteStatusLine(_scanningLabel, line);
         }
-        
 
         public void FileSized(long fileCount, bool complete = false)
         {
-            if (_sizeLine == -1)
-                _sizeLine = _nextLine++;
-
             string currentSizeFriendly = Formatting.GetFriendlySize(_tapeDetail.DataSizeBytes);
             
-            string line = FileCountPosition(fileCount);
+            string line = StatusHelpers.FileCountPosition(fileCount, _tapeDetail.FileCount);
             line += $" [{currentSizeFriendly.PadLeft(12)}]";
             line += " ";
 
             double currentPercent = ((double)fileCount / (double)_tapeDetail.FileCount) * 100.0;
 
-            Console.SetCursorPosition(0, _sizeLine);
+            Console.SetCursorPosition(0, _topLine + _sizeLine);
             StatusHelpers.WriteStatusLineWithPct(_sizingLabel, line, currentPercent, complete);
         }
 
 
-        public void ProcessComplete()
+
+
+        private void ProcessComplete()
         {
-            Console.SetCursorPosition(0, _nextLine+2);
-        }
-
-
-        private string FileCountPosition (long currentFile, long totalFiles = -1, int width = 0)
-        {
-            if (totalFiles == -1)
-                totalFiles = _tapeDetail.FileCount;
-
-            string totalFilesStr = totalFiles.ToString();
-
-            if (width == 0)
-                width = totalFilesStr.Length;
-
-            return $"[{currentFile.ToString().PadLeft(width)} / {totalFiles.ToString().PadLeft(width)}]";
+            Console.SetCursorPosition(0, _topLine + _bottomLine);
+            Console.CursorVisible = true;
         }
 
         public void Dispose()

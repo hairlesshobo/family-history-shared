@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
+using Archiver.Classes.Tape;
 using Archiver.Utilities.Shared;
 using static Archiver.Utilities.Shared.CustomFileCopier;
 
@@ -15,6 +16,15 @@ namespace Archiver.Utilities.Tape
         private const int _sampleDurationMs = 500;
         public string MD5_Hash { get; set; }
         private long _sourceSize = 0;
+        private bool _requiresJsonRecord = false;
+
+        public MD5_Tape()
+        {
+            _requiresJsonRecord = true;
+
+            this.OnComplete += delegate { };
+            this.OnProgressChanged += delegate { };
+        }
 
         public MD5_Tape(long sourceSize)
         {
@@ -27,8 +37,19 @@ namespace Archiver.Utilities.Tape
         public void GenerateHash()
         {
             bool hasJson = TapeUtils.TapeHasJsonRecord();
+            int blockSize = Config.TapeBlockingFactor * 512;
 
-            using (TapeOperator tape = new TapeOperator(Config.TapeDrive, Config.TapeBlockingFactor * 512))
+            if (_requiresJsonRecord && !hasJson)
+                throw new InvalidOperationException("MD5 class was created without a source size, therefore the tape must have the json summary record");
+            
+            if (_requiresJsonRecord && hasJson)
+            {
+                TapeSummary summary = TapeUtils.ReadTapeSummaryFromTape();
+                blockSize = 512 * summary.BlockingFactor;
+                _sourceSize = summary.TotalArchiveBytes;
+            }
+
+            using (TapeOperator tape = new TapeOperator(Config.TapeDrive, blockSize))
             using (MD5 md5 = MD5.Create())
             {
                 Progress progress = new Progress();
@@ -44,7 +65,6 @@ namespace Archiver.Utilities.Tape
                 Stopwatch sw = Stopwatch.StartNew();
 
                 long lastSample = sw.ElapsedMilliseconds;
-                int md5Offset = 0;
                 long lastSampleCopyTotal = 0;
                 long sampleCount = 0;
                 bool endOfData = false;
@@ -52,12 +72,16 @@ namespace Archiver.Utilities.Tape
                 do
                 {
                     endOfData = tape.Read(buffer);
-                    progress.TotalCopiedBytes += size;
-                    progress.PercentCopied = ((double)progress.TotalCopiedBytes / (double)progress.TotalBytes) * 100.0;
 
-                    md5Offset += md5.TransformBlock(buffer, 0, size, buffer, 0);
+                    if (!endOfData)
+                    {
+                        progress.TotalCopiedBytes += size;
+                        progress.PercentCopied = ((double)progress.TotalCopiedBytes / (double)progress.TotalBytes) * 100.0;
                     
-                    if (sw.ElapsedMilliseconds - lastSample > _sampleDurationMs)
+                        md5.TransformBlock(buffer, 0, size, buffer, 0);
+                    }
+                    
+                    if (sw.ElapsedMilliseconds - lastSample > _sampleDurationMs || endOfData)
                     {
                         sampleCount++;
 
@@ -65,7 +89,7 @@ namespace Archiver.Utilities.Tape
                         double timeSinceLastUpdate = (double)(sw.ElapsedMilliseconds - lastSample) / 1000.0;
                         lastSampleCopyTotal = progress.TotalCopiedBytes;
 
-                        progress.InstantTransferRate = (double)progress.BytesCopiedSinceLastupdate / timeSinceLastUpdate;;
+                        progress.InstantTransferRate = (double)progress.BytesCopiedSinceLastupdate / timeSinceLastUpdate;
 
                         if (sampleCount == 1)
                             progress.AverageTransferRate = progress.InstantTransferRate;
@@ -80,7 +104,6 @@ namespace Archiver.Utilities.Tape
                 }
                 while (!endOfData);
 
-                progress.TotalBytes = progress.TotalCopiedBytes;
                 progress.PercentCopied = 100.0;
 
                 OnProgressChanged(progress);

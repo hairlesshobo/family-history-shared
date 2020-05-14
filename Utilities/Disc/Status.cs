@@ -95,7 +95,7 @@ namespace Archiver.Utilities.Disc
             line += " Copy: ";
             line += $"{Formatting.GetFriendlySize(disc.BytesCopied).PadLeft(10)}";
             line += " ";
-            line += FileCountPosition(currentFile, disc.TotalFiles, _copyWidth);
+            line += StatusHelpers.FileCountPosition(currentFile, disc.TotalFiles, _copyWidth);
             line += " ";
             line += "[" + Formatting.GetFriendlyTransferRate(instantTransferRate).PadLeft(12) + "]";
             line += " ";
@@ -210,7 +210,7 @@ namespace Archiver.Utilities.Disc
 
             string currentSizeFriendly = Formatting.GetFriendlySize(DiscGlobals._totalSize);
             
-            string line = FileCountPosition(fileCount);
+            string line = StatusHelpers.FileCountPosition(fileCount, DiscGlobals._newlyFoundFiles);
             line += $" [{currentSizeFriendly.PadLeft(12)}]";
             line += " ";
 
@@ -225,7 +225,7 @@ namespace Archiver.Utilities.Disc
             if (_distributeLine == -1)
                 _distributeLine = _nextLine++;            
 
-            string line = FileCountPosition(fileCount);
+            string line = StatusHelpers.FileCountPosition(fileCount, DiscGlobals._newlyFoundFiles);
             line += $" [ {discCount.ToString().PadLeft(3)} Disc(s)]";
             line += " ";
 
@@ -244,17 +244,6 @@ namespace Archiver.Utilities.Disc
         }
 
 
-        private static string FileCountPosition (long currentFile, long totalFiles = -1, int width = 0)
-        {
-            if (totalFiles == -1)
-                totalFiles = DiscGlobals._newlyFoundFiles;
 
-            string totalFilesStr = totalFiles.ToString();
-
-            if (width == 0)
-                width = totalFilesStr.Length;
-
-            return $"[{currentFile.ToString().PadLeft(width)} / {totalFiles.ToString().PadLeft(width)}]";
-        }
     }
 }

@@ -66,7 +66,7 @@ namespace Archiver.Utilities.Tape
             }
         }
 
-        public static string ReadSummaryFromTape()
+        public static string ReadTxtSummaryFromTape()
         {
             using (TapeOperator tape = new TapeOperator(Config.TapeDrive))
             {
@@ -86,10 +86,47 @@ namespace Archiver.Utilities.Tape
 
                     if (strlen > 0)
                         summary += Encoding.UTF8.GetString(buffer, 0, strlen);
+                    else
+                        summary += Encoding.UTF8.GetString(buffer, 0, buffer.Length);
                 }
                 while (!endOfData);
 
                 return summary;
+            }
+        }
+
+        public static TapeSummary ReadTapeSummaryFromTape()
+        {
+            bool hasJson = TapeHasJsonRecord();
+
+            if (!hasJson)
+                throw new InvalidOperationException("Tape does not have json record!");
+
+            using (TapeOperator tape = new TapeOperator(Config.TapeDrive, 64 * 1024))
+            {
+                byte[] buffer = new byte[tape.BlockSize];
+
+                // seek the tape to the beginning of the file marker
+                tape.RewindTape();
+                tape.SetTapeFilePosition(1);
+
+                string json = String.Empty;
+                bool endOfData = false;
+
+                do
+                {
+                    endOfData = tape.Read(buffer);
+
+                    int strlen = Array.IndexOf(buffer, (byte)0);
+
+                    if (strlen > 0)
+                        json += Encoding.UTF8.GetString(buffer, 0, strlen);
+                    else
+                        json += Encoding.UTF8.GetString(buffer, 0, buffer.Length);
+                }
+                while (!endOfData);
+
+                return JsonConvert.DeserializeObject<TapeSummary>(json);
             }
         }
 
@@ -131,15 +168,15 @@ namespace Archiver.Utilities.Tape
             }
         }
 
-        public static void WriteStringToTape(TapeOperator tape, string input, bool beginningOfTape)
+        public static void WriteStringToTape(TapeOperator tape, string input, bool appendToTape)
         {
             byte[] rawData = Encoding.UTF8.GetBytes(input);
             int lengthNeeded = (int)Helpers.RoundToNextMultiple(rawData.Length, (int)tape.BlockSize);
             Array.Resize(ref rawData, lengthNeeded);
 
-            if (beginningOfTape)
-                tape.SetTapeFilePosition(0);
-            else
+            //if (beginningOfTape)
+            //    tape.SetTapeFilePosition(0);
+            if (appendToTape)
                 tape.SetTapeToEndOfData();
 
             using (MemoryStream reader = new MemoryStream(rawData, 0, rawData.Length, false))
