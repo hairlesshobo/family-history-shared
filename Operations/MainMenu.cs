@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using Archiver.Classes.Tape;
 using Archiver.Utilities;
 using Archiver.Utilities.Shared;
+using Archiver.Utilities.Tape;
 
 namespace Archiver.Operations
 {
@@ -41,8 +43,29 @@ namespace Archiver.Operations
             },
             new CliMenuEntry() {
                 Name = "Run tape archive",
-                Action = NotImplemented,
+                Action = () => {
+                    TapeSourceInfo tape = TapeUtils.SelectTape();
+
+                    if (tape != null)
+                    {
+                        TapeProcessor processor = new TapeProcessor(tape);
+                        processor.ProcessTape();
+                    }
+                },
                 Disabled = Globals._readOnlyFs
+            },
+            new CliMenuEntry() {
+                Name = "Read Tape Summary",
+                Action = () => {
+                    string text = TapeUtils.ReadTxtSummaryFromTape();
+
+                    Console.WriteLine(text);
+                    Console.SetCursorPosition(0, 0);
+                }
+            },
+            new CliMenuEntry() {
+                Name = "Verify Tape",
+                Action = NotImplemented
             },
 
 

@@ -39,47 +39,31 @@ namespace Archiver
             Config.ReadConfig();
             Console.WriteLine("done");
 
-            // Console.Write("Reading disc index... ");
-            // Helpers.ReadIndex();
-            // Console.WriteLine("done");
+            Console.Write("Reading disc index... ");
+            Helpers.ReadIndex();
+            Console.WriteLine("done");
 
             Console.Clear();
 
-            //Console.WriteLine(ReadSummary());
+            // MD5_Tape md5 = new MD5_Tape();
+            // md5.OnProgressChanged += (progress) => {
+            //     Console.CursorLeft = 0;
 
-            TapeSummary summary = TapeUtils.ReadTapeSummaryFromTape();
+            //     string left = String.Empty;
+            //     left += Formatting.GetFriendlySize(progress.TotalCopiedBytes).PadLeft(10);
+            //     left += " ";
+            //     left += $"[{Formatting.GetFriendlyTransferRate(progress.InstantTransferRate).PadLeft(12)}]";
+            //     left += " ";
+            //     left += $"[{Formatting.GetFriendlyTransferRate(progress.AverageTransferRate).PadLeft(12)}]";
 
-            //TapeProcessor processor = new TapeProcessor();
-            //processor.ProcessTape();
-            
+            //     Console.Write(left + StatusHelpers.GeneratePercentBar(Console.BufferWidth, left.Length, 0, progress.PercentCopied, (progress.PercentCopied == 100.0)));
+            // };
 
-            // Console.ReadLine();
-            // return;
+            // Thread thread = new Thread(md5.GenerateHash);
+            // thread.Start();
+            // thread.Join();
 
-
-            MD5_Tape md5 = new MD5_Tape();
-            md5.OnProgressChanged += (progress) => {
-                Console.CursorLeft = 0;
-
-                string left = String.Empty;
-                left += Formatting.GetFriendlySize(progress.TotalCopiedBytes).PadLeft(10);
-                left += " ";
-                left += $"[{Formatting.GetFriendlyTransferRate(progress.InstantTransferRate).PadLeft(12)}]";
-                left += " ";
-                left += $"[{Formatting.GetFriendlyTransferRate(progress.AverageTransferRate).PadLeft(12)}]";
-
-                Console.Write(left + StatusHelpers.GeneratePercentBar(Console.BufferWidth, left.Length, 0, progress.PercentCopied, (progress.PercentCopied == 100.0)));
-            };
-
-            Thread thread = new Thread(md5.GenerateHash);
-            thread.Start();
-            thread.Join();
-
-
-            //Console.WriteLine(TapeUtils.ReadSummaryFromTape());
-            //TapeUtils.ListContentsFromTape();
-
-            //MainMenu.StartOperation();
+            MainMenu.StartOperation();
 
             Console.ReadLine();
         }

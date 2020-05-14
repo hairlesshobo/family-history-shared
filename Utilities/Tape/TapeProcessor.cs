@@ -18,11 +18,6 @@ namespace Archiver.Utilities.Tape
         private TapeDetail _tapeDetail;
         private TapeStatus _status;
 
-        public TapeProcessor()
-        {
-            Initialize(TapeUtils.SelectTape());
-        }
-
         public TapeProcessor(TapeSourceInfo sourceInfo)
         {
             Initialize(sourceInfo);
@@ -33,6 +28,7 @@ namespace Archiver.Utilities.Tape
             _sourceInfo = sourceInfo;
             _tapeDetail = new TapeDetail()
             {
+                ID = sourceInfo.ID,
                 Name = sourceInfo.Name,
                 SourceInfo = sourceInfo,
                 WriteDTM = DateTime.UtcNow
@@ -166,7 +162,7 @@ namespace Archiver.Utilities.Tape
 
             using (TapeOperator tape = new TapeOperator(Config.TapeDrive, 64 * 1024))
             {
-                string json = JsonConvert.SerializeObject(_tapeDetail.GetSummary(), Newtonsoft.Json.Formatting.Indented);
+                string json = JsonConvert.SerializeObject(_tapeDetail.GetSummary(), Newtonsoft.Json.Formatting.None);
 
                 TapeUtils.WriteStringToTape(tape, json, true);
                 tape.WriteFilemark();
@@ -181,7 +177,6 @@ namespace Archiver.Utilities.Tape
             uint bufferBlockCount = 4096 * 3; // results in a 3gb buffer
 
             using (TapeOperator tape = new TapeOperator(Config.TapeDrive, blockSize))
-            // using (FileStream fileStream = new FileStream(@"D:\tape\test.tar", FileMode.Create, FileAccess.Write))
             {
                 lock (_status)
                 {

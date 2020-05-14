@@ -21,19 +21,24 @@ namespace Archiver.Utilities.Tape
             string[] files = Directory.GetFiles(searchPath, "*.json");
 
             List<CliMenuEntry<TapeSourceInfo>> entries = new List<CliMenuEntry<TapeSourceInfo>>();
+            List<TapeSourceInfo> sources = new List<TapeSourceInfo>();
 
             foreach (string file in files)
             {
-                TapeSourceInfo source = JsonConvert.DeserializeObject<TapeSourceInfo>(File.ReadAllText(file));
+                sources.Add(JsonConvert.DeserializeObject<TapeSourceInfo>(File.ReadAllText(file)));
+            }
 
+            foreach (TapeSourceInfo source in sources.OrderBy(x => x.ID))
+            {
                 entries.Add(new CliMenuEntry<TapeSourceInfo>() {
-                    Name = source.Name,
+                    Name = $"{source.ID.ToString().PadLeft(3)}: {source.Name}",
                     SelectedValue = source
                 });
             }
 
             CliMenu<TapeSourceInfo> menu = new CliMenu<TapeSourceInfo>(entries);
             menu.MenuLabel = "Select tape...";
+            menu.OnCancel += Operations.MainMenu.StartOperation;
             
             List<TapeSourceInfo> selectedItems = menu.Show(true);
 

@@ -7,6 +7,7 @@ namespace Archiver.Classes.Tape
 {
     public class TapeSummary
     {
+        public int ID { get; set; }
         public string Name { get; set; }
         public int BlockingFactor { get; set; }
         public DateTime WriteDTM { get; set; }
