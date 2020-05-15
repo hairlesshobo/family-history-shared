@@ -39,7 +39,7 @@ namespace Archiver
             Config.ReadConfig();
             Console.WriteLine("done");
             
-            //Helpers.ReadDiscIndex();
+            Helpers.ReadDiscIndex();
 
             Console.Clear();
 
