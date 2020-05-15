@@ -36,6 +36,20 @@ namespace Archiver.Utilities.Shared
             WriteStatusLine(left, line, color);
         }
 
+        public static void ClearLine(int lineNum)
+        {
+            Console.SetCursorPosition(0, lineNum);
+
+            ClearLine();
+        }
+
+        public static void ClearLine()
+        {
+            Console.CursorLeft = 0;
+            Console.Write("".PadRight(Console.BufferWidth-2));
+            Console.CursorLeft = 0;
+        }
+
         public static void WriteStatusLine(string left, string right)
         {
             WriteStatusLine(left, right, Console.ForegroundColor);
@@ -57,15 +71,34 @@ namespace Archiver.Utilities.Shared
             Console.ResetColor();
         }
 
-        public static string GeneratePercentBar (int AvailableSpace, int LeftLength, int RightLength, double CurrentPercent, bool Complete)
-        {
-            return GeneratePercentBar(AvailableSpace, LeftLength, RightLength, CurrentPercent, Complete, true);
-        }
-
         public static string GeneratePercentBar (int AvailableSpace, int LeftLength, int RightLength, double CurrentPercent, bool Complete, bool Increasing)
         {
+            return GeneratePercentBar(AvailableSpace, LeftLength, RightLength, CurrentPercent, Complete, Increasing, false);
+        }
+
+        public static string GeneratePercentBar (int AvailableSpace, int LeftLength, int RightLength, double CurrentPercent, bool Complete)
+        {
+            return GeneratePercentBar(AvailableSpace, LeftLength, RightLength, CurrentPercent, Complete, true, false);
+        }
+        
+        public static string GeneratePercentBar (int AvailableSpace, double CurrentPercent, bool Complete, bool Increasing, bool BarOnly)
+        {
+            return GeneratePercentBar(AvailableSpace, 0, 0, CurrentPercent, Complete, Increasing, BarOnly);
+        }
+
+        public static string GeneratePercentBar (int AvailableSpace, double CurrentPercent, bool Complete, bool Increasing)
+        {
+            return GeneratePercentBar(AvailableSpace, 0, 0, CurrentPercent, Complete, Increasing, false);
+        }
+
+
+        public static string GeneratePercentBar (int AvailableSpace, int LeftLength, int RightLength, double CurrentPercent, bool Complete, bool Increasing, bool BarOnly)
+        {
             string percentLeft = "[";
-            string percentRight = "] " + Math.Round(CurrentPercent, 0).ToString().PadLeft(3) + "%";
+            string percentRight = "]";
+            
+            if (BarOnly == false)
+                percentRight += " " + Math.Round(CurrentPercent, 0).ToString().PadLeft(3) + "%";
 
             int totalSegments = AvailableSpace - LeftLength - RightLength - percentRight.Length - percentLeft.Length - 1;
             int completeSegments = (int)Math.Floor(totalSegments * (CurrentPercent/100.0));

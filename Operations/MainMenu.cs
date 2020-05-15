@@ -17,7 +17,7 @@ namespace Archiver.Operations
             },
             new CliMenuEntry() {
                 Name = "Run Archive process",
-                Action = Archiver.StartOperation,
+                Action = DiscArchiver.StartOperation,
                 Disabled = Globals._readOnlyFs
             },
             new CliMenuEntry() {
@@ -43,15 +43,7 @@ namespace Archiver.Operations
             },
             new CliMenuEntry() {
                 Name = "Run tape archive",
-                Action = () => {
-                    TapeSourceInfo tape = TapeUtils.SelectTape();
-
-                    if (tape != null)
-                    {
-                        TapeProcessor processor = new TapeProcessor(tape);
-                        processor.ProcessTape();
-                    }
-                },
+                Action = TapeArchiver.StartOperation,
                 Disabled = Globals._readOnlyFs
             },
             new CliMenuEntry() {

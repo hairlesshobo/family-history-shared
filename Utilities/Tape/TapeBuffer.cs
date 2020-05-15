@@ -5,6 +5,17 @@ using System.Threading;
 
 namespace Archiver.Utilities.Tape
 {
+    public class TapeBufferStatus
+    {
+        public bool CanWrite { get; set; }
+        public bool CanRead { get; set; }
+        public bool InputComplete { get; set; }
+        public long BytesWritten { get; set; }
+        public long BytesRead { get; set; }
+        public double CurrentBufferPercent { get; set; }
+        public uint BlocksFull { get; set; }
+    }
+
     public class TapeBuffer : Stream
     {
         #region Constants
@@ -40,6 +51,23 @@ namespace Archiver.Utilities.Tape
         #endregion Private Fields
 
         #region Public Properties
+        public TapeBufferStatus GetStatus()
+        {
+            TapeBufferStatus status = new TapeBufferStatus();
+
+            lock (_sizeSyncRoot)
+            {
+                status.CanWrite = this.CanWrite;
+                status.CanRead = this.CanRead;
+                status.InputComplete = this.InputComplete;
+                status.BytesWritten = this.BytesWritten;
+                status.BytesRead = this.BytesRead;
+                status.CurrentBufferPercent = this.CurrentBufferPercent;
+                status.BlocksFull = this.BlocksFull;
+            }
+
+            return status;
+        }
         public bool EndOfStream { 
             get
             {
@@ -64,18 +92,21 @@ namespace Archiver.Utilities.Tape
         public uint BlocksFull {
             get
             {
-                if (_bufferActive == false)
-                    return 0;
-                else
+                lock (_sizeSyncRoot)
                 {
-                    if (_bufferWritePointer == _bufferReadPointer)
-                        return (uint)_memoryBuffer.Length;
+                    if (_bufferActive == false)
+                        return 0;
                     else
                     {
-                        if (_bufferWritePointer < _bufferReadPointer)
-                            return (uint)(_memoryBuffer.Length-_bufferReadPointer)+_bufferWritePointer;
+                        if (this.BufferFull)
+                            return (uint)_memoryBuffer.Length;
                         else
-                            return (uint)_bufferWritePointer-_bufferReadPointer;
+                        {
+                            if (_bufferWritePointer < _bufferReadPointer)
+                                return (uint)(_memoryBuffer.Length-_bufferReadPointer)+_bufferWritePointer;
+                            else
+                                return (uint)_bufferWritePointer-_bufferReadPointer;
+                        }
                     }
                 }
             }
@@ -85,7 +116,10 @@ namespace Archiver.Utilities.Tape
         {
             get
             {
-                return _bufferActive;
+                lock (_sizeSyncRoot)
+                {
+                    return _bufferActive;
+                }
             }
         }
 
@@ -115,7 +149,10 @@ namespace Archiver.Utilities.Tape
         {
             get
             {
-                return (_bufferActive && _bufferWritePointer == _bufferReadPointer);
+                lock (_sizeSyncRoot)
+                {
+                    return (_bufferActive && _bufferWritePointer == _bufferReadPointer);
+                }
             }
         }
 
@@ -145,7 +182,10 @@ namespace Archiver.Utilities.Tape
         {
             get
             {
-                return (long)this.BlocksFull * (long)_bufferBlockSize;
+                lock (_sizeSyncRoot)
+                {
+                    return (long)this.BlocksFull * (long)_bufferBlockSize;
+                }
             }
         }
 

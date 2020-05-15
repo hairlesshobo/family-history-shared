@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using Archiver.Classes;
 using Archiver.Classes.Disc;
+using Archiver.Classes.Tape;
 using Archiver.Utilities.Disc;
 using Newtonsoft.Json;
 
@@ -88,16 +89,34 @@ namespace Archiver.Utilities.Shared
             return selectedDrive;
         }
 
-        public static void ReadIndex()
+        public static void ReadDiscIndex()
         {
             string jsonDir = Globals._indexDiscDir + "/json";
 
             if (Directory.Exists(jsonDir))
             {
-                string[] jsonFiles = Directory.GetFiles(jsonDir, "*.json");
+                string[] jsonFiles = Directory.GetFiles(jsonDir, "disc_*.json");
+                int totalFiles = jsonFiles.Length;
+                
+                if (totalFiles > 0)
+                {
+                    int currentFile = 0;
 
-                foreach (string jsonFile in jsonFiles)
-                    DiscGlobals._destinationDiscs.Add(JsonConvert.DeserializeObject<DiscDetail>(File.ReadAllText(jsonFile)));
+                    foreach (string jsonFile in jsonFiles)
+                    {
+                        currentFile++;
+
+                        string line = "Reading disc index files... ";
+                        line += $"{currentFile.ToString().PadLeft(totalFiles.ToString().Length)}/{totalFiles}";
+
+                        Console.CursorLeft = 0;
+                        Console.Write(line);
+
+                        DiscGlobals._destinationDiscs.Add(JsonConvert.DeserializeObject<DiscDetail>(File.ReadAllText(jsonFile)));
+                    }
+
+                    Console.WriteLine();
+                }
             }
         }
 
@@ -197,6 +216,25 @@ namespace Archiver.Utilities.Shared
             string jsonFilePath = destinationDir + "/" + fileName;
 
             string json = JsonConvert.SerializeObject(disc, new JsonSerializerSettings() {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                Formatting = Newtonsoft.Json.Formatting.Indented
+            });
+
+            // Write the json data needed for future runs of this app
+            File.WriteAllText(jsonFilePath, json, Encoding.UTF8);
+        }
+
+        public static void SaveTape(TapeDetail tape)
+        {
+            string destinationDir = Globals._indexDiscDir + "/json";
+            string fileName = $"tape_{tape.ID.ToString("000")}.json";
+
+            if (!Directory.Exists(destinationDir))
+                Directory.CreateDirectory(destinationDir);
+
+            string jsonFilePath = destinationDir + "/" + fileName;
+
+            string json = JsonConvert.SerializeObject(tape, new JsonSerializerSettings() {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                 Formatting = Newtonsoft.Json.Formatting.Indented
             });

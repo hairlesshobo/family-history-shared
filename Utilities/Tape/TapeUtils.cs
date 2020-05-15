@@ -100,6 +100,24 @@ namespace Archiver.Utilities.Tape
             }
         }
 
+        public static TapeInfo GetTapeInfo(TapeOperator tape)
+        {
+            return new TapeInfo()
+            {
+                MediaInfo = tape.MediaInfo,
+                DriveInfo = tape.DriveInfo,
+                TapePosition = tape.GetTapeBlockPosition()
+            };
+        }
+
+        public static TapeInfo GetTapeInfo()
+        {
+            using (TapeOperator tape = new TapeOperator(Config.TapeDrive, false))
+            {
+                return GetTapeInfo(tape);
+            }
+        }
+
         public static TapeSummary ReadTapeSummaryFromTape()
         {
             bool hasJson = TapeHasJsonRecord();
@@ -107,7 +125,7 @@ namespace Archiver.Utilities.Tape
             if (!hasJson)
                 throw new InvalidOperationException("Tape does not have json record!");
 
-            using (TapeOperator tape = new TapeOperator(Config.TapeDrive, 64 * 1024))
+            using (TapeOperator tape = new TapeOperator(Config.TapeDrive, (uint)Config.TapeTextBlockSize, false))
             {
                 byte[] buffer = new byte[tape.BlockSize];
 
@@ -173,18 +191,15 @@ namespace Archiver.Utilities.Tape
             }
         }
 
-        public static void WriteStringToTape(TapeOperator tape, string input, bool appendToTape)
+        public static void WriteBytesToTape(TapeOperator tape, byte[] inputBuffer, bool appendToTape)
         {
-            byte[] rawData = Encoding.UTF8.GetBytes(input);
-            int lengthNeeded = (int)Helpers.RoundToNextMultiple(rawData.Length, (int)tape.BlockSize);
-            Array.Resize(ref rawData, lengthNeeded);
+            if (inputBuffer.Length % (int)tape.BlockSize != 0)
+                throw new InvalidDataException("Provided input buffer must be a multiple of tape blocksize");
 
-            //if (beginningOfTape)
-            //    tape.SetTapeFilePosition(0);
-            if (appendToTape)
-                tape.SetTapeToEndOfData();
+            //if (appendToTape)
+            //    tape.SetTapeToEndOfData();
 
-            using (MemoryStream reader = new MemoryStream(rawData, 0, rawData.Length, false))
+            using (MemoryStream reader = new MemoryStream(inputBuffer, 0, inputBuffer.Length, false))
             {
                 int currentPosition = 0;
                 byte[] buffer = new byte[tape.BlockSize];
@@ -196,6 +211,23 @@ namespace Archiver.Utilities.Tape
                     tape.Write(buffer);
                 }
             }
+        }
+
+        public static bool IsTapeLoaded()
+        {
+            using (TapeOperator tape = new TapeOperator(Config.TapeDrive, false))
+            {
+                return tape.TapeLoaded();
+            }
+        }
+
+        public static byte[] GetStringPaddedBytes(string Input, uint BlockSize)
+        {
+            byte[] rawData = Encoding.UTF8.GetBytes(Input);
+            int lengthNeeded = (int)Helpers.RoundToNextMultiple(rawData.Length, (int)BlockSize);
+            Array.Resize(ref rawData, lengthNeeded);
+
+            return rawData;
         }
     }
 }

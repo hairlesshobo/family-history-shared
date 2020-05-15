@@ -30,6 +30,7 @@ namespace Archiver.Utilities.Tape
             {
                 ID = sourceInfo.ID,
                 Name = sourceInfo.Name,
+                Description = sourceInfo.Description,
                 SourceInfo = sourceInfo,
                 WriteDTM = DateTime.UtcNow
             };
@@ -52,13 +53,31 @@ namespace Archiver.Utilities.Tape
                 {
                     _status.WriteStatus("Rewinding tape");
                 }
+
                 rewindThread.Join();
             }
 
-            WriteTapeSummary();
-            WriteTapeJsonSummary();
-            ArchiveFiles();
-            RewindTape();
+            _status.ShowBeforeSummary(TapeUtils.GetTapeInfo());
+
+            if (CheckDestinationSize())
+            {
+                WriteTapeSummary();
+                WriteTapeJsonSummary();
+                ArchiveFiles();
+
+                _status.ShowAfterSummary(TapeUtils.GetTapeInfo());
+
+                WriteTapeJsonToIndex();
+                RewindTape();
+
+                if (Config.TapeAutoEject)
+                    EjectTape();
+            }
+
+            lock (_status)
+            {
+                _status.WriteStatus("Complete!");
+            }
 
             _status.Dispose();
         }
@@ -70,9 +89,22 @@ namespace Archiver.Utilities.Tape
                 _status.WriteStatus("Rewinding tape");
             }
 
-            using (TapeOperator tape = new TapeOperator(Config.TapeDrive))
+            using (TapeOperator tape = new TapeOperator(Config.TapeDrive, false))
             {
                 tape.RewindTape();
+            }
+        }
+
+        private void EjectTape()
+        {
+            lock (_status)
+            {
+                _status.WriteStatus("Ejecting tape");
+            }
+
+            using (TapeOperator tape = new TapeOperator(Config.TapeDrive, false))
+            {
+                tape.EjectTape();
             }
         }
         
@@ -120,6 +152,23 @@ namespace Archiver.Utilities.Tape
             sizeThread.Join();
         }
 
+        private bool CheckDestinationSize()
+        {
+            TapeInfo info = TapeUtils.GetTapeInfo();
+
+            // if the archive is smaller than the tape, we know we are 
+            // good so we just return true
+            if (info.MediaInfo.Capacity > _tapeDetail.TotalArchiveBytes)
+                return true;
+
+            double ratioRequired = (double)_tapeDetail.TotalArchiveBytes / (double)info.MediaInfo.Capacity;
+
+            if (ratioRequired > 1.0)
+                return _status.ShowTapeWarning(ratioRequired);
+
+            return false;
+        }
+
         private void WriteTapeSummary()
         {
             lock (_status)
@@ -127,7 +176,7 @@ namespace Archiver.Utilities.Tape
                 _status.WriteStatus("Writing summary to tape");
             }
 
-            using (TapeOperator tape = new TapeOperator(Config.TapeDrive, 64 * 1024))
+            using (TapeOperator tape = new TapeOperator(Config.TapeDrive, (uint)Config.TapeTextBlockSize, false))
             {
                 string templatePath = Path.Join(Directory.GetCurrentDirectory(), "templates", "tape_summary.txt");
                 string[] lines = File.ReadAllLines(templatePath);
@@ -148,8 +197,11 @@ namespace Archiver.Utilities.Tape
                                          + "\n";
                 }
 
-                TapeUtils.WriteStringToTape(tape, summaryOutput, false);
+                byte[] buffer = TapeUtils.GetStringPaddedBytes(summaryOutput, tape.BlockSize);
+                TapeUtils.WriteBytesToTape(tape, buffer, false);
                 tape.WriteFilemark();
+
+                _tapeDetail.SummaryFileBytes = buffer.Length;
             }
         }
 
@@ -160,11 +212,23 @@ namespace Archiver.Utilities.Tape
                 _status.WriteStatus("Writing json record to tape");
             }
 
-            using (TapeOperator tape = new TapeOperator(Config.TapeDrive, 64 * 1024))
+            using (TapeOperator tape = new TapeOperator(Config.TapeDrive, (uint)Config.TapeTextBlockSize, false))
             {
-                string json = JsonConvert.SerializeObject(_tapeDetail.GetSummary(), Newtonsoft.Json.Formatting.None);
+                // this probably isn't a great way to handle it, but it was the only way i could think of.
+                // sure it wastes a little memory and cpu cycles having to serialize twice, but oh well.
+                // in the grand scheme of writing a tape, this will be a minimal overheader
 
-                TapeUtils.WriteStringToTape(tape, json, true);
+                // lets use MaxValue as a placeholder to determine the output size
+                _tapeDetail.JsonFileBytes = int.MaxValue;
+                string json = JsonConvert.SerializeObject(_tapeDetail.GetSummary(), Newtonsoft.Json.Formatting.None);
+                byte[] buffer = TapeUtils.GetStringPaddedBytes(json, tape.BlockSize);
+
+                // then we store the actual value and serialize it again
+                _tapeDetail.JsonFileBytes = buffer.Length;
+                json = JsonConvert.SerializeObject(_tapeDetail.GetSummary(), Newtonsoft.Json.Formatting.None);
+                buffer = TapeUtils.GetStringPaddedBytes(json, tape.BlockSize);
+
+                TapeUtils.WriteBytesToTape(tape, buffer, true);
                 tape.WriteFilemark();
             }
         }
@@ -174,23 +238,19 @@ namespace Archiver.Utilities.Tape
         private void ArchiveFiles()
         {
             uint blockSize = (uint)(512 * Config.TapeBlockingFactor);
-            uint bufferBlockCount = 4096 * 3; // results in a 3gb buffer
+            uint bufferBlockCount = (uint)Config.TapeMemoryBufferBlockCount;
+            uint minBufferPercent = (uint)Config.TapeMemoryBufferMinFill;
 
-            using (TapeOperator tape = new TapeOperator(Config.TapeDrive, blockSize))
+            TapeInfo beforeInfo = TapeUtils.GetTapeInfo();
+
+            using (TapeOperator tape = new TapeOperator(Config.TapeDrive, blockSize, false))
             {
-                lock (_status)
-                {
-                    _status.WriteStatus("Positioning tape");
-                }
-
-                tape.SetTapeToEndOfData();
-
                 lock (_status)
                 {
                     _status.WriteStatus("Allocating memory buffer");
                 }
 
-                TapeTarWriter writer = new TapeTarWriter(_tapeDetail, tape, blockSize, bufferBlockCount);
+                TapeTarWriter writer = new TapeTarWriter(_tapeDetail, tape, blockSize, bufferBlockCount, minBufferPercent);
 
                 lock (_status)
                 {
@@ -198,16 +258,30 @@ namespace Archiver.Utilities.Tape
                 }
 
                 writer.OnProgressChanged += (progress) => {
-                    _status.WriteElapsed();
-                    _status.UpdateBuffer(progress);
-                    _status.UpdateTarInput(progress);
                     _status.UpdateTarWrite(progress);
                     _status.UpdateTapeWrite(progress);
                 };
                 
                 writer.Start();
+
+                // we want to pull the size BEFORE we write the filemark.. because it seems 
+                // that a filemark take an entire block, which can mess with our verification and
+                // compression ratio calculation
+                TapeInfo afterInfo = TapeUtils.GetTapeInfo(tape);
+                _tapeDetail.ArchiveBytesOnTape = (afterInfo.TapePosition - beforeInfo.TapePosition) * blockSize;
+
                 tape.WriteFilemark();
             }
+        }
+
+        private void WriteTapeJsonToIndex()
+        {
+            lock (_status)
+            {
+                _status.WriteStatus("Saving tape details to index");
+            }
+
+            Helpers.SaveTape(_tapeDetail);
         }
     }
 }

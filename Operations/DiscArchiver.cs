@@ -4,7 +4,7 @@ using Archiver.Utilities.Disc;
 
 namespace Archiver.Operations
 {
-    public static class Archiver
+    public static class DiscArchiver
     {
         public static void StartOperation()
         {

@@ -46,19 +46,17 @@ namespace Archiver.Operations
                                                       .OrderByDescending(x => x.Count);
 
             int maxCountWidth = fileCounts.Max(x => x.Count.ToString().Length);
-            int columnWidth = fileCounts.Max(x => x.Extension.Length) + 5;
+            int columnWidth = new int[] { 6, fileCounts.Max(x => x.Extension.Length) }.Max() + 5;
 
             foreach (FileType type in fileCounts)
             {
-                string extension = "<no extension>";
+                string extension = "<none>";
 
                 if (type.Extension != String.Empty)
                     extension = type.Extension;
 
                 Console.WriteLine($"{extension.PadLeft(columnWidth)}: {type.Count.ToString().PadLeft(maxCountWidth+2)}");
             }
-
-            //var jsonFiles = Globals._sourceFiles.Where(x => x.Extension == "json").Select(x => x.FullPath);
         }
     }
 }

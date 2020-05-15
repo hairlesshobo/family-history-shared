@@ -38,12 +38,12 @@ namespace Archiver
             Console.Write("Reading configuration... ");
             Config.ReadConfig();
             Console.WriteLine("done");
-
-            Console.Write("Reading disc index... ");
-            Helpers.ReadIndex();
-            Console.WriteLine("done");
+            
+            //Helpers.ReadDiscIndex();
 
             Console.Clear();
+
+            
 
             // MD5_Tape md5 = new MD5_Tape();
             // md5.OnProgressChanged += (progress) => {

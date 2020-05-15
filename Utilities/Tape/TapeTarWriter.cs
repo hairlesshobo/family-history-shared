@@ -42,6 +42,7 @@ namespace Archiver.Utilities.Tape
         }
         public long TarBytesWritten { get; set; }
         public long TarTotalFiles { get; set; }
+        public bool TarInputComplete { get; set; }
         public double TarInstantTransferRate { get; set; }
         public double TarAverageTransferRate { get; set; }
         public long TarCurrentFileCount { get; set; }
@@ -77,15 +78,14 @@ namespace Archiver.Utilities.Tape
         public event TapeTarProgressDelegate OnProgressChanged;
         public event TapeTarCompleteDelegate OnTapeComplete;
 
-        public TapeTarWriter(TapeDetail tapeDetail, TapeOperator tape, uint BlockSize, uint BufferBlockCount)
+        public TapeTarWriter(TapeDetail tapeDetail, TapeOperator tape, uint BlockSize, uint BufferBlockCount, uint BufferFillPercent)
         {
             _tapeDetail = tapeDetail;
             _tape = tape;
             _blockSize = BlockSize;
             _blockCount = BufferBlockCount;
 
-            // TODO: move buffer count to config
-            _tapeBuffer = new TapeBuffer(_blockSize, _blockCount);
+            _tapeBuffer = new TapeBuffer(_blockSize, _blockCount, BufferFillPercent);
             _tarOutStream = new TarOutputStream(_tapeBuffer, Config.TapeBlockingFactor);
             _archive = new CustomTarArchive(_tarOutStream);
 
@@ -114,6 +114,7 @@ namespace Archiver.Utilities.Tape
             long tapeLastBytes = 0;
             long tapeSampleCount = 0;
             long tarSampleCount = 0;
+            TapeBufferStatus stats;
 
             // we loop here until both threads complete, that way we can
             // send out status updates while the threads are running
@@ -121,18 +122,26 @@ namespace Archiver.Utilities.Tape
             {
                 if ((sw.ElapsedMilliseconds - lastUpdate) > _updateMilliseconds)
                 {
-                    progress.TarBytesWritten = _tapeBuffer.BytesWritten;
-                    progress.TapeBytesWritten = _tapeBuffer.BytesRead;
-                    progress.BufferPercent = _tapeBuffer.CurrentBufferPercent;
-                    progress.BufferCapacityBytes = (uint)(512 * _tapeDetail.BlockingFactor);
-                    progress.BufferFilledBytes = _tapeBuffer.BlocksFull * _blockSize;
+                    stats = _tapeBuffer.GetStatus();
 
-                    if (_tapeBuffer.InputComplete)
+                    progress.TarInputComplete = stats.InputComplete;
+                    progress.TarBytesWritten = stats.BytesWritten;
+                    progress.TapeBytesWritten = stats.BytesRead;
+                    progress.BufferPercent = stats.CurrentBufferPercent;
+                    progress.BufferFilledBytes = stats.BlocksFull * _blockSize;
+
+
+                    progress.BufferCapacityBytes = _blockCount * _blockSize;
+
+                    if (progress.BufferPercent == 100.0)
+                        progress.BufferFilledBytes = progress.BufferCapacityBytes;
+
+                    if (progress.TarInputComplete)
                         progress.TarStatus = TapeTarWriterStatus.Complete;
                     else
-                        progress.TarStatus = (_tapeBuffer.CanWrite ? TapeTarWriterStatus.Active : TapeTarWriterStatus.Idle);
+                        progress.TarStatus = TapeTarWriterStatus.Active;
 
-                    progress.TapeStatus = (_tapeBuffer.CanRead ? TapeTarWriterStatus.Active : TapeTarWriterStatus.Idle);
+                    progress.TapeStatus = (stats.CanRead ? TapeTarWriterStatus.Active : TapeTarWriterStatus.Idle);
 
                     if (progress.TarStatus == TapeTarWriterStatus.Active)
                     {
@@ -274,6 +283,8 @@ namespace Archiver.Utilities.Tape
                     _lastFileSize = file.Size;
                     _tarFileCount++;
                 }
+
+                file.Copied = true;
 
                 TarEntry entry = TarEntry.CreateEntryFromFile(file.FullPath);
                 _archive.WriteFileEntry(entry, file);

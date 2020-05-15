@@ -10,6 +10,10 @@ namespace Archiver
     {
         public static string TapeDrive { get; set; }
         public static int TapeBlockingFactor { get; set; }
+        public static int TapeMemoryBufferBlockCount { get; set; }
+        public static int TapeMemoryBufferMinFill { get; set; }
+        public static int TapeTextBlockSize { get; set; }
+        public static bool TapeAutoEject { get; set; }
 
         public static void ReadConfig()
         {
@@ -24,6 +28,10 @@ namespace Archiver
             Globals._ddPath = _config["DdPath"];
             Archiver.Config.TapeDrive = _config["Tape:Drive"];
             Archiver.Config.TapeBlockingFactor = _config.GetSection("Tape:BlockingFactor").Get<int>();
+            Archiver.Config.TapeMemoryBufferBlockCount = _config.GetSection("Tape:MemoryBufferBlockCount").Get<int>();
+            Archiver.Config.TapeMemoryBufferMinFill = _config.GetSection("Tape:MemoryBufferMinFill").Get<int>();
+            Archiver.Config.TapeTextBlockSize = _config.GetSection("Tape:TextBlockSize").Get<int>();
+            Archiver.Config.TapeAutoEject = _config.GetSection("Tape:AutoEject").Get<bool>();
             DiscGlobals._discExcludeFiles = _config.GetSection("Disc:ExcludeFiles").Get<string[]>().ToList();
             DiscGlobals._discSourcePaths = _config.GetSection("Disc:SourcePaths").Get<string[]>();
             Array.Sort(DiscGlobals._discSourcePaths);

@@ -15,8 +15,17 @@ namespace Archiver.Utilities
     #endregion
 
     #region Types
+    public enum DriveStatus
+    {
+        Ready = 0,
+        ErrorEndOfMedia = 1100,
+        ErrorMediaChanged = 1110,
+        ErrorNoMediaInDrive = 1112,
+        ErrorWriteProtect = 19,
+    }
+
     [StructLayout(LayoutKind.Sequential)] 
-    public struct MediaInfo
+    public struct TapeMediaInfo
     {
         public long Capacity;
         public long Remaining;
@@ -157,7 +166,7 @@ namespace Archiver.Utilities
         private SafeFileHandle m_handleValue = null;
 
         private Nullable<TapeDriveInfo> m_driveInfo = null;
-        private Nullable<MediaInfo> m_mediaInfo = null;
+        private Nullable<TapeMediaInfo> m_mediaInfo = null;
         private uint _blockSize = 0;
         #endregion
 
@@ -166,21 +175,28 @@ namespace Archiver.Utilities
         /// <summary>
         /// Loads tape with given name. 
         /// </summary>
-        public TapeOperator(string tapeName): this(tapeName, null)
+        public TapeOperator(string tapeName): this(tapeName, null, true)
+        {
+        }
+
+        /// <summary>
+        /// Loads tape with given name. 
+        /// </summary>
+        public TapeOperator(string tapeName, bool loadTape): this(tapeName, null, loadTape)
         {
         }
 
         /// <summary>
         /// Loads tape with given name and block size. 
         /// </summary>
-        public TapeOperator(string tapeName, int blockSize): this(tapeName, (uint)blockSize)
+        public TapeOperator(string tapeName, int blockSize): this(tapeName, (uint)blockSize, true)
         {
         }   
         
         /// <summary>
         /// Loads tape with given name. 
         /// </summary>
-        public TapeOperator(string tapeName, Nullable<uint> blockSize)
+        public TapeOperator(string tapeName, Nullable<uint> blockSize, bool loadTape = true)
         {            
             // Try to open the file.
             m_handleValue = CreateFile(
@@ -189,18 +205,32 @@ namespace Archiver.Utilities
                 0,
                 IntPtr.Zero,
                 OPEN_EXISTING,
-                FILE_ATTRIBUTE_ARCHIVE | FILE_FLAG_BACKUP_SEMANTICS,
+                0,
+                //FILE_ATTRIBUTE_ARCHIVE | FILE_FLAG_BACKUP_SEMANTICS,
                 IntPtr.Zero
                 );
 
             if (m_handleValue.IsInvalid)
                 throw new TapeOperatorWin32Exception("CreateFile", Marshal.GetLastWin32Error());
 
-            // Load the tape
-            int result = PrepareTape(m_handleValue, TAPE_LOAD, TRUE);
+            // lets check to see if the tape has changed, if it did
+            // then we have to force a load of the tape
+            try {
+                GetDriveInfo();
+            }
+            catch (TapeChangedException)
+            {
+                loadTape = true;
+            }
 
-            if ( result != NO_ERROR )
-                throw new TapeOperatorWin32Exception("PrepareTape", Marshal.GetLastWin32Error());
+            // Load the tape
+            if (loadTape)
+            {
+                int result = PrepareTape(m_handleValue, TAPE_LOAD, TRUE);
+
+                if ( result != NO_ERROR )
+                    throw new TapeOperatorWin32Exception("PrepareTape", Marshal.GetLastWin32Error());
+            }
 
             if (!blockSize.HasValue)
                 blockSize = this.DriveInfo.DefaultBlockSize;
@@ -216,9 +246,49 @@ namespace Archiver.Utilities
             m_stream = new FileStream(m_handleValue, FileAccess.ReadWrite, (int)_blockSize, false);
         }
 
+        public bool TapeLoaded()
+        {
+            int result = 0;
+            IntPtr ptr = IntPtr.Zero;
+            try
+            {
+                m_mediaInfo = new TapeMediaInfo();
+
+                // Allocate unmanaged memory
+                int size = Marshal.SizeOf( m_mediaInfo );
+                ptr = Marshal.AllocHGlobal( size );
+
+                Marshal.StructureToPtr(
+                    m_mediaInfo,
+                    ptr,
+                    false
+                );
+                
+                result = GetTapeParameters(m_handleValue, MEDIA_PARAMS, ref size, ptr);
+            }
+            finally
+            {
+                if ( ptr != IntPtr.Zero )
+                    Marshal.FreeHGlobal(ptr);
+            }
+
+            if (result == 1112)
+                return false;
+            else
+                return true;
+        }
+
         public void RewindTape()
         {
             SetTapeBlockPosition(0);
+        }
+
+        public void EjectTape()
+        {
+            int result = PrepareTape(m_handleValue, TAPE_UNLOAD, FALSE);
+
+            if ( result != NO_ERROR )
+                throw new TapeOperatorWin32Exception("PrepareTape", Marshal.GetLastWin32Error());
         }
 
         /// <summary>
@@ -405,7 +475,7 @@ namespace Archiver.Utilities
             }
         }
 
-        public MediaInfo MediaInfo
+        public TapeMediaInfo MediaInfo
         {
             get
             {
@@ -448,10 +518,17 @@ namespace Archiver.Utilities
 
                     Marshal.StructureToPtr(m_driveInfo, ptr, false);
 
-                    
-                    int result = 0;
-                    if ((result = GetTapeParameters(m_handleValue, DRIVE_PARAMS, ref size, ptr)) != NO_ERROR)
-                        throw new TapeOperatorWin32Exception("GetTapeParameters", Marshal.GetLastWin32Error());
+                    int result = GetTapeParameters(m_handleValue, DRIVE_PARAMS, ref size, ptr);
+                    if (result != NO_ERROR)
+                    {
+                        if (result == 1110)
+                        {
+                            m_driveInfo = null;
+                            throw new TapeChangedException();
+                        }
+                        else
+                            throw new TapeOperatorWin32Exception("GetTapeParameters", Marshal.GetLastWin32Error());
+                    }
 
                     // Get managed media Info
                     m_driveInfo = (TapeDriveInfo)Marshal.PtrToStructure(ptr, typeof(TapeDriveInfo));
@@ -471,7 +548,7 @@ namespace Archiver.Utilities
                 IntPtr ptr = IntPtr.Zero;
                 try
                 {
-                    m_mediaInfo = new MediaInfo();
+                    m_mediaInfo = new TapeMediaInfo();
 
                     // Allocate unmanaged memory
                     int size = Marshal.SizeOf( m_mediaInfo );
@@ -489,7 +566,7 @@ namespace Archiver.Utilities
                         throw new TapeOperatorWin32Exception("GetTapeParameters", Marshal.GetLastWin32Error());
 
                     // Get managed media Info
-                    m_mediaInfo = (MediaInfo)Marshal.PtrToStructure(ptr, typeof(MediaInfo));
+                    m_mediaInfo = (TapeMediaInfo)Marshal.PtrToStructure(ptr, typeof(TapeMediaInfo));
                 }
                 finally
                 {
@@ -521,6 +598,14 @@ namespace Archiver.Utilities
                 methodName,
                 win32ErroCode
             ) ){}
+    }
+
+    public class TapeChangedException : Exception
+    {
+        public TapeChangedException(): base()
+        {
+
+        }
     }
 
     public class TapeException : Exception

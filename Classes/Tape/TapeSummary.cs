@@ -9,7 +9,10 @@ namespace Archiver.Classes.Tape
     {
         public int ID { get; set; }
         public string Name { get; set; }
+        public string Description { get; set; }
         public int BlockingFactor { get; set; }
+        public int SummaryFileBytes { get; set; }
+        public int JsonFileBytes { get; set; }
         public DateTime WriteDTM { get; set; }
         public long ExcludedFileCount { get; set; } = 0;
         public long DataSizeBytes 

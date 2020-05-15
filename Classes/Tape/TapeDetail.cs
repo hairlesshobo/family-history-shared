@@ -13,17 +13,26 @@ namespace Archiver.Classes.Tape
 
     public class TapeDetail : TapeSummary
     {
-        public long BytesCopied { get; set; } = 0;
         public List<TapeVerificationResult> Verifications { get; set; }
         public string Hash { get; set; } = null;
-        public double CompressionRatio { get; set; } = 0.0;
+        public double CompressionRatio
+        {
+            get
+            {
+                if (this.ArchiveBytesOnTape == 0)
+                    return 0;
+                else
+                    return ((double)this.TotalArchiveBytes / (double)this.ArchiveBytesOnTape);
+
+            }
+        }
         public TapeSourceInfo SourceInfo { get; set; }
-        public long ExcludedFiles { get; set; }
+        public long ArchiveBytesOnTape { get; set; }
         public int FilesCopied 
         { 
             get
             {
-                return this.Files.Where(x => x.Copied == true).Count();
+                return this.FlattenFiles().Where(x => x.Copied == true).Count();
             }
         }
         
