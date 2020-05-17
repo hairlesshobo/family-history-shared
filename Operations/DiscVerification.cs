@@ -58,6 +58,9 @@ namespace Archiver.Operations
 
         public static void StartOperation()
         {
+            DiscGlobals._destinationDiscs = Helpers.ReadDiscIndex();
+            Console.Clear();
+
             Console.WriteLine("Disc verification process beginning...");
             Console.WriteLine();
 
@@ -73,6 +76,8 @@ namespace Archiver.Operations
                 verifier = new DiscVerifier(selectedDrive, AskDiskToVerify());
 
             verifier.StartVerification();
+
+            DiscGlobals._destinationDiscs.Clear();
         }
     }
 }

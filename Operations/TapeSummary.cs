@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Archiver.Classes.Disc;
+using Archiver.Classes.Tape;
 using Archiver.Utilities.Shared;
 
 namespace Archiver.Operations
 {
-    public static class Summary
+    public static class TapeSummary
     {
         public class FileType
         {
@@ -23,27 +24,26 @@ namespace Archiver.Operations
         }
         public static void StartOperation()
         {
+            List<TapeDetail> existingTapes = Helpers.ReadTapeIndex();
+            Console.Clear();
 
+            IEnumerable<TapeSourceFile> allFiles = existingTapes.SelectMany(x => x.FlattenFiles());
 
             Console.WriteLine();
-            WriteHeader("Current Archive Statistics...");
+            WriteHeader("Current Tape Archive Statistics...");
 
-            IEnumerable<DiscDetail> existingDiscs = DiscGlobals._destinationDiscs.Where(x => x.NewDisc == false);
-            if (existingDiscs.Count() > 0)
+            if (existingTapes.Count() > 0)
             {
-
-                Console.WriteLine($"                Discs: {existingDiscs.Count()}");
-                Console.WriteLine($"                Files: {existingDiscs.Sum(x => x.Files.Count())}");
-                Console.WriteLine($"            Data Size: {Formatting.GetFriendlySize(existingDiscs.Sum(x => x.DataSize))}");
-                Console.WriteLine($"    Last Archive Date: {existingDiscs.Max(x => x.ArchiveDTM).ToShortDateString()}");
+                Console.WriteLine($"          Total Tapes: {existingTapes.Count()}");
+                Console.WriteLine($"          Total Files: {allFiles.Count().ToString("N0")}");
+                Console.WriteLine($"      Total Data Size: {Formatting.GetFriendlySize(existingTapes.Sum(x => x.DataSizeBytes))}");
                 Console.WriteLine();
             }
             
             WriteHeader("File Type Statistics...");
-            IEnumerable<FileType> fileCounts = DiscGlobals._discSourceFiles
-                                                      .GroupBy(x => x.Extension)
-                                                      .Select(x => new FileType() { Extension = x.Key, Count = x.Count()})
-                                                      .OrderByDescending(x => x.Count);
+            IEnumerable<FileType> fileCounts = allFiles.GroupBy(x => x.Extension)
+                                                       .Select(x => new FileType() { Extension = x.Key, Count = x.Count()})
+                                                       .OrderByDescending(x => x.Count);
 
             int maxCountWidth = fileCounts.Max(x => x.Count.ToString().Length);
             int columnWidth = new int[] { 6, fileCounts.Max(x => x.Extension.Length) }.Max() + 5;
@@ -57,6 +57,9 @@ namespace Archiver.Operations
 
                 Console.WriteLine($"{extension.PadLeft(columnWidth)}: {type.Count.ToString().PadLeft(maxCountWidth+2)}");
             }
+
+            existingTapes.Clear();
+            allFiles = null;
         }
     }
 }

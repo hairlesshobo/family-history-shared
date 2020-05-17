@@ -1,6 +1,7 @@
 using System;
 using Archiver.Utilities;
 using Archiver.Utilities.Disc;
+using Archiver.Utilities.Shared;
 
 namespace Archiver.Operations
 {
@@ -8,6 +9,9 @@ namespace Archiver.Operations
     {
         public static void StartOperation()
         {
+            DiscGlobals._destinationDiscs = Helpers.ReadDiscIndex();
+            Console.Clear();
+
             Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine("Preparing...");
             Console.ResetColor();
@@ -32,6 +36,8 @@ namespace Archiver.Operations
 
                 Console.WriteLine("No new files found to archive. Nothing to do.");
             }
+
+            DiscGlobals._destinationDiscs.Clear();
         }
     }
 }

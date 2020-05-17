@@ -89,8 +89,10 @@ namespace Archiver.Utilities.Shared
             return selectedDrive;
         }
 
-        public static void ReadDiscIndex()
+        public static List<DiscDetail> ReadDiscIndex()
         {
+            List<DiscDetail> discs = new List<DiscDetail>();
+
             string jsonDir = Globals._indexDiscDir + "/json";
 
             if (Directory.Exists(jsonDir))
@@ -112,12 +114,55 @@ namespace Archiver.Utilities.Shared
                         Console.CursorLeft = 0;
                         Console.Write(line);
 
-                        DiscGlobals._destinationDiscs.Add(JsonConvert.DeserializeObject<DiscDetail>(File.ReadAllText(jsonFile)));
+                        DiscDetail discDetail = JsonConvert.DeserializeObject<DiscDetail>(File.ReadAllText(jsonFile));
+                        discDetail.Files.ForEach(x => x.DestinationDisc = discDetail);
+
+                        discs.Add(discDetail);
                     }
 
                     Console.WriteLine();
                 }
             }
+
+            return discs;
+        }
+
+        public static List<TapeDetail> ReadTapeIndex()
+        {
+            List<TapeDetail> tapes = new List<TapeDetail>();
+
+            string jsonDir = Globals._indexDiscDir + "/json";
+
+            if (Directory.Exists(jsonDir))
+            {
+                string[] jsonFiles = Directory.GetFiles(jsonDir, "tape_*.json");
+                int totalFiles = jsonFiles.Length;
+                
+                if (totalFiles > 0)
+                {
+                    int currentFile = 0;
+
+                    foreach (string jsonFile in jsonFiles)
+                    {
+                        currentFile++;
+
+                        string line = "Reading tape index files... ";
+                        line += $"{currentFile.ToString().PadLeft(totalFiles.ToString().Length)}/{totalFiles}";
+
+                        Console.CursorLeft = 0;
+                        Console.Write(line);
+
+                        TapeDetail tapeDetail = JsonConvert.DeserializeObject<TapeDetail>(File.ReadAllText(jsonFile));
+                        tapeDetail.FlattenFiles().ToList().ForEach(x => x.Tape = tapeDetail);
+                        
+                        tapes.Add(tapeDetail);
+                    }
+
+                    Console.WriteLine();
+                }
+            }
+
+            return tapes;
         }
 
         public static string CleanPath(string inPath)

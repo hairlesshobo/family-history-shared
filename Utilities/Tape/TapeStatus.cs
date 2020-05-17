@@ -84,10 +84,13 @@ namespace Archiver.Utilities.Tape
 
         public void WriteStatus(string statusMessage)
         {
-            if (statusMessage.ToLower().StartsWith("complete"))
-                WriteLine(_statusLine, _statusLabel, statusMessage, ConsoleColor.Green);
-            else
-                WriteLine(_statusLine, _statusLabel, statusMessage, ConsoleColor.Blue);
+            lock (this)
+            {
+                if (statusMessage.ToLower().StartsWith("complete"))
+                    WriteLine(_statusLine, _statusLabel, statusMessage, ConsoleColor.Green);
+                else
+                    WriteLine(_statusLine, _statusLabel, statusMessage, ConsoleColor.Blue);
+            }
         }
 
         private void WriteLine(int lineNum, string left, string right)
@@ -112,36 +115,45 @@ namespace Archiver.Utilities.Tape
 
         private void WriteElapsed()
         {
-            WriteLine(_elapsedLine, _elapsedLabel, _stopwatch.Elapsed.ToString(@"hh\:mm\:ss"));
+            lock (this)
+            {
+                WriteLine(_elapsedLine, _elapsedLabel, _stopwatch.Elapsed.ToString(@"hh\:mm\:ss"));
+            }
         }
 
         public void ShowBeforeSummary(TapeInfo info)
         {
-            ConsoleColor defaultColor = Console.ForegroundColor;
+            lock (this)
+            {
+                ConsoleColor defaultColor = Console.ForegroundColor;
 
-            WriteLine(_summaryLine, "Files Found", _tapeDetail.FileCount.ToString("N0"), ConsoleColor.Blue);
+                WriteLine(_summaryLine, "Files Found", _tapeDetail.FileCount.ToString("N0"), ConsoleColor.Blue);
 
-            WriteLine(_summaryLine+1, "Source Size", Shared.Formatting.GetFriendlySize(_tapeDetail.DataSizeBytes), ConsoleColor.Blue);
+                WriteLine(_summaryLine+1, "Source Size", Shared.Formatting.GetFriendlySize(_tapeDetail.DataSizeBytes), ConsoleColor.Blue);
 
-            ConsoleColor capacityColor = (_tapeDetail.TotalArchiveBytes > info.MediaInfo.Capacity ? ConsoleColor.Yellow : ConsoleColor.Green);
-            WriteLine(_summaryLine+2, "Tape Capacity", Shared.Formatting.GetFriendlySize(info.MediaInfo.Capacity), capacityColor);
+                ConsoleColor capacityColor = (_tapeDetail.TotalArchiveBytes > info.MediaInfo.Capacity ? ConsoleColor.Yellow : ConsoleColor.Green);
+                WriteLine(_summaryLine+2, "Tape Capacity", Shared.Formatting.GetFriendlySize(info.MediaInfo.Capacity), capacityColor);
 
-            double requiredCompressionRatio = ((double)_tapeDetail.TotalArchiveBytes / (double)info.MediaInfo.Capacity);
-            
-            if (requiredCompressionRatio <= 1.0)
-                requiredCompressionRatio = 1.0;
+                double requiredCompressionRatio = ((double)_tapeDetail.TotalArchiveBytes / (double)info.MediaInfo.Capacity);
+                
+                if (requiredCompressionRatio <= 1.0)
+                    requiredCompressionRatio = 1.0;
 
-            WriteLine(_summaryLine+3, "Required compression ratio", $"{Math.Round(requiredCompressionRatio, 2).ToString("0.00")}:1", capacityColor);
+                WriteLine(_summaryLine+3, "Required compression ratio", $"{Math.Round(requiredCompressionRatio, 2).ToString("0.00")}:1", capacityColor);
+            }
         }
 
         public void ShowAfterSummary(TapeInfo info)
         {
-            ConsoleColor defaultColor = Console.ForegroundColor;
+            lock (this)
+            {
+                ConsoleColor defaultColor = Console.ForegroundColor;
 
-            WriteLine(_exitSummaryLine, "Archive Size", Shared.Formatting.GetFriendlySize(_tapeDetail.TotalArchiveBytes), ConsoleColor.Blue);
-            WriteLine(_exitSummaryLine+1, "Size on Tape", Shared.Formatting.GetFriendlySize(_tapeDetail.ArchiveBytesOnTape), ConsoleColor.Blue);
-            WriteLine(_exitSummaryLine+2, "Tape Capacity Remaining", Shared.Formatting.GetFriendlySize(info.MediaInfo.Remaining), ConsoleColor.Blue);
-            WriteLine(_exitSummaryLine+3, "Compression Ratio on Tape", $"{Math.Round(_tapeDetail.CompressionRatio, 2).ToString("0.00")}:1", ConsoleColor.Blue);
+                WriteLine(_exitSummaryLine, "Archive Size", Shared.Formatting.GetFriendlySize(_tapeDetail.TotalArchiveBytes), ConsoleColor.Blue);
+                WriteLine(_exitSummaryLine+1, "Size on Tape", Shared.Formatting.GetFriendlySize(_tapeDetail.ArchiveBytesOnTape), ConsoleColor.Blue);
+                WriteLine(_exitSummaryLine+2, "Tape Capacity Remaining", Shared.Formatting.GetFriendlySize(info.MediaInfo.Remaining), ConsoleColor.Blue);
+                WriteLine(_exitSummaryLine+3, "Compression Ratio on Tape", $"{Math.Round(_tapeDetail.CompressionRatio, 2).ToString("0.00")}:1", ConsoleColor.Blue);
+            }
         }
 
         public void UpdateTarWrite(TapeTarWriterProgress progress)
@@ -161,8 +173,11 @@ namespace Archiver.Utilities.Tape
                 line += StatusHelpers.FileCountPosition(progress.TarCurrentFileCount, progress.TarTotalFiles, 7);
             }
 
-            Console.SetCursorPosition(0, _topLine + _tarWriteLine);
-            StatusHelpers.WriteStatusLineWithPct(_tarWriteLabel, line, progress.TarWritePercent, (progress.TarBytesWritten == progress.TotalBytes));
+            lock (this)
+            {
+                Console.SetCursorPosition(0, _topLine + _tarWriteLine);
+                StatusHelpers.WriteStatusLineWithPct(_tarWriteLabel, line, progress.TarWritePercent, (progress.TarBytesWritten == progress.TotalBytes));
+            }
         }
 
         public void UpdateTapeWrite(TapeTarWriterProgress progress)
@@ -186,9 +201,12 @@ namespace Archiver.Utilities.Tape
                 line += StatusHelpers.GeneratePercentBar(20, progress.BufferPercent, progress.BufferPercent == 100.0, increasing, true);
 
             }
-
-            Console.SetCursorPosition(0, _topLine + _writeTapeLine);
-            StatusHelpers.WriteStatusLineWithPct(_writeTapeLabel, line, progress.TapeWritePercent, (progress.TapeBytesWritten == progress.TotalBytes));
+            
+            lock (this)
+            {
+                Console.SetCursorPosition(0, _topLine + _writeTapeLine);
+                StatusHelpers.WriteStatusLineWithPct(_writeTapeLabel, line, progress.TapeWritePercent, (progress.TapeBytesWritten == progress.TotalBytes));
+            }
         }
 
         public void FileScanned(long newFiles, long excludedFiles, bool complete = false)
@@ -201,40 +219,49 @@ namespace Archiver.Utilities.Tape
             if (complete)
                 line += "   **Complete**";
 
-            Console.SetCursorPosition(0, _topLine + _scanLine);
-            StatusHelpers.WriteStatusLine(_scanningLabel, line);
+            lock (this)
+            {
+                Console.SetCursorPosition(0, _topLine + _scanLine);
+                StatusHelpers.WriteStatusLine(_scanningLabel, line);
+            }
         }
 
         public void FileSized(long fileCount, bool complete = false)
         {
-            string currentSizeFriendly = Formatting.GetFriendlySize(_tapeDetail.DataSizeBytes);
-            
-            string line = StatusHelpers.FileCountPosition(fileCount, _tapeDetail.FileCount);
-            line += $" [{currentSizeFriendly.PadLeft(12)}]";
-            line += " ";
+            lock (this)
+            {
+                string currentSizeFriendly = Formatting.GetFriendlySize(_tapeDetail.DataSizeBytes);
+                
+                string line = StatusHelpers.FileCountPosition(fileCount, _tapeDetail.FileCount);
+                line += $" [{currentSizeFriendly.PadLeft(12)}]";
+                line += " ";
 
-            double currentPercent = ((double)fileCount / (double)_tapeDetail.FileCount) * 100.0;
+                double currentPercent = ((double)fileCount / (double)_tapeDetail.FileCount) * 100.0;
 
-            Console.SetCursorPosition(0, _topLine + _sizeLine);
-            StatusHelpers.WriteStatusLineWithPct(_sizingLabel, line, currentPercent, complete);
+                Console.SetCursorPosition(0, _topLine + _sizeLine);
+                StatusHelpers.WriteStatusLineWithPct(_sizingLabel, line, currentPercent, complete);
+            }
         }
 
         public bool ShowTapeWarning(double requiredRatio)
         {
             int tmpStartLine = _tarWriteLine;
 
-            Console.SetCursorPosition(0, tmpStartLine);
+            lock (this)
+            {
+                Console.SetCursorPosition(0, tmpStartLine);
 
-            WriteColor(ConsoleColor.DarkYellow, "WARNING:");
-            Console.Write(" The source data to be archived exceeds the tape capacity! This data source requires a ");
-            WriteColor(ConsoleColor.Cyan, Math.Round(requiredRatio, 2).ToString("0.00") + ":1");
-            Console.WriteLine(" compression ratio in order to fit.");
-            Console.WriteLine();
-            Console.WriteLine("For heavy data such as audio, photo, and video files, do not expect to achieve a ratio higher than 1.05:1 - 1.2:1!");
-            Console.WriteLine();
-            Console.Write("Do you want to continue anyways? (yes/");
-            WriteColor(ConsoleColor.Blue, "NO");
-            Console.Write(") ");
+                WriteColor(ConsoleColor.DarkYellow, "WARNING:");
+                Console.Write(" The source data to be archived exceeds the tape capacity! This data source requires a ");
+                WriteColor(ConsoleColor.Cyan, Math.Round(requiredRatio, 2).ToString("0.00") + ":1");
+                Console.WriteLine(" compression ratio in order to fit.");
+                Console.WriteLine();
+                Console.WriteLine("For heavy data such as audio, photo, and video files, do not expect to achieve a ratio higher than 1.05:1 - 1.2:1!");
+                Console.WriteLine();
+                Console.Write("Do you want to continue anyways? (yes/");
+                WriteColor(ConsoleColor.Blue, "NO");
+                Console.Write(") ");
+            }
 
             Console.CursorVisible = true;
             this.PauseTimer();

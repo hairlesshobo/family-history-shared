@@ -39,11 +39,7 @@ namespace Archiver
             Config.ReadConfig();
             Console.WriteLine("done");
             
-            Helpers.ReadDiscIndex();
-
             Console.Clear();
-
-            
 
             // MD5_Tape md5 = new MD5_Tape();
             // md5.OnProgressChanged += (progress) => {
@@ -62,6 +58,27 @@ namespace Archiver
             // Thread thread = new Thread(md5.GenerateHash);
             // thread.Start();
             // thread.Join();
+
+            // var info = TapeUtils.GetTapeInfo();
+
+            // using (FileStream fileStream = new FileStream("D:/temp/test.tar", FileMode.Create, FileAccess.Write))
+            // {
+            //     TarArchive archive = TarArchive.CreateOutputTarArchive(fileStream);
+
+            //     TarEntry entry = TarEntry.CreateEntryFromFile(@"\\magneto\d$\temp\test");
+
+            //     archive.WriteEntry(entry, false);
+            // }
+
+            // string text = TapeUtils.ReadTxtSummaryFromTape();
+
+            // Pager pager = new Pager();
+            // pager.AutoScroll = false;
+
+            // foreach (string line in text.Split("\n"))
+            // {
+            //     pager.AppendLine(line);
+            // }
 
             MainMenu.StartOperation();
 

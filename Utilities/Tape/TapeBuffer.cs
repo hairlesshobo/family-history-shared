@@ -369,6 +369,17 @@ namespace Archiver.Utilities.Tape
         {
             throw new NotSupportedException();
         }
+
+        public new void Dispose()
+        {
+            for (int i = 0; i < _memoryBuffer.Length; i++)
+            {
+                _memoryBuffer[i] = new byte[] { };
+            }
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        }
         #endregion Public Methods
     }
 }

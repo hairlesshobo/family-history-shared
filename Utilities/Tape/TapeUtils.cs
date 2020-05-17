@@ -89,10 +89,13 @@ namespace Archiver.Utilities.Tape
 
                     int strlen = Array.IndexOf(buffer, (byte)0);
 
-                    if (strlen > 0)
-                        summary += Encoding.UTF8.GetString(buffer, 0, strlen);
-                    else
-                        summary += Encoding.UTF8.GetString(buffer, 0, buffer.Length);
+                    if (!endOfData)
+                    {
+                        if (strlen > 0)
+                            summary += Encoding.UTF8.GetString(buffer, 0, strlen);
+                        else
+                            summary += Encoding.UTF8.GetString(buffer, 0, buffer.Length);
+                    }
                 }
                 while (!endOfData);
 
@@ -102,12 +105,25 @@ namespace Archiver.Utilities.Tape
 
         public static TapeInfo GetTapeInfo(TapeOperator tape)
         {
-            return new TapeInfo()
+            if (tape.TapeLoaded())
             {
-                MediaInfo = tape.MediaInfo,
-                DriveInfo = tape.DriveInfo,
-                TapePosition = tape.GetTapeBlockPosition()
-            };
+                return new TapeInfo()
+                {
+                    DriveInfo = tape.DriveInfo,
+                    TapePosition = tape.GetTapeBlockPosition(),
+                    MediaInfo = tape.MediaInfo
+                };
+            }
+            else
+            {
+                return new TapeInfo()
+                {
+                    DriveInfo = tape.DriveInfo,
+                    TapePosition = -1,
+                    MediaInfo = default (TapeMediaInfo)
+                };
+            }
+
         }
 
         public static TapeInfo GetTapeInfo()

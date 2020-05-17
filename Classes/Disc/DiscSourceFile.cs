@@ -1,13 +1,14 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using Archiver.Classes.Shared;
 using Archiver.Utilities;
 using Archiver.Utilities.Shared;
 using Newtonsoft.Json;
 
 namespace Archiver.Classes.Disc
 {
-public class DiscSourceFile
+    public class DiscSourceFile : ISourceFile
     {
         private string _FullPath;
         public string Name { get; set; }

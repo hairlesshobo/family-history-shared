@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Archiver.Utilities.Shared;
+using Newtonsoft.Json;
 
 namespace Archiver.Classes.Tape
 {
@@ -27,6 +28,9 @@ namespace Archiver.Classes.Tape
         public string RelativePath { get; set; }
         public List<TapeSourceDirectory> Directories { get; set; }
         public List<TapeSourceFile> Files { get; set; }
+        public DateTime LastWriteTimeUtc { get; set; }
+        [JsonIgnore]
+        public TapeDetail Tape { get; set; } = null;
 
         public TapeSourceDirectory(string sourcePath)
         {
@@ -37,6 +41,12 @@ namespace Archiver.Classes.Tape
 
             if (!Directory.Exists(this.FullPath))
                 throw new DirectoryNotFoundException($"Source directory does not exist: {sourcePath}");
+
+            // we go ahead and pull the last write time when we add the directory, no
+            // need for seperate scanning for this info
+            FileInfo dirInfo = new FileInfo(this.FullPath);
+
+            this.LastWriteTimeUtc = dirInfo.LastWriteTimeUtc;
         }
 
         public TapeSourceDirectory()

@@ -22,7 +22,7 @@ namespace Archiver.Operations
             },
             new CliMenuEntry() {
                 Name = "View Archive Summary",
-                Action = Summary.StartOperation
+                Action = DiscSummary.StartOperation
             },
             new CliMenuEntry() {
                 Name = "Verify Discs",
@@ -49,11 +49,17 @@ namespace Archiver.Operations
             new CliMenuEntry() {
                 Name = "Read Tape Summary",
                 Action = () => {
+                    Console.WriteLine("Rewinding tape and reading summary...");
                     string text = TapeUtils.ReadTxtSummaryFromTape();
+                    Console.Clear();
 
                     Console.WriteLine(text);
                     Console.SetCursorPosition(0, 0);
                 }
+            },
+            new CliMenuEntry() {
+                Name = "View Archive Summary",
+                Action = TapeSummary.StartOperation
             },
             new CliMenuEntry() {
                 Name = "Verify Tape",

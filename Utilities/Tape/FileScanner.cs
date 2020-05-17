@@ -21,6 +21,7 @@ namespace Archiver.Utilities.Tape
         private Stopwatch _sw;
         private long _lastSample;
         private TapeDetail _tapeDetail;
+        private long _newFiles = 0;
 
         public FileScanner(TapeDetail tapeDetail)
         {
@@ -173,11 +174,14 @@ namespace Archiver.Utilities.Tape
                     _tapeDetail.ExcludedFileCount++;
 
                 else
-                    directory.Files.Add(new TapeSourceFile(cleanFile));
+                {
+                    directory.Files.Add(new TapeSourceFile(cleanFile, _tapeDetail));
+                    _newFiles++;
+                }
 
                 if (_sw.ElapsedMilliseconds - _lastSample > _sampleDurationMs)
                 {
-                    OnProgressChanged(_tapeDetail.FileCount, _tapeDetail.ExcludedFileCount);
+                    OnProgressChanged(_newFiles, _tapeDetail.ExcludedFileCount);
                     _lastSample = _sw.ElapsedMilliseconds;
                 }
             }

@@ -18,10 +18,14 @@ namespace Archiver.Utilities.Tape
 
         private TarOutputStream tarOut;
         private bool isDisposed;
+        private byte[] localBuffer;
 
         public CustomTarArchive(TarOutputStream tarOutputStream)
         {
             tarOut = tarOutputStream;
+
+            // we use a 4mb buffer for performance reasons
+            localBuffer = new byte[1024 * 1024 * 4];
         }
 
         public void WriteDirectoryEntry(TarEntry sourceEntry)
@@ -34,24 +38,16 @@ namespace Archiver.Utilities.Tape
 
         public void WriteFileEntry(TarEntry sourceEntry, TapeSourceFile sourceFile)
 		{
-			string entryFilename = sourceEntry.File;
-
-            sourceEntry.TrimLeadingFolder();
-
 			var entry = (TarEntry)sourceEntry.Clone();
-
-			//OnProgressMessageEvent(entry, null);
 
 			tarOut.PutNextEntry(entry);
 
-			if (!entry.IsDirectory)
+			if (!entry.IsDirectory && sourceFile.Size > 0)
 			{
-                using (Stream inputStream = File.OpenRead(entryFilename))
+                //using (Stream inputStream = File.OpenRead(sourceFile.FullPath))
+                using (Stream inputStream = new FileStream(sourceFile.FullPath, FileMode.Open, FileAccess.Read))
                 using (MD5 md5 = MD5.Create())
                 {
-                    // we use a 1mb buffer for performance reasons
-                    byte[] localBuffer = new byte[1024 * 1024];
-
                     while (true)
                     {
                         int numRead = inputStream.Read(localBuffer, 0, localBuffer.Length);
@@ -78,7 +74,9 @@ namespace Archiver.Utilities.Tape
 		public void Dispose()
 		{
 			Dispose(true);
-			GC.SuppressFinalize(this);
+            localBuffer = new byte[] { };
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
 		}
 
         /// <summary>

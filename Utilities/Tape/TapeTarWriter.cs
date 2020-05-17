@@ -46,8 +46,8 @@ namespace Archiver.Utilities.Tape
         public double TarInstantTransferRate { get; set; }
         public double TarAverageTransferRate { get; set; }
         public long TarCurrentFileCount { get; set; }
-        public long TarCurrentFileSizeBytes { get; set; }
-        public string TarCurrentFileName { get; set; }
+        // public long TarCurrentFileSizeBytes { get; set; }
+        // public string TarCurrentFileName { get; set; }
         public TapeTarWriterStatus TarStatus { get; set; }
 
         public double BufferPercent { get; set; }
@@ -58,7 +58,7 @@ namespace Archiver.Utilities.Tape
 
     }
 
-    public class TapeTarWriter
+    public class TapeTarWriter : IDisposable
     {
         private const int _updateMilliseconds = 500;
         private TapeBuffer _tapeBuffer;
@@ -68,8 +68,8 @@ namespace Archiver.Utilities.Tape
         private TarOutputStream _tarOutStream;
         private long _dataWrittenToTape = 0;
         private readonly object _lastFileReadLock = new object();
-        private string _lastFileRead = String.Empty;
-        private long _lastFileSize = 0;
+        // private string _lastFileRead = String.Empty;
+        // private long _lastFileSize = 0;
         private volatile int _tarFileCount = 0;
 
         private readonly uint _blockCount;
@@ -185,16 +185,16 @@ namespace Archiver.Utilities.Tape
                     {
                         progress.TarCurrentFileCount = _tarFileCount;
 
-                        if (progress.TarStatus == TapeTarWriterStatus.Complete)
-                        {
-                            progress.TarCurrentFileName = String.Empty;
-                            progress.TarCurrentFileSizeBytes = 0;
-                        }
-                        else
-                        {
-                            progress.TarCurrentFileName = _lastFileRead;
-                            progress.TarCurrentFileSizeBytes = _lastFileSize;
-                        }
+                        // if (progress.TarStatus == TapeTarWriterStatus.Complete)
+                        // {
+                        //     progress.TarCurrentFileName = String.Empty;
+                        //     progress.TarCurrentFileSizeBytes = 0;
+                        // }
+                        // else
+                        // {
+                        //     progress.TarCurrentFileName = _lastFileRead;
+                        //     progress.TarCurrentFileSizeBytes = _lastFileSize;
+                        // }
                     }
 
                     progress.Elapsed = sw.Elapsed;
@@ -212,8 +212,8 @@ namespace Archiver.Utilities.Tape
             progress.TarInstantTransferRate = 0.0;
             progress.BufferPercent = _tapeBuffer.CurrentBufferPercent;
             progress.BufferFilledBytes = _tapeBuffer.BlocksFull * _blockSize;
-            progress.TarCurrentFileName = String.Empty;
-            progress.TarCurrentFileSizeBytes = 0;
+            // progress.TarCurrentFileName = String.Empty;
+            // progress.TarCurrentFileSizeBytes = 0;
             progress.TapeStatus = TapeTarWriterStatus.Complete;
             progress.TarStatus = TapeTarWriterStatus.Complete;
             progress.TarBytesWritten = _tapeBuffer.BytesWritten;
@@ -259,14 +259,12 @@ namespace Archiver.Utilities.Tape
         private void ArchiveTapeSourceDirectory(IEnumerable<TapeSourceDirectory> directories)
         {
             foreach (TapeSourceDirectory dir in directories)
-            {
                 ArchiveTapeSourceDirectory(dir);
-            }
         }
 
         private void ArchiveTapeSourceDirectory(TapeSourceDirectory directory)
         {
-            TarEntry dirEntry = TarEntry.CreateEntryFromFile(directory.FullPath);
+            TarEntry dirEntry = CreateTarDirectoryEntry(directory);
             _archive.WriteDirectoryEntry(dirEntry);
 
             ArchiveTapeSourceDirectory(directory.Directories);
@@ -279,16 +277,57 @@ namespace Archiver.Utilities.Tape
             {
                 lock(_lastFileReadLock)
                 {
-                    _lastFileRead = file.Name;
-                    _lastFileSize = file.Size;
+                    // _lastFileRead = file.Name;
+                    // _lastFileSize = file.Size;
                     _tarFileCount++;
                 }
 
                 file.Copied = true;
 
-                TarEntry entry = TarEntry.CreateEntryFromFile(file.FullPath);
+                TarEntry entry = CreateTarFileEntry(file);
                 _archive.WriteFileEntry(entry, file);
             }
+        }
+
+        private TarEntry CreateTarDirectoryEntry(TapeSourceDirectory directory)
+        {
+            TarHeader header = new TarHeader();
+            header.Name = directory.RelativePath.TrimStart('/'); // trim leading slash so no path in the archive is absolute
+            header.LinkName = String.Empty;
+            header.ModTime = directory.LastWriteTimeUtc;
+            header.Mode = 1003; // Magic number for security access for a UNIX filesystem
+            header.TypeFlag = TarHeader.LF_DIR; // mark that this is a directory
+            header.Size = 0;
+            header.DevMajor = 0;
+            header.DevMinor = 0;
+
+            // apparently tar needs to have the directory named with a trailing slash
+            // seems odd to me, but lets make sure we conform to the standard
+            if (header.Name[header.Name.Length - 1] != '/')
+                header.Name += "/";
+            
+            return new TarEntry(header);
+        }
+
+        private TarEntry CreateTarFileEntry(TapeSourceFile file)
+        {
+            TarHeader header = new TarHeader();
+            header.Name = file.RelativePath.TrimStart('/'); // trim leading slash so no path in the archive is absolute
+            header.LinkName = String.Empty;
+            header.ModTime = file.LastWriteTimeUtc;
+            header.Mode = 33216; // Magic number for security access for a UNIX filesystem
+            header.TypeFlag = TarHeader.LF_NORMAL; // mark that this is a file
+            header.Size = file.Size;
+            header.DevMajor = 0;
+            header.DevMinor = 0;
+
+            
+            return new TarEntry(header);
+        }
+
+        public void Dispose()
+        {
+            _tapeBuffer.Dispose();
         }
     }
 }

@@ -51,7 +51,18 @@ namespace Archiver.Utilities
 
         public uint FeaturesLow;
         public uint FeaturesHigh;
-        public uint EATWarningZone;
+        public uint EOTWarningZone;
+    }
+
+    [StructLayout( LayoutKind.Sequential )]
+    public class TapeSetDriveParameters
+    {
+        public byte ECC;
+        public byte Compression;
+        public byte DataPadding;
+        public byte ReportSetMarks;
+
+        public uint EOTWarningZoneSize;
     }
     #endregion
 
@@ -94,6 +105,9 @@ namespace Archiver.Utilities
 
         private const int FALSE = 0;
         private const int TRUE = 0;
+
+        private const int SET_TAPE_MEDIA_INFORMATION = 0;
+        private const int SET_TAPE_DRIVE_INFORMATION = 1;
 
         private const int MEDIA_PARAMS = 0;
         private const int DRIVE_PARAMS = 1;
@@ -155,6 +169,13 @@ namespace Archiver.Utilities
            int operationType,
            ref int size,
            IntPtr mediaInfo
+           );
+
+        [DllImport( "kernel32", SetLastError = true )]
+        private static extern int SetTapeParameters(
+           SafeFileHandle handle,
+           int operationType,
+           TapeSetDriveParameters parameters
            );
 
         [DllImport( "kernel32", SetLastError = true )]
@@ -252,14 +273,14 @@ namespace Archiver.Utilities
             IntPtr ptr = IntPtr.Zero;
             try
             {
-                m_mediaInfo = new TapeMediaInfo();
+                var tmpMediaInfo = new TapeMediaInfo();
 
                 // Allocate unmanaged memory
-                int size = Marshal.SizeOf( m_mediaInfo );
+                int size = Marshal.SizeOf( tmpMediaInfo );
                 ptr = Marshal.AllocHGlobal( size );
 
                 Marshal.StructureToPtr(
-                    m_mediaInfo,
+                    tmpMediaInfo,
                     ptr,
                     false
                 );
@@ -395,6 +416,25 @@ namespace Archiver.Utilities
                 throw new TapeOperatorWin32Exception("WriteTapemark", Marshal.GetLastWin32Error());
         }
 
+        public void SetDriveCompression()
+        {
+            TapeDriveInfo info = this.DriveInfo;
+
+            TapeSetDriveParameters parameters = new TapeSetDriveParameters()
+            {
+                Compression = 1,
+                DataPadding = info.DataPadding,
+                ECC = info.ECC,
+                EOTWarningZoneSize = info.EOTWarningZone,
+                ReportSetMarks = info.ReportSetMarks
+            };
+
+            int errorCode = SetTapeParameters(m_handleValue, SET_TAPE_DRIVE_INFORMATION, parameters);
+
+            if (errorCode != NO_ERROR)
+                throw new TapeOperatorWin32Exception("SetTapeParameters", Marshal.GetLastWin32Error());
+        }
+
         /// <summary>
         /// Returns Current tape's postion ( seek )
         /// </summary>
@@ -488,21 +528,6 @@ namespace Archiver.Utilities
 
         #region Private methods
         
-        /// <summary>
-        /// Returns minum number of blocks that can contain
-        /// given number of bytes
-        /// </summary>
-        private uint GetBlocksNumber(long bytes)
-        {
-            uint numberOfBlocks = ( uint )bytes / BlockSize;
-            uint bytesInLastBlock = ( uint )bytes % BlockSize;
-
-            // Calculate number of blocks
-            if ( bytesInLastBlock > 0 ) numberOfBlocks++;
-
-            return numberOfBlocks;
-        }
-
         private void GetDriveInfo()
         {
             if ( !m_driveInfo.HasValue )

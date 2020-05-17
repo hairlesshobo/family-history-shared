@@ -44,6 +44,9 @@ namespace Archiver.Utilities.Tape
             Thread rewindThread = new Thread(RewindTape);
             rewindThread.Start();
 
+            // give the rewind a bit to start and mark the status
+            Thread.Sleep(500);
+
             IndexAndCountFiles();
             SizeFiles();
 
@@ -200,8 +203,6 @@ namespace Archiver.Utilities.Tape
                 byte[] buffer = TapeUtils.GetStringPaddedBytes(summaryOutput, tape.BlockSize);
                 TapeUtils.WriteBytesToTape(tape, buffer, false);
                 tape.WriteFilemark();
-
-                _tapeDetail.SummaryFileBytes = buffer.Length;
             }
         }
 
@@ -214,19 +215,8 @@ namespace Archiver.Utilities.Tape
 
             using (TapeOperator tape = new TapeOperator(Config.TapeDrive, (uint)Config.TapeTextBlockSize, false))
             {
-                // this probably isn't a great way to handle it, but it was the only way i could think of.
-                // sure it wastes a little memory and cpu cycles having to serialize twice, but oh well.
-                // in the grand scheme of writing a tape, this will be a minimal overheader
-
-                // lets use MaxValue as a placeholder to determine the output size
-                _tapeDetail.JsonFileBytes = int.MaxValue;
                 string json = JsonConvert.SerializeObject(_tapeDetail.GetSummary(), Newtonsoft.Json.Formatting.None);
                 byte[] buffer = TapeUtils.GetStringPaddedBytes(json, tape.BlockSize);
-
-                // then we store the actual value and serialize it again
-                _tapeDetail.JsonFileBytes = buffer.Length;
-                json = JsonConvert.SerializeObject(_tapeDetail.GetSummary(), Newtonsoft.Json.Formatting.None);
-                buffer = TapeUtils.GetStringPaddedBytes(json, tape.BlockSize);
 
                 TapeUtils.WriteBytesToTape(tape, buffer, true);
                 tape.WriteFilemark();
@@ -242,33 +232,43 @@ namespace Archiver.Utilities.Tape
             uint minBufferPercent = (uint)Config.TapeMemoryBufferMinFill;
 
             TapeInfo beforeInfo = TapeUtils.GetTapeInfo();
+            long remainingCapacityBefore = beforeInfo.MediaInfo.Capacity - beforeInfo.MediaInfo.Remaining;
 
             using (TapeOperator tape = new TapeOperator(Config.TapeDrive, blockSize, false))
             {
+                tape.SetDriveCompression();
+
                 lock (_status)
                 {
                     _status.WriteStatus("Allocating memory buffer");
                 }
 
-                TapeTarWriter writer = new TapeTarWriter(_tapeDetail, tape, blockSize, bufferBlockCount, minBufferPercent);
-
-                lock (_status)
+                using (TapeTarWriter writer = new TapeTarWriter(_tapeDetail, tape, blockSize, bufferBlockCount, minBufferPercent))
                 {
-                    _status.WriteStatus("Writing data to tape");
-                }
+                    lock (_status)
+                    {
+                        _status.WriteStatus("Writing data to tape");
+                    }
 
-                writer.OnProgressChanged += (progress) => {
-                    _status.UpdateTarWrite(progress);
-                    _status.UpdateTapeWrite(progress);
-                };
-                
-                writer.Start();
+                    writer.OnProgressChanged += (progress) => {
+                        _status.UpdateTarWrite(progress);
+                        _status.UpdateTapeWrite(progress);
+                    };
+                    
+                    writer.Start();
+
+                    lock (_status)
+                    {
+                        _status.WriteStatus("Freeing memory buffer");
+                    }
+                }
 
                 // we want to pull the size BEFORE we write the filemark.. because it seems 
                 // that a filemark take an entire block, which can mess with our verification and
                 // compression ratio calculation
                 TapeInfo afterInfo = TapeUtils.GetTapeInfo(tape);
-                _tapeDetail.ArchiveBytesOnTape = (afterInfo.TapePosition - beforeInfo.TapePosition) * blockSize;
+                long remainingCapacityAfter = afterInfo.MediaInfo.Capacity - afterInfo.MediaInfo.Remaining;
+                _tapeDetail.ArchiveBytesOnTape = (remainingCapacityAfter - remainingCapacityBefore);
 
                 tape.WriteFilemark();
             }

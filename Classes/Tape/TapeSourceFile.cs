@@ -1,12 +1,13 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using Archiver.Classes.Shared;
 using Archiver.Utilities.Shared;
 using Newtonsoft.Json;
 
 namespace Archiver.Classes.Tape
 {
-public class TapeSourceFile
+    public class TapeSourceFile : ISourceFile
     {
         private string _FullPath;
 
@@ -56,6 +57,11 @@ public class TapeSourceFile
 
             if (!File.Exists(this.FullPath))
                 throw new DirectoryNotFoundException($"Source file does not exist: {sourcePath}");
+        }
+
+        public TapeSourceFile(string sourcePath, TapeDetail tapeDetail) : this(sourcePath)
+        {
+            this.Tape = tapeDetail;
         }
 
         public void ReadSizeAndAttribs(TapeDetail tape)
