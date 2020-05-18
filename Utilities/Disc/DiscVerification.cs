@@ -15,12 +15,14 @@ namespace Archiver.Utilities.Disc
         private static int _nextLine = -1;
         private static int _discLine = -1;
         private static int _statusLine = -1;
+        private static int _cancelLine = -1;
         private static int _discCount = 0;
         private List<DiscDetail> _discsToVerify;
         private List<int> _pendingDiscs;
         private List<int> _completedDiscs;
         private string _driveLetter;
         private volatile bool _cancel = false;
+        Thread _generateThread;
 
         public DiscVerifier(string DriveLetter)
         {
@@ -61,6 +63,8 @@ namespace Archiver.Utilities.Disc
             _nextLine += 2;
             _statusLine = _nextLine;
             _nextLine += 2;
+            //_cancelLine = _nextLine;
+            //_nextLine += 2;
 
             Console.ForegroundColor = ConsoleColor.Magenta;
             Console.SetCursorPosition(0, _discLine);
@@ -82,6 +86,13 @@ namespace Archiver.Utilities.Disc
             }
 
             SetStatus("Starting...");
+
+            // Console.SetCursorPosition(0, _cancelLine);
+            // Console.Write("Press ");
+            // Console.ForegroundColor = ConsoleColor.DarkYellow;
+            // Console.Write("<ctrl+c>");
+            // Console.ResetColor();
+            // Console.Write(" to cancel");
         }
 
         private void SetStatus(string status)
@@ -102,7 +113,8 @@ namespace Archiver.Utilities.Disc
 
                 if (_pendingDiscs.Count() == 1)
                     append = " " + _pendingDiscs[0].ToString();
-                while (1 == 1)
+
+                while (_cancel == false)
                 {
                     if (di.IsReady == false)
                         SetStatus($"Please insert archive disc{append}...");
@@ -148,9 +160,20 @@ namespace Archiver.Utilities.Disc
 
         public void StartVerification()
         {
-            while (_pendingDiscs.Count() > 0)
+            Console.CursorVisible = false;
+            // Console.CancelKeyPress += (sender, e) => {
+            //     _cancel = true;
+
+            //     if (_generateThread != null && _generateThread.IsAlive)
+            //         _generateThread.Abort();
+            // };
+
+            while (_pendingDiscs.Count() > 0 && _cancel == false)
             {
                 DiscDetail disc = WaitForDisc();
+
+                if (disc == null)
+                    break;
 
                 Stopwatch sw = Stopwatch.StartNew();
 
@@ -177,13 +200,14 @@ namespace Archiver.Utilities.Disc
                         WriteDiscVerificationFailed(disc, sw.Elapsed);
                 };
 
-                Thread generateThread = new Thread(md5disc.GenerateHash);
-                generateThread.Start();
-                generateThread.Join();
+                _generateThread = new Thread(md5disc.GenerateHash);
+                _generateThread.Start();
+                _generateThread.Join();
             }
 
             SetStatus("All Discs have been verified, review results above.");
             Console.SetCursorPosition(0, _nextLine);
+            Console.CursorVisible = true;
         }
 
         private int GetDiscIndex(DiscDetail disc)
