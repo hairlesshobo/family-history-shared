@@ -12,6 +12,44 @@ namespace Archiver.Utilities.Tape
 {
     public static class TapeUtils
     {
+        public static TapeDetail GetTapeDetail(int id)
+        {
+            List<TapeDetail> tapes = new List<TapeDetail>();
+
+            string jsonDir = Globals._indexDiscDir + "/json";
+
+            if (Directory.Exists(jsonDir))
+            {
+                string[] jsonFiles = Directory.GetFiles(jsonDir, $"tape_{id.ToString("000")}.json");
+                int totalFiles = jsonFiles.Length;
+                
+                if (totalFiles == 1)
+                {
+                    Console.CursorLeft = 0;
+                    Console.Write("Reading tape index file... ");
+
+                    TapeDetail tapeDetail = JsonConvert.DeserializeObject<TapeDetail>(File.ReadAllText(jsonFiles[0]));
+                    tapeDetail.FlattenFiles().ToList().ForEach(x => x.Tape = tapeDetail);
+
+                    Console.WriteLine("done");
+
+                    return tapeDetail;
+                }
+                else
+                    return null;
+            }
+
+            return null;
+        }
+
+        public static void RewindTape()
+        {
+            using (TapeOperator tape = new TapeOperator(Config.TapeDrive, false))
+            {
+                tape.RewindTape();
+            }
+        }
+
         public static TapeSourceInfo SelectTape()
         {
             TapeSourceInfo tape = default(TapeSourceInfo);
@@ -158,10 +196,13 @@ namespace Archiver.Utilities.Tape
 
                     int strlen = Array.IndexOf(buffer, (byte)0);
 
-                    if (strlen > 0)
-                        json += Encoding.UTF8.GetString(buffer, 0, strlen);
-                    else
-                        json += Encoding.UTF8.GetString(buffer, 0, buffer.Length);
+                    if (!endOfData)
+                    {
+                        if (strlen > 0)
+                            json += Encoding.UTF8.GetString(buffer, 0, strlen);
+                        else
+                            json += Encoding.UTF8.GetString(buffer, 0, buffer.Length);
+                    }
                 }
                 while (!endOfData);
 

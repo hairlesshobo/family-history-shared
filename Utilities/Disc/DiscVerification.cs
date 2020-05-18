@@ -20,6 +20,7 @@ namespace Archiver.Utilities.Disc
         private List<int> _pendingDiscs;
         private List<int> _completedDiscs;
         private string _driveLetter;
+        private volatile bool _cancel = false;
 
         public DiscVerifier(string DriveLetter)
         {

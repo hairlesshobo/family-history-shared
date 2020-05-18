@@ -153,6 +153,10 @@ namespace Archiver.Utilities.Shared
             Console.ForegroundColor = keyColor;
             Console.Write("<esc>");
             Console.ForegroundColor = _foregroundColor;
+            Console.Write(" or ");
+            Console.ForegroundColor = keyColor;
+            Console.Write("q");
+            Console.ForegroundColor = _foregroundColor;
             Console.Write(" to cancel");
 
             while (1 == 1)
@@ -193,7 +197,7 @@ namespace Archiver.Utilities.Shared
                     }
                 }
 
-                if (key.Key == ConsoleKey.Escape)
+                if (key.Key == ConsoleKey.Escape || key.Key == ConsoleKey.Q)
                 {
                     _canceled = true;
                     break;
