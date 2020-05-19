@@ -19,6 +19,8 @@ namespace Archiver.Utilities.Shared
         public bool Disabled { get; set; } = false;
         public bool Header { get; set; } = false;
         public TKey SelectedValue { get; set; }
+        public ConsoleColor ForegroundColor { get; set; } = Console.ForegroundColor;
+        public ConsoleColor BackgroundColor { get; set; } = Console.BackgroundColor;
         public bool Selected { 
             get
             {
@@ -35,8 +37,15 @@ namespace Archiver.Utilities.Shared
 
     public class CliMenu<TKey>
     {
+        #region Public Properties
         public event CliMenuCanceled OnCancel;
         public string MenuLabel { get; set; }
+        public ConsoleColor HeaderColor { get; set; } = ConsoleColor.Magenta;
+        public ConsoleColor KeyColor { get; set; } = ConsoleColor.DarkYellow;
+        public ConsoleColor CursorBackgroundColor { get; set; } = ConsoleColor.DarkGray;
+        public ConsoleColor CursorForegroundColor { get; set; } = ConsoleColor.DarkGreen;
+        public ConsoleColor CursorArrowColor { get; set; } = ConsoleColor.Green;
+        public ConsoleColor DisabledForegroundColor { get; set; } = ConsoleColor.DarkGray;
         public Boolean MultiSelect { 
             get
             {
@@ -52,7 +61,9 @@ namespace Archiver.Utilities.Shared
                 return _entries.Where(x => x.Selected).Select(x => x.SelectedValue).ToList();
             }
         }
+        #endregion Public Properties
 
+        #region Private Fields
         private List<CliMenuEntry<TKey>> _entries;
         private ConsoleColor _foregroundColor;
         private bool _multiSelect;
@@ -60,7 +71,9 @@ namespace Archiver.Utilities.Shared
         private bool _canceled = false;
 
         private int _startLine;
+        #endregion Private Fields
 
+        #region Constructors
         public CliMenu (List<CliMenuEntry<TKey>> entries, bool multiSelect)
         {
             Initalize(entries, multiSelect);
@@ -92,7 +105,9 @@ namespace Archiver.Utilities.Shared
 
             this.OnCancel += delegate {};
         }
+        #endregion Constructors
 
+        #region Public Methods
         public List<TKey> Show()
         {
             return Show(false);
@@ -110,7 +125,7 @@ namespace Archiver.Utilities.Shared
 
             if (this.MenuLabel != null)
             {
-                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.ForegroundColor = this.HeaderColor;
                 Console.WriteLine(this.MenuLabel);
                 Console.WriteLine();
                 Console.ForegroundColor = _foregroundColor;
@@ -123,21 +138,20 @@ namespace Archiver.Utilities.Shared
                 WriteMenuEntry(entry);
             }
 
-            ConsoleColor keyColor = ConsoleColor.DarkYellow;
             Console.SetCursorPosition(0, _startLine + _entries.Count() + 1);
             
             if (_multiSelect == true)
             {
                 Console.Write("Press ");
-                Console.ForegroundColor = keyColor;
+                Console.ForegroundColor = this.KeyColor;
                 Console.Write("<space>");
                 Console.ForegroundColor = _foregroundColor;
                 Console.Write(" to select entry, ");
-                Console.ForegroundColor = keyColor;
+                Console.ForegroundColor = this.KeyColor;
                 Console.Write("<Shift>-A");
                 Console.ForegroundColor = _foregroundColor;
                 Console.Write(" to select all, ");
-                Console.ForegroundColor = keyColor;
+                Console.ForegroundColor = this.KeyColor;
                 Console.Write("<Shift>-D");
                 Console.ForegroundColor = _foregroundColor;
                 Console.Write(" to deselect all");
@@ -146,15 +160,15 @@ namespace Archiver.Utilities.Shared
 
             Console.WriteLine();
             Console.Write("Press ");
-            Console.ForegroundColor = keyColor;
+            Console.ForegroundColor = this.KeyColor;
             Console.Write("<enter>");
             Console.ForegroundColor = _foregroundColor;
             Console.Write(" when finished, ");
-            Console.ForegroundColor = keyColor;
+            Console.ForegroundColor = this.KeyColor;
             Console.Write("<esc>");
             Console.ForegroundColor = _foregroundColor;
             Console.Write(" or ");
-            Console.ForegroundColor = keyColor;
+            Console.ForegroundColor = this.KeyColor;
             Console.Write("q");
             Console.ForegroundColor = _foregroundColor;
             Console.Write(" to cancel");
@@ -252,7 +266,9 @@ namespace Archiver.Utilities.Shared
                 return null;
             }
         }
+        #endregion Public Methods
 
+        #region Private Methods
         private void MoveCursor(CliMenuEntry<TKey> entry, bool down)
         {
             if (down == true)
@@ -294,14 +310,14 @@ namespace Archiver.Utilities.Shared
 
                 if (entryIndex == _cursorIndex)
                 {
-                    Console.BackgroundColor = ConsoleColor.DarkGray;
-                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.BackgroundColor = this.CursorBackgroundColor;
+                    Console.ForegroundColor = this.CursorArrowColor;
                     Console.Write("> ");
-                    Console.ForegroundColor = _foregroundColor;
+                    Console.ForegroundColor = this.CursorForegroundColor;
                 }
                 else if (Entry.Disabled)
                 {
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.ForegroundColor = this.DisabledForegroundColor;
                     Console.Write("  ");
                 }
                 else
@@ -323,13 +339,18 @@ namespace Archiver.Utilities.Shared
 
             if (Entry.Header && Entry.Name != null)
                 Console.Write($"----- {Entry.Name} -----");
-
             else
+            {
+                if (!Entry.Disabled)
+                    Console.ForegroundColor = Entry.ForegroundColor;
+
                 Console.Write(Entry.Name);
+            }
 
             Console.CursorLeft = 0;
 
             Console.ResetColor();
         }
+        #endregion Private Methods
     }
 }

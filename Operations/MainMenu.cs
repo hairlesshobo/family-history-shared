@@ -62,31 +62,38 @@ namespace Archiver.Operations
                     new CliMenuEntry<bool>() {
                         Name = "Search Disc Archive",
                         Action = NotImplemented,
-                    },
-                    new CliMenuEntry<bool>() {
-                        Name = "Run Archive process",
-                        Action = DiscArchiver.StartOperation,
-                        Disabled = Config.ReadOnlyFilesystem || !Config.OpticalDrivePresent
-                    },
-                    new CliMenuEntry<bool>() {
-                        Name = "View Archive Summary",
-                        Action = DiscSummary.StartOperation,
-                        SelectedValue = true // do not show the "press enter to return to main menu" message
-                    },
-                    new CliMenuEntry<bool>() {
-                        Name = "Verify Discs",
-                        Action = DiscVerification.StartOperation,
-                        Disabled = Config.ReadOnlyFilesystem || !Config.OpticalDrivePresent
-                    },
-                    new CliMenuEntry<bool>() {
-                        Name = "Scan For Changes",
-                        Action = NotImplemented
+                        ForegroundColor = ConsoleColor.Green
                     },
                     new CliMenuEntry<bool>() {
                         Name = "Restore entire disc(s)",
                         Action = NotImplemented,
-                        Disabled = !Config.OpticalDrivePresent
+                        Disabled = !Config.OpticalDrivePresent,
+                        ForegroundColor = ConsoleColor.Green
                     },
+                    new CliMenuEntry<bool>() {
+                        Name = "View Archive Summary",
+                        Action = DiscSummary.StartOperation,
+                        SelectedValue = true, // do not show the "press enter to return to main menu" message
+                        ForegroundColor = ConsoleColor.Blue
+                    },                   
+                    new CliMenuEntry<bool>() {
+                        Name = "Verify Discs",
+                        Action = DiscVerification.StartOperation,
+                        Disabled = Config.ReadOnlyFilesystem || !Config.OpticalDrivePresent,
+                        ForegroundColor = ConsoleColor.DarkYellow
+                    },
+                    new CliMenuEntry<bool>() {
+                        Name = "Scan For Changes",
+                        Action = NotImplemented,
+                        ForegroundColor = ConsoleColor.DarkYellow
+                    },
+                    new CliMenuEntry<bool>() {
+                        Name = "Run Archive process",
+                        Action = DiscArchiver.StartOperation,
+                        Disabled = Config.ReadOnlyFilesystem || !Config.OpticalDrivePresent,
+                        ForegroundColor = ConsoleColor.Red
+                    },
+                    
 
                     new CliMenuEntry<bool>() {
                         Header = true
@@ -98,32 +105,38 @@ namespace Archiver.Operations
                     new CliMenuEntry<bool>() {
                         Name = "Search Tape Archive",
                         Action = NotImplemented,
+                        ForegroundColor = ConsoleColor.Green
                     },
                     new CliMenuEntry<bool>() {
-                        Name = "Run tape archive",
-                        Action = TapeArchiver.StartOperation,
-                        Disabled = Config.ReadOnlyFilesystem || !Config.TapeDrivePresent
+                        Name = "Restore entire tape",
+                        Action = NotImplemented,
+                        Disabled = !Config.TapeDrivePresent,
+                        ForegroundColor = ConsoleColor.Green
                     },
                     new CliMenuEntry<bool>() {
                         Name = "Read Tape Summary",
                         Action = ShowTapeSummary.StartOperation,
                         Disabled = !Config.TapeDrivePresent,
-                        SelectedValue = true // do not show the "press enter to return to main menu" message
+                        SelectedValue = true, // do not show the "press enter to return to main menu" message
+                        ForegroundColor = ConsoleColor.Blue
                     },
                     new CliMenuEntry<bool>() {
                         Name = "View Archive Summary",
                         Action = TapeArchiveSummary.StartOperation,
-                        SelectedValue = true // do not show the "press enter to return to main menu" message
+                        SelectedValue = true, // do not show the "press enter to return to main menu" message
+                        ForegroundColor = ConsoleColor.Blue
                     },
                     new CliMenuEntry<bool>() {
                         Name = "Verify Tape",
                         Action = TapeVerification.StartOperation,
-                        Disabled = Config.ReadOnlyFilesystem || !Config.TapeDrivePresent
+                        Disabled = Config.ReadOnlyFilesystem || !Config.TapeDrivePresent,
+                        ForegroundColor = ConsoleColor.DarkYellow
                     },
                     new CliMenuEntry<bool>() {
-                        Name = "Restore entire tape",
-                        Action = NotImplemented,
-                        Disabled = !Config.TapeDrivePresent
+                        Name = "Run tape archive",
+                        Action = TapeArchiver.StartOperation,
+                        Disabled = Config.ReadOnlyFilesystem || !Config.TapeDrivePresent,
+                        ForegroundColor = ConsoleColor.Red
                     },
 
 
