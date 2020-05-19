@@ -16,7 +16,7 @@ namespace Archiver.Operations
         public static void StartOperation()
         {
             Initialize();
-            
+
             while (1 == 1)
             {
                 bool result = _menu.Show(true).First();
@@ -48,16 +48,25 @@ namespace Archiver.Operations
                 if (Config.TapeDrivePresent == false)
                     tapeMenuAppend += " (drive not detected)";
 
+                string discMenuAppend = String.Empty;
+
+                if (Config.OpticalDrivePresent == false)
+                    discMenuAppend += " (drive not detected)";
+
                 _menu = new CliMenu<bool>(new List<CliMenuEntry<bool>>()
                 {
                     new CliMenuEntry<bool>() {
-                        Name = "Disc Operations",
+                        Name = "Disc Operations" + discMenuAppend,
                         Header = true
+                    },
+                    new CliMenuEntry<bool>() {
+                        Name = "Search Disc Archive",
+                        Action = NotImplemented,
                     },
                     new CliMenuEntry<bool>() {
                         Name = "Run Archive process",
                         Action = DiscArchiver.StartOperation,
-                        Disabled = Globals._readOnlyFs
+                        Disabled = Config.ReadOnlyFilesystem || !Config.OpticalDrivePresent
                     },
                     new CliMenuEntry<bool>() {
                         Name = "View Archive Summary",
@@ -67,11 +76,16 @@ namespace Archiver.Operations
                     new CliMenuEntry<bool>() {
                         Name = "Verify Discs",
                         Action = DiscVerification.StartOperation,
-                        Disabled = Globals._readOnlyFs
+                        Disabled = Config.ReadOnlyFilesystem || !Config.OpticalDrivePresent
                     },
                     new CliMenuEntry<bool>() {
                         Name = "Scan For Changes",
                         Action = NotImplemented
+                    },
+                    new CliMenuEntry<bool>() {
+                        Name = "Restore entire disc(s)",
+                        Action = NotImplemented,
+                        Disabled = !Config.OpticalDrivePresent
                     },
 
                     new CliMenuEntry<bool>() {
@@ -82,9 +96,13 @@ namespace Archiver.Operations
                         Header = true
                     },
                     new CliMenuEntry<bool>() {
+                        Name = "Search Tape Archive",
+                        Action = NotImplemented,
+                    },
+                    new CliMenuEntry<bool>() {
                         Name = "Run tape archive",
                         Action = TapeArchiver.StartOperation,
-                        Disabled = Globals._readOnlyFs || !Config.TapeDrivePresent
+                        Disabled = Config.ReadOnlyFilesystem || !Config.TapeDrivePresent
                     },
                     new CliMenuEntry<bool>() {
                         Name = "Read Tape Summary",
@@ -95,12 +113,16 @@ namespace Archiver.Operations
                     new CliMenuEntry<bool>() {
                         Name = "View Archive Summary",
                         Action = TapeArchiveSummary.StartOperation,
-                        Disabled = !Config.TapeDrivePresent,
                         SelectedValue = true // do not show the "press enter to return to main menu" message
                     },
                     new CliMenuEntry<bool>() {
                         Name = "Verify Tape",
                         Action = TapeVerification.StartOperation,
+                        Disabled = Config.ReadOnlyFilesystem || !Config.TapeDrivePresent
+                    },
+                    new CliMenuEntry<bool>() {
+                        Name = "Restore entire tape",
+                        Action = NotImplemented,
                         Disabled = !Config.TapeDrivePresent
                     },
 
@@ -115,12 +137,12 @@ namespace Archiver.Operations
                     new CliMenuEntry<bool>() {
                         Name = "Copy Tools to Local Disk",
                         Action = NotImplemented,
-                        Disabled = !Globals._readOnlyFs
+                        Disabled = !Config.ReadOnlyFilesystem
                     },
                     new CliMenuEntry<bool>() {
                         Name = "Create Index ISO",
                         Action = Helpers.CreateIndexIso,
-                        Disabled = Globals._readOnlyFs
+                        Disabled = Config.ReadOnlyFilesystem
                     },
                     new CliMenuEntry<bool>() {
                         Name = "Exit",
