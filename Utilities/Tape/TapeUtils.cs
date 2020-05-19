@@ -12,6 +12,21 @@ namespace Archiver.Utilities.Tape
 {
     public static class TapeUtils
     {
+        public static bool TapeDrivePresent()
+        {
+            try
+            {
+                using (TapeOperator tape = new TapeOperator(Config.TapeDrive, false))
+                {}
+            }
+            catch (TapeOperatorWin32Exception exception)
+            {
+                if (exception.HResult == -2146232832)
+                    return false;
+            }
+
+            return true;
+        }
         public static TapeDetail GetTapeDetail(int id)
         {
             List<TapeDetail> tapes = new List<TapeDetail>();

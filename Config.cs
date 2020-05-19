@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Archiver.Utilities.Shared;
+using Archiver.Utilities.Tape;
 using Microsoft.Extensions.Configuration;
 
 namespace Archiver
@@ -14,6 +15,15 @@ namespace Archiver
         public static int TapeMemoryBufferMinFill { get; set; }
         public static int TapeTextBlockSize { get; set; }
         public static bool TapeAutoEject { get; set; }
+        public static bool TapeDrivePresent 
+        { 
+            get
+            {
+                return _tapeDrivePresent;
+            }
+        }
+
+        private static bool _tapeDrivePresent;
 
         public static void ReadConfig()
         {
@@ -45,6 +55,8 @@ namespace Archiver
             }
 
             Globals._indexDiscDir = DiscGlobals._discStagingDir + $"/index";
+
+            _tapeDrivePresent = TapeUtils.TapeDrivePresent();
         }
     }
 }

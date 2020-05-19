@@ -10,91 +10,13 @@ namespace Archiver.Operations
 {
     public static class MainMenu
     {
-        private static CliMenu<bool> _menu = new CliMenu<bool>(new List<CliMenuEntry<bool>>()
-        {
-            new CliMenuEntry<bool>() {
-                Name = "Disc Operations",
-                Header = true
-            },
-            new CliMenuEntry<bool>() {
-                Name = "Run Archive process",
-                Action = DiscArchiver.StartOperation,
-                Disabled = Globals._readOnlyFs
-            },
-            new CliMenuEntry<bool>() {
-                Name = "View Archive Summary",
-                Action = DiscSummary.StartOperation,
-                SelectedValue = true // do not show the "press enter to return to main menu" message
-            },
-            new CliMenuEntry<bool>() {
-                Name = "Verify Discs",
-                Action = DiscVerification.StartOperation,
-                Disabled = Globals._readOnlyFs
-            },
-            new CliMenuEntry<bool>() {
-                Name = "Scan For Changes",
-                Action = NotImplemented
-            },
-
-            new CliMenuEntry<bool>() {
-                Header = true
-            },
-            new CliMenuEntry<bool>() {
-                Name = "Tape Operations",
-                Header = true
-            },
-            new CliMenuEntry<bool>() {
-                Name = "Run tape archive",
-                Action = TapeArchiver.StartOperation,
-                Disabled = Globals._readOnlyFs
-            },
-            new CliMenuEntry<bool>() {
-                Name = "Read Tape Summary",
-                Action = ShowTapeSummary.StartOperation,
-                SelectedValue = true // do not show the "press enter to return to main menu" message
-            },
-            new CliMenuEntry<bool>() {
-                Name = "View Archive Summary",
-                Action = TapeArchiveSummary.StartOperation,
-                SelectedValue = true // do not show the "press enter to return to main menu" message
-            },
-            new CliMenuEntry<bool>() {
-                Name = "Verify Tape",
-                Action = TapeVerification.StartOperation
-            },
-
-
-            new CliMenuEntry<bool>() {
-                Header = true
-            },
-            new CliMenuEntry<bool>() {
-                Name = "Universal Operations",
-                Header = true
-            },
-            new CliMenuEntry<bool>() {
-                Name = "Copy Tools to Local Disk",
-                Action = NotImplemented,
-                Disabled = !Globals._readOnlyFs
-            },
-            new CliMenuEntry<bool>() {
-                Name = "Create Index ISO",
-                Action = Helpers.CreateIndexIso,
-                Disabled = Globals._readOnlyFs
-            },
-            new CliMenuEntry<bool>() {
-                Name = "Exit",
-                Action = () => Environment.Exit(0)
-            }
-        });
+        private static bool _initialized = false;
+        private static CliMenu<bool> _menu; 
 
         public static void StartOperation()
         {
-            _menu.MenuLabel = "Archiver, main menu...";
-            _menu.OnCancel += () =>
-            {
-                Environment.Exit(0);
-            };
-
+            Initialize();
+            
             while (1 == 1)
             {
                 bool result = _menu.Show(true).First();
@@ -112,6 +34,105 @@ namespace Archiver.Operations
                             break;
                     }
                 }
+            }
+        }
+
+        private static void Initialize()
+        {
+            if (_initialized == false)
+            {
+                _initialized = true;
+
+                string tapeMenuAppend = String.Empty;
+
+                if (Config.TapeDrivePresent == false)
+                    tapeMenuAppend += " (drive not detected)";
+
+                _menu = new CliMenu<bool>(new List<CliMenuEntry<bool>>()
+                {
+                    new CliMenuEntry<bool>() {
+                        Name = "Disc Operations",
+                        Header = true
+                    },
+                    new CliMenuEntry<bool>() {
+                        Name = "Run Archive process",
+                        Action = DiscArchiver.StartOperation,
+                        Disabled = Globals._readOnlyFs
+                    },
+                    new CliMenuEntry<bool>() {
+                        Name = "View Archive Summary",
+                        Action = DiscSummary.StartOperation,
+                        SelectedValue = true // do not show the "press enter to return to main menu" message
+                    },
+                    new CliMenuEntry<bool>() {
+                        Name = "Verify Discs",
+                        Action = DiscVerification.StartOperation,
+                        Disabled = Globals._readOnlyFs
+                    },
+                    new CliMenuEntry<bool>() {
+                        Name = "Scan For Changes",
+                        Action = NotImplemented
+                    },
+
+                    new CliMenuEntry<bool>() {
+                        Header = true
+                    },
+                    new CliMenuEntry<bool>() {
+                        Name = "Tape Operations" + tapeMenuAppend,
+                        Header = true
+                    },
+                    new CliMenuEntry<bool>() {
+                        Name = "Run tape archive",
+                        Action = TapeArchiver.StartOperation,
+                        Disabled = Globals._readOnlyFs || !Config.TapeDrivePresent
+                    },
+                    new CliMenuEntry<bool>() {
+                        Name = "Read Tape Summary",
+                        Action = ShowTapeSummary.StartOperation,
+                        Disabled = !Config.TapeDrivePresent,
+                        SelectedValue = true // do not show the "press enter to return to main menu" message
+                    },
+                    new CliMenuEntry<bool>() {
+                        Name = "View Archive Summary",
+                        Action = TapeArchiveSummary.StartOperation,
+                        Disabled = !Config.TapeDrivePresent,
+                        SelectedValue = true // do not show the "press enter to return to main menu" message
+                    },
+                    new CliMenuEntry<bool>() {
+                        Name = "Verify Tape",
+                        Action = TapeVerification.StartOperation,
+                        Disabled = !Config.TapeDrivePresent
+                    },
+
+
+                    new CliMenuEntry<bool>() {
+                        Header = true
+                    },
+                    new CliMenuEntry<bool>() {
+                        Name = "Universal Operations",
+                        Header = true
+                    },
+                    new CliMenuEntry<bool>() {
+                        Name = "Copy Tools to Local Disk",
+                        Action = NotImplemented,
+                        Disabled = !Globals._readOnlyFs
+                    },
+                    new CliMenuEntry<bool>() {
+                        Name = "Create Index ISO",
+                        Action = Helpers.CreateIndexIso,
+                        Disabled = Globals._readOnlyFs
+                    },
+                    new CliMenuEntry<bool>() {
+                        Name = "Exit",
+                        Action = () => Environment.Exit(0)
+                    }
+                });
+
+                _menu.MenuLabel = "Archiver, main menu...";
+                _menu.OnCancel += () =>
+                {
+                    Environment.Exit(0);
+                };
             }
         }
 

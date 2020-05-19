@@ -61,7 +61,6 @@ namespace Archiver
 
             // var info = TapeUtils.GetTapeInfo();
 
-
             MainMenu.StartOperation();
 
             // Console.ReadLine();
