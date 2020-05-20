@@ -173,6 +173,8 @@ namespace Archiver.Utilities.Shared
             Console.ForegroundColor = _foregroundColor;
             Console.Write(" to cancel");
 
+            Console.TreatControlCAsInput = true;
+
             while (1 == 1)
             {
                 ConsoleKeyInfo key = Console.ReadKey(true);
@@ -211,7 +213,7 @@ namespace Archiver.Utilities.Shared
                     }
                 }
 
-                if (key.Key == ConsoleKey.Escape || key.Key == ConsoleKey.Q)
+                if (key.Key == ConsoleKey.Escape || key.Key == ConsoleKey.Q || (key.Key == ConsoleKey.C && key.Modifiers == ConsoleModifiers.Control))
                 {
                     _canceled = true;
                     break;
@@ -238,6 +240,7 @@ namespace Archiver.Utilities.Shared
                     break;
             }
 
+            Console.TreatControlCAsInput = false;
             Console.CursorVisible = true;
             Console.SetCursorPosition(0, _startLine+_entries.Count()+1);
 

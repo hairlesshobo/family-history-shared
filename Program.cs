@@ -29,9 +29,6 @@ namespace Archiver
         //     Summary.StartOperation();
         // }
 
-
-
-
         static void Main(string[] args)
         {
             Console.BackgroundColor = ConsoleColor.Black;

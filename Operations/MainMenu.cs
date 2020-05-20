@@ -107,8 +107,9 @@ namespace Archiver.Operations
                     },
                     new CliMenuEntry<bool>() {
                         Name = "Search Tape Archive",
-                        Action = NotImplemented,
-                        ForegroundColor = ConsoleColor.Green
+                        Action = TapeSearcher.StartOperation,
+                        ForegroundColor = ConsoleColor.Green,
+                        SelectedValue = true, // do not show the "press enter to return to main menu" message
                     },
                     new CliMenuEntry<bool>() {
                         Name = "Restore entire tape",

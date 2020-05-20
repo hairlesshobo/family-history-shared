@@ -15,7 +15,7 @@ namespace Archiver.Utilities.Disc
         private static int _nextLine = -1;
         private static int _discLine = -1;
         private static int _statusLine = -1;
-        private static int _cancelLine = -1;
+        // private static int _cancelLine = -1;
         private static int _discCount = 0;
         private List<DiscDetail> _discsToVerify;
         private List<int> _pendingDiscs;

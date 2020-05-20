@@ -324,11 +324,13 @@ namespace Archiver.Utilities.Shared
 
         private void MainLoop()
         {
+            Console.TreatControlCAsInput = true;
+
             while (!_abort)
             {
                 ConsoleKeyInfo key = Console.ReadKey(true);
 
-                if (key.Key == ConsoleKey.Q || key.Key == ConsoleKey.Escape)
+                if (key.Key == ConsoleKey.Q || key.Key == ConsoleKey.Escape || (key.Key == ConsoleKey.C && key.Modifiers == ConsoleModifiers.Control))
                     _abort = true;
                 else if (key.Key == ConsoleKey.DownArrow)
                     DownLine();
@@ -345,6 +347,8 @@ namespace Archiver.Utilities.Shared
                 else if (key.Key == ConsoleKey.S && key.Modifiers == ConsoleModifiers.Control)
                     SaveFile();
             }
+
+            Console.TreatControlCAsInput = false;
         }
 
         private void Cleanup()
