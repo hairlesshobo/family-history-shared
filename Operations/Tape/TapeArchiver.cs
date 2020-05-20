@@ -4,7 +4,7 @@ using Archiver.Utilities;
 using Archiver.Utilities.Disc;
 using Archiver.Utilities.Tape;
 
-namespace Archiver.Operations
+namespace Archiver.Operations.Disc
 {
     public static class TapeArchiver
     {

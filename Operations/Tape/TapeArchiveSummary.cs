@@ -5,7 +5,7 @@ using Archiver.Classes.Disc;
 using Archiver.Classes.Tape;
 using Archiver.Utilities.Shared;
 
-namespace Archiver.Operations
+namespace Archiver.Operations.Disc
 {
     public static class TapeArchiveSummary
     {
@@ -31,6 +31,8 @@ namespace Archiver.Operations
 
             using (Pager pager = new Pager())
             {
+                pager.Start();
+                
                 pager.AppendLine("Overall Tape Archive Statistics");
                 pager.AppendLine("==============================================================");
 

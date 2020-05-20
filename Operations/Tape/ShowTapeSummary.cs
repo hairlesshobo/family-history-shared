@@ -2,7 +2,7 @@ using System;
 using Archiver.Utilities.Shared;
 using Archiver.Utilities.Tape;
 
-namespace Archiver.Operations
+namespace Archiver.Operations.Disc
 {
     public static class ShowTapeSummary
     {
@@ -22,6 +22,8 @@ namespace Archiver.Operations
 
                 using (Pager pager = new Pager())
                 {
+                    pager.Start();
+                    
                     pager.AutoScroll = false;
                     pager.ShowLineNumbers = true;
 

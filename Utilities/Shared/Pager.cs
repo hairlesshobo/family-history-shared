@@ -15,11 +15,87 @@ namespace Archiver.Utilities.Shared
         #region Public Properties
         public bool AutoScroll { get; set; } = false;
         public bool ShowLineNumbers { get; set; } = false;
+        public bool ShowHeader { get; set; } = false;
+        public string HeaderText { get; set; } = String.Empty;
+        public string HighlightText { get; set; } = null;
+        public bool Highlight { get; set; } = false;
+        public ConsoleColor HighlightColor { get; set; } = ConsoleColor.DarkYellow;
+        public int StartLine { get; set; } = 0;
+
+        public int FirstLine
+        {
+            get
+            {
+                if (this.ShowHeader)
+                    return this.StartLine + 1;
+                else
+                    return this.StartLine;
+            }
+        }
+        public int WindowHeight
+        {
+            get
+            {
+                if (this.ShowHeader)
+                    return Console.WindowHeight - this.StartLine - 1;
+                else
+                    return Console.WindowHeight - this.StartLine;
+            }
+        }
+        public int WindowWidth
+        {
+            get
+            {
+                return Console.WindowWidth - 1;
+            }
+        }
+        public int LineNumberWidth
+        {
+            get
+            {
+                if (this.ShowLineNumbers)
+                    return (_topLineIndexPointer + this.MaxLines).ToString().Length;
+                else
+                    return 0;
+            }
+        }
+        public int MaxWidth
+        {
+            get
+            {
+                if (this.ShowLineNumbers)
+                    return this.WindowWidth - this.LineNumberWidth - 1; // we subtract one more for a little padding
+                else
+                    return this.WindowWidth;
+            }
+        }
+        public int MaxLines
+        {
+            get
+            {
+                return this.WindowHeight - 1;
+            }
+        }
         public bool DeferDraw 
         { 
             get
             {
                 return _deferDraw;
+            }
+        }
+
+        public int BottomLine
+        {
+            get
+            {
+                return Console.WindowHeight - 1;
+            }
+        }
+        public bool Started
+        {
+            get
+            {
+                return _started;
             }
         }
         #endregion Public Properties
@@ -28,52 +104,29 @@ namespace Archiver.Utilities.Shared
         private object _consoleLock = new object();
         
         private List<string> _lines;
-        private int _startLine = 0;
-        private int _bottomLine = 0;
-        private int _windowHeight = -1;
-        private int _windowWidth = -1;
         private int _topLineIndexPointer = 0;
 
-        private int _maxWidth = -1;
-        private int _maxLines = -1;
         private int _totalLines = 0;
-        private int _lineNumberWidth = 0;
         private volatile bool _drawn = false;
 
         private Thread _thread;
         private volatile bool _abort = false;
         private bool _deferDraw = true;
+        private volatile bool _started = false;
         #endregion Private Fields
 
         #region Constructor
         public Pager()
         {
-            Initialize();
-        }
-
-        public Pager(bool deferDraw)
-        {
-            _deferDraw = deferDraw;
-        }
-
-        public Pager(int StartLine)
-        {
-            _startLine = Console.WindowHeight - StartLine;
-
-            Initialize();
-        }
-
-        private void Initialize()
-        {
             _lines = new List<string>();
-            _windowWidth = Console.WindowWidth - 1;
-            _windowHeight = Console.WindowHeight - _startLine;
-            _bottomLine = Console.WindowHeight - 1;
-            _maxWidth = _windowWidth;
-            _maxLines = _windowHeight - 1;
+        }
 
+        public void Start()
+        {
             _thread = new Thread(Run);
             _thread.Start();
+
+            _started = true;
         }
         #endregion Constructor
 
@@ -87,26 +140,29 @@ namespace Archiver.Utilities.Shared
             _lines.Add(Line);
             _totalLines++;
 
-            if (this.AutoScroll == true)
-                ScrollToBottom();
-            else
+            if (_started)
             {
-                if (DeferDraw == true)
+                if (this.AutoScroll == true)
+                    ScrollToBottom();
+                else
                 {
-                    if (_totalLines >= _maxLines)
+                    if (DeferDraw == true)
                     {
-                        if (_drawn == false)
+                        if (_totalLines >= this.MaxLines)
+                        {
+                            if (_drawn == false)
+                                Redraw();
+                            else
+                                WriteStatusBar();
+                        }
+                    }
+                    else
+                    {
+                        if (_totalLines - _topLineIndexPointer <= this.MaxLines)
                             Redraw();
                         else
                             WriteStatusBar();
                     }
-                }
-                else
-                {
-                    if (_totalLines - _topLineIndexPointer <= _maxLines)
-                        Redraw();
-                    else
-                        WriteStatusBar();
                 }
             }
         }
@@ -120,7 +176,7 @@ namespace Archiver.Utilities.Shared
 
         public void ScrollToBottom()
         {
-            _topLineIndexPointer = _totalLines - _maxLines;
+            _topLineIndexPointer = _totalLines - this.MaxLines;
 
             Redraw();
         }
@@ -137,7 +193,7 @@ namespace Archiver.Utilities.Shared
 
         public void UpPage()
         {
-            _topLineIndexPointer -= _maxLines;
+            _topLineIndexPointer -= this.MaxLines;
 
             if (_topLineIndexPointer < 0)
                 _topLineIndexPointer = 0;
@@ -150,18 +206,18 @@ namespace Archiver.Utilities.Shared
         {
             _topLineIndexPointer++;
 
-            if (_topLineIndexPointer + _maxLines >= _totalLines)
-                _topLineIndexPointer = _totalLines - (_maxLines > _totalLines ? _totalLines : _maxLines);
+            if (_topLineIndexPointer + this.MaxLines >= _totalLines)
+                _topLineIndexPointer = _totalLines - (this.MaxLines > _totalLines ? _totalLines : this.MaxLines);
 
             Redraw();
         }
 
         public void DownPage()
         {
-            _topLineIndexPointer += _maxLines;
+            _topLineIndexPointer += this.MaxLines;
 
-            if (_topLineIndexPointer + _maxLines >= _totalLines)
-                _topLineIndexPointer = _totalLines - (_maxLines > _totalLines ? _totalLines : _maxLines);
+            if (_topLineIndexPointer + this.MaxLines >= _totalLines)
+                _topLineIndexPointer = _totalLines - (this.MaxLines > _totalLines ? _totalLines : this.MaxLines);
 
             Redraw();
         }
@@ -170,13 +226,13 @@ namespace Archiver.Utilities.Shared
         {
             lock (_consoleLock)
             {
-                Console.SetCursorPosition(0, _bottomLine);
+                Console.SetCursorPosition(0, this.BottomLine);
                 Console.BackgroundColor = ConsoleColor.DarkGreen;
                 Console.ForegroundColor = ConsoleColor.Black;
                 Console.CursorVisible = true;
-                Console.Write(String.Empty.PadRight(_windowWidth));
+                Console.Write(String.Empty.PadRight(this.WindowWidth));
 
-                Console.SetCursorPosition(0, _bottomLine);
+                Console.SetCursorPosition(0, this.BottomLine);
                 Console.Write("Enter file name (blank to abort): ");
                 string fileName = Console.ReadLine();
                 Console.ResetColor();
@@ -190,12 +246,12 @@ namespace Archiver.Utilities.Shared
                 {
                     if (File.Exists(fileName))
                     {
-                        Console.SetCursorPosition(0, _bottomLine);
+                        Console.SetCursorPosition(0, this.BottomLine);
                         Console.BackgroundColor = ConsoleColor.DarkRed;
                         Console.ForegroundColor = ConsoleColor.Black;
-                        Console.Write(String.Empty.PadRight(_windowWidth));
+                        Console.Write(String.Empty.PadRight(this.WindowWidth));
 
-                        Console.SetCursorPosition(0, _bottomLine);
+                        Console.SetCursorPosition(0, this.BottomLine);
                         Console.Write("ERROR: File already exists, try again.");
                         Console.ResetColor();
 
@@ -210,12 +266,12 @@ namespace Archiver.Utilities.Shared
                                 stream.WriteLine(line);
                         }
 
-                        Console.SetCursorPosition(0, _bottomLine);
+                        Console.SetCursorPosition(0, this.BottomLine);
                         Console.BackgroundColor = ConsoleColor.DarkGreen;
                         Console.ForegroundColor = ConsoleColor.Black;
-                        Console.Write(String.Empty.PadRight(_windowWidth));
+                        Console.Write(String.Empty.PadRight(this.WindowWidth));
 
-                        Console.SetCursorPosition(0, _bottomLine);
+                        Console.SetCursorPosition(0, this.BottomLine);
                         Console.Write($"Success! Text saved to {fileName}");
                         Console.ResetColor();
 
@@ -312,39 +368,72 @@ namespace Archiver.Utilities.Shared
             {
                 _drawn = true;
 
+                WriteHeader();
                 WriteStatusBar();
 
-                if (ShowLineNumbers)
-                {
-                    _lineNumberWidth = (_topLineIndexPointer + _maxLines).ToString().Length;
-                    _maxWidth = _windowWidth - _lineNumberWidth - 1; // we subtract one more for a little padding
-                }
-                else
-                    _lineNumberWidth = 0;
-
-                IEnumerable<string> linesToShow = _lines.Skip(_topLineIndexPointer).Take(_maxLines);
+                IEnumerable<string> linesToShow = _lines.Skip(_topLineIndexPointer).Take(this.MaxLines);
                 int i = 0;
 
                 foreach (string line in linesToShow)
                 {
                     lock (_consoleLock)
                     {
-                        Console.SetCursorPosition(0, _startLine + i);
+                        Console.SetCursorPosition(0, this.FirstLine + i);
 
                         if (ShowLineNumbers == true)
                         {
                             Console.BackgroundColor = ConsoleColor.DarkBlue;
-                            Console.Write((_topLineIndexPointer + i + 1).ToString().PadLeft(_lineNumberWidth));
+                            Console.Write((_topLineIndexPointer + i + 1).ToString().PadLeft(this.LineNumberWidth));
                             Console.ResetColor();
                             Console.Write(" ");
                         }
 
-                        int lineWidth = (line.Length > _maxWidth ? _maxWidth : line.Length);
+                        int lineWidth = (line.Length > this.MaxWidth ? this.MaxWidth : line.Length);
 
-                        Console.Write(line.Substring(0, lineWidth).PadRight(_maxWidth));
+                        if (this.Highlight == true && this.HighlightText != null)
+                        {
+                            for (int s = 0; s < line.Length; s++)
+                            {
+                                if (line.Substring(s).ToLower().StartsWith(this.HighlightText.ToLower()))
+                                {
+                                    Console.ForegroundColor = this.HighlightColor;
+                                    Console.Write(line.Substring(s, this.HighlightText.Length));
+                                    Console.ResetColor();
+
+                                    s += this.HighlightText.Length-1;
+                                }
+                                else
+                                    Console.Write(line[s]);
+                            }
+
+                            // erase the rest of the line
+                            if (line.Length < this.MaxWidth)
+                                Console.Write(String.Empty.PadRight(this.MaxWidth - line.Length));
+                        }
+                        else
+                            Console.Write(line.Substring(0, lineWidth).PadRight(this.MaxWidth));
                     }
 
                     i++;
+                }
+            }
+        }
+
+        private void WriteHeader()
+        {
+            if (this.ShowHeader)
+            {
+                string line = this.HeaderText;
+
+                if (line == null)
+                    line = String.Empty;
+
+                lock (_consoleLock)
+                {
+                    Console.SetCursorPosition(0, this.StartLine);
+                    Console.BackgroundColor = ConsoleColor.DarkBlue;
+                    Console.Write(line.PadRight(this.MaxWidth));
+                    Console.ResetColor();
                 }
             }
         }
@@ -353,8 +442,8 @@ namespace Archiver.Utilities.Shared
         {
             string line = _statusLineLeft;
 
-            int startLine = _topLineIndexPointer+1;
-            int endLine = _topLineIndexPointer+_maxLines;
+            int startLine = _topLineIndexPointer + 1;
+            int endLine = _topLineIndexPointer + this.MaxLines;
 
             if (endLine > _totalLines)
                 endLine = _totalLines;
@@ -362,11 +451,11 @@ namespace Archiver.Utilities.Shared
             double linePct = Math.Round(((double)(endLine) / (double)_totalLines) * 100.0, 0);
             string lineIndex = $"Line: {startLine}-{endLine} / {_totalLines}   {linePct.ToString("##0").PadLeft(3)}%";
 
-            int leftPad = _windowWidth - lineIndex.Length;
+            int leftPad = this.WindowWidth - lineIndex.Length;
 
             lock (_consoleLock)
             {
-                Console.SetCursorPosition(0, _bottomLine);
+                Console.SetCursorPosition(0, this.BottomLine);
                 Console.BackgroundColor = ConsoleColor.DarkBlue;
                 Console.Write(line.PadRight(leftPad) + lineIndex);
                 Console.ResetColor();

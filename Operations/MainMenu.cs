@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Archiver.Classes.Disc;
 using Archiver.Classes.Tape;
+using Archiver.Operations.Disc;
 using Archiver.Utilities;
 using Archiver.Utilities.Shared;
 using Archiver.Utilities.Tape;
@@ -61,8 +63,9 @@ namespace Archiver.Operations
                     },
                     new CliMenuEntry<bool>() {
                         Name = "Search Disc Archive",
-                        Action = NotImplemented,
-                        ForegroundColor = ConsoleColor.Green
+                        Action = DiscSearcher.StartOperation,
+                        ForegroundColor = ConsoleColor.Green,
+                        SelectedValue = true, // do not show the "press enter to return to main menu" message
                     },
                     new CliMenuEntry<bool>() {
                         Name = "Restore entire disc(s)",
@@ -72,7 +75,7 @@ namespace Archiver.Operations
                     },
                     new CliMenuEntry<bool>() {
                         Name = "View Archive Summary",
-                        Action = DiscSummary.StartOperation,
+                        Action = Disc.DiscSummary.StartOperation,
                         SelectedValue = true, // do not show the "press enter to return to main menu" message
                         ForegroundColor = ConsoleColor.Blue
                     },                   

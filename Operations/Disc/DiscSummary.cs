@@ -4,7 +4,7 @@ using System.Linq;
 using Archiver.Classes.Disc;
 using Archiver.Utilities.Shared;
 
-namespace Archiver.Operations
+namespace Archiver.Operations.Disc
 {
     public static class DiscSummary
     {
@@ -28,6 +28,8 @@ namespace Archiver.Operations
 
             using (Pager pager = new Pager())
             {
+                pager.Start();
+                
                 pager.AppendLine("Current Disc Archive Statistics");
                 pager.AppendLine("==============================================================");
 

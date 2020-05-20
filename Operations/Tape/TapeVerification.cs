@@ -5,7 +5,7 @@ using Archiver.Classes.Tape;
 using Archiver.Utilities.Shared;
 using Archiver.Utilities.Tape;
 
-namespace Archiver.Operations
+namespace Archiver.Operations.Disc
 {
     public static class TapeVerification
     {

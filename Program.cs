@@ -12,6 +12,7 @@ using Archiver.Utilities.Tape;
 using ICSharpCode.SharpZipLib.Tar;
 using Archiver.Utilities.Shared;
 using Archiver.Classes.Tape;
+using Archiver.Operations.Disc;
 
 namespace Archiver
 {

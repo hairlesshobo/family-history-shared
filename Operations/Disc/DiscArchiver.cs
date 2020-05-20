@@ -3,7 +3,7 @@ using Archiver.Utilities;
 using Archiver.Utilities.Disc;
 using Archiver.Utilities.Shared;
 
-namespace Archiver.Operations
+namespace Archiver.Operations.Disc
 {
     public static class DiscArchiver
     {
