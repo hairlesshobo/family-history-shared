@@ -40,6 +40,7 @@ namespace Archiver.Classes.Tape
         public long Size { get; set; } = 0;
         public string Hash { get; set; }
         public bool Copied { get; set; }
+        public DateTime ArchiveTimeUtc { get; set; }
         public DateTime LastAccessTimeUtc { get; set; }
         public DateTime LastWriteTimeUtc { get; set; }
         public DateTime CreationTimeUtc { get; set; }

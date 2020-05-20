@@ -61,6 +61,7 @@ namespace Archiver.Utilities.Tape
 
                     md5.TransformFinalBlock(new byte[] { }, 0, 0);
                     sourceFile.Hash = BitConverter.ToString(md5.Hash).Replace("-","").ToLower();
+                    sourceFile.ArchiveTimeUtc = DateTime.UtcNow;
                 }
 
 				tarOut.CloseEntry();
