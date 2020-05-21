@@ -15,7 +15,7 @@ namespace Archiver.Utilities.Disc
         private static int _nextLine = -1;
         private static int _discLine = -1;
         private static int _statusLine = -1;
-        // private static int _cancelLine = -1;
+        private static int _cancelLine = -1;
         private static int _discCount = 0;
         private List<DiscDetail> _discsToVerify;
         private List<int> _pendingDiscs;
@@ -63,8 +63,8 @@ namespace Archiver.Utilities.Disc
             _nextLine += 2;
             _statusLine = _nextLine;
             _nextLine += 2;
-            //_cancelLine = _nextLine;
-            //_nextLine += 2;
+            _cancelLine = _nextLine;
+            _nextLine += 2;
 
             Console.ForegroundColor = ConsoleColor.Magenta;
             Console.SetCursorPosition(0, _discLine);
@@ -87,12 +87,12 @@ namespace Archiver.Utilities.Disc
 
             SetStatus("Starting...");
 
-            // Console.SetCursorPosition(0, _cancelLine);
-            // Console.Write("Press ");
-            // Console.ForegroundColor = ConsoleColor.DarkYellow;
-            // Console.Write("<ctrl+c>");
-            // Console.ResetColor();
-            // Console.Write(" to cancel");
+            Console.SetCursorPosition(0, _cancelLine);
+            Console.Write("Press ");
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.Write("<ctrl+c>");
+            Console.ResetColor();
+            Console.Write(" to cancel");
         }
 
         private void SetStatus(string status)
@@ -161,12 +161,13 @@ namespace Archiver.Utilities.Disc
         public void StartVerification()
         {
             Console.CursorVisible = false;
-            // Console.CancelKeyPress += (sender, e) => {
-            //     _cancel = true;
+            Console.TreatControlCAsInput = false;
+            Console.CancelKeyPress += (sender, e) => {
+                _cancel = true;
 
-            //     if (_generateThread != null && _generateThread.IsAlive)
-            //         _generateThread.Abort();
-            // };
+                if (_generateThread != null && _generateThread.IsAlive)
+                    _generateThread.Abort();
+            };
 
             while (_pendingDiscs.Count() > 0 && _cancel == false)
             {
@@ -205,9 +206,14 @@ namespace Archiver.Utilities.Disc
                 _generateThread.Join();
             }
 
-            SetStatus("All Discs have been verified, review results above.");
+            if (_cancel == true)
+                SetStatus("Process canceled");
+            else
+                SetStatus("All Discs have been verified, review results above.");
+                
             Console.SetCursorPosition(0, _nextLine);
             Console.CursorVisible = true;
+            Console.TreatControlCAsInput = true;
         }
 
         private int GetDiscIndex(DiscDetail disc)

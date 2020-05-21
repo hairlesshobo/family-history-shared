@@ -78,7 +78,6 @@ namespace Archiver.Operations.Disc
                         VerificationDTM = DateTime.UtcNow
                     };
 
-                    Console.CursorLeft = 0;
                     ClearLine();
                     Console.Write("           Verify: ");
 
@@ -101,7 +100,7 @@ namespace Archiver.Operations.Disc
                     Helpers.SaveTape(tapeDetail);
                     Console.WriteLine("done");
 
-                    Console.Write("Rewindind tape... ");
+                    Console.Write("Rewinding tape... ");
                     TapeUtils.RewindTape();
                     Console.WriteLine("done");
                 }
@@ -111,7 +110,7 @@ namespace Archiver.Operations.Disc
         public static void ClearLine()
         {
             Console.CursorLeft = 0;
-            Console.Write("".PadRight(Console.BufferWidth-2));
+            Console.Write("".PadRight(Console.BufferWidth-1));
             Console.CursorLeft = 0;
         }
     }

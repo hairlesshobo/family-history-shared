@@ -44,6 +44,21 @@ namespace Archiver
 
         public static void ReadConfig()
         {
+            // we set the directory to where the exe is
+            Directory.SetCurrentDirectory(Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location));
+            
+            string configDir = Path.Join(Directory.GetCurrentDirectory(), "config/");
+
+            // lets check the current dir and the parent dir for a config directory
+
+            if (!Directory.Exists(configDir))
+            {
+                configDir = Path.Join(Directory.GetCurrentDirectory(), "../", "config/");
+
+                if (Directory.Exists(configDir))
+                    Directory.SetCurrentDirectory(Path.Join(Directory.GetCurrentDirectory(), "../"));
+            }
+
             IConfiguration _config = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("./config/appsettings.json", true, true)

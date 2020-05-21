@@ -139,9 +139,12 @@ namespace Archiver.Utilities.Shared
             }
 
             Console.SetCursorPosition(0, _startLine + _entries.Count() + 1);
+
+            string message = "to select item";
             
             if (_multiSelect == true)
             {
+                message = "when finished";
                 Console.Write("Press ");
                 Console.ForegroundColor = this.KeyColor;
                 Console.Write("<space>");
@@ -163,7 +166,7 @@ namespace Archiver.Utilities.Shared
             Console.ForegroundColor = this.KeyColor;
             Console.Write("<enter>");
             Console.ForegroundColor = _foregroundColor;
-            Console.Write(" when finished, ");
+            Console.Write($" {message}, ");
             Console.ForegroundColor = this.KeyColor;
             Console.Write("<esc>");
             Console.ForegroundColor = _foregroundColor;
@@ -172,8 +175,6 @@ namespace Archiver.Utilities.Shared
             Console.Write("q");
             Console.ForegroundColor = _foregroundColor;
             Console.Write(" to cancel");
-
-            Console.TreatControlCAsInput = true;
 
             while (1 == 1)
             {
@@ -240,7 +241,6 @@ namespace Archiver.Utilities.Shared
                     break;
             }
 
-            Console.TreatControlCAsInput = false;
             Console.CursorVisible = true;
             Console.SetCursorPosition(0, _startLine+_entries.Count()+1);
 

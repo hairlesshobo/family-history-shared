@@ -26,7 +26,19 @@ namespace Archiver.Operations
                 if (result == false)
                 {
                     Console.WriteLine();
-                    Console.Write("Process complete, press <enter>, <q>, or <esc> to return to the main menu...");
+                    Console.Write("Process complete, press ");
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    Console.Write("<enter>");
+                    Console.ResetColor();
+                    Console.Write(", ");
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    Console.Write("<esc>");
+                    Console.ResetColor();
+                    Console.Write(", or ");
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    Console.Write("q");
+                    Console.ResetColor();
+                    Console.Write(" to return to the main menu...");
 
                     while (true)
                     {

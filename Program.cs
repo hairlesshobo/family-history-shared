@@ -31,6 +31,10 @@ namespace Archiver
 
         static void Main(string[] args)
         {
+            Console.CancelKeyPress += (sender, e) => {
+                e.Cancel = true;
+            };
+            Console.TreatControlCAsInput = true;
             Console.BackgroundColor = ConsoleColor.Black;
 
             Console.Write("Reading configuration... ");
@@ -41,7 +45,16 @@ namespace Archiver
 
             MainMenu.StartOperation();
 
-            // Console.ReadLine();
+            //Console.ReadLine();
+        }
+
+        public static void ClearLine()
+        {
+            Console.CursorLeft = 0;
+            Console.Write("".PadRight(Console.BufferWidth-1));
+            Console.CursorLeft = 0;
         }
     }
 }
+
+

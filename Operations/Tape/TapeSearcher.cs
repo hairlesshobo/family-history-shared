@@ -28,7 +28,9 @@ namespace Archiver.Operations.Disc
 
                 Console.SetCursorPosition(0, 0);
                 Console.Write("Term to search for in file/directory: ");
+                Console.TreatControlCAsInput = false;
                 string searchString = Console.ReadLine();
+                Console.TreatControlCAsInput = true;
 
                 Console.Clear();
 

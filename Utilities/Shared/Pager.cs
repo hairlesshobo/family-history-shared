@@ -324,8 +324,6 @@ namespace Archiver.Utilities.Shared
 
         private void MainLoop()
         {
-            Console.TreatControlCAsInput = true;
-
             while (!_abort)
             {
                 ConsoleKeyInfo key = Console.ReadKey(true);
@@ -347,8 +345,6 @@ namespace Archiver.Utilities.Shared
                 else if (key.Key == ConsoleKey.S && key.Modifiers == ConsoleModifiers.Control)
                     SaveFile();
             }
-
-            Console.TreatControlCAsInput = false;
         }
 
         private void Cleanup()
