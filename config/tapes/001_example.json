@@ -1,0 +1,14 @@
+{
+    "ID": 1,
+    "Name": "Example",
+    "Description": "This is an example config for a single backup tape",
+    "SourcePaths": [
+        "//server/Remote/Path"
+    ],
+    "ExcludePaths": [],
+    "ExcludeFiles": [
+        "Thumbs.db",
+        ".DS_Store",
+        "desktop.ini"
+    ]
+}
