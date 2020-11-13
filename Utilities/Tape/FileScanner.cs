@@ -39,7 +39,14 @@ namespace Archiver.Utilities.Tape
             _tapeDetail.Directories = new List<TapeSourceDirectory>();
 
             foreach (string dirtySourcePath in _tapeDetail.SourceInfo.SourcePaths)
-                _tapeDetail.Directories.Add(ScanRootDirectory(dirtySourcePath));
+            {
+                TapeSourceDirectory newSource = ScanRootDirectory(dirtySourcePath);
+
+                // we only add the source if it doesn't already exist, otherwise we end up duplicating our list
+                // of source files
+                if (!_tapeDetail.Directories.Contains(newSource))
+                    _tapeDetail.Directories.Add(newSource);
+            }
 
             _sw.Stop();
             OnComplete();
