@@ -18,8 +18,8 @@ namespace Archiver.Utilities.Disc
         private static int _cancelLine = -1;
         private static int _discCount = 0;
         private List<DiscDetail> _discsToVerify;
-        private List<int> _pendingDiscs;
-        private List<int> _completedDiscs;
+        private List<int> _pendingDiscs = new List<int>();
+        private List<int> _completedDiscs = new List<int>();
         private string _driveLetter;
         private volatile bool _cancel = false;
         Thread _generateThread;
@@ -28,27 +28,35 @@ namespace Archiver.Utilities.Disc
         {
             _discsToVerify = DiscGlobals._destinationDiscs.Where(x => x.NewDisc == false).OrderBy(x => x.DiscNumber).ToList();
 
-            Initialize(DriveLetter);
+            Initialize(DriveLetter, false);
         }
 
         public DiscVerifier(string DriveLetter, List<DiscDetail> discsToVerify)
         {
             _discsToVerify = discsToVerify;
 
-            Initialize(DriveLetter);
+            Initialize(DriveLetter, true);
         }
 
-        private void Initialize (string DriveLetter)
+        private void Initialize (string DriveLetter, bool force)
         {
             // we only want to verify discs that haven't been verified in the past week, 
             // or have never been verified at all
-            _pendingDiscs = _discsToVerify.Where(x => x.DaysSinceLastVerify > 7)
-                                          .Select(x => x.DiscNumber)
-                                          .ToList();
-                                    
-            _completedDiscs = _discsToVerify.Where(x => x.DaysSinceLastVerify <= 7)
+            if (force == true)
+            {
+                _pendingDiscs = _discsToVerify.Select(x => x.DiscNumber)
+                                              .ToList();
+            }
+            else
+            {
+                _pendingDiscs = _discsToVerify.Where(x => x.DaysSinceLastVerify > 7)
                                             .Select(x => x.DiscNumber)
                                             .ToList();
+                                        
+                _completedDiscs = _discsToVerify.Where(x => x.DaysSinceLastVerify <= 7)
+                                                .Select(x => x.DiscNumber)
+                                                .ToList();
+            }
 
             _driveLetter = DriveLetter;
 

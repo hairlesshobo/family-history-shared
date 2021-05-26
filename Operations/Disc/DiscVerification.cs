@@ -42,7 +42,7 @@ namespace Archiver.Operations.Disc
             {
                 entries.Add(new CliMenuEntry<DiscDetail>()
                 {
-                    Name = $"{Formatting.GetDiscName(disc)} | Date Archived: {disc.ArchiveDTM.ToString("MM-dd-yyyy")} | Data Size: {Formatting.GetFriendlySize(disc.DataSize).PadLeft(10)}",
+                    Name = $"{Formatting.GetDiscName(disc)} `R|`N `BDate Archived:`N {disc.ArchiveDTM.ToString("MM-dd-yyyy")} `R|`N `BData Size:`N {Formatting.GetFriendlySize(disc.DataSize).PadLeft(10)}",
                     SelectedValue = disc
                 });
             }

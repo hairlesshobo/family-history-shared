@@ -79,6 +79,7 @@ namespace Archiver.Operations
                         ForegroundColor = ConsoleColor.Green,
                         SelectedValue = true, // do not show the "press enter to return to main menu" message
                     },
+                    //! not implemented
                     new CliMenuEntry<bool>() {
                         Name = "Restore entire disc(s)",
                         Action = NotImplemented,
@@ -99,7 +100,7 @@ namespace Archiver.Operations
                     },
                     new CliMenuEntry<bool>() {
                         Name = "Scan For Changes",
-                        Action = NotImplemented,
+                        Action = DiscArchiver.StartScanOnly,
                         ForegroundColor = ConsoleColor.DarkYellow
                     },
                     new CliMenuEntry<bool>() {
@@ -123,6 +124,7 @@ namespace Archiver.Operations
                         ForegroundColor = ConsoleColor.Green,
                         SelectedValue = true, // do not show the "press enter to return to main menu" message
                     },
+                    //! not implemented
                     new CliMenuEntry<bool>() {
                         Name = "Restore entire tape",
                         Action = NotImplemented,

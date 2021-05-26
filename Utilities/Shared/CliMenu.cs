@@ -347,7 +347,56 @@ namespace Archiver.Utilities.Shared
                 if (!Entry.Disabled)
                     Console.ForegroundColor = Entry.ForegroundColor;
 
-                Console.Write(Entry.Name);
+                char[] letters = (Entry.Name != null ? Entry.Name.ToCharArray() : new char[0]);
+
+                ConsoleColor defaultForeground = Console.ForegroundColor;
+
+                for (int i = 0; i < letters.Length; i++)
+                {
+                    char letter = letters[i];
+
+                    if (letter == '`' && i < letters.Length)
+                    {
+                        char nextLetter = letters[i+1];
+                        bool setColor = false;
+
+                        switch (nextLetter)
+                        {
+                            case 'R':
+                                Console.ForegroundColor = ConsoleColor.Red;
+                                setColor = true;
+                                break;
+
+                            case 'G':
+                                Console.ForegroundColor = ConsoleColor.Green;
+                                setColor = true;
+                                break;
+
+                            case 'B':
+                                Console.ForegroundColor = ConsoleColor.Blue;
+                                setColor = true;
+                                break;
+
+                            case 'C':
+                                Console.ForegroundColor = ConsoleColor.Cyan;
+                                setColor = true;
+                                break;
+
+                            case 'N':
+                                Console.ForegroundColor = defaultForeground;
+                                setColor = true;
+                                break;
+                        }
+
+                        if (setColor)
+                        {
+                            i++;
+                            continue;
+                        }
+                    }
+
+                    Console.Write(letter);
+                }
             }
 
             Console.CursorLeft = 0;
