@@ -8,35 +8,36 @@ using Newtonsoft.Json;
 
 namespace Archiver.Classes.Disc
 {
-    public class DiscSourceFile : ISourceFile
+    public class DiscSourceFile : DiscSourceFilePathDetail, ISourceFile
     {
-        private string _FullPath;
-        public string Name { get; set; }
-        public string Extension { 
-            get
-            {
-                if (this.Name.Contains(".") && this.Name.LastIndexOf('.') != this.Name.Length-1)
-                    return this.Name.Substring(this.Name.LastIndexOf('.')+1).ToLower();
-                else
-                    return String.Empty;
-            }
-        }
-        public string FullPath { 
-            get
-            {
-                return _FullPath;
-            } 
-            set
-            {
-                _FullPath = Helpers.CleanPath(value);
+        // private string _FullPath;
+        // public string Name { get; set; }
+        // public string Extension { 
+        //     get
+        //     {
+        //         if (this.Name.Contains(".") && this.Name.LastIndexOf('.') != this.Name.Length-1)
+        //             return this.Name.Substring(this.Name.LastIndexOf('.')+1).ToLower();
+        //         else
+        //             return String.Empty;
+        //     }
+        // }
+        // public string FullPath { 
+        //     get
+        //     {
+        //         return _FullPath;
+        //     } 
+        //     set
+        //     {
+        //         _FullPath = Helpers.CleanPath(value);
 
-                this.Name = Helpers.GetFileName(_FullPath);
-                this.RelativePath = Helpers.GetRelativePath(value);
-                this.RelativeDirectory = this.RelativePath.Substring(0, this.RelativePath.LastIndexOf('/'));
-            }
-        }
-        public string RelativePath { get; set; }
-        public string RelativeDirectory { get; set; }
+        //         this.Name = Helpers.GetFileName(_FullPath);
+        //         this.RelativePath = Helpers.GetRelativePath(value);
+        //         this.RelativeDirectory = this.RelativePath.Substring(0, this.RelativePath.LastIndexOf('/'));
+        //     }
+        // }
+        // public string RelativePath { get; set; }
+        // public string RelativeDirectory { get; set; }
+        public DiscSourceFilePathDetail OriginalFile { get; set; } = null;
         public long Size { get; set; } = -1;
         public bool Archived { get; set; }
         public string Hash { get; set; }
@@ -54,7 +55,7 @@ namespace Archiver.Classes.Disc
             DiscGlobals._discSourceFiles.Add(this);
         }
 
-        public DiscSourceFile(string sourcePath)
+        public DiscSourceFile(string sourcePath, bool scanForRenames = false)
         {
             this.FullPath = sourcePath;
 
@@ -70,8 +71,20 @@ namespace Archiver.Classes.Disc
             // we only add the file to the index if it hasn't yet been archived
             else
             {
-                DiscGlobals._newlyFoundFiles += 1;
-                DiscGlobals._discSourceFiles.Add(this);
+                bool isNewFile = true;
+                
+                // scan for renames, only if we are told to do so
+                if (scanForRenames == true)
+                {
+                    // we scan for renames by checking for files with the same extension and size
+                    this.ReadSizeAndAttribs();
+                }
+
+                if (isNewFile)
+                {
+                    DiscGlobals._newlyFoundFiles += 1;
+                    DiscGlobals._discSourceFiles.Add(this);
+                }
             }
         }
 

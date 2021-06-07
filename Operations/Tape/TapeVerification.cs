@@ -78,7 +78,7 @@ namespace Archiver.Operations.Disc
                         VerificationDTM = DateTime.UtcNow
                     };
 
-                    ClearLine();
+                    StatusHelpers.ClearLine();
                     Console.Write("           Verify: ");
 
                     if (result.TapeValid)
@@ -105,13 +105,6 @@ namespace Archiver.Operations.Disc
                     Console.WriteLine("done");
                 }
             }
-        }
-
-        public static void ClearLine()
-        {
-            Console.CursorLeft = 0;
-            Console.Write("".PadRight(Console.BufferWidth-1));
-            Console.CursorLeft = 0;
         }
     }
 }

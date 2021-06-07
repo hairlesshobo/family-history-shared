@@ -262,7 +262,8 @@ namespace Archiver.Utilities.Shared
 
             string json = JsonConvert.SerializeObject(disc, new JsonSerializerSettings() {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                Formatting = Newtonsoft.Json.Formatting.Indented
+                Formatting = Newtonsoft.Json.Formatting.Indented,
+                NullValueHandling = NullValueHandling.Ignore
             });
 
             // Write the json data needed for future runs of this app

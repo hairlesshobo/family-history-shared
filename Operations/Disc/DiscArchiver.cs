@@ -83,6 +83,6 @@ namespace Archiver.Operations.Disc
             => RunArchive(true);
 
         public static void StartOperation()
-         => RunArchive(false);
+            => RunArchive(false);
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Archiver.Utilities.Shared;
 using Newtonsoft.Json;
 
 namespace Archiver.Classes.Disc
@@ -106,5 +107,8 @@ namespace Archiver.Classes.Disc
                 DiscValid = discValid
             });
         }
+
+        public void SaveToJson()
+            => Helpers.SaveDestinationDisc(this);
     }
 }

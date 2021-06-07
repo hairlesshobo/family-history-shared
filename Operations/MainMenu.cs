@@ -104,6 +104,11 @@ namespace Archiver.Operations
                         ForegroundColor = ConsoleColor.DarkYellow
                     },
                     new CliMenuEntry<bool>() {
+                        Name = "Scan For Renamed/Moved Files",
+                        Action = ScanForFileRenames.StartOperation,
+                        ForegroundColor = ConsoleColor.DarkYellow
+                    },
+                    new CliMenuEntry<bool>() {
                         Name = "Run Archive process",
                         Action = DiscArchiver.StartOperation,
                         Disabled = Config.ReadOnlyFilesystem || !Config.OpticalDrivePresent,

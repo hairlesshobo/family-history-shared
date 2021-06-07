@@ -14,6 +14,7 @@ namespace Archiver.Utilities.Disc
         private static int _fileCountLine = -1;
         private static int _sizeLine = -1;
         private static int _distributeLine = -1;
+        private static int _renameScanLine = -1;
         private static int _existingDiscCount = 0;
         private static int _newDiscs = 0;
 
@@ -22,6 +23,7 @@ namespace Archiver.Utilities.Disc
         private const string _scanningLabel = "Scanning";
         private const string _sizingLabel = "Size";
         private const string _distrubuteLabel = "Distribute";
+        private const string _renameScanLabel = "Rename Scan";
 
         public static void Initialize()
         {
@@ -235,7 +237,20 @@ namespace Archiver.Utilities.Disc
             StatusHelpers.WriteStatusLineWithPct(_distrubuteLabel, line, currentPercent, complete);
         }
 
-        
+        public static void RenameScanned(long currentFileCount, long totalFileCount, long renamesFound, bool complete = false)
+        {
+            if (_renameScanLine == -1)
+                _renameScanLine = _nextLine++;            
+
+            string line = StatusHelpers.FileCountPosition(currentFileCount, totalFileCount);
+            line += $" [ {renamesFound.ToString().PadLeft(5)} Found]";
+            line += " ";
+
+            double currentPercent = ((double)currentFileCount / (double)totalFileCount) * 100.0;
+
+            Console.SetCursorPosition(0, _renameScanLine);
+            StatusHelpers.WriteStatusLineWithPct(_renameScanLabel, line, currentPercent, complete);
+        }
 
 
         public static void ProcessComplete()
