@@ -6,11 +6,25 @@ namespace Archiver.Utilities.Shared
 {
     public static class Formatting
     {
-        public static string GetDiscName(DiscDetail disc)
+        public static void WriteC(ConsoleColor color, string inputString)
         {
-            return $"Disc {disc.DiscNumber.ToString("0000")}";
+            ConsoleColor originalColor = Console.ForegroundColor;
+            Console.ForegroundColor = color;
+            Console.Write(inputString);
+            Console.ForegroundColor = originalColor;
         }
-        
+
+        public static void WriteLineC(ConsoleColor color, string inputString)
+        {
+            ConsoleColor originalColor = Console.ForegroundColor;
+            Console.ForegroundColor = color;
+            Console.WriteLine(inputString);
+            Console.ForegroundColor = originalColor;
+        }
+
+        public static string GetDiscName(DiscDetail disc)
+            => $"Disc {disc.DiscNumber.ToString("0000")}";
+
         public static string FormatElapsedTime(TimeSpan elapsed)
         {
             if (elapsed == default(TimeSpan))

@@ -16,11 +16,10 @@ namespace Archiver.Operations.Disc
 
         private static void WriteHeader(string header)
         {
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.WriteLine(header);
-            Console.ForegroundColor = ConsoleColor.White;
+            Formatting.WriteLineC(ConsoleColor.Magenta, header);
             Console.WriteLine();
         }
+        
         public static void StartOperation()
         {
             DiscGlobals._destinationDiscs = Helpers.ReadDiscIndex();

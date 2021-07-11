@@ -15,9 +15,7 @@ namespace Archiver.Operations.Disc
             DiscGlobals._destinationDiscs = Helpers.ReadDiscIndex();
             Console.Clear();
 
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.WriteLine("Preparing...");
-            Console.ResetColor();
+            Formatting.WriteLineC(ConsoleColor.Magenta, "Preparing...");
             Status.Initialize();
 
             DiscProcessing.IndexAndCountFiles();
@@ -114,47 +112,33 @@ namespace Archiver.Operations.Disc
 
             Console.SetCursorPosition(0, _confirmStartLine);
             
-            ConsoleColor originalColor = Console.ForegroundColor;
-
             Console.WriteLine($"Potentially renamed file {currentCount} / {totalCount}");
             Console.WriteLine();
 
             StatusHelpers.ClearLine();
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.Write("    Previous Path: ");
-            Console.ForegroundColor = originalColor;
+            Formatting.WriteC(ConsoleColor.Blue, "    Previous Path: ");
             Console.WriteLine(sourceFile.FullPath);
             
             StatusHelpers.ClearLine();
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.Write("         New Path: ");
-            Console.ForegroundColor = originalColor;
+            Formatting.WriteC(ConsoleColor.Blue, "         New Path: ");
             Console.WriteLine(destFile.FullPath);
 
             StatusHelpers.ClearLine();
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.Write("             Size: ");
-            Console.ForegroundColor = originalColor;
+            Formatting.WriteC(ConsoleColor.Blue, "             Size: ");
             Console.WriteLine(Formatting.GetFriendlySize(sourceFile.Size));
 
             StatusHelpers.ClearLine();
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.Write("    Creation Date: ");
-            Console.ForegroundColor = originalColor;
+            Formatting.WriteC(ConsoleColor.Blue, "    Creation Date: ");
             Console.WriteLine(sourceFile.CreationTimeUtc.ToLocalTime());
 
             StatusHelpers.ClearLine();
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.Write("    Existing Disc: ");
-            Console.ForegroundColor = originalColor;
+            Formatting.WriteC(ConsoleColor.Blue, "    Existing Disc: ");
             Console.WriteLine(Formatting.GetDiscName(sourceFile.DestinationDisc));
             Console.WriteLine();
 
             StatusHelpers.ClearLine();
             Console.Write("Are the two files above the same file? (yes/");
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.Write("NO");
-            Console.ForegroundColor = originalColor;
+            Formatting.WriteC(ConsoleColor.Blue, "NO");
             Console.Write(") ");
 
             Console.CursorVisible = true;

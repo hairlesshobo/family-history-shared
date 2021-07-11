@@ -47,6 +47,14 @@ namespace Archiver.Classes.Tape
         public FileAttributes Attributes { get; set; }
         [JsonIgnore]
         public TapeDetail Tape { get; set; } = null;
+        [JsonIgnore]
+        public string SourceRootPath
+        {
+            get
+            {
+                return this.FullPath.Substring(0, this.FullPath.Length - this.Name.Length - this.RelativeDirectory.Length - 1);
+            }
+        }
 
         public TapeSourceFile()
         {

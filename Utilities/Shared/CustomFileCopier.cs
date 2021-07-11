@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
+using System.Text;
+using Archiver.Classes.Shared;
 using Archiver.Utilities.Shared;
 
 namespace Archiver.Utilities.Shared
@@ -13,38 +16,40 @@ namespace Archiver.Utilities.Shared
 
     public class CustomFileCopier
     {
-        public string SourceFilePath { get; set; }
+        public ISourceFile SourceFile { get; set; }
+        public string DestinationRoot { get; set; }
         public string DestinationDirectory { get; set; }
         public string DestinationFilePath { get; set; }
         public bool OverwriteDestination { get; set; } = false;
         public bool Preserve { get; set; } = true;
-        public int SampleDurationMs { get; set; } = 500;
+        public int SampleDurationMs { get; set; } = 1000;
         public string MD5_Hash { get; set; } = null;
 
         public event CompleteDelegate OnComplete;
         public event ProgressChangedDelegate OnProgressChanged;
 
-        public CustomFileCopier(string Source, string Destination)
+        public CustomFileCopier(ISourceFile sourceFile, string destinationRoot)
         {
-            Initialize(Source, Destination);
+            Initialize(sourceFile, destinationRoot);
         }
 
-        private void Initialize(string Source, string DestDirectory, string NewFileName = null)
+        private void Initialize(ISourceFile sourceFile, string destinationRoot, string newFileName = null)
         {
-            this.SourceFilePath = Helpers.CleanPath(Source);
-            this.DestinationDirectory = Helpers.CleanPath(DestDirectory);
+            this.SourceFile = sourceFile;
+            this.DestinationRoot = Helpers.CleanPath(destinationRoot);
+            this.DestinationDirectory = Helpers.CleanPath($"{this.DestinationRoot}/{this.SourceFile.RelativeDirectory}");
 
-            if (!File.Exists(SourceFilePath))
-                throw new FileNotFoundException($"Source file doesn't exist: {this.SourceFilePath}");
+            if (!File.Exists(this.SourceFile.FullPath))
+                throw new FileNotFoundException($"Source file doesn't exist: {this.SourceFile.FullPath}");
 
             if (!Directory.Exists(this.DestinationDirectory))
                 Directory.CreateDirectory(this.DestinationDirectory);
 
-            if (NewFileName != null)
-                this.DestinationFilePath = Path.Join(this.DestinationDirectory, NewFileName);
+            if (newFileName != null)
+                this.DestinationFilePath = Path.Join(this.DestinationDirectory, newFileName);
             else
             {
-                FileInfo fi = new FileInfo(this.SourceFilePath);
+                FileInfo fi = new FileInfo(this.SourceFile.FullPath);
                 this.DestinationFilePath = Path.Join(this.DestinationDirectory, fi.Name);
             }
 
@@ -58,10 +63,10 @@ namespace Archiver.Utilities.Shared
         {
             Progress progress = new Progress();
 
-            byte[] buffer = new byte[1024 * 1024 * 4]; // 4MB buffer
+            byte[] buffer = new byte[1024 * 1024 * 2]; // 2MB buffer
             // bool cancelFlag = false;
 
-            using (FileStream source = new FileStream(this.SourceFilePath, FileMode.Open, FileAccess.Read))
+            using (FileStream source = new FileStream(this.SourceFile.FullPath, FileMode.Open, FileAccess.Read))
             {
                 long fileLength = source.Length;
 
@@ -72,18 +77,9 @@ namespace Archiver.Utilities.Shared
 
                 File.Create(this.DestinationFilePath).Dispose();
 
-                FileInfo sourceFileInfo = new FileInfo(this.SourceFilePath);
+                FileInfo sourceFileInfo = new FileInfo(this.SourceFile.FullPath);
 
                 progress.FileName = sourceFileInfo.Name;
-
-                if (this.Preserve)
-                {
-                    FileInfo destinationFileInfo = new FileInfo(this.DestinationFilePath);
-
-                    destinationFileInfo.LastAccessTimeUtc = sourceFileInfo.LastAccessTimeUtc;
-                    destinationFileInfo.LastWriteTimeUtc = sourceFileInfo.LastWriteTimeUtc;
-                    destinationFileInfo.CreationTimeUtc = sourceFileInfo.CreationTimeUtc;
-                }
 
                 using (var md5 = MD5.Create())
                 using (FileStream dest = new FileStream(this.DestinationFilePath, FileMode.Truncate, FileAccess.Write))
@@ -137,9 +133,46 @@ namespace Archiver.Utilities.Shared
                         }
                     }
                 }
+
+                if (this.Preserve)
+                {
+                    FileInfo destinationFileInfo = new FileInfo(this.DestinationFilePath);
+
+                    destinationFileInfo.LastAccessTimeUtc = sourceFileInfo.LastAccessTimeUtc;
+                    destinationFileInfo.LastWriteTimeUtc = sourceFileInfo.LastWriteTimeUtc;
+                    destinationFileInfo.CreationTimeUtc = sourceFileInfo.CreationTimeUtc;
+
+                    PreserveDirectoryTimes();
+                }
             }
 
             OnComplete(progress);
+        }
+
+        private void PreserveDirectoryTimes()
+        {
+            string[] dirParts = this.SourceFile.RelativeDirectory.Trim('/').Split("/");
+
+            StringBuilder dirRecursion = new StringBuilder();
+
+            foreach (string part in dirParts)
+            {
+                dirRecursion.Append($"/{part}");
+
+                string sourceDirPart = $"{this.SourceFile.SourceRootPath}{dirRecursion.ToString()}";
+                string destDirPart = $"{this.DestinationRoot}{dirRecursion.ToString()}";
+
+                if (Directory.Exists(destDirPart) && Directory.Exists(destDirPart))
+                {
+                    // copy the relevant bits
+                    DirectoryInfo destinationDirInfo = new DirectoryInfo(destDirPart);
+                    DirectoryInfo sourceDirInfo = new DirectoryInfo(sourceDirPart);
+
+                    destinationDirInfo.LastAccessTimeUtc = sourceDirInfo.LastAccessTimeUtc;
+                    destinationDirInfo.LastWriteTimeUtc = sourceDirInfo.LastWriteTimeUtc;
+                    destinationDirInfo.CreationTimeUtc = sourceDirInfo.CreationTimeUtc;
+                }
+            }
         }
 
         public class Progress 

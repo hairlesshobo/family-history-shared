@@ -3,15 +3,17 @@ using System.IO;
 using System.Linq;
 using Archiver.Classes.Shared;
 using Archiver.Utilities;
+using Archiver.Utilities.CSD;
 using Archiver.Utilities.Shared;
 using Newtonsoft.Json;
 
-namespace Archiver.Classes.Disc
+namespace Archiver.Classes.CSD
 {
-    public class DiscSourceFile : DiscSourceFilePathDetail, ISourceFile
+    public class CsdSourceFile : CsdSourceFilePathDetail, ISourceFile
     {
-        public DiscSourceFilePathDetail OriginalFile { get; set; } = null;
+        public CsdSourceFilePathDetail OriginalFile { get; set; } = null;
         public long Size { get; set; } = -1;
+        public bool? FileDeleted { get; set; } = null;
         public bool Archived { get; set; }
         public string Hash { get; set; }
         public bool Copied { get; set; }
@@ -21,7 +23,7 @@ namespace Archiver.Classes.Disc
         public DateTime CreationTimeUtc { get; set; }
         public FileAttributes Attributes { get; set; }
         [JsonIgnore]
-        public DiscDetail DestinationDisc { get; set; } = null;
+        public CsdDetail DestinationCsd { get; set; } = null;
         [JsonIgnore]
         public string SourceRootPath
         {
@@ -31,12 +33,12 @@ namespace Archiver.Classes.Disc
             }
         }
 
-        public DiscSourceFile()
+        public CsdSourceFile()
         {
-            DiscGlobals._discSourceFiles.Add(this);
+            CsdGlobals._sourceFiles.Add(this);
         }
 
-        public DiscSourceFile(string sourcePath, bool scanForRenames = false)
+        public CsdSourceFile(string sourcePath, bool scanForRenames = false)
         {
             this.FullPath = sourcePath;
 
@@ -44,9 +46,9 @@ namespace Archiver.Classes.Disc
                 throw new DirectoryNotFoundException($"Source file does not exist: {sourcePath}");
 
             // we found a file on the filesystem, but it is already in the archive
-            if (DiscGlobals._discSourceFiles.Any(x => x.Archived == true && x.RelativePath == this.RelativePath))
+            if (CsdGlobals._sourceFiles.Any(x => x.Archived == true && x.RelativePath == this.RelativePath))
             {
-                DiscGlobals._existingFilesArchived += 1;
+                CsdGlobals._existingFileCount += 1;
             }
 
             // we only add the file to the index if it hasn't yet been archived
@@ -63,8 +65,8 @@ namespace Archiver.Classes.Disc
 
                 if (isNewFile)
                 {
-                    DiscGlobals._newlyFoundFiles += 1;
-                    DiscGlobals._discSourceFiles.Add(this);
+                    CsdGlobals._newFileCount += 1;
+                    CsdGlobals._sourceFiles.Add(this);
                 }
             }
         }
@@ -79,23 +81,26 @@ namespace Archiver.Classes.Disc
             this.CreationTimeUtc = fileInfo.CreationTimeUtc;
             this.Attributes = fileInfo.Attributes;
 
-            DiscGlobals._totalSize += this.Size;
+            CsdGlobals._totalSize += this.Size;
         }
 
-        public void AssignDisc()
+        public void AssignCsd()
         {
             if (this.Size >= 0)
             {
-                this.DestinationDisc = Helpers.GetDestinationDisc(this.Size);
-                this.DestinationDisc.Files.Add(this);
+                this.DestinationCsd = CsdUtils.GetDestinationCsd(this.Size);
+                this.DestinationCsd.Files.Add(this);
+
+                if (this.DestinationCsd.HasPendingWrites == false)
+                    this.DestinationCsd.HasPendingWrites = true;
             }
         }
 
-        public CustomFileCopier ActivateCopy()
+        public CustomFileCopier ActivateCopy(string driveLetter)
         {
-            string destinationDir = $"{this.DestinationDisc.RootStagingPath}/data";
+            string destinationRoot = $"{driveLetter}/data";
 
-            CustomFileCopier copier = new CustomFileCopier(this, destinationDir);
+            CustomFileCopier copier = new CustomFileCopier(this, destinationRoot);
             copier.OverwriteDestination = true;
             copier.Preserve = true;
 

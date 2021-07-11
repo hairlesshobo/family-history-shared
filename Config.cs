@@ -15,6 +15,9 @@ namespace Archiver
         public static int TapeMemoryBufferMinFill { get; set; }
         public static int TapeTextBlockSize { get; set; }
         public static bool TapeAutoEject { get; set; }
+
+        public static long CsdReservedCapacity { get; set; }
+        public static string[] CsdIgnoreDrives { get; set; }
         public static bool TapeDrivePresent 
         { 
             get
@@ -64,16 +67,38 @@ namespace Archiver
                 .AddJsonFile("./config/appsettings.json", true, true)
                 .Build();
 
-            DiscGlobals._discCapacityLimit = _config.GetSection("Disc:CapacityLimit").Get<long>();
-            DiscGlobals._discStagingDir = _config["Disc:StagingDir"];
+            // global config
             Globals._cdbxpPath = _config["CdbxpPath"];
             Globals._ddPath = _config["DdPath"];
+            Globals._indexDiscDir = Directory.GetCurrentDirectory();
+
+            // Tape config
             Archiver.Config.TapeDrive = _config["Tape:Drive"];
             Archiver.Config.TapeBlockingFactor = _config.GetSection("Tape:BlockingFactor").Get<int>();
             Archiver.Config.TapeMemoryBufferBlockCount = _config.GetSection("Tape:MemoryBufferBlockCount").Get<int>();
             Archiver.Config.TapeMemoryBufferMinFill = _config.GetSection("Tape:MemoryBufferMinFill").Get<int>();
             Archiver.Config.TapeTextBlockSize = _config.GetSection("Tape:TextBlockSize").Get<int>();
             Archiver.Config.TapeAutoEject = _config.GetSection("Tape:AutoEject").Get<bool>();
+            
+            // CSD Config
+            Archiver.Config.CsdIgnoreDrives = _config.GetSection("CSD:IgnoreDrives").Get<string[]>();
+            Archiver.Config.CsdReservedCapacity = _config.GetSection("CSD:ReservedCapacityBytes").Get<long>();
+
+            CsdGlobals._csdExcludeFiles = _config.GetSection("CSD:ExcludeFiles").Get<string[]>().ToList();
+            CsdGlobals._csdSourcePaths = _config.GetSection("CSD:SourcePaths").Get<string[]>();
+            Array.Sort(CsdGlobals._csdSourcePaths);
+
+            foreach (string excPath in _config.GetSection("Disc:ExcludePaths").Get<string[]>())
+            {
+                string cleanExcPath = Helpers.CleanPath(excPath);
+
+                if (File.Exists(cleanExcPath) || Directory.Exists(cleanExcPath))
+                    CsdGlobals._csdExcludePaths.Add(cleanExcPath);
+            }
+
+            // disc config
+            DiscGlobals._discCapacityLimit = _config.GetSection("Disc:CapacityLimit").Get<long>();
+            DiscGlobals._discStagingDir = _config["Disc:StagingDir"];
             DiscGlobals._discExcludeFiles = _config.GetSection("Disc:ExcludeFiles").Get<string[]>().ToList();
             DiscGlobals._discSourcePaths = _config.GetSection("Disc:SourcePaths").Get<string[]>();
             Array.Sort(DiscGlobals._discSourcePaths);
@@ -85,8 +110,6 @@ namespace Archiver
                 if (File.Exists(cleanExcPath) || Directory.Exists(cleanExcPath))
                     DiscGlobals._discExcludePaths.Add(cleanExcPath);
             }
-
-            Globals._indexDiscDir = Directory.GetCurrentDirectory();
 
             _tapeDrivePresent = TapeUtils.TapeDrivePresent();
             _opticalDrivePresent = DriveInfo.GetDrives().Any(x => x.DriveType == DriveType.CDRom);

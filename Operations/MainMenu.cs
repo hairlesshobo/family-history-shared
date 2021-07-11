@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Archiver.Classes.Disc;
 using Archiver.Classes.Tape;
+using Archiver.Operations.CSD;
 using Archiver.Operations.Disc;
 using Archiver.Utilities;
 using Archiver.Utilities.Shared;
@@ -17,6 +18,12 @@ namespace Archiver.Operations
 
         public static void StartOperation()
         {
+            // CSD.RegisterDrive.StartOperation();
+
+            // Console.ReadLine();
+
+            // return;
+
             Initialize();
 
             while (1 == 1)
@@ -27,17 +34,11 @@ namespace Archiver.Operations
                 {
                     Console.WriteLine();
                     Console.Write("Process complete, press ");
-                    Console.ForegroundColor = ConsoleColor.DarkYellow;
-                    Console.Write("<enter>");
-                    Console.ResetColor();
+                    Formatting.WriteC(ConsoleColor.DarkYellow, "<enter>");
                     Console.Write(", ");
-                    Console.ForegroundColor = ConsoleColor.DarkYellow;
-                    Console.Write("<esc>");
-                    Console.ResetColor();
+                    Formatting.WriteC(ConsoleColor.DarkYellow, "<esc>");
                     Console.Write(", or ");
-                    Console.ForegroundColor = ConsoleColor.DarkYellow;
-                    Console.Write("q");
-                    Console.ResetColor();
+                    Formatting.WriteC(ConsoleColor.DarkYellow, "q");
                     Console.Write(" to return to the main menu...");
 
                     while (true)
@@ -83,7 +84,7 @@ namespace Archiver.Operations
                     new CliMenuEntry<bool>() {
                         Name = "Restore entire disc(s)",
                         Action = NotImplemented,
-                        Disabled = !Config.OpticalDrivePresent,
+                        Disabled = !Config.OpticalDrivePresent || true, // remove once implemented
                         ForegroundColor = ConsoleColor.Green
                     },
                     new CliMenuEntry<bool>() {
@@ -133,7 +134,7 @@ namespace Archiver.Operations
                     new CliMenuEntry<bool>() {
                         Name = "Restore entire tape",
                         Action = NotImplemented,
-                        Disabled = !Config.TapeDrivePresent,
+                        Disabled = !Config.TapeDrivePresent || true, // remove once implemented
                         ForegroundColor = ConsoleColor.Green
                     },
                     new CliMenuEntry<bool>() {
@@ -162,6 +163,54 @@ namespace Archiver.Operations
                         ForegroundColor = ConsoleColor.Red
                     },
 
+                    new CliMenuEntry<bool>() {
+                        Header = true
+                    },
+                    new CliMenuEntry<bool>() {
+                        Name = "Cold Storage Disk (HDD) Operations",
+                        Header = true
+                    },
+                    new CliMenuEntry<bool>() {
+                        Name = "Register CSD Drive",
+                        Action = CSD.RegisterDrive.StartOperation,
+                        ForegroundColor = ConsoleColor.Green
+                    },
+                    //! not implemented
+                    new CliMenuEntry<bool>() {
+                        Name = "Restore entire CSD Drive",
+                        Action = NotImplemented,
+                        Disabled = true, // remove once implemented
+                        ForegroundColor = ConsoleColor.Green
+                    },
+                    //! not implemented
+                    new CliMenuEntry<bool>() {
+                        Name = "Read CSD Drive Summary",
+                        Action = NotImplemented,         
+                        // Action = ShowTapeSummary.StartOperation,
+                        Disabled = true, // remove once implemented
+                        SelectedValue = true, // do not show the "press enter to return to main menu" message
+                        ForegroundColor = ConsoleColor.Blue
+                    },
+                    new CliMenuEntry<bool>() {
+                        Name = "View CSD Archive Summary",
+                        Action = CSD.ArchiveSummary.StartOperation,
+                        SelectedValue = true, // do not show the "press enter to return to main menu" message
+                        ForegroundColor = ConsoleColor.Blue
+                    },
+                    //! not implemented
+                    new CliMenuEntry<bool>() {
+                        Name = "Verify CSD Drive",
+                        Action = NotImplemented,
+                        // Action = TapeVerification.StartOperation,
+                        Disabled = Config.ReadOnlyFilesystem || true, // remove once implemented
+                        ForegroundColor = ConsoleColor.DarkYellow
+                    },
+                    new CliMenuEntry<bool>() {
+                        Name = "Run CSD Archive Process",
+                        Action = CSD.Archiver.StartOperation,
+                        Disabled = Config.ReadOnlyFilesystem,
+                        ForegroundColor = ConsoleColor.Red
+                    },
 
                     new CliMenuEntry<bool>() {
                         Header = true
@@ -196,9 +245,7 @@ namespace Archiver.Operations
 
         private static void NotImplemented()
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("This operation has not yet been implemented.");
-            Console.ResetColor();
+            Formatting.WriteLineC(ConsoleColor.Red, "This operation has not yet been implemented.");
         }
     }
 }

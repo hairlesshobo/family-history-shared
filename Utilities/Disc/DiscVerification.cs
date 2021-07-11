@@ -74,11 +74,9 @@ namespace Archiver.Utilities.Disc
             _cancelLine = _nextLine;
             _nextLine += 2;
 
-            Console.ForegroundColor = ConsoleColor.Magenta;
             Console.SetCursorPosition(0, _discLine);
             Console.CursorLeft = 0;
-            Console.Write("Verifying discs...");
-            Console.ResetColor();
+            Formatting.WriteC(ConsoleColor.Magenta, "Verifying discs...");
 
             foreach (DiscDetail disc in _discsToVerify)
             {
@@ -97,9 +95,7 @@ namespace Archiver.Utilities.Disc
 
             Console.SetCursorPosition(0, _cancelLine);
             Console.Write("Press ");
-            Console.ForegroundColor = ConsoleColor.DarkYellow;
-            Console.Write("<ctrl+c>");
-            Console.ResetColor();
+            Formatting.WriteC(ConsoleColor.DarkYellow, "<ctrl+c>");
             Console.Write(" to cancel");
         }
 

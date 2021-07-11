@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Management;
 using System.Text;
 using System.Threading;
 using Archiver.Classes;
+using Archiver.Classes.CSD;
 using Archiver.Classes.Disc;
 using Archiver.Classes.Tape;
 using Archiver.Utilities.Disc;
@@ -51,14 +53,15 @@ namespace Archiver.Utilities.Shared
             throw new DriveNotFoundException($"Could not find drive {DriveLetter}");
         }
 
-        public static string SelectDrive()
+        public static string SelectCdromDrive()
         {
             List<DriveInfo> drives = DriveInfo.GetDrives().Where(x => x.DriveType == DriveType.CDRom).ToList();
-            string selectedDrive = drives[0].Name.TrimEnd('\\');
 
             if (drives.Count() == 0)
                 throw new DriveNotFoundException("No optical drives were detected on this system!");
             
+            string selectedDrive = drives[0].Name.TrimEnd('\\');
+
             if (drives.Count() == 1)
                 return selectedDrive;
 
@@ -88,6 +91,10 @@ namespace Archiver.Utilities.Shared
 
             return selectedDrive;
         }
+
+
+
+        
 
         public static List<DiscDetail> ReadDiscIndex()
         {
@@ -165,15 +172,13 @@ namespace Archiver.Utilities.Shared
             return tapes;
         }
 
+        
+
         public static string CleanPath(string inPath)
-        {
-            return inPath.Replace(@"\", "/").TrimEnd('/');
-        }
+            => inPath.Replace(@"\", "/").TrimEnd('/');
 
         public static string DirtyPath(string inPath)
-        {
-            return inPath.Replace("/", @"\");
-        }
+            => inPath.Replace("/", @"\");
 
         public static string GetRelativePath(string inPath)
         {
@@ -205,12 +210,12 @@ namespace Archiver.Utilities.Shared
                 return matchingDisc;
         }
 
+        
+
         public static void CreateIndexIso()
         {
             Console.WriteLine();
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.Write("Creating index iso file...");
-            Console.ResetColor();
+            Formatting.WriteC(ConsoleColor.Magenta, "Creating index iso file...");
             Console.WriteLine();
 
             string isoPath = DiscGlobals._discStagingDir + "/iso/index.iso";
@@ -246,6 +251,8 @@ namespace Archiver.Utilities.Shared
             
             return nameParts[nameParts.Length-1];
         }
+
+        
 
         public static void SaveDestinationDisc(DiscDetail disc, string destinationDir = null, string fileName = null)
         {

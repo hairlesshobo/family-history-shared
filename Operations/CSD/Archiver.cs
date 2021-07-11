@@ -1,44 +1,48 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Archiver.Classes.Disc;
+using Archiver.Classes.CSD;
 using Archiver.Utilities;
-using Archiver.Utilities.Disc;
+using Archiver.Utilities.CSD;
 using Archiver.Utilities.Shared;
 
-namespace Archiver.Operations.Disc
+namespace Archiver.Operations.CSD
 {
-    public static class DiscArchiver
+    public static class Archiver
     {
         public static void RunArchive(bool askBeforeArchive = false)
         {
-            DiscGlobals._destinationDiscs = Helpers.ReadDiscIndex();
+            CsdGlobals._destinationCsds = CsdUtils.ReadIndex();
             Console.Clear();
 
             Formatting.WriteLineC(ConsoleColor.Magenta, "Preparing...");
+
+            // ask whether to search for and process deletions
             Status.Initialize();
 
-            DiscProcessing.IndexAndCountFiles();
+            Processing.IndexAndCountFiles();
 
-            if (DiscGlobals._newlyFoundFiles > 0)
+            if (CsdGlobals._newFileCount > 0)
             {
-                DiscProcessing.SizeFiles();
-                DiscProcessing.DistributeFiles();
+                Processing.SizeFiles();
+                Processing.VerifyFreeSpace();
+                Processing.DistributeFiles();
 
                 bool doProcess = true;
 
-                List<DiscDetail> newDiscs = DiscGlobals._destinationDiscs
-                                                        .Where(x => x.NewDisc == true)
-                                                        .ToList();
-
-                Console.WriteLine();
-                Console.WriteLine();
-                Console.WriteLine($"    New files found: {DiscGlobals._newlyFoundFiles.ToString("N0")}");
-                Console.WriteLine($"New Discs to Create: {newDiscs.Count}");
-                Console.WriteLine();
-
                 if (askBeforeArchive)
                 {
+                    List<CsdDetail> csdsToWrite = CsdGlobals._destinationCsds
+                                                        .Where(x => x.HasPendingWrites == true)
+                                                        .ToList();
+
+                    Console.WriteLine();
+                    Console.WriteLine();
+                    Console.WriteLine($"       New files found: {CsdGlobals._newFileCount.ToString("N0")}");
+                    Console.WriteLine($"   Deleted files found: {CsdGlobals._deletedFileCount.ToString("N0")}");
+                    Console.WriteLine($"CSD Drives to Write To: {csdsToWrite.Count.ToString("N0")}");
+                    Console.WriteLine();
+                    
                     Console.Write("Do you want to run the archive process now? (yes/");
                     Formatting.WriteC(ConsoleColor.Blue, "NO");
                     Console.Write(") ");
@@ -55,11 +59,7 @@ namespace Archiver.Operations.Disc
                 }
 
                 if (doProcess)
-                {
-                    DiscProcessing.ProcessDiscs();
-
-                    Formatting.WriteLineC(ConsoleColor.Green, "Process complete... don't forget to burn the ISOs to disc!");
-                }
+                    Processing.ProcessCsdDrives();
             }
             else
             {
@@ -68,7 +68,7 @@ namespace Archiver.Operations.Disc
                 Console.WriteLine("No new files found to archive. Nothing to do.");
             }
 
-            DiscGlobals._destinationDiscs.Clear();
+            CsdGlobals.Reset();
         }
 
         public static void StartScanOnly()

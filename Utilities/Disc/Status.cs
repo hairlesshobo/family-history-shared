@@ -50,11 +50,9 @@ namespace Archiver.Utilities.Disc
 
                 _copyWidth = DiscGlobals._destinationDiscs.Where(x => x.NewDisc == true).Max(x => x.TotalFiles).ToString().Length;
 
-                Console.ForegroundColor = ConsoleColor.Magenta;
                 Console.CursorTop = _discLine;
                 Console.CursorLeft = 0;
-                Console.Write(header);
-                Console.ResetColor();
+                Formatting.WriteC(ConsoleColor.Magenta, header);
 
                 foreach (DiscDetail disc in DiscGlobals._destinationDiscs.Where(x => x.Finalized == false).OrderBy(x => x.DiscNumber))
                     WriteDiscPendingLine(disc, default(TimeSpan));

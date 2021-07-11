@@ -9,6 +9,7 @@ namespace Archiver.Classes.Shared
         string RelativePath { get; }
         string RelativeDirectory { get; set; }
         string FullPath { get; set; }
+        string SourceRootPath { get; }
         long Size { get; set; }
         string Hash { get; set; }
         DateTime LastAccessTimeUtc { get; set; }

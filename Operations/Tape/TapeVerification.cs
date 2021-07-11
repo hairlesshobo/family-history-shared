@@ -16,9 +16,7 @@ namespace Archiver.Operations.Disc
 
             if (TapeUtils.IsTapeLoaded() == false)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("ERROR: ");
-                Console.ResetColor();
+                Formatting.WriteC(ConsoleColor.Red, "ERROR: ");
                 Console.WriteLine("No tape is present in the drive, please insert tape and run this operation again.");
                 Console.ReadLine();
             }
@@ -26,9 +24,7 @@ namespace Archiver.Operations.Disc
             {
                 if (TapeUtils.TapeHasJsonRecord() == false)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.Write("ERROR: ");
-                    Console.ResetColor();
+                    Formatting.WriteC(ConsoleColor.Red, "ERROR: ");
                     Console.WriteLine("This tape does not contain a summary json record and therefore cannot be verified. Please insert a different tape and run this operation again.");
                     Console.ReadLine();
                 }
@@ -82,15 +78,9 @@ namespace Archiver.Operations.Disc
                     Console.Write("           Verify: ");
 
                     if (result.TapeValid)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.WriteLine("Data Valid!");
-                    }
+                        Formatting.WriteLineC(ConsoleColor.Green, "Data Valid!");
                     else
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("FAILED, data be corrupted!");
-                    }
+                        Formatting.WriteLineC(ConsoleColor.Red, "FAILED, data be corrupted!");
 
                     Console.ResetColor();
 

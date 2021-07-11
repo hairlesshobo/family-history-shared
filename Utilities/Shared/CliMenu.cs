@@ -125,18 +125,14 @@ namespace Archiver.Utilities.Shared
 
             if (this.MenuLabel != null)
             {
-                Console.ForegroundColor = this.HeaderColor;
-                Console.WriteLine(this.MenuLabel);
+                Formatting.WriteLineC(this.HeaderColor, this.MenuLabel);
                 Console.WriteLine();
-                Console.ForegroundColor = _foregroundColor;
             }
 
             _startLine = Console.CursorTop;
 
             foreach (CliMenuEntry<TKey> entry in _entries)
-            {
                 WriteMenuEntry(entry);
-            }
 
             Console.SetCursorPosition(0, _startLine + _entries.Count() + 1);
 
@@ -146,34 +142,22 @@ namespace Archiver.Utilities.Shared
             {
                 message = "when finished";
                 Console.Write("Press ");
-                Console.ForegroundColor = this.KeyColor;
-                Console.Write("<space>");
-                Console.ForegroundColor = _foregroundColor;
+                Formatting.WriteC(this.KeyColor, "<space>");
                 Console.Write(" to select entry, ");
-                Console.ForegroundColor = this.KeyColor;
-                Console.Write("<Shift>-A");
-                Console.ForegroundColor = _foregroundColor;
+                Formatting.WriteC(this.KeyColor, "<Shift>-A");
                 Console.Write(" to select all, ");
-                Console.ForegroundColor = this.KeyColor;
-                Console.Write("<Shift>-D");
-                Console.ForegroundColor = _foregroundColor;
+                Formatting.WriteC(this.KeyColor, "<Shift>-D");
                 Console.Write(" to deselect all");
                 Console.WriteLine();
             }
 
             Console.WriteLine();
             Console.Write("Press ");
-            Console.ForegroundColor = this.KeyColor;
-            Console.Write("<enter>");
-            Console.ForegroundColor = _foregroundColor;
+            Formatting.WriteC(this.KeyColor, "<enter>");
             Console.Write($" {message}, ");
-            Console.ForegroundColor = this.KeyColor;
-            Console.Write("<esc>");
-            Console.ForegroundColor = _foregroundColor;
+            Formatting.WriteC(this.KeyColor, "<esc>");
             Console.Write(" or ");
-            Console.ForegroundColor = this.KeyColor;
-            Console.Write("q");
-            Console.ForegroundColor = _foregroundColor;
+            Formatting.WriteC(this.KeyColor, "q");
             Console.Write(" to cancel");
 
             while (1 == 1)

@@ -64,7 +64,7 @@ namespace Archiver.Operations.Disc
             Console.WriteLine("Disc verification process beginning...");
             Console.WriteLine();
 
-            string selectedDrive = Helpers.SelectDrive();
+            string selectedDrive = Helpers.SelectCdromDrive();
 
             bool verifyAll = AskVerifyAllDiscs();
 

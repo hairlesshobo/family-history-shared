@@ -10,9 +10,7 @@ namespace Archiver.Operations.Disc
         {
             if (TapeUtils.IsTapeLoaded() == false)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("ERROR: ");
-                Console.ResetColor();
+                Formatting.WriteC(ConsoleColor.Red, "ERROR: ");
                 Console.WriteLine("No tape is present in the drive, please insert tape and run this operation again.");
                 Console.ReadLine();
             }

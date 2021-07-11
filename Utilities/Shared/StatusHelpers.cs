@@ -5,19 +5,13 @@ namespace Archiver.Utilities.Shared
     public static class StatusHelpers
     {
         public static void WriteStatusLineWithPct(string left, string right, double percent, bool complete)
-        {
-            WriteStatusLineWithPct(left, right, percent, complete, Console.ForegroundColor);
-        }
+            => WriteStatusLineWithPct(left, right, percent, complete, Console.ForegroundColor);
 
         public static void WriteStatusLineWithPct(string left, string right, double percent, bool complete, bool increasing)
-        {
-            WriteStatusLineWithPct(left, right, percent, complete, Console.ForegroundColor, increasing);
-        }
+            => WriteStatusLineWithPct(left, right, percent, complete, Console.ForegroundColor, increasing);
 
         public static void WriteStatusLineWithPct(string left, string right, double percent, bool complete, ConsoleColor color)
-        {
-            WriteStatusLineWithPct(left, right, percent, complete, Console.ForegroundColor, true);
-        }
+            => WriteStatusLineWithPct(left, right, percent, complete, Console.ForegroundColor, true);
 
         public static void WriteStatusLineWithPct(string left, string right, double percent, bool complete, ConsoleColor color, bool increasing)
         {
@@ -60,15 +54,9 @@ namespace Archiver.Utilities.Shared
             int padRight = Console.WindowWidth - Globals._leftHeaderWidth - 2 - 1;
 
             if (left != null)
-            {
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
-                Console.Write($"{left.PadLeft(Globals._leftHeaderWidth)}: ");
-                Console.ResetColor();
-            }
+                Formatting.WriteC(ConsoleColor.DarkCyan, $"{left.PadLeft(Globals._leftHeaderWidth)}: ");
 
-            Console.ForegroundColor = rightColor;
-            Console.Write($"{right.PadRight(padRight)}");
-            Console.ResetColor();
+            Formatting.WriteC(rightColor, $"{right.PadRight(padRight)}");
         }
 
         public static string GeneratePercentBar (int AvailableSpace, int LeftLength, int RightLength, double CurrentPercent, bool Complete, bool Increasing)

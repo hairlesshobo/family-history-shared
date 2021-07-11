@@ -21,9 +21,7 @@ namespace Archiver.Operations.Disc
             {
                 Console.SetCursorPosition(0, 2);
                 Console.Write("Press ");
-                Console.ForegroundColor = ConsoleColor.DarkYellow;
-                Console.Write("<ctrl>+C");
-                Console.ResetColor();
+                Formatting.WriteC(ConsoleColor.DarkYellow, "<ctrl>+C");
                 Console.Write(" to cancel");
 
                 Console.SetCursorPosition(0, 0);

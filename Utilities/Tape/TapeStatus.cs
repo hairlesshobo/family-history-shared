@@ -94,9 +94,7 @@ namespace Archiver.Utilities.Tape
         }
 
         private void WriteLine(int lineNum, string left, string right)
-        {
-            WriteLine(lineNum, left, right, Console.ForegroundColor);
-        }
+            => WriteLine(lineNum, left, right, Console.ForegroundColor);
 
         private void WriteLine(int lineNum, string left, string right, ConsoleColor rightColor)
         {
@@ -108,9 +106,7 @@ namespace Archiver.Utilities.Tape
                 Console.Write(": ");
             }
 
-            Console.ForegroundColor = rightColor;
-            Console.Write(right);
-            Console.ForegroundColor = _defaultForeground;
+            Formatting.WriteC(rightColor, right);
         }
 
         private void WriteElapsed()
@@ -251,15 +247,15 @@ namespace Archiver.Utilities.Tape
             {
                 Console.SetCursorPosition(0, tmpStartLine);
 
-                WriteColor(ConsoleColor.DarkYellow, "WARNING:");
+                Formatting.WriteC(ConsoleColor.DarkYellow, "WARNING:");
                 Console.Write(" The source data to be archived exceeds the tape capacity! This data source requires a ");
-                WriteColor(ConsoleColor.Cyan, Math.Round(requiredRatio, 2).ToString("0.00") + ":1");
+                Formatting.WriteC(ConsoleColor.Cyan, Math.Round(requiredRatio, 2).ToString("0.00") + ":1");
                 Console.WriteLine(" compression ratio in order to fit.");
                 Console.WriteLine();
                 Console.WriteLine("For heavy data such as audio, photo, and video files, do not expect to achieve a ratio higher than 1.05:1 - 1.2:1!");
                 Console.WriteLine();
                 Console.Write("Do you want to continue anyways? (yes/");
-                WriteColor(ConsoleColor.Blue, "NO");
+                Formatting.WriteC(ConsoleColor.Blue, "NO");
                 Console.Write(") ");
             }
 
@@ -321,16 +317,6 @@ namespace Archiver.Utilities.Tape
         }
 
         public void Dispose()
-        {
-            ProcessComplete();
-        }
-
-        private void WriteColor(ConsoleColor color, string inputString)
-        {
-            ConsoleColor originalColor = Console.ForegroundColor;
-            Console.ForegroundColor = color;
-            Console.Write(inputString);
-            Console.ForegroundColor = originalColor;
-        }
+            => ProcessComplete();
     }
 }
