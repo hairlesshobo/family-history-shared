@@ -18,7 +18,7 @@ namespace Archiver.Utilities.CSD
             Uninitialized
         }
 
-        public static CsdSummary ReadSummaryFromCsd(string driveLetter)
+        public static CsdDetail Read(string driveLetter)
         {
             throw new DriveNotFoundException($"Unable to find drive '{driveLetter}'");
         }
@@ -184,41 +184,30 @@ namespace Archiver.Utilities.CSD
             return selectedDrive;
         }
 
-        public static void SaveSummaryToCsd(string driveLetter, CsdDetail disc)
+        private static void SaveCsdDetailToJson(string jsonFilePath, CsdDetail csd)
         {
-            CsdSummary csdInfo = disc.GetCsdSummary();
-
             Newtonsoft.Json.JsonSerializerSettings settings = new Newtonsoft.Json.JsonSerializerSettings() {
                 ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
                 Formatting = Newtonsoft.Json.Formatting.Indented
             };
 
-            string jsonFilePath = $"{driveLetter}/info.json";
-            string json = Newtonsoft.Json.JsonConvert.SerializeObject(csdInfo, settings);
+            string json = Newtonsoft.Json.JsonConvert.SerializeObject(csd.TakeSnapshot(), settings);
             File.WriteAllText(jsonFilePath, json, Encoding.UTF8);
+
         }
 
-        public static void SaveDetailToIndex(CsdDetail disc, string destinationDir = null, string fileName = null)
+        public static void SaveSummaryToCsd(string driveLetter, CsdDetail csd)
+            => SaveCsdDetailToJson($"{driveLetter}/info.json", csd);
+
+        public static void SaveDetailToIndex(CsdDetail csd)
         {
-            if (destinationDir == null)
-                destinationDir = Globals._indexDiscDir + "/json";
+            string destDir = $"{Globals._indexDiscDir}/json";
+            string jsonFilePath = $"{destDir}/csd_{csd.CsdNumber.ToString("000")}.json";
 
-            if (fileName == null)
-                fileName = $"csd_{disc.CsdNumber.ToString("000")}.json";
+            if (!Directory.Exists(destDir))
+                Directory.CreateDirectory(destDir);
 
-            if (!Directory.Exists(destinationDir))
-                Directory.CreateDirectory(destinationDir);
-
-            string jsonFilePath = destinationDir + "/" + fileName;
-
-            string json = Newtonsoft.Json.JsonConvert.SerializeObject(disc, new Newtonsoft.Json.JsonSerializerSettings() {
-                ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
-                Formatting = Newtonsoft.Json.Formatting.Indented,
-                NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore
-            });
-
-            // Write the json data needed for future runs of this app
-            File.WriteAllText(jsonFilePath, json, Encoding.UTF8);
+            SaveCsdDetailToJson(jsonFilePath, csd);
         }
     }
 }

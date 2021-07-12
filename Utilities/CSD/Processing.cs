@@ -83,11 +83,10 @@ namespace Archiver.Utilities.CSD
             distributeThread.Join();
         }
 
-        public static void CopyFiles(string driveLetter, CsdDetail csd, Stopwatch masterSw)
+        public static void CopyFiles(string driveLetter, CsdDetail csd, Stopwatch masterSw, Action indexSaveCallback)
         {
             long bytesCopied = 0;
             int currentFile = 1;
-            // int currentCsd = 0;
             double averageTransferRate = 0;
             long sampleCount = 1;
 
@@ -98,17 +97,19 @@ namespace Archiver.Utilities.CSD
             int totalFilesToCopy = sourceFiles.Count();
             long totalSizeToCopy = sourceFiles.Sum(x => x.Size);
 
+            long lastIndexSave = 0;
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
             foreach (CsdSourceFile file in sourceFiles)
             {
-                // if we moved to another csd, we reset the csd counter
-                // if (file.DestinationCsd.CsdNumber > currentCsd)
-                // {
-                //     currentCsd = file.DestinationCsd.CsdNumber;
-                //     currentFile = 1;
-                // }
+                // check if we need to save the index
+                if (((sw.ElapsedMilliseconds/1000) - lastIndexSave) > Archiver.Config.CsdAutoSaveInterval)
+                {
+                    indexSaveCallback();
+
+                    lastIndexSave = sw.ElapsedMilliseconds/1000;
+                }
 
                 var copier = file.ActivateCopy(driveLetter);
 
@@ -148,6 +149,8 @@ namespace Archiver.Utilities.CSD
             }
 
             sw.Stop();
+
+            indexSaveCallback();
         }
 
         public static void GenerateHashFile(string driveLetter, CsdDetail csd, Stopwatch masterSw)
@@ -163,7 +166,7 @@ namespace Archiver.Utilities.CSD
                     sw.WriteLine($"{"MD5 Hash".PadRight(32)}   File");
 
                     int currentLine = 1;
-                    foreach (CsdSourceFile file in csd.Files.Where(x => x.Size > 0 && x.Hash != null).OrderBy(x => x.RelativePath))
+                    foreach (CsdSourceFile file in csd.Files.Where(x => x.Copied && x.Size > 0 && x.Hash != null).OrderBy(x => x.RelativePath))
                     {
                         double currentPercent = ((double)currentLine / (double)csd.TotalFiles) * 100.0;
                         sw.WriteLine($"{file.Hash.PadRight(32)}   {file.RelativePath}");
@@ -216,7 +219,7 @@ namespace Archiver.Utilities.CSD
                             int currentLine = 1;
 
                             // Write the human readable index
-                            foreach (CsdSourceFile file in csd.Files.OrderBy(x => x.RelativePath))
+                            foreach (CsdSourceFile file in csd.Files.Where(x => x.Copied).OrderBy(x => x.RelativePath))
                             {
                                 string line = "";
                                 line += csd.CsdNumber.ToString("000");
@@ -291,13 +294,14 @@ namespace Archiver.Utilities.CSD
                     return;
                 }
 
-                CopyFiles(driveLetter, csd, masterSw);
-                GenerateIndexFiles(driveLetter, csd, masterSw);
-                GenerateHashFile(driveLetter, csd, masterSw);
-                WriteCsdSummary(driveLetter, csd, masterSw);
-            //     // CreateISOFile(csd, masterSw);
-            //     // ReadIsoHash(csd, masterSw);
-                SaveJsonData(driveLetter, csd, masterSw);
+                masterSw.Restart();
+
+                CopyFiles(driveLetter, csd, masterSw, () => {
+                    GenerateIndexFiles(driveLetter, csd, masterSw);
+                    GenerateHashFile(driveLetter, csd, masterSw);
+                    WriteCsdSummary(driveLetter, csd, masterSw);
+                    SaveJsonData(driveLetter, csd, masterSw);
+                });
 
                 masterSw.Stop();
                 Status.WriteCsdComplete(csd, masterSw.Elapsed);

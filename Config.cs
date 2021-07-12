@@ -17,7 +17,9 @@ namespace Archiver
         public static bool TapeAutoEject { get; set; }
 
         public static long CsdReservedCapacity { get; set; }
-        public static string[] CsdIgnoreDrives { get; set; }
+        public static int CsdAutoSaveInterval { get; set; }
+
+
         public static bool TapeDrivePresent 
         { 
             get
@@ -81,8 +83,8 @@ namespace Archiver
             Archiver.Config.TapeAutoEject = _config.GetSection("Tape:AutoEject").Get<bool>();
             
             // CSD Config
-            Archiver.Config.CsdIgnoreDrives = _config.GetSection("CSD:IgnoreDrives").Get<string[]>();
             Archiver.Config.CsdReservedCapacity = _config.GetSection("CSD:ReservedCapacityBytes").Get<long>();
+            Archiver.Config.CsdAutoSaveInterval = _config.GetSection("CSD:AutoSaveInterval").Get<int>();
 
             CsdGlobals._csdExcludeFiles = _config.GetSection("CSD:ExcludeFiles").Get<string[]>().ToList();
             CsdGlobals._csdSourcePaths = _config.GetSection("CSD:SourcePaths").Get<string[]>();

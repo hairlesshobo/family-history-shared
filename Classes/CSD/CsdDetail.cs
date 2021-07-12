@@ -7,23 +7,59 @@ using Newtonsoft.Json;
 
 namespace Archiver.Classes.CSD
 {
-    public class CsdVerificationResult
+
+
+    public class CsdDetail
     {
-        public DateTime VerificationDTM { get; set; }
-        public bool CsdValid { get; set; }
-    }
-    public class CsdDetail : CsdSummary
-    {
+        public int CsdNumber { get; set; }
+        public DateTime RegisterDtmUtc { get; set; }
+        public List<DateTime> WriteDtmUtc { get; set; }
+        public string CsdName { 
+            get
+            {
+                return $"CSD{this.CsdNumber.ToString("000")}";
+            }
+        }
+        public int TotalFiles 
+        {
+            get
+            {
+                return this.Files.Count();
+            }
+        }
+        public int BlockSize { get; set; }
+        public long TotalSpace { get; set; }
+        public long FreeSpace 
+        { 
+            get
+            {
+                return this.TotalSpace - this.DataSizeOnDisc;
+            }
+        }
+        
+        public long DataSize 
+        { 
+            get
+            {
+                return this.Files.Sum(x => x.Size);
+            } 
+        }
+
+        public long DataSizeOnDisc
+        {
+            get
+            {
+                return this.Files.Sum(x => Helpers.RoundToNextMultiple(x.Size, this.BlockSize));
+            } 
+        }
+        public List<CsdSourceFile> Files { get; set; }
+        public CsdDriveInfo DriveInfo { get; set; }
+        
         public long BytesCopied { get; set; }
         [JsonIgnore]
         public List<CsdSourceFile> PendingWrites { get; set; }
         [JsonIgnore]
         public bool HasPendingWrites { get; set; } = false;
-        public string Hash { get; set; }
-        [JsonIgnore]
-        public bool NewCsd { get; set; } = true;
-        [JsonIgnore]
-        public bool IsoCreated { get; set; } = false;
         
         public int FilesCopied 
         { 
@@ -66,13 +102,20 @@ namespace Archiver.Classes.CSD
 
         public CsdDetail() : base()
         {
+            this.DriveInfo = new CsdDriveInfo();
+            this.WriteDtmUtc = new List<DateTime>();
+            this.Files = new List<CsdSourceFile>();
+
             this.PendingWrites = new List<CsdSourceFile>();
             this.Verifications = new List<CsdVerificationResult>();
-            this.NewCsd = false;
         }
 
         public CsdDetail(int csdNumber, int blockSize, long totalSpace) : base()
         {
+            this.DriveInfo = new CsdDriveInfo();
+            this.WriteDtmUtc = new List<DateTime>();
+            this.Files = new List<CsdSourceFile>();
+
             this.PendingWrites = new List<CsdSourceFile>();
             this.Verifications = new List<CsdVerificationResult>();
             this.BlockSize = blockSize;
@@ -81,19 +124,6 @@ namespace Archiver.Classes.CSD
             this.CsdNumber = csdNumber;
 
             CsdGlobals._destinationCsds.Add(this);
-        }
-
-        public CsdSummary GetCsdSummary()
-        {
-            return new CsdSummary()
-            {
-                RegisterDtmUtc = this.RegisterDtmUtc,
-                CsdNumber = this.CsdNumber,
-                Files = this.Files,
-                TotalSpace = this.TotalSpace,
-                BlockSize = this.BlockSize,
-                WriteDtmUtc = this.WriteDtmUtc
-            };
         }
 
         public void RecordVerification(DateTime verifyDtm, bool csdValid)
@@ -108,7 +138,26 @@ namespace Archiver.Classes.CSD
             });
         }
 
-        public void SaveToJson()
-            => CsdUtils.SaveDetailToIndex(this);
+        /// <summary>
+        ///     Create a clone of this object but only include files that have been successfully copied
+        /// </summary>
+        public CsdDetail TakeSnapshot()
+        {
+            CsdDetail newCopy = new CsdDetail()
+            {
+                RegisterDtmUtc = this.RegisterDtmUtc,
+                CsdNumber = this.CsdNumber,
+                TotalSpace = this.TotalSpace,
+                BlockSize = this.BlockSize,
+                WriteDtmUtc = this.WriteDtmUtc,
+                BytesCopied = this.BytesCopied,
+                DriveInfo = this.DriveInfo,
+                Verifications = this.Verifications
+            };
+
+            newCopy.Files = this.Files.Where(x => x.Copied == true).ToList();
+             
+            return newCopy;
+        }
     }
 }
