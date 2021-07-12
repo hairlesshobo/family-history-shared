@@ -18,9 +18,16 @@ namespace Archiver.Utilities.CSD
             Uninitialized
         }
 
-        public static CsdDetail Read(string driveLetter)
+        public static CsdDetail ReadCsdIndex(string driveLetter)
         {
-            throw new DriveNotFoundException($"Unable to find drive '{driveLetter}'");
+            string infoFilePath = $"{driveLetter}/info.json";
+
+            if (!File.Exists(infoFilePath))
+                throw new DriveNotFoundException($"Unable to find index file at the following location: {infoFilePath}");
+
+            string jsonContent = File.ReadAllText(infoFilePath);
+
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<CsdDetail>(jsonContent);
         }
 
         public static List<CsdDetail> ReadIndex()

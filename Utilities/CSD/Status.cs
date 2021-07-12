@@ -83,9 +83,9 @@ namespace Archiver.Utilities.CSD
             line += " ";
             line += "Pending".PadRight(12);
             line += " ";
-            line += $"{csd.TotalFiles.ToString().PadLeft(7)} files assigned";
+            line += $"{csd.Files.Where(x => !x.Copied).Count().ToString().PadLeft(7)} files assigned";
             line += "   ";
-            line += $"{Formatting.GetFriendlySize(csd.DataSize).PadLeft(10)} data size";
+            line += $"{Formatting.GetFriendlySize(csd.Files.Where(x => !x.Copied).Sum(x => x.Size)).PadLeft(10)} data size";
 
             Console.SetCursorPosition(0, _driveLineIndex[csd]);
             StatusHelpers.WriteStatusLine(csd.CsdName, line, ConsoleColor.Blue);

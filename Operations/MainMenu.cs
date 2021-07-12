@@ -206,6 +206,13 @@ namespace Archiver.Operations
                         ForegroundColor = ConsoleColor.DarkYellow
                     },
                     new CliMenuEntry<bool>() {
+                        Name = "Clean CSD Drive - Remove files not in index",
+                        Action = CSD.Cleaner.StartOperation,
+                        // Action = TapeVerification.StartOperation,
+                        Disabled = Config.ReadOnlyFilesystem, // remove once implemented
+                        ForegroundColor = ConsoleColor.DarkYellow
+                    },
+                    new CliMenuEntry<bool>() {
                         Name = "Run CSD Archive Process",
                         Action = CSD.Archiver.StartOperation,
                         Disabled = Config.ReadOnlyFilesystem,
