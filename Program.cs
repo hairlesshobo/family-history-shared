@@ -18,32 +18,45 @@ namespace Archiver
 {
     class Program
     {
-        // private static void DoScanOnly()
-        // {
-        //     Status.Initialize();
-
-        //     DiscProcessing.IndexAndCountFiles();
-
-        //     Status.ProcessComplete();
-
-        //     Summary.StartOperation();
-        // }
-
         static void Main(string[] args)
         {
-            Console.CancelKeyPress += (sender, e) => {
-                e.Cancel = true;
-            };
-            Console.TreatControlCAsInput = true;
-            Console.BackgroundColor = ConsoleColor.Black;
+            try
+            {
+                Console.CancelKeyPress += (sender, e) => {
+                    e.Cancel = true;
+                };
+                Console.TreatControlCAsInput = true;
+                Console.BackgroundColor = ConsoleColor.Black;
 
-            Console.Write("Reading configuration... ");
-            Config.ReadConfig();
-            Console.WriteLine("done");
-            
-            Console.Clear();
+                Console.Write("Reading configuration... ");
+                Config.ReadConfig();
+                Console.WriteLine("done");
+                
+                Console.Clear();
 
-            MainMenu.StartOperation();
+                MainMenu.StartOperation();
+            }
+            catch (Exception e)
+            {
+                Console.CursorLeft = 0;
+                Console.CursorTop = Console.CursorTop + 5;
+                Formatting.WriteLineC(ConsoleColor.Red, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                Console.WriteLine();
+                Formatting.WriteLineC(ConsoleColor.Red, $"Unhandled exception occurred: {e.Message}");
+                Console.WriteLine();
+                Formatting.WriteLineC(ConsoleColor.Red, e.StackTrace);
+                Console.WriteLine();
+                Formatting.WriteLineC(ConsoleColor.Red, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                Console.WriteLine();
+                Console.WriteLine();
+                Console.Write("Press ");
+                Formatting.WriteC(ConsoleColor.DarkYellow, "<any key>");
+                Console.WriteLine(" to terminate application");
+
+                Console.ReadKey(true);
+
+                return;
+            }
 
             //Console.ReadLine();
         }

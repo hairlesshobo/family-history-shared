@@ -26,7 +26,7 @@ namespace Archiver.Utilities.CSD
         private const string _renameScanLabel = "Rename Scan";
         private const string _verifySpaceLabel = "Verify Space";
 
-        private static Dictionary<CsdDetail, int> _driveLineIndex;
+        private static Dictionary<int, int> _driveLineIndex;
 
         public static void Initialize()
         {
@@ -41,7 +41,7 @@ namespace Archiver.Utilities.CSD
             _csdLine = -1;
 
             _nextLine = Console.CursorTop;
-            _driveLineIndex = new Dictionary<CsdDetail, int>();
+            _driveLineIndex = new Dictionary<int, int>();
         }
 
         public static void InitCsdDriveLines()
@@ -62,7 +62,7 @@ namespace Archiver.Utilities.CSD
                 int currLine = _csdLine+1;
                 foreach (CsdDetail csd in CsdGlobals._destinationCsds.Where(x => x.HasPendingWrites == true).OrderBy(x => x.CsdNumber))
                 {
-                    _driveLineIndex.Add(csd, currLine);
+                    _driveLineIndex.Add(csd.CsdNumber, currLine);
                     WriteCsdPendingLine(csd, default(TimeSpan));
                     currLine++;
                 }
@@ -87,7 +87,7 @@ namespace Archiver.Utilities.CSD
             line += "   ";
             line += $"{Formatting.GetFriendlySize(csd.Files.Where(x => !x.Copied).Sum(x => x.Size)).PadLeft(10)} data size";
 
-            Console.SetCursorPosition(0, _driveLineIndex[csd]);
+            Console.SetCursorPosition(0, _driveLineIndex[csd.CsdNumber]);
             StatusHelpers.WriteStatusLine(csd.CsdName, line, ConsoleColor.Blue);
         }
 
@@ -102,7 +102,7 @@ namespace Archiver.Utilities.CSD
             line += $"Please attach {csd.CsdName}";
             line += " ";
 
-            Console.SetCursorPosition(0, _driveLineIndex[csd]);
+            Console.SetCursorPosition(0, _driveLineIndex[csd.CsdNumber]);
             StatusHelpers.WriteStatusLine(csd.CsdName, line, ConsoleColor.Yellow);
         }
 
@@ -126,6 +126,8 @@ namespace Archiver.Utilities.CSD
             line += Formatting.FormatElapsedTime(elapsed);
             line += " Copy: ";
             line += $"{Formatting.GetFriendlySize(bytesCopied).PadLeft(10)}";
+            line += " / ";
+            line += $"{Formatting.GetFriendlySize(totalBytes).PadLeft(10)}";
             line += " ";
             line += StatusHelpers.FileCountPosition(currentFile, totalFileCount, _copyWidth);
             line += " ";
@@ -138,7 +140,7 @@ namespace Archiver.Utilities.CSD
             if (csd.BytesCopied == csd.DataSize)
                 complete = true;
 
-            Console.SetCursorPosition(0, _driveLineIndex[csd]);
+            Console.SetCursorPosition(0, _driveLineIndex[csd.CsdNumber]);
             StatusHelpers.WriteStatusLineWithPct(csd.CsdName, line, currentPercent, complete, ConsoleColor.DarkYellow);
         }
 
@@ -149,7 +151,7 @@ namespace Archiver.Utilities.CSD
             line += " ";
             line += "Writing CSD Drive index:";
 
-            Console.SetCursorPosition(0, _driveLineIndex[csd]);
+            Console.SetCursorPosition(0, _driveLineIndex[csd.CsdNumber]);
             StatusHelpers.WriteStatusLineWithPct(csd.CsdName, line, currentPercent, (currentPercent == 100.0), ConsoleColor.DarkYellow);
         }
 
@@ -160,7 +162,7 @@ namespace Archiver.Utilities.CSD
             line += " ";
             line += "Writing CSD drive hash file:";
 
-            Console.SetCursorPosition(0, _driveLineIndex[csd]);
+            Console.SetCursorPosition(0, _driveLineIndex[csd.CsdNumber]);
             StatusHelpers.WriteStatusLineWithPct(csd.CsdName, line, currentPercent, (currentPercent == 100.0), ConsoleColor.DarkYellow);
         }
 
@@ -171,7 +173,7 @@ namespace Archiver.Utilities.CSD
             line += " ";
             line += "Saving CSD drive details to json file ...";
 
-            Console.SetCursorPosition(0, _driveLineIndex[csd]);
+            Console.SetCursorPosition(0, _driveLineIndex[csd.CsdNumber]);
             StatusHelpers.WriteStatusLine(csd.CsdName, line, ConsoleColor.DarkYellow);
         }
 
@@ -182,7 +184,7 @@ namespace Archiver.Utilities.CSD
             line += " ";
             line += "Complete!";
 
-            Console.SetCursorPosition(0, _driveLineIndex[csd]);
+            Console.SetCursorPosition(0, _driveLineIndex[csd.CsdNumber]);
             StatusHelpers.WriteStatusLine(csd.CsdName, line, ConsoleColor.DarkGreen);
         }
 
@@ -220,7 +222,7 @@ namespace Archiver.Utilities.CSD
             if (_sizeLine == -1)
                 _sizeLine = _nextLine++;
 
-            string currentSizeFriendly = Formatting.GetFriendlySize(CsdGlobals._totalSize);
+            string currentSizeFriendly = Formatting.GetFriendlySize(CsdGlobals._totalSizePending);
             
             string line = StatusHelpers.FileCountPosition(fileCount, CsdGlobals._newFileCount);
             line += $" [{currentSizeFriendly.PadLeft(12)}]";

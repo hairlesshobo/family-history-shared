@@ -12,6 +12,8 @@ namespace Archiver.Utilities.CSD
 {
     public static class Processing
     {
+        private static int _updateFrequencyMs = 1000;
+
         public static void IndexAndCountFiles()
         {
             Console.WriteLine();
@@ -43,7 +45,7 @@ namespace Archiver.Utilities.CSD
             };
 
             sizer.OnComplete += () => {
-                Status.FileSized(CsdGlobals._newFileCount, CsdGlobals._totalSize, true);
+                Status.FileSized(CsdGlobals._newFileCount, CsdGlobals._totalSizePending, true);
             };
 
             Thread sizeThread = new Thread(sizer.SizeFiles);
@@ -85,52 +87,58 @@ namespace Archiver.Utilities.CSD
 
         public static void CopyFiles(string driveLetter, CsdDetail csd, Stopwatch masterSw, Action indexSaveCallback)
         {
-            long bytesCopied = 0;
-            int currentFile = 1;
-            double averageTransferRate = 0;
-            long sampleCount = 1;
-
             csd.WriteDtmUtc.Add(DateTime.UtcNow);
 
             IEnumerable<CsdSourceFile> sourceFiles = csd.Files.Where(x => x.Archived == false).OrderBy(x => x.RelativePath);
 
             int totalFilesToCopy = sourceFiles.Count();
             long totalSizeToCopy = sourceFiles.Sum(x => x.Size);
+            long bytesCopiedSinceLastupdate = 0;
+            long bytesCopied = 0;
+            int currentFile = 1;
+            double averageTransferRate = 0.0;
+            long sampleCount = 0;
 
-            long lastIndexSave = 0;
             Stopwatch sw = new Stopwatch();
             sw.Start();
+
+            long lastSample = sw.ElapsedMilliseconds;
+            long lastIndexSave = sw.ElapsedMilliseconds;
 
             foreach (CsdSourceFile file in sourceFiles)
             {
                 // check if we need to save the index
-                if (((sw.ElapsedMilliseconds/1000) - lastIndexSave) > Archiver.Config.CsdAutoSaveInterval)
+                if ((sw.ElapsedMilliseconds - lastIndexSave) > (Archiver.Config.CsdAutoSaveInterval * 1000))
                 {
                     indexSaveCallback();
 
-                    lastIndexSave = sw.ElapsedMilliseconds/1000;
+                    lastIndexSave = sw.ElapsedMilliseconds;
                 }
 
-                var copier = file.ActivateCopy(driveLetter);
+                CustomFileCopier copier = file.ActivateCopy(driveLetter);
 
                 copier.OnProgressChanged += (progress) => {
                     bytesCopied += progress.BytesCopiedSinceLastupdate;
+                    bytesCopiedSinceLastupdate += progress.BytesCopiedSinceLastupdate;
                     file.DestinationCsd.BytesCopied += progress.BytesCopiedSinceLastupdate;
 
-                    // not sure why we get the occasional infinite or invalid number, so lets just filter them out for now
-                    if (!Double.IsNaN(progress.InstantTransferRate) 
-                      && Double.IsFinite(progress.InstantTransferRate) 
-                      && progress.InstantTransferRate > 0.0)
+                    if ((sw.ElapsedMilliseconds - lastSample) > _updateFrequencyMs)
                     {
-                        if (sampleCount == 1)
-                            averageTransferRate = progress.InstantTransferRate;
-                        else
-                            averageTransferRate = averageTransferRate + (progress.InstantTransferRate - averageTransferRate) / sampleCount;
-
                         sampleCount++;
-                    }
 
-                    Status.WriteCsdCopyLine(csd, driveLetter, masterSw.Elapsed, currentFile, totalFilesToCopy, bytesCopied, totalSizeToCopy, progress.InstantTransferRate, averageTransferRate);
+                        double timeSinceLastUpdate = (double)(sw.ElapsedMilliseconds - lastSample) / 1000.0;
+                        double instantTransferRate = (double)bytesCopiedSinceLastupdate / timeSinceLastUpdate;
+
+                        if (sampleCount == 1)
+                            averageTransferRate = instantTransferRate;
+                        else
+                            averageTransferRate = averageTransferRate + (instantTransferRate - averageTransferRate) / sampleCount;
+
+                        Status.WriteCsdCopyLine(csd, driveLetter, masterSw.Elapsed, currentFile, totalFilesToCopy, bytesCopied, totalSizeToCopy, instantTransferRate, averageTransferRate);
+
+                        bytesCopiedSinceLastupdate = 0;
+                        lastSample = sw.ElapsedMilliseconds;
+                    }
                 };
 
                 copier.OnComplete += (progress) => {
@@ -297,16 +305,16 @@ namespace Archiver.Utilities.CSD
                 masterSw.Restart();
 
                 CopyFiles(driveLetter, csd, masterSw, () => {
-                    GenerateIndexFiles(driveLetter, csd, masterSw);
-                    GenerateHashFile(driveLetter, csd, masterSw);
-                    WriteCsdSummary(driveLetter, csd, masterSw);
-                    SaveJsonData(driveLetter, csd, masterSw);
+                    CsdDetail snapshot = csd.TakeSnapshot();
+
+                    GenerateIndexFiles(driveLetter, snapshot, masterSw);
+                    GenerateHashFile(driveLetter, snapshot, masterSw);
+                    WriteCsdSummary(driveLetter, snapshot, masterSw);
+                    SaveJsonData(driveLetter, snapshot, masterSw);
                 });
 
                 masterSw.Stop();
                 Status.WriteCsdComplete(csd, masterSw.Elapsed);
-
-                // write: CSD xxx finished writing, please "safely remove" drive then press enter
             }
 
             Status.ProcessComplete();

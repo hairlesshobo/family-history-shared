@@ -81,7 +81,7 @@ namespace Archiver.Classes.CSD
             this.CreationTimeUtc = fileInfo.CreationTimeUtc;
             this.Attributes = fileInfo.Attributes;
 
-            CsdGlobals._totalSize += this.Size;
+            CsdGlobals._totalSizePending += this.Size;
         }
 
         public void AssignCsd()

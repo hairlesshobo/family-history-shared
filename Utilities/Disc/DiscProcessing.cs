@@ -13,6 +13,8 @@ namespace Archiver.Utilities.Disc
 {
     public static class DiscProcessing
     {
+        private static int _updateFrequencyMs = 1000;
+        
         public static void IndexAndCountFiles()
         {
             Console.WriteLine();
@@ -71,12 +73,6 @@ namespace Archiver.Utilities.Disc
 
         public static void CopyFiles(DiscDetail disc, Stopwatch masterSw)
         {
-            long bytesCopied = 0;
-            int currentFile = 1;
-            int currentDisc = 0;
-            double averageTransferRate = 0;
-            long sampleCount = 1;
-
             // if the stage dir already exists, we need to remove it so we don't accidentally end up with data
             // on the final disc that doesn't belong there
             if (Directory.Exists(disc.RootStagingPath))
@@ -86,8 +82,17 @@ namespace Archiver.Utilities.Disc
 
             IEnumerable<DiscSourceFile> sourceFiles = disc.Files.Where(x => x.Archived == false).OrderBy(x => x.RelativePath);
 
+            long bytesCopied = 0;
+            long bytesCopiedSinceLastupdate = 0;
+            int currentFile = 1;
+            int currentDisc = 0;
+            double averageTransferRate = 0;
+            long sampleCount = 0;
+            
             Stopwatch sw = new Stopwatch();
             sw.Start();
+
+            long lastSample = sw.ElapsedMilliseconds;
 
             foreach (DiscSourceFile file in sourceFiles)
             {
@@ -102,22 +107,26 @@ namespace Archiver.Utilities.Disc
 
                 copier.OnProgressChanged += (progress) => {
                     bytesCopied += progress.BytesCopiedSinceLastupdate;
+                    bytesCopiedSinceLastupdate += progress.BytesCopiedSinceLastupdate;
                     file.DestinationDisc.BytesCopied += progress.BytesCopiedSinceLastupdate;
 
-                    // not sure why we get the occasional infinite or invalid number, so lets just filter them out for now
-                    if (!Double.IsNaN(progress.InstantTransferRate) 
-                      && Double.IsFinite(progress.InstantTransferRate) 
-                      && progress.InstantTransferRate > 0.0)
+                    if ((sw.ElapsedMilliseconds - lastSample) > _updateFrequencyMs)
                     {
-                        if (sampleCount == 1)
-                            averageTransferRate = progress.InstantTransferRate;
-                        else
-                            averageTransferRate = averageTransferRate + (progress.InstantTransferRate - averageTransferRate) / sampleCount;
-
                         sampleCount++;
-                    }
 
-                    Status.WriteDiscCopyLine(disc, masterSw.Elapsed, currentFile, progress.InstantTransferRate, averageTransferRate);
+                        double timeSinceLastUpdate = (double)(sw.ElapsedMilliseconds - lastSample) / 1000.0;
+                        double instantTransferRate = (double)bytesCopiedSinceLastupdate / timeSinceLastUpdate;
+
+                        if (sampleCount == 1)
+                            averageTransferRate = instantTransferRate;
+                        else
+                            averageTransferRate = averageTransferRate + (instantTransferRate - averageTransferRate) / sampleCount;
+
+                        Status.WriteDiscCopyLine(disc, masterSw.Elapsed, currentFile, instantTransferRate, averageTransferRate);
+
+                        bytesCopiedSinceLastupdate = 0;
+                        lastSample = sw.ElapsedMilliseconds;
+                    }
                 };
 
                 copier.OnComplete += (progress) => {

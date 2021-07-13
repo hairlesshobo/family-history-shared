@@ -37,7 +37,7 @@ namespace Archiver.Utilities.CSD
 
                 if (_sw.ElapsedMilliseconds - _lastSample > _sampleDurationMs)
                 {
-                    OnProgressChanged(fileCount, DiscGlobals._totalSize);
+                    OnProgressChanged(fileCount, CsdGlobals._totalSizePending);
                     _lastSample = _sw.ElapsedMilliseconds;
                 }
 

@@ -2,16 +2,16 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
+using Archiver.Classes.Shared;
 using Archiver.Classes.Tape;
 using Archiver.Utilities.Shared;
-using static Archiver.Utilities.Shared.CustomFileCopier;
 
 namespace Archiver.Utilities.Tape
 {
     public class MD5_Tape
     {
         public event MD5_CompleteDelegate OnComplete;
-        public event ProgressChangedDelegate OnProgressChanged;
+        public event MD5_ProgressChangedDelegate OnProgressChanged;
 
         private const int _sampleDurationMs = 500;
         public string MD5_Hash { get; set; }
@@ -52,7 +52,7 @@ namespace Archiver.Utilities.Tape
             using (TapeOperator tape = new TapeOperator(Config.TapeDrive, blockSize))
             using (MD5 md5 = MD5.Create())
             {
-                Progress progress = new Progress();
+                Md5Progress progress = new Md5Progress();
                 progress.TotalBytes = _sourceSize;
                 progress.TotalCopiedBytes = 0;
                 
@@ -116,6 +116,19 @@ namespace Archiver.Utilities.Tape
 
                 OnComplete(this.MD5_Hash);
             }
+        }
+
+        public class Progress 
+        {
+            public long TotalCopiedBytes { get; set; } = 0;
+            public long BytesCopiedSinceLastupdate { get; set; } = 0;
+            public long TotalBytes { get; set; } = 0;
+            public double PercentCopied { get; set; } = 0.0;
+            public double InstantTransferRate { get; set; } = 0.0;
+            public double AverageTransferRate { get; set; } = 0.0;
+            public TimeSpan ElapsedTime { get; set; }
+            public bool Complete { get; set; } = false;
+            public string FileName { get; set; } = String.Empty;
         }
     }
 }

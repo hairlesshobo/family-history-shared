@@ -5,8 +5,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
+using Archiver.Classes.Shared;
 using Archiver.Utilities.Shared;
-using static Archiver.Utilities.Shared.CustomFileCopier;
 
 namespace Archiver.Utilities.Disc
 {
@@ -30,7 +30,7 @@ namespace Archiver.Utilities.Disc
         private int _driveId = 0;
 
         public event MD5_CompleteDelegate OnComplete;
-        public event ProgressChangedDelegate OnProgressChanged;
+        public event MD5_ProgressChangedDelegate OnProgressChanged;
         public int SampleDurationMs { get; set; } = 500;
 
         public MD5_Disc (string DriveLetter)
@@ -80,7 +80,7 @@ namespace Archiver.Utilities.Disc
             // win32 CreateFile(), and windows explorer, shows the size as too small and therefore
             // doesn't generate the correct md5sum. In my limited test case, it truncates off
             // 555008 byts of data. so, for the esimate, we add that back.
-            Progress progress = new Progress();
+            Md5Progress progress = new Md5Progress();
             progress.TotalBytes = _driveInfo.TotalSize + 555008;
             int fieldWidth = progress.TotalBytes.ToString().Length;
             progress.TotalCopiedBytes = 0;

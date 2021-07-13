@@ -1,16 +1,17 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using Archiver.Classes.Shared;
 
 namespace Archiver.Utilities.Shared
 {
-    public delegate void MD5_ProgressChangedDelegate(double currentPercent);
-    public delegate void MD5_CompleteDelegate(string hash);
+    public delegate void MD5_ProgressChangedDelegateSimple(double currentPercent);
+    
 
     public class MD5_Generator
     {
         public event MD5_CompleteDelegate OnComplete;
-        public event MD5_ProgressChangedDelegate OnProgressChanged;
+        public event MD5_ProgressChangedDelegateSimple OnProgressChanged;
 
         private string _filePath;
         private const int _sampleDurationMs = 100;

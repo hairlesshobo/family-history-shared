@@ -19,7 +19,7 @@ namespace Archiver
         public static long _renamedFileCount = 0;
         public static long _existingFileCount = 0;
         public static long _excludedFileCount = 0;
-        public static long _totalSize = 0;
+        public static long _totalSizePending = 0;
 
 
         public static string[] _csdSourcePaths;
@@ -34,7 +34,7 @@ namespace Archiver
             _newFileCount = 0;
             _renamedFileCount = 0;
             _existingFileCount = 0;
-            _totalSize = 0;
+            _totalSizePending = 0;
             _excludedFileCount = 0;
         }
 

@@ -6,7 +6,7 @@ using Archiver.Classes.CSD;
 
 namespace Archiver.Utilities.CSD
 {
-    public delegate void Distributor_ProgressChangedDelegate(long currentFile, int discCount);
+    public delegate void Distributor_ProgressChangedDelegate(long currentFile, int csdCount);
     public delegate void Distributor_CompleteDelegate();
 
     public class FileDistributor
@@ -38,8 +38,8 @@ namespace Archiver.Utilities.CSD
 
                 if (_sw.ElapsedMilliseconds - _lastSample > _sampleDurationMs)
                 {
-                    int discCount = DiscGlobals._destinationDiscs.Where(x => x.Finalized == false).Count();
-                    OnProgressChanged(fileCount, discCount);
+                    int csdCount = CsdGlobals._destinationCsds.Where(x => x.HasPendingWrites == true).Count();
+                    OnProgressChanged(fileCount, csdCount);
                     _lastSample = _sw.ElapsedMilliseconds;
                 }
 
