@@ -11,12 +11,25 @@ namespace Archiver.Classes.CSD
 {
     public class CsdSourceFile : CsdSourceFilePathDetail, ISourceFile
     {
+        private bool _copied = false;
+
         public CsdSourceFilePathDetail OriginalFile { get; set; } = null;
         public long Size { get; set; } = -1;
         public bool? FileDeleted { get; set; } = null;
-        public bool Archived { get; set; }
         public string Hash { get; set; }
-        public bool Copied { get; set; }
+        public bool Copied 
+        { 
+            get => _copied; 
+            set
+            {
+                bool isBeingMarkedAsCopied = _copied == false && value == true;
+
+                _copied = value;
+
+                if (isBeingMarkedAsCopied && this.DestinationCsd != null)
+                    this.DestinationCsd.MarkFileCopied(this);
+            }
+        }
         public DateTime ArchiveTimeUtc { get; set; }
         public DateTime LastAccessTimeUtc { get; set; }
         public DateTime LastWriteTimeUtc { get; set; }
@@ -35,7 +48,7 @@ namespace Archiver.Classes.CSD
 
         public CsdSourceFile()
         {
-            CsdGlobals._sourceFiles.Add(this);
+            CsdGlobals._jsonReadSourceFiles.Add(this);
         }
 
         public CsdSourceFile(string sourcePath, bool scanForRenames = false)
@@ -46,10 +59,8 @@ namespace Archiver.Classes.CSD
                 throw new DirectoryNotFoundException($"Source file does not exist: {sourcePath}");
 
             // we found a file on the filesystem, but it is already in the archive
-            if (CsdGlobals._sourceFiles.Any(x => x.Archived == true && x.RelativePath == this.RelativePath))
-            {
+            if (CsdGlobals._sourceFileDict.ContainsKey(this.RelativePath))
                 CsdGlobals._existingFileCount += 1;
-            }
 
             // we only add the file to the index if it hasn't yet been archived
             else
@@ -66,22 +77,26 @@ namespace Archiver.Classes.CSD
                 if (isNewFile)
                 {
                     CsdGlobals._newFileCount += 1;
-                    CsdGlobals._sourceFiles.Add(this);
+                    CsdGlobals._sourceFileDict.Add(this.RelativePath, this);
                 }
             }
         }
 
         public void ReadSizeAndAttribs()
         {
-            FileInfo fileInfo = new FileInfo(this.FullPath);
+            // only read attribs if we haven't already done so
+            if (this.LastWriteTimeUtc.Equals(default(DateTime)))
+            {
+                FileInfo fileInfo = new FileInfo(this.FullPath);
 
-            this.Size = fileInfo.Length;
-            this.LastAccessTimeUtc = fileInfo.LastAccessTimeUtc;
-            this.LastWriteTimeUtc = fileInfo.LastWriteTimeUtc;
-            this.CreationTimeUtc = fileInfo.CreationTimeUtc;
-            this.Attributes = fileInfo.Attributes;
+                this.Size = fileInfo.Length;
+                this.LastAccessTimeUtc = fileInfo.LastAccessTimeUtc;
+                this.LastWriteTimeUtc = fileInfo.LastWriteTimeUtc;
+                this.CreationTimeUtc = fileInfo.CreationTimeUtc;
+                this.Attributes = fileInfo.Attributes;
 
-            CsdGlobals._totalSizePending += this.Size;
+                CsdGlobals._totalSizePending += this.Size;
+            }
         }
 
         public void AssignCsd()
@@ -89,7 +104,7 @@ namespace Archiver.Classes.CSD
             if (this.Size >= 0)
             {
                 this.DestinationCsd = CsdUtils.GetDestinationCsd(this.Size);
-                this.DestinationCsd.Files.Add(this);
+                this.DestinationCsd.AddFile(this);
             }
         }
 

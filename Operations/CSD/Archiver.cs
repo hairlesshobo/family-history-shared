@@ -12,7 +12,7 @@ namespace Archiver.Operations.CSD
     {
         public static void RunArchive(bool askBeforeArchive = false)
         {
-            CsdGlobals._destinationCsds = CsdUtils.ReadIndex();
+            CsdUtils.ReadIndexToGlobal();
             Console.Clear();
 
             Formatting.WriteLineC(ConsoleColor.Magenta, "Preparing...");

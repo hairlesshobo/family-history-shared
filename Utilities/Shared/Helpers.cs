@@ -191,6 +191,17 @@ namespace Archiver.Utilities.Shared
             return inPath.Split(':')[1];
         }
 
+        public static string GetFileName(string FullPath)
+        {
+            FullPath = Helpers.CleanPath(FullPath);
+
+            return FullPath.Substring(FullPath.LastIndexOf('/')+1);
+
+            // string[] nameParts = FullPath.Split('/');
+            
+            // return nameParts[nameParts.Length-1];
+        }
+
         public static DiscDetail GetDestinationDisc(long FileSize)
         {
             DiscDetail matchingDisc = DiscGlobals._destinationDiscs.FirstOrDefault(x => x.NewDisc == true && (x.DataSize + FileSize) < DiscGlobals._discCapacityLimit);
@@ -241,15 +252,6 @@ namespace Archiver.Utilities.Shared
 
             Console.CursorLeft = 0;
             Console.CursorTop = Console.CursorTop+2;
-        }
-
-        public static string GetFileName(string FullPath)
-        {
-            FullPath = Helpers.CleanPath(FullPath);
-
-            string[] nameParts = FullPath.Split('/');
-            
-            return nameParts[nameParts.Length-1];
         }
 
         

@@ -95,12 +95,10 @@ namespace Archiver.Utilities.CSD
 
         public static void CopyFiles(string driveLetter, CsdDetail csd, Stopwatch masterSw, Action indexSaveCallback)
         {
-            csd.WriteDtmUtc.Add(DateTime.UtcNow);
+            csd.AddWriteDate();
 
-            IEnumerable<CsdSourceFile> sourceFiles = csd.Files.Where(x => x.Archived == false).OrderBy(x => x.RelativePath);
-
-            int totalFilesToCopy = sourceFiles.Count();
-            long totalSizeToCopy = sourceFiles.Sum(x => x.Size);
+            long totalFilesToCopy = csd.PendingFileCount;
+            long totalSizeToCopy = csd.PendingBytes;
             long bytesCopiedSinceLastupdate = 0;
             long bytesCopied = 0;
             int currentFile = 1;
@@ -113,8 +111,10 @@ namespace Archiver.Utilities.CSD
             long lastSample = sw.ElapsedMilliseconds;
             long lastIndexSave = sw.ElapsedMilliseconds;
 
-            foreach (CsdSourceFile file in sourceFiles)
+            while (csd.PendingFileCount > 0)
             {
+                CsdSourceFile file = csd.PendingFiles.First();
+
                 // check if we need to save the index
                 if ((sw.ElapsedMilliseconds - lastIndexSave) > (Archiver.Config.CsdAutoSaveInterval * 1000))
                 {
@@ -158,7 +158,6 @@ namespace Archiver.Utilities.CSD
                 copyThread.Join();
 
                 file.Copied = true;
-                file.Archived = true;
                 file.ArchiveTimeUtc = DateTime.UtcNow;
 
                 currentFile++;
@@ -181,12 +180,22 @@ namespace Archiver.Utilities.CSD
                 {
                     sw.WriteLine($"{"MD5 Hash".PadRight(32)}   File");
 
+                    Stopwatch stopwatch = Stopwatch.StartNew();
                     int currentLine = 1;
-                    foreach (CsdSourceFile file in csd.Files.Where(x => x.Copied && x.Size > 0 && x.Hash != null).OrderBy(x => x.RelativePath))
+                    long lastSample = stopwatch.ElapsedMilliseconds;
+
+                    foreach (CsdSourceFile file in csd.Files.Where(x => x.Size > 0 && x.Hash != null).OrderBy(x => x.RelativePath))
                     {
-                        double currentPercent = ((double)currentLine / (double)csd.TotalFiles) * 100.0;
                         sw.WriteLine($"{file.Hash.PadRight(32)}   {file.RelativePath}");
-                        Status.WriteHashListFile(csd, masterSw.Elapsed, currentPercent);
+
+                        if ((stopwatch.ElapsedMilliseconds - lastSample) > _updateFrequencyMs)
+                        {
+                            double currentPercent = ((double)currentLine / (double)csd.TotalFiles) * 100.0;
+                            Status.WriteHashListFile(csd, masterSw.Elapsed, currentPercent);
+
+                            lastSample = stopwatch.ElapsedMilliseconds;
+                        }
+
                         currentLine++;
                     }
 
@@ -232,10 +241,12 @@ namespace Archiver.Utilities.CSD
                         {
                             csdIndex.WriteLine(headerLine);
 
+                            Stopwatch sw = Stopwatch.StartNew();
                             int currentLine = 1;
+                            long lastSample = sw.ElapsedMilliseconds;
 
                             // Write the human readable index
-                            foreach (CsdSourceFile file in csd.Files.Where(x => x.Copied).OrderBy(x => x.RelativePath))
+                            foreach (CsdSourceFile file in csd.Files.OrderBy(x => x.RelativePath))
                             {
                                 string line = "";
                                 line += csd.CsdNumber.ToString("000");
@@ -253,8 +264,13 @@ namespace Archiver.Utilities.CSD
                                 csdIndex.WriteLine(line);
                                 masterIndex.WriteLine(line);
 
-                                double currentPercent = ((double)currentLine / (double)csd.TotalFiles) * 100.0;
-                                Status.WriteCsdIndex(csd, masterSw.Elapsed, currentPercent);
+                                if ((sw.ElapsedMilliseconds - lastSample) > _updateFrequencyMs)
+                                {
+                                    double currentPercent = ((double)currentLine / (double)csd.TotalFiles) * 100.0;
+                                    Status.WriteCsdIndex(csd, masterSw.Elapsed, currentPercent);
+
+                                    lastSample = sw.ElapsedMilliseconds;
+                                }
 
                                 currentLine++;
                             }

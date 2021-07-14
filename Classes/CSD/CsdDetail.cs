@@ -11,69 +11,69 @@ namespace Archiver.Classes.CSD
 
     public class CsdDetail
     {
-        public int CsdNumber { get; set; }
+        #region Private members
+
+        private int _csdNumber = 0;
+        private string _csdName = "CSD000";
+        private List<CsdSourceFile> _files = new List<CsdSourceFile>();
+        private List<CsdSourceFile> _pendingFiles = new List<CsdSourceFile>();
+        private List<DateTime> _writeDtmUtc = new List<DateTime>();
+        private long _pendingBytes = 0;
+        private long _pendingBytesOnDisk = 0;
+        private long _pendingFileCount = 0;
+        private int _totalFiles = 0;
+        private long _dataSize = 0;
+        private long _dataSizeOnDisk = 0;
+
+        #endregion Private members
+
+
+
+        public int CsdNumber 
+        { 
+            get => _csdNumber;
+            set
+            {
+                _csdNumber = value;
+                _csdName = $"CSD{this.CsdNumber.ToString("000")}";
+            }
+        }
         public DateTime RegisterDtmUtc { get; set; }
-        public List<DateTime> WriteDtmUtc { get; set; }
-        public string CsdName { 
-            get
-            {
-                return $"CSD{this.CsdNumber.ToString("000")}";
-            }
-        }
-        public int TotalFiles 
-        {
-            get
-            {
-                return this.Files.Count();
-            }
-        }
+        public IReadOnlyList<DateTime> WriteDtmUtc => (IReadOnlyList<DateTime>)_writeDtmUtc;
+        public string CsdName => _csdName;
+        public int TotalFiles => _totalFiles;
         public int BlockSize { get; set; }
         public long TotalSpace { get; set; }
-        public long FreeSpace 
-        { 
-            get
-            {
-                return this.TotalSpace - this.DataSizeOnDisc;
-            }
-        }
-        
-        public long DataSize 
-        { 
-            get
-            {
-                return this.Files.Sum(x => x.Size);
-            } 
-        }
+        public long FreeSpace => this.TotalSpace - _dataSizeOnDisk;
+        public long DataSize => _dataSize;
 
-        public long DataSizeOnDisc
-        {
-            get
-            {
-                return this.Files.Sum(x => Helpers.RoundToNextMultiple(x.Size, this.BlockSize));
-            } 
-        }
-        public List<CsdSourceFile> Files { get; set; }
-        
-        public CsdDriveInfo DriveInfo { get; set; }
-        
+        public long DataSizeOnDisc => _dataSizeOnDisk;
+        public IReadOnlyList<CsdSourceFile> Files => (IReadOnlyList<CsdSourceFile>)_files;
+        public CsdDriveInfo DriveInfo { get; set; } = new CsdDriveInfo();
         public long BytesCopied { get; set; }
+
+        public List<CsdVerificationResult> Verifications { get; set; } = new List<CsdVerificationResult>();
         
+        #region JSON hidden public properties
         [JsonIgnore]
-        public bool DiskFull => (this.FreeSpace - Config.CsdReservedCapacity) <= this.BlockSize;
+        public bool DiskFull => this.UsableFreeSpace <= this.BlockSize;
 
         [JsonIgnore]
         public bool HasPendingWrites => this.PendingFileCount > 0;
 
         [JsonIgnore]
-        public IEnumerable<CsdSourceFile> PendingFiles => this.Files.Where(x => x.Copied == false);
+        public IEnumerable<CsdSourceFile> PendingFiles => _pendingFiles;
 
         [JsonIgnore]
-        public long PendingBytes => this.PendingFiles.Sum(x => x.Size);
+        public long UsableFreeSpace => this.TotalSpace - Config.CsdReservedCapacity - this._dataSizeOnDisk - this._pendingBytesOnDisk;
+        [JsonIgnore]
+        public long PendingBytes => _pendingBytes;
+        [JsonIgnore]
+        public long PendingBytesOnDisk => _pendingBytesOnDisk;
 
         [JsonIgnore]
-        public long PendingFileCount => this.PendingFiles.Count();
+        public long PendingFileCount => this._pendingFileCount;
         
-        public int FilesCopied => this.Files.Where(x => x.Copied == true).Count();
 
         [JsonIgnore]
         public int DaysSinceLastVerify {
@@ -104,31 +104,48 @@ namespace Archiver.Classes.CSD
             }
         }
         
-        public List<CsdVerificationResult> Verifications { get; set; }
         
+        #endregion JSON hidden public properties
+        
+        public CsdDetail()
+        { }
 
-        public CsdDetail() : base()
+        public CsdDetail(int csdNumber, int blockSize, long totalSpace)
         {
-            this.DriveInfo = new CsdDriveInfo();
-            this.WriteDtmUtc = new List<DateTime>();
-            this.Files = new List<CsdSourceFile>();
-
-            this.Verifications = new List<CsdVerificationResult>();
-        }
-
-        public CsdDetail(int csdNumber, int blockSize, long totalSpace) : base()
-        {
-            this.DriveInfo = new CsdDriveInfo();
-            this.WriteDtmUtc = new List<DateTime>();
-            this.Files = new List<CsdSourceFile>();
-
-            this.Verifications = new List<CsdVerificationResult>();
             this.BlockSize = blockSize;
             this.TotalSpace = totalSpace;
             this.RegisterDtmUtc = DateTime.UtcNow;
             this.CsdNumber = csdNumber;
 
             CsdGlobals._destinationCsds.Add(this);
+        }
+
+        public void AddFile(CsdSourceFile file)
+        {
+            if (file.Copied)
+            {
+                this._files.Add(file);
+
+                _totalFiles++;
+                _dataSize += file.Size;
+                _dataSizeOnDisk += Helpers.RoundToNextMultiple(file.Size, this.BlockSize);
+            }   
+            else
+            {
+                this._pendingFiles.Add(file);
+
+                this._pendingFileCount++;
+                this._pendingBytes += file.Size;
+                this._pendingBytesOnDisk += Helpers.RoundToNextMultiple(file.Size, this.BlockSize);
+            }
+        }
+
+        public void AddWriteDate()
+            => this._writeDtmUtc.Add(DateTime.UtcNow);
+
+        public void SortPendingFiles()
+        {
+            this._pendingFiles = this._pendingFiles.OrderBy(x => x.RelativePath).ToList();
         }
 
         public void RecordVerification(DateTime verifyDtm, bool csdValid)
@@ -143,10 +160,46 @@ namespace Archiver.Classes.CSD
             });
         }
 
+        public void SyncStats(bool includePending = false)
+        {
+            this._totalFiles = this._files.Count();
+            this._dataSize = this._files.Sum(x => x.Size);
+            this._dataSizeOnDisk = this._files.Sum(x => Helpers.RoundToNextMultiple(x.Size, this.BlockSize));
+            this.BytesCopied = this.DataSize;
+
+            if (includePending)
+            {
+                this._pendingFileCount = this._pendingFiles.Count();
+                this._pendingBytes = this._pendingFiles.Sum(x => x.Size);
+                this._pendingBytesOnDisk = this._pendingFiles.Sum(x => Helpers.RoundToNextMultiple(x.Size, this.BlockSize));
+            }
+        }
+
+        public void MarkFileCopied(CsdSourceFile file)
+        {
+            if (_pendingFiles.Contains(file))
+            {
+                _pendingFiles.Remove(file);
+
+                _pendingFileCount--;
+                _pendingBytes -= file.Size;
+                _pendingBytesOnDisk -= Helpers.RoundToNextMultiple(file.Size, this.BlockSize);
+            }
+
+            if (!_files.Contains(file))
+            {
+                this._files.Add(file);
+
+                _totalFiles++;
+                _dataSize += file.Size;
+                _dataSizeOnDisk += Helpers.RoundToNextMultiple(file.Size, this.BlockSize);
+            }
+        }
+
         /// <summary>
         ///     Create a clone of this object but only include files that have been successfully copied
         /// </summary>
-        public CsdDetail TakeSnapshot()
+        public CsdDetail TakeSnapshot(bool includePending = false)
         {
             CsdDetail newCopy = new CsdDetail()
             {
@@ -154,13 +207,18 @@ namespace Archiver.Classes.CSD
                 CsdNumber = this.CsdNumber,
                 TotalSpace = this.TotalSpace,
                 BlockSize = this.BlockSize,
-                WriteDtmUtc = this.WriteDtmUtc,
                 BytesCopied = this.BytesCopied,
                 DriveInfo = this.DriveInfo,
                 Verifications = this.Verifications
             };
 
-            newCopy.Files = this.Files.Where(x => x.Copied == true).ToList();
+            newCopy._writeDtmUtc = _writeDtmUtc;
+            newCopy._files = this._files.ToList();
+
+            if (includePending)
+                newCopy._pendingFiles = this._pendingFiles.ToList();
+
+            newCopy.SyncStats(includePending);
              
             return newCopy;
         }

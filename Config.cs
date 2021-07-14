@@ -90,7 +90,7 @@ namespace Archiver
             CsdGlobals._csdSourcePaths = _config.GetSection("CSD:SourcePaths").Get<string[]>();
             Array.Sort(CsdGlobals._csdSourcePaths);
 
-            foreach (string excPath in _config.GetSection("Disc:ExcludePaths").Get<string[]>())
+            foreach (string excPath in _config.GetSection("CSD:ExcludePaths").Get<string[]>())
             {
                 string cleanExcPath = Helpers.CleanPath(excPath);
 

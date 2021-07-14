@@ -83,7 +83,7 @@ namespace Archiver.Utilities.CSD
             line += " ";
             line += "Pending".PadRight(15);
             line += " ";
-            line += $"{csd.Files.Where(x => !x.Copied).Count().ToString().PadLeft(7)} files assigned";
+            line += $"{csd.PendingFileCount.ToString().PadLeft(7)} files assigned";
             line += "   ";
             line += $"{Formatting.GetFriendlySize(csd.PendingFiles.Sum(x => x.Size)).PadLeft(10)} data size";
 
@@ -116,7 +116,7 @@ namespace Archiver.Utilities.CSD
             string driveLetter,
             TimeSpan elapsed = default(TimeSpan),
             int currentFile = 0, 
-            int totalFileCount = 0,
+            long totalFileCount = 0,
             long bytesCopied = 0, 
             long totalBytes = 0,
             double instantTransferRate = 0.0, 

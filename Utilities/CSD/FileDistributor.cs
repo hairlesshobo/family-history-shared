@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -33,7 +34,13 @@ namespace Archiver.Utilities.CSD
             long lastSample = _sw.ElapsedMilliseconds;
             long lastSampleFileCount = 0;
 
-            foreach (CsdSourceFile sourceFile in CsdGlobals._sourceFiles.Where(x => x.Archived == false).OrderByDescending(x => x.Size))
+            List<CsdSourceFile> files = CsdGlobals._sourceFileDict
+                                                  .Select(x => x.Value)
+                                                  .Where(x => x.Copied == false)
+                                                  .OrderByDescending(x => x.Size)
+                                                  .ToList();
+
+            foreach (CsdSourceFile sourceFile in files)
             {
                 sourceFile.AssignCsd();
 

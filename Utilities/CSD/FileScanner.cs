@@ -68,11 +68,12 @@ namespace Archiver.Utilities.CSD
                 _totalFileCount++;
 
                 string cleanFile = Helpers.CleanPath(file);
+                string fileName = Helpers.GetFileName(cleanFile);
 
                 if (CsdGlobals._csdExcludePaths.Any(x => cleanFile.ToLower().StartsWith(x.ToLower())))
                     CsdGlobals._excludedFileCount++;
 
-                else if (CsdGlobals._csdExcludeFiles.Any(x => Helpers.GetFileName(cleanFile).ToLower().EndsWith(x.ToLower())))
+                else if (CsdGlobals._csdExcludeFiles.Any(x => fileName.ToLower().EndsWith(x.ToLower())))
                     CsdGlobals._excludedFileCount++;
 
                 else

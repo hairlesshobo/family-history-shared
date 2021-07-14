@@ -32,7 +32,7 @@ namespace Archiver.Utilities.CSD
             long lastSampleFileCount = 0;
             long lastSample = _sw.ElapsedMilliseconds;
 
-            foreach (CsdSourceFile sourceFile in CsdGlobals._sourceFiles.Where(x => x.Archived == false))
+            foreach (CsdSourceFile sourceFile in CsdGlobals._sourceFileDict.Select(x => x.Value).Where(x => x.Copied == false))
             {
                 sourceFile.ReadSizeAndAttribs();
 

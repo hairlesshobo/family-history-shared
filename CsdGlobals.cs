@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Archiver.Classes;
@@ -7,11 +8,12 @@ namespace Archiver
 {
     public static class CsdGlobals
     {
-        public static List<CsdSourceFile> _newFileEntries => _sourceFiles.Where(x => x.Copied == false).ToList();
+        public static List<CsdSourceFile> _jsonReadSourceFiles = new List<CsdSourceFile>();
+        public static List<CsdSourceFile> _newFileEntries => _sourceFileDict.Select(x => x.Value).Where(x => x.Copied == false).ToList();
         
-        public static List<CsdSourceFile> _sourceFiles = new List<CsdSourceFile>();
         public static List<CsdSourceFile> _deletedFiles = new List<CsdSourceFile>();
         public static List<CsdDetail> _destinationCsds = new List<CsdDetail>();
+        public static Dictionary<string, CsdSourceFile> _sourceFileDict = new Dictionary<string, CsdSourceFile>(StringComparer.OrdinalIgnoreCase);
 
 
         public static long _newFileCount = 0;
@@ -29,7 +31,8 @@ namespace Archiver
 
         public static void Reset()
         {
-            _sourceFiles.Clear();
+            _sourceFileDict.Clear();
+            _jsonReadSourceFiles.Clear();
             _deletedFiles.Clear();
             _destinationCsds.Clear();
             _newFileCount = 0;

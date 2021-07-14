@@ -30,6 +30,16 @@ namespace Archiver.Utilities.CSD
             return Newtonsoft.Json.JsonConvert.DeserializeObject<CsdDetail>(jsonContent);
         }
 
+        public static void ReadIndexToGlobal()
+        {
+            CsdGlobals._destinationCsds = ReadIndex();
+
+            foreach (CsdSourceFile file in CsdGlobals._jsonReadSourceFiles)
+                CsdGlobals._sourceFileDict.Add(file.RelativePath, file);
+
+            CsdGlobals._jsonReadSourceFiles.Clear();
+        }
+
         public static List<CsdDetail> ReadIndex()
         {
             List<CsdDetail> csds = new List<CsdDetail>();
@@ -56,7 +66,9 @@ namespace Archiver.Utilities.CSD
                         Console.Write(line);
 
                         CsdDetail csdDetail = Newtonsoft.Json.JsonConvert.DeserializeObject<CsdDetail>(File.ReadAllText(jsonFile));
-                        csdDetail.Files.ForEach(x => x.DestinationCsd = csdDetail);
+                        
+                        foreach (CsdSourceFile file in csdDetail.Files)
+                            file.DestinationCsd = csdDetail;
 
                         csds.Add(csdDetail);
                     }
@@ -65,14 +77,16 @@ namespace Archiver.Utilities.CSD
                 }
             }
 
+            csds.ForEach(x => x.SyncStats());
+
             return csds;
         }
 
         public static CsdDetail GetDestinationCsd(long FileSize)
         {
             CsdDetail matchingCsd = CsdGlobals._destinationCsds
-                                              .FirstOrDefault(x => x.DiskFull == false
-                                                                && (x.FreeSpace - Config.CsdReservedCapacity) > Helpers.RoundToNextMultiple(FileSize, x.BlockSize));
+                                              .FirstOrDefault(x => x.DiskFull == false &&
+                                                                   x.UsableFreeSpace > Helpers.RoundToNextMultiple(FileSize, x.BlockSize));
 
             if (matchingCsd == null)
                 throw new InsufficientCsdCapacityException($"No CSD Drive with sufficient capacity to store a {FileSize} byte ({Formatting.GetFriendlySize(FileSize)}) file");
