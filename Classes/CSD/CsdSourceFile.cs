@@ -90,9 +90,6 @@ namespace Archiver.Classes.CSD
             {
                 this.DestinationCsd = CsdUtils.GetDestinationCsd(this.Size);
                 this.DestinationCsd.Files.Add(this);
-
-                if (this.DestinationCsd.HasPendingWrites == false)
-                    this.DestinationCsd.HasPendingWrites = true;
             }
         }
 

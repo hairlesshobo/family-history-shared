@@ -7,7 +7,7 @@ using Archiver.Utilities.Shared;
 
 namespace Archiver.Utilities.CSD
 {
-    public delegate void Scanner_ProgressChangedDelegate(long newFiles, long existingFiles, long excludedFiles);
+    public delegate void Scanner_ProgressChangedDelegate(long newFiles, long existingFiles, long excludedFiles, double filesPerSecond);
     public delegate void Scanner_CompleteDelegate();
 
     public class FileScanner
@@ -15,7 +15,9 @@ namespace Archiver.Utilities.CSD
         public event Scanner_CompleteDelegate OnComplete;
         public event Scanner_ProgressChangedDelegate OnProgressChanged;
 
-        private const int _sampleDurationMs = 100;
+        private const int _sampleDurationMs = 1000;
+        private long _totalFileCount = 0;
+        private long _lastSampleFileCount = 0;
         private Stopwatch _sw;
         private long _lastSample;
 
@@ -47,16 +49,24 @@ namespace Archiver.Utilities.CSD
             if (!Directory.Exists(sourcePath))
                 throw new DirectoryNotFoundException($"Source directory does not exist: {sourcePath}");
 
-            foreach (string dir in Directory.GetDirectories(sourcePath))
-            {
-                string cleanDir = Helpers.CleanPath(dir);
+            try {
+                foreach (string dir in Directory.GetDirectories(sourcePath))
+                {
+                    string cleanDir = Helpers.CleanPath(dir);
 
-                if (!(CsdGlobals._csdExcludePaths.Any(x => cleanDir.ToLower().StartsWith(x.ToLower()))))
-                    ScanDirectory(dir);
+                    if (!(CsdGlobals._csdExcludePaths.Any(x => cleanDir.ToLower().StartsWith(x.ToLower()))))
+                        ScanDirectory(dir);
+                }
+            }
+            catch (IOException)
+            {
+                return;
             }
 
             foreach (string file in Directory.GetFiles(sourcePath))
             {
+                _totalFileCount++;
+
                 string cleanFile = Helpers.CleanPath(file);
 
                 if (CsdGlobals._csdExcludePaths.Any(x => cleanFile.ToLower().StartsWith(x.ToLower())))
@@ -70,8 +80,15 @@ namespace Archiver.Utilities.CSD
 
                 if (_sw.ElapsedMilliseconds - _lastSample > _sampleDurationMs)
                 {
-                    OnProgressChanged(CsdGlobals._newFileCount, CsdGlobals._existingFileCount, CsdGlobals._excludedFileCount);
+                    long elapsedSinceLastSample = _sw.ElapsedMilliseconds - _lastSample;
+                    long filesSinceLastSample = _totalFileCount - _lastSampleFileCount;
+
+                    double filesPerSecond = (double)filesSinceLastSample / ((double)elapsedSinceLastSample / 1000.0);
+
+                    OnProgressChanged(CsdGlobals._newFileCount, CsdGlobals._existingFileCount, CsdGlobals._excludedFileCount, filesPerSecond);
+
                     _lastSample = _sw.ElapsedMilliseconds;
+                    _lastSampleFileCount = _totalFileCount;
                 }
             }
         }

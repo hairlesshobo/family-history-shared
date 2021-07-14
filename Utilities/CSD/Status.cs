@@ -53,7 +53,7 @@ namespace Archiver.Utilities.CSD
                 _nextLine++;
                 _csdLine = _nextLine++;
 
-                _copyWidth = CsdGlobals._destinationCsds.Where(x => x.HasPendingWrites == true).Max(x => x.PendingWrites.Count).ToString().Length;
+                _copyWidth = CsdGlobals._destinationCsds.Where(x => x.HasPendingWrites == true).Max(x => x.PendingFileCount).ToString().Length;
    
                 Console.CursorTop = _csdLine;
                 Console.CursorLeft = 0;
@@ -81,11 +81,11 @@ namespace Archiver.Utilities.CSD
             string line = "";
             line += Formatting.FormatElapsedTime(elapsed);
             line += " ";
-            line += "Pending".PadRight(12);
+            line += "Pending".PadRight(15);
             line += " ";
             line += $"{csd.Files.Where(x => !x.Copied).Count().ToString().PadLeft(7)} files assigned";
             line += "   ";
-            line += $"{Formatting.GetFriendlySize(csd.Files.Where(x => !x.Copied).Sum(x => x.Size)).PadLeft(10)} data size";
+            line += $"{Formatting.GetFriendlySize(csd.PendingFiles.Sum(x => x.Size)).PadLeft(10)} data size";
 
             Console.SetCursorPosition(0, _driveLineIndex[csd.CsdNumber]);
             StatusHelpers.WriteStatusLine(csd.CsdName, line, ConsoleColor.Blue);
@@ -93,14 +93,19 @@ namespace Archiver.Utilities.CSD
 
         public static void WriteAttachCsdLine(
             CsdDetail csd, 
-            TimeSpan elapsed = default(TimeSpan))
+            TimeSpan elapsed,
+            long totalFileCount, 
+            long totalBytes)
         {
 
             string line = "";
             line += Formatting.FormatElapsedTime(elapsed);
             line += " ";
-            line += $"Please attach {csd.CsdName}";
+            line += $"Attach {csd.CsdName}".PadRight(15);
             line += " ";
+            line += $"{totalFileCount.ToString().PadLeft(7)} files assigned";
+            line += "   ";
+            line += $"{Formatting.GetFriendlySize(totalBytes).PadLeft(10)} data size"; 
 
             Console.SetCursorPosition(0, _driveLineIndex[csd.CsdNumber]);
             StatusHelpers.WriteStatusLine(csd.CsdName, line, ConsoleColor.Yellow);
@@ -141,7 +146,7 @@ namespace Archiver.Utilities.CSD
                 complete = true;
 
             Console.SetCursorPosition(0, _driveLineIndex[csd.CsdNumber]);
-            StatusHelpers.WriteStatusLineWithPct(csd.CsdName, line, currentPercent, complete, ConsoleColor.DarkYellow);
+            StatusHelpers.WriteStatusLineWithPct(csd.CsdName, line, currentPercent, complete, ConsoleColor.Cyan);
         }
 
         public static void WriteCsdIndex(CsdDetail csd, TimeSpan elapsed, double currentPercent)
@@ -177,12 +182,16 @@ namespace Archiver.Utilities.CSD
             StatusHelpers.WriteStatusLine(csd.CsdName, line, ConsoleColor.DarkYellow);
         }
 
-        public static void WriteCsdComplete(CsdDetail csd, TimeSpan elapsed)
+        public static void WriteCsdComplete(CsdDetail csd, TimeSpan elapsed, long totalFileCount, long totalBytes)
         {
             string line = "";
             line += Formatting.FormatElapsedTime(elapsed);
             line += " ";
-            line += "Complete!";
+            line += "Complete!".PadRight(15);
+            line += " ";
+            line += $"{totalFileCount.ToString().PadLeft(7)} files copied";
+            line += "   ";
+            line += $"{Formatting.GetFriendlySize(totalBytes).PadLeft(10)} data copied";
 
             Console.SetCursorPosition(0, _driveLineIndex[csd.CsdNumber]);
             StatusHelpers.WriteStatusLine(csd.CsdName, line, ConsoleColor.DarkGreen);
@@ -195,10 +204,19 @@ namespace Archiver.Utilities.CSD
 
 
 
-        public static void FileScanned(long newFiles, long existingFiles, long excludedFiles, long deletedFiles, bool complete = false)
+        public static void FileScanned(
+            long newFiles, 
+            long existingFiles, 
+            long excludedFiles, 
+            long deletedFiles, 
+            long modifiedFiles, 
+            double filesPerSecond,
+            bool complete = false)
         {
             if (_fileCountLine == -1)
                 _fileCountLine = _nextLine++;
+
+            filesPerSecond = Math.Round(filesPerSecond, 1);
 
             string line = "";
             line += $"New: {newFiles.ToString().PadLeft(7)}";
@@ -208,8 +226,15 @@ namespace Archiver.Utilities.CSD
             line += $"Excluded: {excludedFiles.ToString().PadLeft(7)}";
             line += "   ";
             line += $"Deleted: {deletedFiles.ToString().PadLeft(7)}";
+            line += "   ";
+            line += $"Modified: {modifiedFiles.ToString().PadLeft(7)}";
 
-            if (complete)
+            if (!complete)
+            {
+                line += "   ";
+                line += $"[Scan Rate:{filesPerSecond.ToString("N0").PadLeft(5)} files/s]";
+            }
+            else
                 line += "   **Complete**";
 
             Console.SetCursorPosition(0, _fileCountLine);

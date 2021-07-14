@@ -25,41 +25,63 @@ namespace Archiver.Operations.CSD
             if (CsdGlobals._newFileCount > 0)
             {
                 Processing.SizeFiles();
-                Processing.VerifyFreeSpace();
-                Processing.DistributeFiles();
-
-                bool doProcess = true;
-
-                if (askBeforeArchive)
+                bool sufficientSpace = Processing.VerifyFreeSpace();
+                 
+                if (!sufficientSpace)
                 {
-                    List<CsdDetail> csdsToWrite = CsdGlobals._destinationCsds
-                                                        .Where(x => x.HasPendingWrites == true)
-                                                        .ToList();
+                    Status.ProcessComplete();
 
+                    long requiredBytes = CsdGlobals._newFileEntries.Sum(x => x.Size);
+                    long freeSpace = CsdGlobals._destinationCsds.Sum(x => x.FreeSpace);
+
+                    long additionalCapacityNeeded = requiredBytes - freeSpace;
+
+                    Formatting.WriteC(ConsoleColor.Red, "ERROR: ");
+                    Console.WriteLine("There is not enough free space on the CSD drives.");
                     Console.WriteLine();
-                    Console.WriteLine();
-                    Console.WriteLine($"       New files found: {CsdGlobals._newFileCount.ToString("N0")}");
-                    Console.WriteLine($"   Deleted files found: {CsdGlobals._deletedFileCount.ToString("N0")}");
-                    Console.WriteLine($"CSD Drives to Write To: {csdsToWrite.Count.ToString("N0")}");
-                    Console.WriteLine();
-                    
-                    Console.Write("Do you want to run the archive process now? (yes/");
-                    Formatting.WriteC(ConsoleColor.Blue, "NO");
-                    Console.Write(") ");
-
-                    Console.CursorVisible = true;
-                    string response = Console.ReadLine();
-                    Console.CursorVisible = false;
-
-                    int endLine = Console.CursorTop;
-
-                    doProcess = response.ToLower().StartsWith("yes");
+                    Console.Write("Please register at least ");
+                    Formatting.WriteC(ConsoleColor.Yellow, Formatting.GetFriendlySize(additionalCapacityNeeded));
+                    Console.Write(" of additional CSD drives and then try again.");
                     Console.WriteLine();
                     Console.WriteLine();
                 }
+                else
+                {
+                    Processing.DistributeFiles();
 
-                if (doProcess)
-                    Processing.ProcessCsdDrives();
+                    bool doProcess = true;
+
+                    if (askBeforeArchive)
+                    {
+                        List<CsdDetail> csdsToWrite = CsdGlobals._destinationCsds
+                                                                .Where(x => x.HasPendingWrites == true)
+                                                                .ToList();
+
+                        Console.WriteLine();
+                        Console.WriteLine();
+                        Console.WriteLine($"       New files found: {CsdGlobals._newFileCount.ToString("N0")}");
+                        Console.WriteLine($"   Deleted files found: {CsdGlobals._deletedFileCount.ToString("N0")}");
+                        Console.WriteLine($"CSD Drives to Write To: {csdsToWrite.Count.ToString("N0")}");
+                        Console.WriteLine();
+                        
+                        Console.Write("Do you want to run the archive process now? (yes/");
+                        Formatting.WriteC(ConsoleColor.Blue, "NO");
+                        Console.Write(") ");
+
+                        Console.CursorVisible = true;
+                        string response = Console.ReadLine();
+                        Console.CursorVisible = false;
+
+                        int endLine = Console.CursorTop;
+
+                        doProcess = response.ToLower().StartsWith("yes");
+                        Console.WriteLine();
+                        Console.WriteLine();
+                    }
+
+                    if (doProcess)
+                        Processing.ProcessCsdDrives();
+                }
             }
             else
             {

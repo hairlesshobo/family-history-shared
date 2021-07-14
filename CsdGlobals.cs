@@ -16,6 +16,7 @@ namespace Archiver
 
         public static long _newFileCount = 0;
         public static long _deletedFileCount = 0;
+        public static long _modifiedFileCount = 0;
         public static long _renamedFileCount = 0;
         public static long _existingFileCount = 0;
         public static long _excludedFileCount = 0;

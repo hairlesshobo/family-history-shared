@@ -20,13 +20,21 @@ namespace Archiver.Utilities.CSD
 
             FileScanner scanner = new FileScanner();
 
-            scanner.OnProgressChanged += (newFiles, existingFiles, excludedFiles) => {
+            scanner.OnProgressChanged += (newFiles, existingFiles, excludedFiles, filesPerSecond) => {
                 // TODO: Add deleted count here
-                Status.FileScanned(newFiles, existingFiles, excludedFiles, 0);
+                Status.FileScanned(newFiles, existingFiles, excludedFiles, 0, 0, filesPerSecond);
             };
 
             scanner.OnComplete += () => {
-                Status.FileScanned(CsdGlobals._newFileCount, CsdGlobals._existingFileCount, CsdGlobals._excludedFileCount, CsdGlobals._deletedFileCount, true);
+                Status.FileScanned(
+                    CsdGlobals._newFileCount, 
+                    CsdGlobals._existingFileCount, 
+                    CsdGlobals._excludedFileCount, 
+                    CsdGlobals._deletedFileCount, 
+                    CsdGlobals._modifiedFileCount,
+                    0, 
+                    true
+                );
             };
 
             Thread scanThread = new Thread(scanner.ScanFiles);
@@ -267,11 +275,11 @@ namespace Archiver.Utilities.CSD
             Status.WriteJsonLine(csd, masterSw.Elapsed);
         }
 
-        private static string DetectDriveLetter(CsdDetail csd, Stopwatch masterSw)
+        private static string DetectDriveLetter(CsdDetail csd, Stopwatch masterSw, long totalFileCount, long totalBytes)
         {
             while (1 == 1)
             {
-                Status.WriteAttachCsdLine(csd, masterSw.Elapsed);
+                Status.WriteAttachCsdLine(csd, masterSw.Elapsed, totalFileCount, totalBytes);
 
                 string driveLetter = CsdUtils.SelectDrive(csd, true);
 
@@ -288,10 +296,13 @@ namespace Archiver.Utilities.CSD
 
             foreach (CsdDetail csd in CsdGlobals._destinationCsds.Where(x => x.HasPendingWrites == true).OrderBy(x => x.CsdNumber))
             {
+                long totalFiles = csd.PendingFileCount;
+                long totalBytes = csd.PendingBytes;
+
                 Stopwatch masterSw = new Stopwatch();
                 masterSw.Start();
 
-                string driveLetter = DetectDriveLetter(csd, masterSw);
+                string driveLetter = DetectDriveLetter(csd, masterSw, totalFiles, totalBytes);
 
                 if (driveLetter == null)
                 {
@@ -314,7 +325,7 @@ namespace Archiver.Utilities.CSD
                 });
 
                 masterSw.Stop();
-                Status.WriteCsdComplete(csd, masterSw.Elapsed);
+                Status.WriteCsdComplete(csd, masterSw.Elapsed, totalFiles, totalBytes);
             }
 
             Status.ProcessComplete();

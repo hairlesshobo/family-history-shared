@@ -7,10 +7,14 @@
 - CSD: Make it so that "clean" also removes files from index that do not exist on disk
 - CSD: fix distribute to show number of CSDs
 - CSD: Add handling for modified files (size or date change)
+
 - Tape: Restore entire tape
+- Tape: Add scan rate to file scanner
+
 - Disc: Restore entire disc
-- CustomFileCopier: Fix so that when working with tiny files, infinite doesn't show up
+- Disc: Add scan rate to file scanner
 
 
 ## future
 - Selectvely restore files
+- Search entire archive

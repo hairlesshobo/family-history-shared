@@ -53,21 +53,25 @@ namespace Archiver.Classes.CSD
             } 
         }
         public List<CsdSourceFile> Files { get; set; }
+        
         public CsdDriveInfo DriveInfo { get; set; }
         
         public long BytesCopied { get; set; }
+
         [JsonIgnore]
-        public List<CsdSourceFile> PendingWrites { get; set; }
+        public bool HasPendingWrites => this.PendingFileCount > 0;
+
         [JsonIgnore]
-        public bool HasPendingWrites { get; set; } = false;
+        public IEnumerable<CsdSourceFile> PendingFiles => this.Files.Where(x => x.Copied == false);
+
+        [JsonIgnore]
+        public long PendingBytes => this.PendingFiles.Sum(x => x.Size);
+
+        [JsonIgnore]
+        public long PendingFileCount => this.PendingFiles.Count();
         
-        public int FilesCopied 
-        { 
-            get
-            {
-                return this.Files.Where(x => x.Copied == true).Count();
-            }
-        }
+        public int FilesCopied => this.Files.Where(x => x.Copied == true).Count();
+
         [JsonIgnore]
         public int DaysSinceLastVerify {
             get
@@ -106,7 +110,6 @@ namespace Archiver.Classes.CSD
             this.WriteDtmUtc = new List<DateTime>();
             this.Files = new List<CsdSourceFile>();
 
-            this.PendingWrites = new List<CsdSourceFile>();
             this.Verifications = new List<CsdVerificationResult>();
         }
 
@@ -116,7 +119,6 @@ namespace Archiver.Classes.CSD
             this.WriteDtmUtc = new List<DateTime>();
             this.Files = new List<CsdSourceFile>();
 
-            this.PendingWrites = new List<CsdSourceFile>();
             this.Verifications = new List<CsdVerificationResult>();
             this.BlockSize = blockSize;
             this.TotalSpace = totalSpace;

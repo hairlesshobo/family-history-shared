@@ -32,20 +32,45 @@ namespace Archiver.Operations.CSD
             {
                 pager.Start();
                 
-                pager.AppendLine("Overall CSD Archive Statistics");
+                pager.AppendLine("                Overall CSD Archive Statistics");
                 pager.AppendLine("==============================================================");
 
+                long driveCount = existingCsdDrives.Count();
+                long totalFileCount = existingCsdDrives.Sum(x => x.TotalFiles);
                 long totalDriveCapacity = existingCsdDrives.Sum(x => x.TotalSpace);
                 long totalDataSize = existingCsdDrives.Sum(x => x.DataSize);
+                long totalDataSizeOnDisk = existingCsdDrives.Sum(x => x.DataSizeOnDisc);
+                long totalFreeSpace = totalDriveCapacity - totalDataSize - (driveCount * Config.CsdReservedCapacity);
+                double capacityUsed = Math.Round(((double)totalDataSize / (double)totalDriveCapacity)*100.0, 1);
 
                 if (existingCsdDrives.Count() > 0)
                 {
-                    pager.AppendLine($"         Total CSD Drives: {existingCsdDrives.Count()}");
-                    // pager.AppendLine($"              Total Files: {allFiles.Count().ToString("N0")}");
-                    pager.AppendLine($" Total CSD Drive Capacity: {totalDriveCapacity} Bytes ({Formatting.GetFriendlySize(totalDriveCapacity)})");
-                    pager.AppendLine($"          Total Data Size: {totalDataSize} Bytes ({Formatting.GetFriendlySize(totalDataSize)})");
+                    pager.AppendLine($"    Registered CSD Drives: {driveCount}");
+                    pager.AppendLine($"              Total Files: {totalFileCount.ToString("N0")}");
+                    pager.AppendLine($" Total CSD Drive Capacity: {Formatting.GetFriendlySize(totalDriveCapacity)} ({totalDriveCapacity.ToString("N0")} Bytes)");
+                    pager.AppendLine($"          Total Data Size: {Formatting.GetFriendlySize(totalDataSize)} ({totalDataSize.ToString("N0")} Bytes)");
+                    pager.AppendLine($"  Total Data Size on Disk: {Formatting.GetFriendlySize(totalDataSizeOnDisk)} ({totalDataSizeOnDisk.ToString("N0")} Bytes)");
+                    pager.AppendLine($"        Usable Free Space: {Formatting.GetFriendlySize(totalFreeSpace)} ({totalFreeSpace.ToString("N0")} Bytes)");
+                    pager.AppendLine($"            Used Capacity: {capacityUsed.ToString()}%");
                     pager.AppendLine();
                     pager.AppendLine();
+                    pager.AppendLine($"                      CSD Drive Overview");
+                    pager.AppendLine("==============================================================");
+                    pager.AppendLine("CSD".PadLeft(6) + "    " + "Free Space".PadLeft(11) + "    " + "Capacity".PadLeft(11) + "    " + "Used %".PadLeft(6) + "    " + "File Count".PadLeft(10));
+                    pager.AppendLine("--------------------------------------------------------------");
+
+
+                    foreach (CsdDetail csd in existingCsdDrives)
+                    {
+                        long usableFreeSpace = csd.FreeSpace - Config.CsdReservedCapacity;
+                        
+                        if (usableFreeSpace < 0 || usableFreeSpace == csd.BlockSize)
+                            usableFreeSpace = 0;
+
+                        double csdPctUsed = Math.Round(((double)csd.DataSizeOnDisc / (double)(csd.TotalSpace-Config.CsdReservedCapacity))*100.0, 1);
+
+                        pager.AppendLine(csd.CsdName + "    " + Formatting.GetFriendlySize(usableFreeSpace).PadLeft(11) + "    " + Formatting.GetFriendlySize(csd.TotalSpace).PadLeft(11) + "    " + $"{csdPctUsed}%".PadLeft(6) + "    " + csd.TotalFiles.ToString("N0").PadLeft(10));
+                    }
                 }
 
                 // foreach (CsdDetail csdDetail in existinCsdDrives)
