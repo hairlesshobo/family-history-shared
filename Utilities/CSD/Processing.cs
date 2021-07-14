@@ -48,12 +48,12 @@ namespace Archiver.Utilities.CSD
 
             FileSizer sizer = new FileSizer();
 
-            sizer.OnProgressChanged += (currentFile, totalSize) => {
-                Status.FileSized(currentFile, totalSize);
+            sizer.OnProgressChanged += (currentFile, totalSize, filesPerSecond) => {
+                Status.FileSized(currentFile, totalSize, filesPerSecond);
             };
 
             sizer.OnComplete += () => {
-                Status.FileSized(CsdGlobals._newFileCount, CsdGlobals._totalSizePending, true);
+                Status.FileSized(CsdGlobals._newFileCount, CsdGlobals._totalSizePending, 0, true);
             };
 
             Thread sizeThread = new Thread(sizer.SizeFiles);
@@ -79,13 +79,13 @@ namespace Archiver.Utilities.CSD
         {
             FileDistributor distributor = new FileDistributor();
 
-            distributor.OnProgressChanged += (currentFile, csdCount) => {
-                Status.FileDistributed(currentFile, csdCount);
+            distributor.OnProgressChanged += (currentFile, csdCount, filesPerSecond) => {
+                Status.FileDistributed(currentFile, csdCount, filesPerSecond);
             };
 
             distributor.OnComplete += () => {
                 int csdCount = CsdGlobals._destinationCsds.Where(x => x.HasPendingWrites == true).Count();
-                Status.FileDistributed(CsdGlobals._newFileCount, csdCount, true);
+                Status.FileDistributed(CsdGlobals._newFileCount, csdCount, 0, true);
             };
 
             Thread distributeThread = new Thread(distributor.DistributeFiles);

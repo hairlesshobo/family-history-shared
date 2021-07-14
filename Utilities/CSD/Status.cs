@@ -216,23 +216,23 @@ namespace Archiver.Utilities.CSD
             if (_fileCountLine == -1)
                 _fileCountLine = _nextLine++;
 
-            filesPerSecond = Math.Round(filesPerSecond, 1);
-
             string line = "";
-            line += $"New: {newFiles.ToString().PadLeft(7)}";
-            line += "   ";
-            line += $"Existing: {existingFiles.ToString().PadLeft(7)}";
-            line += "   ";
-            line += $"Excluded: {excludedFiles.ToString().PadLeft(7)}";
-            line += "   ";
-            line += $"Deleted: {deletedFiles.ToString().PadLeft(7)}";
-            line += "   ";
-            line += $"Modified: {modifiedFiles.ToString().PadLeft(7)}";
+            line += $"[New:{newFiles.ToString("N0").PadLeft(9)}]";
+            line += " ";
+            line += $"[Existing:{existingFiles.ToString("N0").PadLeft(9)}]";
+            line += " ";
+            line += $"[Excluded:{excludedFiles.ToString("N0").PadLeft(9)}]";
+            line += " ";
+            line += $"[Deleted:{deletedFiles.ToString("N0").PadLeft(9)}]";
+            line += " ";
+            line += $"[Modified:{modifiedFiles.ToString("N0").PadLeft(9)}]";
 
             if (!complete)
             {
-                line += "   ";
-                line += $"[Scan Rate:{filesPerSecond.ToString("N0").PadLeft(5)} files/s]";
+                filesPerSecond = Math.Round(filesPerSecond, 1);
+
+                line += " ";
+                line += $"[Rate: {filesPerSecond.ToString("N1").PadLeft(6)} files/s]";
             }
             else
                 line += "   **Complete**";
@@ -242,7 +242,7 @@ namespace Archiver.Utilities.CSD
         }
         
 
-        public static void FileSized(long fileCount, long totalSizes, bool complete = false)
+        public static void FileSized(long fileCount, long totalSizes, double filesPerSecond, bool complete = false)
         {
             if (_sizeLine == -1)
                 _sizeLine = _nextLine++;
@@ -250,6 +250,15 @@ namespace Archiver.Utilities.CSD
             string currentSizeFriendly = Formatting.GetFriendlySize(CsdGlobals._totalSizePending);
             
             string line = StatusHelpers.FileCountPosition(fileCount, CsdGlobals._newFileCount);
+            
+            if (!complete)
+            {
+                filesPerSecond = Math.Round(filesPerSecond, 1);
+
+                line += " ";
+                line += $"[Rate: {filesPerSecond.ToString("N1").PadLeft(6)} files/s]";
+            }
+
             line += $" [{currentSizeFriendly.PadLeft(12)}]";
             line += " ";
 
@@ -273,12 +282,21 @@ namespace Archiver.Utilities.CSD
         }
         
 
-        public static void FileDistributed(long fileCount, int csdCount, bool complete = false)
+        public static void FileDistributed(long fileCount, int csdCount, double filesPerSecond, bool complete = false)
         {
             if (_distributeLine == -1)
                 _distributeLine = _nextLine++;            
 
             string line = StatusHelpers.FileCountPosition(fileCount, CsdGlobals._newFileCount);
+            
+            if (!complete)
+            {
+                filesPerSecond = Math.Round(filesPerSecond, 1);
+
+                line += " ";
+                line += $"[Rate: {filesPerSecond.ToString("N1").PadLeft(6)} files/s]";
+            }
+
             line += $" [ {csdCount.ToString().PadLeft(4)} CSD(s)]";
             line += " ";
 

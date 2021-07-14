@@ -57,6 +57,9 @@ namespace Archiver.Classes.CSD
         public CsdDriveInfo DriveInfo { get; set; }
         
         public long BytesCopied { get; set; }
+        
+        [JsonIgnore]
+        public bool DiskFull => (this.FreeSpace - Config.CsdReservedCapacity) <= this.BlockSize;
 
         [JsonIgnore]
         public bool HasPendingWrites => this.PendingFileCount > 0;

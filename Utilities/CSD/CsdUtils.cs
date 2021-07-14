@@ -70,7 +70,9 @@ namespace Archiver.Utilities.CSD
 
         public static CsdDetail GetDestinationCsd(long FileSize)
         {
-            CsdDetail matchingCsd = CsdGlobals._destinationCsds.FirstOrDefault(x => (x.FreeSpace - Config.CsdReservedCapacity) > Helpers.RoundToNextMultiple(FileSize, x.BlockSize));
+            CsdDetail matchingCsd = CsdGlobals._destinationCsds
+                                              .FirstOrDefault(x => x.DiskFull == false
+                                                                && (x.FreeSpace - Config.CsdReservedCapacity) > Helpers.RoundToNextMultiple(FileSize, x.BlockSize));
 
             if (matchingCsd == null)
                 throw new InsufficientCsdCapacityException($"No CSD Drive with sufficient capacity to store a {FileSize} byte ({Formatting.GetFriendlySize(FileSize)}) file");
