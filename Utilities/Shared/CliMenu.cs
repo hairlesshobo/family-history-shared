@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Archiver.Utilities.Shared
@@ -19,6 +20,7 @@ namespace Archiver.Utilities.Shared
         public bool Disabled { get; set; } = false;
         public bool Header { get; set; } = false;
         public TKey SelectedValue { get; set; }
+        public ConsoleKey ShortcutKey { get; set; }
         public ConsoleColor ForegroundColor { get; set; } = Console.ForegroundColor;
         public ConsoleColor BackgroundColor { get; set; } = Console.BackgroundColor;
         public bool Selected { 
@@ -208,6 +210,41 @@ namespace Archiver.Utilities.Shared
                 else if (key.Key == ConsoleKey.UpArrow)
                     MoveCursor(selectedEntry, false);
 
+                // a single, lower case character was pressed (that wasn't Q.. because that is caught in the if above)
+                else if (key.KeyChar >= 97 && key.KeyChar <= 122)
+                {
+                    CliMenuEntry<TKey> entry = _entries.FirstOrDefault(x => x.ShortcutKey == key.Key);
+
+                    // we found a menu entry with that shortcut key
+                    if (entry != null)
+                    {
+                        int entryIndex = _entries.IndexOf(entry);
+
+                        // if it is a header entry, we need to move to the next non-header line
+                        if (entry.Header == true)
+                        {
+                            while (1 == 1)
+                            {
+                                entryIndex++;
+
+                                if (_entries.Count <= entryIndex)
+                                {
+                                    entryIndex = -1;
+                                    break;
+                                }
+
+                                if (_entries[entryIndex].Header == false)
+                                    break;
+                            }
+                        }
+
+                        if (entryIndex >= 0)
+                        {
+                            MoveCursor(selectedEntry, _entries[entryIndex]);
+                        }
+                    }
+                }
+
                 if (_multiSelect == false && (key.Key == ConsoleKey.UpArrow || key.Key == ConsoleKey.DownArrow))
                 {
                     WriteMenuEntry(previousEntry);
@@ -278,6 +315,15 @@ namespace Archiver.Utilities.Shared
                 if (_entries[_cursorIndex].Disabled || _entries[_cursorIndex].Header)
                     MoveCursor(_entries[_cursorIndex], down);
             }
+        }
+
+        private void MoveCursor(CliMenuEntry<TKey> currentEntry, CliMenuEntry<TKey> newEntry)
+        {
+            int newIndex = _entries.IndexOf(newEntry);
+            currentEntry.Selected = false;
+            newEntry.Selected = true;
+
+            _cursorIndex = newIndex;
         }
 
         private void WriteMenuEntry(CliMenuEntry<TKey> Entry)
