@@ -5,7 +5,7 @@ using Archiver.Classes.Disc;
 using Archiver.Classes.Tape;
 using Archiver.Utilities.Shared;
 
-namespace Archiver.Operations.Disc
+namespace Archiver.Operations.Tape
 {
     public static class TapeArchiveSummary
     {

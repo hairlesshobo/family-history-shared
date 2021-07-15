@@ -12,7 +12,6 @@ namespace Archiver.Operations.Disc
             {
                 Formatting.WriteC(ConsoleColor.Red, "ERROR: ");
                 Console.WriteLine("No tape is present in the drive, please insert tape and run this operation again.");
-                Console.ReadLine();
             }
             else
             {

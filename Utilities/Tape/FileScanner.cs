@@ -17,7 +17,7 @@ namespace Archiver.Utilities.Tape
         public event Scanner_CompleteDelegate OnComplete;
         public event Scanner_ProgressChangedDelegate OnProgressChanged;
 
-        private const int _sampleDurationMs = 100;
+        private const int _sampleDurationMs = 250;
         private Stopwatch _sw;
         private long _lastSample;
         private TapeDetail _tapeDetail;

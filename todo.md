@@ -15,6 +15,8 @@
 - Disc: Add scan rate to `file scanner`
 - Disc: Add scan rate to `Sizer` and `Distributor`
 - Disc: Add scan rate to `Distributor`
+- Disc: Port file scanner performance improvements
+- Disc: Port sizer and distributor performance improvements
 
 
 ## future

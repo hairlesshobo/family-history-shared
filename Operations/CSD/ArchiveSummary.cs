@@ -46,12 +46,14 @@ namespace Archiver.Operations.CSD
                 if (existingCsdDrives.Count() > 0)
                 {
                     pager.AppendLine($"    Registered CSD Drives: {driveCount}");
-                    pager.AppendLine($"              Total Files: {totalFileCount.ToString("N0")}");
+                    pager.AppendLine();
                     pager.AppendLine($" Total CSD Drive Capacity: {Formatting.GetFriendlySize(totalDriveCapacity)} ({totalDriveCapacity.ToString("N0")} Bytes)");
-                    pager.AppendLine($"          Total Data Size: {Formatting.GetFriendlySize(totalDataSize)} ({totalDataSize.ToString("N0")} Bytes)");
-                    pager.AppendLine($"  Total Data Size on Disk: {Formatting.GetFriendlySize(totalDataSizeOnDisk)} ({totalDataSizeOnDisk.ToString("N0")} Bytes)");
                     pager.AppendLine($"        Usable Free Space: {Formatting.GetFriendlySize(totalFreeSpace)} ({totalFreeSpace.ToString("N0")} Bytes)");
                     pager.AppendLine($"            Used Capacity: {capacityUsed.ToString()}%");
+                    pager.AppendLine();
+                    pager.AppendLine($"              Total Files: {totalFileCount.ToString("N0")}");
+                    pager.AppendLine($"          Total Data Size: {Formatting.GetFriendlySize(totalDataSize)} ({totalDataSize.ToString("N0")} Bytes)");
+                    pager.AppendLine($"  Total Data Size on Disk: {Formatting.GetFriendlySize(totalDataSizeOnDisk)} ({totalDataSizeOnDisk.ToString("N0")} Bytes)");
                     pager.AppendLine();
                     pager.AppendLine();
                     pager.AppendLine($"                      CSD Drive Overview");
@@ -69,7 +71,7 @@ namespace Archiver.Operations.CSD
 
                         double csdPctUsed = Math.Round(((double)csd.DataSizeOnDisc / (double)(csd.TotalSpace-Config.CsdReservedCapacity))*100.0, 1);
 
-                        pager.AppendLine(csd.CsdName + "    " + Formatting.GetFriendlySize(usableFreeSpace).PadLeft(11) + "    " + Formatting.GetFriendlySize(csd.TotalSpace).PadLeft(11) + "    " + $"{csdPctUsed}%".PadLeft(6) + "    " + csd.TotalFiles.ToString("N0").PadLeft(10));
+                        pager.AppendLine(csd.CsdName + "    " + Formatting.GetFriendlySize(usableFreeSpace).PadLeft(11) + "    " + Formatting.GetFriendlySize(csd.TotalSpace).PadLeft(11) + "    " + $"{csdPctUsed.ToString("N1")}%".PadLeft(6) + "    " + csd.TotalFiles.ToString("N0").PadLeft(10));
                     }
                 }
 

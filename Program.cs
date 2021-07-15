@@ -13,6 +13,7 @@ using ICSharpCode.SharpZipLib.Tar;
 using Archiver.Utilities.Shared;
 using Archiver.Classes.Tape;
 using Archiver.Operations.Disc;
+using Terminal.Gui;
 
 namespace Archiver
 {
@@ -38,6 +39,8 @@ namespace Archiver
             }
             catch (Exception e)
             {
+                Application.Shutdown();
+                Console.Clear();
                 Console.CursorLeft = 0;
                 Console.CursorTop = Console.CursorTop + 5;
                 Formatting.WriteLineC(ConsoleColor.Red, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");

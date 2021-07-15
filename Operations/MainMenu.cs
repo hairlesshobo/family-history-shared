@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Archiver.Classes.Disc;
 using Archiver.Classes.Tape;
@@ -8,6 +9,8 @@ using Archiver.Operations.Disc;
 using Archiver.Utilities;
 using Archiver.Utilities.Shared;
 using Archiver.Utilities.Tape;
+using Archiver.Views;
+using Terminal.Gui;
 
 namespace Archiver.Operations
 {
@@ -18,12 +21,23 @@ namespace Archiver.Operations
 
         public static void StartOperation()
         {
-            // CSD.RegisterDrive.StartOperation();
+            ShowMenuOld();
+        }
 
-            // Console.ReadLine();
+        private static void ShowMenuNew()
+        {
+            ViewMainMenu vmm = new ViewMainMenu();
 
-            // return;
+            bool quit = false;
+            do
+            {
+                quit = vmm.Show();
+            } 
+            while (!quit);
+        }
 
+        private static void ShowMenuOld()
+        {
             Initialize();
 
             while (1 == 1)
@@ -72,7 +86,8 @@ namespace Archiver.Operations
                 {
                     new CliMenuEntry<bool>() {
                         Name = "Disc Operations" + discMenuAppend,
-                        Header = true
+                        Header = true,
+                        ShortcutKey = ConsoleKey.D
                     },
                     new CliMenuEntry<bool>() {
                         Name = "Search Disc Archive",
@@ -122,17 +137,25 @@ namespace Archiver.Operations
                     },
                     new CliMenuEntry<bool>() {
                         Name = "Tape Operations" + tapeMenuAppend,
-                        Header = true
+                        Header = true,
+                        ShortcutKey = ConsoleKey.T
                     },
                     new CliMenuEntry<bool>() {
                         Name = "Search Tape Archive",
-                        Action = TapeSearcher.StartOperation,
+                        Action = Tape.TapeSearcher.StartOperation,
                         ForegroundColor = ConsoleColor.Green,
                         SelectedValue = true, // do not show the "press enter to return to main menu" message
                     },
                     //! not implemented
                     new CliMenuEntry<bool>() {
-                        Name = "Restore entire tape",
+                        Name = "Restore entire tape (to tar file)",
+                        Action = Tape.RestoreTapeToTar.StartOperation,
+                        Disabled = !Config.TapeDrivePresent || true, // remove once implemented
+                        ForegroundColor = ConsoleColor.Green
+                    },
+                    //! not implemented
+                    new CliMenuEntry<bool>() {
+                        Name = "Restore entire tape (to original file structure)",
                         Action = NotImplemented,
                         Disabled = !Config.TapeDrivePresent || true, // remove once implemented
                         ForegroundColor = ConsoleColor.Green
@@ -141,24 +164,24 @@ namespace Archiver.Operations
                         Name = "Read Tape Summary",
                         Action = ShowTapeSummary.StartOperation,
                         Disabled = !Config.TapeDrivePresent,
-                        SelectedValue = true, // do not show the "press enter to return to main menu" message
+                        // SelectedValue = true, // do not show the "press enter to return to main menu" message
                         ForegroundColor = ConsoleColor.Blue
                     },
                     new CliMenuEntry<bool>() {
                         Name = "View Archive Summary",
-                        Action = TapeArchiveSummary.StartOperation,
+                        Action = Tape.TapeArchiveSummary.StartOperation,
                         SelectedValue = true, // do not show the "press enter to return to main menu" message
                         ForegroundColor = ConsoleColor.Blue
                     },
                     new CliMenuEntry<bool>() {
                         Name = "Verify Tape",
-                        Action = TapeVerification.StartOperation,
+                        Action = Tape.TapeVerification.StartOperation,
                         Disabled = Config.ReadOnlyFilesystem || !Config.TapeDrivePresent,
                         ForegroundColor = ConsoleColor.DarkYellow
                     },
                     new CliMenuEntry<bool>() {
                         Name = "Run tape archive",
-                        Action = TapeArchiver.StartOperation,
+                        Action = Tape.TapeArchiver.StartOperation,
                         Disabled = Config.ReadOnlyFilesystem || !Config.TapeDrivePresent,
                         ForegroundColor = ConsoleColor.Red
                     },
@@ -168,7 +191,8 @@ namespace Archiver.Operations
                     },
                     new CliMenuEntry<bool>() {
                         Name = "Cold Storage Disk (HDD) Operations",
-                        Header = true
+                        Header = true,
+                        ShortcutKey = ConsoleKey.C
                     },
                     new CliMenuEntry<bool>() {
                         Name = "Register CSD Drive",
