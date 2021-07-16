@@ -2,7 +2,7 @@ using System;
 using Archiver.Utilities.Shared;
 using Archiver.Utilities.Tape;
 
-namespace Archiver.Operations.Disc
+namespace Archiver.Operations.Tape
 {
     public static class ShowTapeSummary
     {

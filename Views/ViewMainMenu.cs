@@ -1,235 +1,131 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
-using System.Threading;
-using Archiver.Operations.Disc;
-using Archiver.Operations.Tape;
+using Archiver.Classes.Views;
+using Archiver.Utilities.Shared;
 using Terminal.Gui;
 
 namespace Archiver.Views
 {
-    public class MainMenuItem
-    {
-        public string Category { get; set; }
-        public string Label { get; set; } = String.Empty;
-        public string Description { get; set; }
-        public Action Action { get; set; }
-        public Color ForegroundColor { get; set; }
-        public bool DropFromGui { get; set; } = false;
-        public bool Header { get; set; } = false;
-
-        public override string ToString() => Label;
-    }
-
     public class ViewMainMenu
     {
-        MainMenuListSource _menuSource;
-        // MainMenuListSource _tapeMenuSource;
-        MainMenuItem _actionMenuItem = null;
+        private List<int> _menuEntryIndex = new List<int>();
+        HyperlinkInfo _actionLink = null;
         volatile bool _quit = false;
 
-        public ViewMainMenu()
+        private void MenuItemSelected(HyperlinkInfo link)
         {
-            _menuSource = new MainMenuListSource(new List<MainMenuItem>()
+            if (link.DropFromGui)
             {
-                new MainMenuItem() {
-                    Label = "----- Disc Operations -----",
-                    Header = true
-                },
-                new MainMenuItem() { 
-                    Label = "Search Disc Archive", 
-                    ForegroundColor = Color.Green,
-                    Action = DiscSearcher.StartOperation,
-                    DropFromGui = true
-                },
-                
-                new MainMenuItem() { 
-                    Label = "Restore entire disc(s)", 
-                    ForegroundColor = Color.Green,
-                    Action = NotImplemented
-                },
-                
-                new MainMenuItem() { 
-                    Label = "View Archive Summary", 
-                    ForegroundColor = Color.Blue,
-                    Action = DiscSummary.StartOperation,
-                    DropFromGui = true
-                },
-                
-                new MainMenuItem() { 
-                    Label = "Verify Discs", 
-                    ForegroundColor = Color.BrightYellow,
-                    Action = DiscVerification.StartOperation,
-                    DropFromGui = true
-                },
-                
-                new MainMenuItem() { 
-                    Label = "Scan For Changes", 
-                    ForegroundColor = Color.BrightYellow,
-                    Action = DiscArchiver.StartScanOnly,
-                    DropFromGui = true
-                },
-                
-                new MainMenuItem() { 
-                    Label = "Scan For Renamed/Moved Files", 
-                    ForegroundColor = Color.BrightYellow,
-                    Action = ScanForFileRenames.StartOperation,
-                    DropFromGui = true
-                },
-                
-                new MainMenuItem() { 
-                    Label = "Run Archive process", 
-                    ForegroundColor = Color.Red,
-                    Action = DiscArchiver.StartOperation,
-                    DropFromGui = true
-                },
-
-
-                new MainMenuItem() {
-                    Header = true
-                },
-                new MainMenuItem() {
-                    Label = "----- Tape Operations -----",
-                    Header = true
-                },
-                new MainMenuItem() {
-                    Label = "Search Tape Archive",
-                    Action = TapeSearcher.StartOperation,
-                    ForegroundColor = Color.Green,
-                    // SelectedValue = true, // do not show the "press enter to return to main menu" message
-                },
-                //! not implemented
-                new MainMenuItem() {
-                    Label = "Restore entire tape (to tar file)",
-                    Action = RestoreTapeToTar.StartOperation,
-                    // Disabled = !Config.TapeDrivePresent || true, // remove once implemented
-                    ForegroundColor = Color.Green
-                },
-                //! not implemented
-                new MainMenuItem() {
-                    Label = "Restore entire tape (to original file structure)",
-                    Action = NotImplemented,
-                    // Disabled = !Config.TapeDrivePresent || true, // remove once implemented
-                    ForegroundColor = Color.Green
-                },
-                new MainMenuItem() {
-                    Label = "Read Tape Summary",
-                    Action = ShowTapeSummary.StartOperation,
-                    // Disabled = !Config.TapeDrivePresent,
-                    // SelectedValue = true, // do not show the "press enter to return to main menu" message
-                    ForegroundColor = Color.Blue
-                },
-                new MainMenuItem() {
-                    Label = "View Archive Summary",
-                    Action = TapeArchiveSummary.StartOperation,
-                    // SelectedValue = true, // do not show the "press enter to return to main menu" message
-                    ForegroundColor = Color.Blue
-                },
-                new MainMenuItem() {
-                    Label = "Verify Tape",
-                    Action = TapeVerification.StartOperation,
-                    // Disabled = Config.ReadOnlyFilesystem || !Config.TapeDrivePresent,
-                    ForegroundColor = Color.BrightYellow
-                },
-                new MainMenuItem() {
-                    Label = "Run tape archive",
-                    Action = TapeArchiver.StartOperation,
-                    // Disabled = Config.ReadOnlyFilesystem || !Config.TapeDrivePresent,
-                    ForegroundColor = Color.Red
-                }
-            });
-
-        }
-
-        private void MenuItemSelected(ListViewItemEventArgs item)
-        {
-            MainMenuItem menuItem = (MainMenuItem)item.Value;
-
-            if (menuItem.DropFromGui)
-            {
-                _actionMenuItem = menuItem;
+                _actionLink = link;
                 Application.Current.Running = false;
             }
-            else
-                menuItem.Action();
+            else if (link.Action != null)
+                link.Action();
         }
 
         public bool Show()
         {
             // reset the state handling
+            _menuEntryIndex.Clear();
             _quit = false;
-            _actionMenuItem = null;
+            _actionLink = null;
 
-            
+
             Application.Init();
-            Toplevel top = Application.Top;
+            GuiGlobals.Colors.InitColorSchemes();
 
+            Toplevel top = Application.Top;
+            Window mainWindow = BuildMainWindow(top);
+
+            BuildDiscMenu(mainWindow);
+            BuildTapeMenu(mainWindow);
+            BuildCsdMenu(mainWindow);
+            BuildUniversalMenu(mainWindow);
+            
+            BuildStatusBar(top);
+
+            Application.Run();
+
+            HandlePostRunAction();
+
+            return _quit;
+        }
+
+        private void AddLabel(Window win, string text, int marginAbove = 0)
+        {
+            int newY = GetNextLocation(marginAbove);
+            _menuEntryIndex.Add(newY);
+
+            Label newLabel = new Label($"----- {text} -----") 
+            {
+                X = 0,
+                Y = newY
+            };
+            win.Add(newLabel);
+        }
+
+        private void AddHyperlink(Window win, HyperlinkInfo info, int marginAbove = 0)
+        {
+            int newY = GetNextLocation(marginAbove);
+            _menuEntryIndex.Add(newY);
+
+            Hyperlink newHyperlink = new Hyperlink(info)
+            {
+                X = 4,
+                Y = newY,
+                ActionHandler = MenuItemSelected
+            };
+            win.Add(newHyperlink);
+        }
+
+        private int GetNextLocation(int marginAbove = 0)
+        {
+            int count = _menuEntryIndex.Count;
+
+            if (count == 0)
+                return 1 + marginAbove;
+            else
+                return _menuEntryIndex[count-1] + 1 + marginAbove;
+        }
+
+        private void HandlePostRunAction()
+        {
+            if (_actionLink != null)
+            {
+                if (_actionLink.DropFromGui)
+                {
+                    Application.Shutdown();
+                    Console.Clear();
+                }
+
+                if (_actionLink.Action != null)
+                    _actionLink.Action();
+            }
+        }
+
+        private Window BuildMainWindow(Toplevel top)
+        {
             Window mainWindow = new Window("Archiver - Main Menu")
             {
                 X = 0,
                 Y = 0,
                 Width = Dim.Fill(),
                 Height = Dim.Fill(1),
-                CanFocus = false
-            };					
-
-
-            // Label label_discMenu = new Label("----- Disc Operations -----") {
-            //     X = 0,
-            //     Y = 1
-            // };
-            // mainWindow.Add(label_discMenu);
-
-            // Label button_test = new Label("_Not Implemented")
-            // {
-            //     X = 4,
-            //     Y = Pos.Bottom(label_discMenu),
-            //     CanFocus = true
-            // };
-            // button_test.Clicked += NotImplemented;
-
-            // mainWindow.Add(button_test);
-
-
-            ListView lv_discMenu = new ListView(_menuSource)
-            {
-                X = 4,
-				Y = 1,
-				Width = Dim.Fill(0),
-				Height = _menuSource.Count,
-				AllowsMarking = false,
-				CanFocus = true,
+                CanFocus = false,
+                ColorScheme = GuiGlobals.Colors.GlobalScheme
             };
-            lv_discMenu.OpenSelectedItem += MenuItemSelected;
-            mainWindow.Add(lv_discMenu);
 
+            top.Add(mainWindow);
 
-            // Label label_tapeMenu = new Label("----- Tape Operations -----") {
-            //     X = 0,
-            //     Y = Pos.Bottom(lv_discMenu) + 1
-            // };
-            // mainWindow.Add(label_tapeMenu);
+            return mainWindow;
+        }
 
-
-            // ListView lv_tapeMenu = new ListView(_tapeMenuSource)
-            // {
-            //     X = 4,
-			// 	Y = Pos.Bottom(label_tapeMenu),
-			// 	Width = Dim.Fill(0),
-			// 	Height = _tapeMenuSource.Count,
-			// 	AllowsMarking = false,
-			// 	CanFocus = true
-            // };
-            // lv_tapeMenu.OpenSelectedItem += MenuItemSelected;
-            // mainWindow.Add(lv_tapeMenu);
-
-
+        private void BuildStatusBar(Toplevel top)
+        {
             StatusBar statusBar = new StatusBar() 
             {
 				Visible = true,
-                ColorScheme = new ColorScheme() { Normal = Application.Driver.MakeAttribute(Color.Gray, Color.Blue)}
+                ColorScheme = GuiGlobals.Colors.StatusBar
 			};
 
 			statusBar.Items = new StatusItem[] 
@@ -261,104 +157,248 @@ namespace Archiver.Views
 				new StatusItem (Key.CharMask, Application.Driver.GetType().Name, null),
 			};
 
+            top.Add(statusBar);
+        }
+
+        private void BuildDiscMenu(Window mainWindow)
+        {
+            AddLabel(mainWindow, "Disc Operations");
+
+            AddHyperlink(mainWindow, new HyperlinkInfo() 
+            {
+                Text = "Search Disc Archive", 
+                Color = GuiGlobals.Colors.Green,
+                Action = Operations.Disc.DiscSearcher.StartOperation,
+                DropFromGui = true
+            });
             
 
-            Colors.Base.Normal = Application.Driver.MakeAttribute(Color.Gray, Color.Black);
-
-            top.Add(mainWindow);
-            top.Add(statusBar);
-
-            Application.Run();
-
-            if (_actionMenuItem != null)
+            //! not implemented
+            AddHyperlink(mainWindow, new HyperlinkInfo() 
             {
-                if (_actionMenuItem.DropFromGui)
+                Text = "Restore entire disc(s)", 
+                Color = GuiGlobals.Colors.Green,
+                Action = NotImplemented,
+                Disabled = true
+            });
+
+            AddHyperlink(mainWindow, new HyperlinkInfo() 
+            {
+                Text = "View Archive Summary", 
+                Color = GuiGlobals.Colors.Blue,
+                Action = Operations.Disc.DiscSummary.StartOperation,
+                DropFromGui = true
+            });
+            
+            AddHyperlink(mainWindow, new HyperlinkInfo() 
+            {
+                Text = "Verify Discs", 
+                Color = GuiGlobals.Colors.Yellow,
+                Action = Operations.Disc.DiscVerification.StartOperation,
+                DropFromGui = true
+            });
+            
+            AddHyperlink(mainWindow, new HyperlinkInfo() 
+            {
+                Text = "Scan For Changes", 
+                Color = GuiGlobals.Colors.Yellow,
+                Action = Operations.Disc.DiscArchiver.StartScanOnly,
+                DropFromGui = true
+            });
+            
+            AddHyperlink(mainWindow, new HyperlinkInfo() 
+            {
+                Text = "Scan For Renamed/Moved Files", 
+                Color = GuiGlobals.Colors.Yellow,
+                Action = Operations.Disc.ScanForFileRenames.StartOperation,
+                DropFromGui = true
+            });
+            
+            AddHyperlink(mainWindow, new HyperlinkInfo() 
+            {
+                Text = "Run Archive process", 
+                Color = GuiGlobals.Colors.Red,
+                Action = Operations.Disc.DiscArchiver.StartOperation,
+                DropFromGui = true
+            });
+        }
+
+        private void BuildTapeMenu(Window mainWindow)
+        {
+            AddLabel(mainWindow, "Tape Operations", 1);
+
+            AddHyperlink(mainWindow, new HyperlinkInfo() 
+            {
+                Text = "Search Tape Archive",
+                Action = Operations.Tape.TapeSearcher.StartOperation,
+                Color = GuiGlobals.Colors.Green,
+                DropFromGui = true
+            });
+
+            AddHyperlink(mainWindow, new HyperlinkInfo() 
+            {
+                Text = "Search Tape Archive",
+                Action = Operations.Tape.TapeSearcher.StartOperation,
+                Color = GuiGlobals.Colors.Green,
+                DropFromGui = true
+            });
+
+            //! not implemented
+            AddHyperlink(mainWindow, new HyperlinkInfo() 
+            {
+                Text = "Restore entire tape (to tar file)",
+                Action = Operations.Tape.RestoreTapeToTar.StartOperation,
+                // Disabled = !Config.TapeDrivePresent || true, // remove once implemented
+                Color = GuiGlobals.Colors.Green,
+                DropFromGui = true
+            });
+
+            //! not implemented
+            AddHyperlink(mainWindow, new HyperlinkInfo() 
+            {
+                Text = "Restore entire tape (to original file structure)",
+                Action = NotImplemented,
+                // Disabled = !Config.TapeDrivePresent || true, // remove once implemented
+                Color = GuiGlobals.Colors.Green,
+                DropFromGui = true
+            });
+
+            AddHyperlink(mainWindow, new HyperlinkInfo() 
+            {
+                Text = "Read Tape Summary",
+                Action = Operations.Tape.ShowTapeSummary.StartOperation,
+                // Disabled = !Config.TapeDrivePresent,
+                Color = GuiGlobals.Colors.Blue,
+                DropFromGui = true
+            });
+
+            AddHyperlink(mainWindow, new HyperlinkInfo() 
+            {
+                Text = "View Archive Summary",
+                Action = Operations.Tape.TapeArchiveSummary.StartOperation,
+                // SelectedValue = true, // do not show the "press enter to return to main menu" message
+                Color = GuiGlobals.Colors.Blue,
+                DropFromGui = true
+            });
+
+            AddHyperlink(mainWindow, new HyperlinkInfo() 
+            {
+                Text = "Verify Tape",
+                Action = Operations.Tape.TapeVerification.StartOperation,
+                // Disabled = Config.ReadOnlyFilesystem || !Config.TapeDrivePresent,
+                Color = GuiGlobals.Colors.Yellow,
+                DropFromGui = true
+            });
+
+            AddHyperlink(mainWindow, new HyperlinkInfo() 
+            {
+                Text = "Run tape archive",
+                Action = Operations.Tape.TapeArchiver.StartOperation,
+                // Disabled = Config.ReadOnlyFilesystem || !Config.TapeDrivePresent,
+                Color = GuiGlobals.Colors.Red,
+                DropFromGui = true
+            });
+
+        }
+
+        private void BuildCsdMenu(Window mainWindow)
+        {
+            AddLabel(mainWindow, "Cold Storage Disk (HDD) Operations", 1);
+
+
+            AddHyperlink(mainWindow, new HyperlinkInfo() {
+                Text = "Register CSD Drive",
+                Action = Operations.CSD.RegisterDrive.StartOperation,
+                Color = GuiGlobals.Colors.Green,
+                DropFromGui = true
+            });
+
+            //! not implemented
+            AddHyperlink(mainWindow, new HyperlinkInfo() {
+                Text = "Restore entire CSD Drive",
+                Action = NotImplemented,
+                //Disabled = true, // remove once implemented
+                Color = GuiGlobals.Colors.Green,
+                DropFromGui = true
+            });
+
+            //! not implemented
+            AddHyperlink(mainWindow, new HyperlinkInfo() {
+                Text = "Read CSD Drive Summary",
+                Action = NotImplemented,         
+                // Action = ShowTapeSummary.StartOperation,
+                //Disabled = true, // remove once implemented
+                // SelectedValue = true, // do not show the "press enter to return to main menu" message
+                Color = GuiGlobals.Colors.Blue,
+                DropFromGui = true
+            });
+
+            AddHyperlink(mainWindow, new HyperlinkInfo() {
+                Text = "View CSD Archive Summary",
+                Action = Operations.CSD.ArchiveSummary.StartOperation,
+                // SelectedValue = true, // do not show the "press enter to return to main menu" message
+                Color = GuiGlobals.Colors.Blue,
+                DropFromGui = true
+            });
+
+            //! not implemented
+            AddHyperlink(mainWindow, new HyperlinkInfo() {
+                Text = "Verify CSD Drive",
+                Action = NotImplemented,
+                // Action = TapeVerification.StartOperation,
+                //Disabled = Config.ReadOnlyFilesystem || true, // remove once implemented
+                Color = GuiGlobals.Colors.Yellow,
+                DropFromGui = true
+            });
+
+            AddHyperlink(mainWindow, new HyperlinkInfo() {
+                Text = "Clean CSD Drive - Remove files not in index",
+                Action = Operations.CSD.Cleaner.StartOperation,
+                // Action = TapeVerification.StartOperation,
+                //Disabled = Config.ReadOnlyFilesystem, // remove once implemented
+                Color = GuiGlobals.Colors.Yellow,
+                DropFromGui = true
+            });
+
+            AddHyperlink(mainWindow, new HyperlinkInfo() {
+                Text = "Run CSD Archive Process",
+                Action = Operations.CSD.Archiver.StartOperation,
+                //Disabled = Config.ReadOnlyFilesystem,
+                Color = GuiGlobals.Colors.Red,
+                DropFromGui = true
+            });
+
+        }
+
+        private void BuildUniversalMenu(Window mainWindow)
+        {
+            AddLabel(mainWindow, "Universal Operations", 1);
+
+            AddHyperlink(mainWindow, new HyperlinkInfo() {
+                Text = "Copy Tools to Local Disk",
+                Action = NotImplemented,
+                //Disabled = !Config.ReadOnlyFilesystem,
+                DropFromGui = true
+            });
+
+            AddHyperlink(mainWindow, new HyperlinkInfo() {
+                Text = "Create Index ISO",
+                Action = Helpers.CreateIndexIso,
+                //Disabled = Config.ReadOnlyFilesystem,
+                DropFromGui = true
+            });
+
+            AddHyperlink(mainWindow, new HyperlinkInfo() {
+                Text = "Exit",
+                Action = () => 
                 {
-                    Application.Shutdown();
-                    Console.Clear();
+                    _quit = true;
+                    Application.RequestStop();
                 }
-
-                if (_actionMenuItem.Action != null)
-                    _actionMenuItem.Action();
-            }
-
-            return _quit;
+            });
         }
 
         public static void NotImplemented()
             => MessageBox.ErrorQuery(40, 10, "Error", "This operation has not yet been implemented.", "Ok");
-
-        public class MainMenuListSource : IListDataSource
-        {
-            int _prevSelected = -1;
-
-            List<MainMenuItem> _items;
-
-            public int Count => _items.Count;
-
-            public int Length => 20;
-
-            public MainMenuListSource(List<MainMenuItem> menuItems) 
-            {
-                _items = menuItems;
-            }
-
-            public bool IsMarked(int item) => false;
-
-            public void Render(ListView container, ConsoleDriver driver, bool selected, int item, int col, int line, int width, int start = 0)
-            {
-                MainMenuItem menuItem = _items[item];
-
-                if (menuItem.Header)
-                    menuItem.ForegroundColor = Color.Cyan;
-                else
-                {
-                    driver.SetAttribute(Application.Driver.MakeAttribute(Color.Black, Color.Black));
-                    driver.AddStr("    ");
-                }
-
-                Color backgroundColor = selected && !menuItem.Header ? Color.DarkGray : Color.Black;
-
-                driver.SetAttribute(Application.Driver.MakeAttribute(menuItem.ForegroundColor, backgroundColor));
-                StringBuilder builder = new StringBuilder();
-
-                if (menuItem.Header)
-                    driver.AddStr(menuItem.Label);
-                else
-                {
-                    builder.Append(selected ? ">" : " ");
-                    builder.Append(" ");
-                    builder.Append(menuItem.Label);
-                    
-                    driver.AddStr(builder.ToString());
-                }
-                
-                if (selected)
-                {
-                    bool isMovingDown = item > _prevSelected;
-                    _prevSelected = item;
-
-                    if (menuItem.Header == true)
-                    {
-                        selected = false;
-
-                        // TODO: Add safety check here to make sure there is a down
-                        if (isMovingDown)
-                            container.MoveDown();
-                        else
-                        {
-                            if (item == 0 && menuItem.Header)
-                                container.MoveDown();
-                            else
-                                container.MoveUp();
-                        }
-                    }
-                }
-            }
-
-            public void SetMark(int item, bool value) { }
-
-            public IList ToList() => _items;
-        }
     }
 }
