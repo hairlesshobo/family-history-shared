@@ -5,10 +5,13 @@
    "version": "0.2.0",
    "configurations": [
         {
-            "name": "Launch",
+            "name": "Launch Archiver",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
+            "preLaunchTask": "build-archiver",
+            "logging": {
+                "moduleLoad": false
+            },
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/../bin/archiver.dll",
             "args": [],
@@ -18,10 +21,20 @@
             "stopAtEntry": false
         },
         {
-            "name": ".NET Core Attach",
+            "name": "Launch TapeServer",
             "type": "coreclr",
-            "request": "attach",
-            "processId": "${command:pickProcess}"
+            "request": "launch",
+            "preLaunchTask": "build-tapeserver",
+            "logging": {
+                "moduleLoad": false
+            },
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/../bin/TapeServer.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
+            "console": "internalConsole",
+            "stopAtEntry": false
         }
     ]
 }
