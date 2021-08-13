@@ -60,6 +60,36 @@ namespace Archiver.Operations.Tape
                     pager.AppendLine("     Archive Size: " + Formatting.GetFriendlySize(tapeDetail.TotalArchiveBytes));
                     pager.AppendLine("     Size on Tape: " + Formatting.GetFriendlySize(tapeDetail.ArchiveBytesOnTape));
                     pager.AppendLine("Compression Ratio: " + tapeDetail.CompressionRatio.ToString("0.00") + ":1");
+
+                    if (tapeDetail.SourceInfo.SourcePaths.Length > 0)
+                    {
+                        pager.AppendLine();
+                        pager.AppendLine("     Source Paths: " + tapeDetail.SourceInfo.SourcePaths[0]);
+
+                        for (int i = 1; i < tapeDetail.SourceInfo.SourcePaths.Length; i++)
+                            pager.AppendLine("                   " + tapeDetail.SourceInfo.SourcePaths[i]);
+                    }
+
+                    if (tapeDetail.SourceInfo.ExcludePaths.Length > 0)
+                    {
+                        pager.AppendLine();
+                        pager.AppendLine("   Excluded Paths: " + tapeDetail.SourceInfo.ExcludePaths[0]);
+
+                        for (int i = 1; i < tapeDetail.SourceInfo.ExcludePaths.Length; i++)
+                            pager.AppendLine("                   " + tapeDetail.SourceInfo.ExcludePaths[i]);
+                    }
+
+                    if (tapeDetail.SourceInfo.ExcludeFiles.Length > 0)
+                    {
+                        pager.AppendLine();
+                        pager.AppendLine("   Excluded Files: " + tapeDetail.SourceInfo.ExcludeFiles[0]);
+
+                        for (int i = 1; i < tapeDetail.SourceInfo.ExcludeFiles.Length; i++)
+                            pager.AppendLine("                   " + tapeDetail.SourceInfo.ExcludeFiles[i]);
+                    }
+                    
+                    pager.AppendLine("==============================================================");
+                    pager.AppendLine();
                     pager.AppendLine();
                     pager.AppendLine();
                 }

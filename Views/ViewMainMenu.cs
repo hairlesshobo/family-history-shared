@@ -100,6 +100,26 @@ namespace Archiver.Views
 
                 if (_actionLink.Action != null)
                     _actionLink.Action();
+
+                if (_actionLink.DropFromGui && _actionLink.PauseAfterOperation)
+                {
+                    Console.WriteLine();
+                    Console.Write("Process complete, press ");
+                    Formatting.WriteC(ConsoleColor.DarkYellow, "<enter>");
+                    Console.Write(", ");
+                    Formatting.WriteC(ConsoleColor.DarkYellow, "<esc>");
+                    Console.Write(", or ");
+                    Formatting.WriteC(ConsoleColor.DarkYellow, "q");
+                    Console.Write(" to return to the main menu...");
+
+                    while (true)
+                    {
+                        ConsoleKeyInfo key = Console.ReadKey(true);
+
+                        if (key.Key == ConsoleKey.Q || key.Key == ConsoleKey.Enter || key.Key == ConsoleKey.Escape)
+                            break;
+                    }
+                }
             }
         }
 
@@ -195,7 +215,7 @@ namespace Archiver.Views
                 Text = "Verify Discs", 
                 Color = GuiGlobals.Colors.Yellow,
                 Action = Operations.Disc.DiscVerification.StartOperation,
-                DropFromGui = true
+                DropFromGui = true,
             });
             
             AddHyperlink(mainWindow, new HyperlinkInfo() 
@@ -278,7 +298,8 @@ namespace Archiver.Views
                 Action = Operations.Tape.TapeArchiveSummary.StartOperation,
                 // SelectedValue = true, // do not show the "press enter to return to main menu" message
                 Color = GuiGlobals.Colors.Blue,
-                DropFromGui = true
+                DropFromGui = true,
+                PauseAfterOperation = false
             });
 
             AddHyperlink(mainWindow, new HyperlinkInfo() 

@@ -19,8 +19,8 @@ namespace Archiver.Operations
 
         public static void StartOperation()
         {
-            ShowMenuOld();
-            // ShowMenuNew();
+            // ShowMenuOld();
+            ShowMenuNew();
         }
 
         private static void ShowMenuNew()

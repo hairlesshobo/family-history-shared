@@ -323,6 +323,7 @@ namespace Archiver.Classes.Views {
         public bool Disabled { get; set; } = false;
         public bool DropFromGui { get; set; } = false;
         public bool Header { get; set; } = false;
+		public bool PauseAfterOperation { get; set; } = true;
 
         public override string ToString() => Text;
     }
