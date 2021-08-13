@@ -9,6 +9,7 @@ namespace Archiver
 {
     public static class Config
     {
+        public static string TapeDriver { get; set; }
         public static string TapeDrive { get; set; }
         public static int TapeBlockingFactor { get; set; }
         public static int TapeMemoryBufferBlockCount { get; set; }
@@ -75,6 +76,7 @@ namespace Archiver
             Globals._indexDiscDir = Directory.GetCurrentDirectory();
 
             // Tape config
+            Archiver.Config.TapeDriver = _config["Tape:Driver"];
             Archiver.Config.TapeDrive = _config["Tape:Drive"];
             Archiver.Config.TapeBlockingFactor = _config.GetSection("Tape:BlockingFactor").Get<int>();
             Archiver.Config.TapeMemoryBufferBlockCount = _config.GetSection("Tape:MemoryBufferBlockCount").Get<int>();

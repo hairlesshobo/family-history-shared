@@ -52,21 +52,21 @@ namespace Archiver
                     {
                         Normal = new TAttribute(Color.Red, GlobalScheme.Normal.Background),
                         Focus = new TAttribute(Color.Red, GlobalScheme.Focus.Background),
-
+                        Disabled = new TAttribute(Color.DarkGray, GlobalScheme.Normal.Background)
                     };
 
                     Blue = new ColorScheme()
                     {
                         Normal = new TAttribute(Color.Blue, GlobalScheme.Normal.Background),
                         Focus = new TAttribute(Color.Blue, GlobalScheme.Focus.Background),
-
+                        Disabled = new TAttribute(Color.DarkGray, GlobalScheme.Normal.Background)
                     };
 
                     Yellow = new ColorScheme()
                     {
-                        Normal = new TAttribute(Color.BrightYellow, GlobalScheme.Normal.Background),
-                        Focus = new TAttribute(Color.BrightYellow, GlobalScheme.Focus.Background),
-
+                        Normal = new TAttribute(Color.Brown, GlobalScheme.Normal.Background),
+                        Focus = new TAttribute(Color.Brown, GlobalScheme.Focus.Background),
+                        Disabled = new TAttribute(Color.DarkGray, GlobalScheme.Normal.Background)
                     };
 
                     _isInitalized = true;

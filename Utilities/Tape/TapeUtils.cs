@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Archiver.Classes.Shared;
 using Archiver.Classes.Tape;
 using Archiver.Utilities.Shared;
 using ICSharpCode.SharpZipLib.Tar;
@@ -13,6 +14,20 @@ namespace Archiver.Utilities.Tape
     public static class TapeUtils
     {
         public static bool TapeDrivePresent()
+        {
+            if (Config.TapeDriver.ToLower() != "auto-remote")
+            {
+                if (SystemInformation.OperatingSystemType == OSType.Windows)
+                    return WindowsTapeDrivePresent();
+                else if (SystemInformation.OperatingSystemType == OSType.Linux)
+                    return false;
+            }
+
+            // TODO: finish implementing tape drive detection
+            return false;
+        }
+
+        public static bool WindowsTapeDrivePresent()
         {
             try
             {
@@ -27,6 +42,7 @@ namespace Archiver.Utilities.Tape
 
             return true;
         }
+
         public static TapeDetail GetTapeDetail(int id)
         {
             List<TapeDetail> tapes = new List<TapeDetail>();

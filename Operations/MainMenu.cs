@@ -33,6 +33,9 @@ namespace Archiver.Operations
                 quit = vmm.Show();
             } 
             while (!quit);
+
+            Application.Shutdown();
+            Console.Clear();
         }
 
         private static void ShowMenuOld()

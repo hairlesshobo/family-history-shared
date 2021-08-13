@@ -197,9 +197,9 @@ namespace Archiver.Views
             AddHyperlink(mainWindow, new HyperlinkInfo() 
             {
                 Text = "Restore entire disc(s)", 
+                Disabled = !Config.OpticalDrivePresent || true, // remove once implemented
                 Color = GuiGlobals.Colors.Green,
                 Action = NotImplemented,
-                Disabled = true
             });
 
             AddHyperlink(mainWindow, new HyperlinkInfo() 
@@ -215,6 +215,7 @@ namespace Archiver.Views
                 Text = "Verify Discs", 
                 Color = GuiGlobals.Colors.Yellow,
                 Action = Operations.Disc.DiscVerification.StartOperation,
+                Disabled = Config.ReadOnlyFilesystem || !Config.OpticalDrivePresent,
                 DropFromGui = true,
             });
             
@@ -239,6 +240,7 @@ namespace Archiver.Views
                 Text = "Run Archive process", 
                 Color = GuiGlobals.Colors.Red,
                 Action = Operations.Disc.DiscArchiver.StartOperation,
+                Disabled = Config.ReadOnlyFilesystem || !Config.OpticalDrivePresent,
                 DropFromGui = true
             });
         }
@@ -268,7 +270,7 @@ namespace Archiver.Views
             {
                 Text = "Restore entire tape (to tar file)",
                 Action = Operations.Tape.RestoreTapeToTar.StartOperation,
-                // Disabled = !Config.TapeDrivePresent || true, // remove once implemented
+                Disabled = !Config.TapeDrivePresent || true, // remove once implemented
                 Color = GuiGlobals.Colors.Green,
                 DropFromGui = true
             });
@@ -278,7 +280,7 @@ namespace Archiver.Views
             {
                 Text = "Restore entire tape (to original file structure)",
                 Action = NotImplemented,
-                // Disabled = !Config.TapeDrivePresent || true, // remove once implemented
+                Disabled = !Config.TapeDrivePresent || true, // remove once implemented
                 Color = GuiGlobals.Colors.Green,
                 DropFromGui = true
             });
@@ -287,7 +289,7 @@ namespace Archiver.Views
             {
                 Text = "Read Tape Summary",
                 Action = Operations.Tape.ShowTapeSummary.StartOperation,
-                // Disabled = !Config.TapeDrivePresent,
+                Disabled = !Config.TapeDrivePresent,
                 Color = GuiGlobals.Colors.Blue,
                 DropFromGui = true
             });
@@ -306,7 +308,7 @@ namespace Archiver.Views
             {
                 Text = "Verify Tape",
                 Action = Operations.Tape.TapeVerification.StartOperation,
-                // Disabled = Config.ReadOnlyFilesystem || !Config.TapeDrivePresent,
+                Disabled = Config.ReadOnlyFilesystem || !Config.TapeDrivePresent,
                 Color = GuiGlobals.Colors.Yellow,
                 DropFromGui = true
             });
@@ -315,7 +317,7 @@ namespace Archiver.Views
             {
                 Text = "Run tape archive",
                 Action = Operations.Tape.TapeArchiver.StartOperation,
-                // Disabled = Config.ReadOnlyFilesystem || !Config.TapeDrivePresent,
+                Disabled = Config.ReadOnlyFilesystem || !Config.TapeDrivePresent,
                 Color = GuiGlobals.Colors.Red,
                 DropFromGui = true
             });
