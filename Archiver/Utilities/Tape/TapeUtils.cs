@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using Archiver.Classes.Shared;
 using Archiver.Classes.Tape;
+using Archiver.Shared;
+using Archiver.Shared.Classes;
 using Archiver.Utilities.Shared;
 using ICSharpCode.SharpZipLib.Tar;
 using Newtonsoft.Json;

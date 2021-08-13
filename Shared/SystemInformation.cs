@@ -1,8 +1,8 @@
 using System;
 using System.Runtime.InteropServices;
-using Archiver.Classes.Shared;
+using Archiver.Shared.Classes;
 
-namespace Archiver
+namespace Archiver.Shared
 {
     public static class SystemInformation
     {

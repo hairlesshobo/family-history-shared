@@ -1,21 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Management;
-using System.Text;
-using System.Threading;
-using Archiver.Classes;
 using Archiver.Operations;
-using Archiver.Utilities;
-using Archiver.Utilities.Tape;
-using ICSharpCode.SharpZipLib.Tar;
 using Archiver.Utilities.Shared;
-using Archiver.Classes.Tape;
-using Archiver.Operations.Disc;
 using Terminal.Gui;
-using System.Runtime.InteropServices;
-using Archiver.Classes.Shared;
+using Archiver.Shared;
+using Archiver.Shared.Classes;
 
 namespace Archiver
 {

@@ -1,6 +1,6 @@
 using System;
 
-namespace Archiver.Classes.Shared
+namespace Archiver.Shared.Classes
 {
     public enum OSType
     {
