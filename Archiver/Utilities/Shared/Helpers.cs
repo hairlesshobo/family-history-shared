@@ -1,13 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Management;
 using System.Text;
 using System.Threading;
-using Archiver.Classes;
-using Archiver.Classes.CSD;
 using Archiver.Classes.Disc;
 using Archiver.Classes.Tape;
 using Archiver.Utilities.Disc;

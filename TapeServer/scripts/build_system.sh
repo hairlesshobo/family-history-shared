@@ -9,9 +9,13 @@ apt-get install -y \
 	apt-transport-https \
 	beep \
 	buffer \
+	git \
 	mt-st \
+	mtx \
 	netcat-openbsd \
-	pv
+	pv \
+	rsync \
+	sg3-utils
 
 apt-get update 
 
