@@ -12,6 +12,14 @@ namespace Archiver.TapeServer.TapeDrivers
         static readonly uint MTIOCTOP = 0x40086D01; //         const struct mtop *
         static readonly uint MTIOCGET = 0x801C6D02; //         struct mtget *
         static readonly uint MTIOCPOS = 0x80046D03; //         struct mtpos *
+
+        private enum TapeOpType
+        {
+            /// <summary>
+            /// rewind and put the drive offline (eject?)
+            /// </summary>
+            MTOFFL = 7
+        }
         
 
         /* Magnetic Tape operations [Not all operations supported by all drivers]: */
