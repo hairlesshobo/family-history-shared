@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using Archiver.Shared;
 using Archiver.Shared.Interfaces;
 using Archiver.TapeServer.Classes.Config;
+using Archiver.TapeServer.TapeDrivers;
 
 namespace Archiver.TapeServer
 {
@@ -14,13 +15,16 @@ namespace Archiver.TapeServer
         static void Main()
         {
             TapeServerConfig config = TapeServerHelpers.ReadConfig();
-            ITapeDrive tapeDrive = TapeServerHelpers.GetTapeDrive(config);
+            // ITapeDrive tapeDrive = TapeServerHelpers.GetTapeDrive(config);
 
-            NetworkServer server = new NetworkServer(config, tapeDrive);
-            TapeOperator_Linux tol = new TapeOperator_Linux("/dev/random");
+            // NetworkServer server = new NetworkServer(config, tapeDrive);
+            NativeLinuxTapeDriver tapeDriver = new NativeLinuxTapeDriver(config.TapeDrive);
 
-            byte[] buffer = new byte[1024];
-            bool endOfData = tol.Read(buffer);
+            
+
+            // byte[] buffer = new byte[1024];
+            // bool endOfData = tapeDriver.Read(buffer);
+            tapeDriver.Eject();
 
             int pid = GetPid();
             

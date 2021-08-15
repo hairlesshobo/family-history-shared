@@ -1,38 +1,17 @@
 using System;
 using System.Runtime.InteropServices;
-using Archiver.Shared;
-using Archiver.Shared.Interfaces;
-using Archiver.TapeServer.Classes.Config;
 
-namespace Archiver.TapeServer
+namespace Archiver.TapeServer.TapeDrivers
 {
-    public class TapeOperator_Linux : IDisposable
+    public partial class NativeLinuxTapeDriver : IDisposable
     {
-        static readonly int OPEN_READ_ONLY = 0;
-        static readonly int OPEN_WRITE_ONLY = 1;
-        static readonly int OPEN_READ_WRITE = 2;
+        [StructLayout(LayoutKind.Sequential)] 
+        public struct MagneticTapeOperation
+        {
+            public short Operation;	/* operations defined below */
+	        public int	Count;	        /* how many of them */
+        }
 
-
-        [DllImport("libc.so.6", EntryPoint = "open", SetLastError = true)]
-        private static extern int Open(string fileName, int mode);
-        
-        [DllImport("libc.so.6", EntryPoint = "close", SetLastError = true)]
-        private static extern int Close(int handle);
-
-
-
-        [DllImport("libc.so.6", EntryPoint = "read", SetLastError = true)]
-        private static extern int Read(int handle, byte[] data, int length);
-
-        [DllImport("libc.so.6", EntryPoint = "write", SetLastError = true)]
-        private static extern int Write(int handle, byte[] data, int length);
-
-        
-
-        [DllImport("libc.so.6", EntryPoint = "ioctl", SetLastError = true)]
-        private extern static int Ioctl(int fd, int request, int data);
-
-        
 
         private string _devicePath;
         private int _tapeHandle;
@@ -45,23 +24,23 @@ namespace Archiver.TapeServer
         /// <summary>
         /// Loads tape with given name. 
         /// </summary>
-        public TapeOperator_Linux(string devicePath): this(devicePath, null, true) { }
+        public NativeLinuxTapeDriver(string devicePath): this(devicePath, null, true) { }
 
         /// <summary>
         /// Loads tape with given name. 
         /// </summary>
-        public TapeOperator_Linux(string devicePath, bool loadTape): this(devicePath, null, loadTape) { }
+        public NativeLinuxTapeDriver(string devicePath, bool loadTape): this(devicePath, null, loadTape) { }
 
         /// <summary>
         /// Loads tape with given name and block size. 
         /// </summary>
-        public TapeOperator_Linux(string devicePath, int blockSize): this(devicePath, (uint)blockSize, true) { }   
+        public NativeLinuxTapeDriver(string devicePath, int blockSize): this(devicePath, (uint)blockSize, true) { }   
         #endregion empty constructor overloads
         
         /// <summary>
         /// Loads tape with given name. 
         /// </summary>
-        public TapeOperator_Linux(string devicePath, Nullable<uint> blockSize, bool loadTape = true)
+        public NativeLinuxTapeDriver(string devicePath, Nullable<uint> blockSize, bool loadTape = true)
         {
             _devicePath = devicePath;
 
@@ -116,6 +95,23 @@ namespace Archiver.TapeServer
         public bool Read(byte[] buffer)
         {
             return this.Read(buffer, null);
+        }
+
+        public void Eject()
+        {
+            MagneticTapeOperation op;
+            op.Count = 1;
+            op.Operation = MTOFFL;
+            
+            int result = Ioctl(_tapeHandle, MTIOCTOP, op);
+
+            if (result < 0)
+                throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
+                
+            // int result = PrepareTape(m_handleValue, TAPE_UNLOAD, FALSE);
+
+            // if ( result != NO_ERROR )
+            //     throw new TapeOperatorWin32Exception("PrepareTape", Marshal.GetLastWin32Error());
         }
 
         /// <summary>
