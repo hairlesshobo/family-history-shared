@@ -4,6 +4,7 @@ namespace Archiver.TapeServer.TapeDrivers
 {
     public partial class NativeLinuxTapeDriver
     {
+        #pragma warning disable CS0414
         static readonly int OPEN_READ_ONLY = 0;
         static readonly int OPEN_WRITE_ONLY = 1;
         static readonly int OPEN_READ_WRITE = 2;
@@ -55,5 +56,6 @@ namespace Archiver.TapeServer.TapeDrivers
         static readonly short MTCOMPRESSION = 32;   /* control compression with SCSI mode page 15 */
         static readonly short MTSETPART     = 33;	/* Change the active tape partition */
         static readonly short MTMKPART      = 34;	/* Format the tape with one or two partitions */
+        #pragma warning restore	CS0414
     }
 }

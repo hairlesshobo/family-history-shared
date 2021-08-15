@@ -24,7 +24,7 @@ namespace Archiver.TapeServer.TapeDrivers
         [DllImport("libc.so.6", EntryPoint = "ioctl", SetLastError = true)]
         // private extern static int Ioctl(int fd, int request, int data);
         // private extern static int Ioctl(int fd, ulong request, ulong data);
-        private extern static int Ioctl(int fd, ulong request, MagneticTapeOperation data);
+        private extern static int Ioctl(int fd, ulong request, IntPtr data);
 
     }
 }

@@ -45,6 +45,11 @@ namespace Archiver.TapeServer.TapeDrivers
             _devicePath = devicePath;
 
             _tapeHandle = Open(_devicePath, OPEN_READ_ONLY);
+
+	    Console.WriteLine($"Tape Handle: {_tapeHandle}");
+
+            if (_tapeHandle < 0)
+                throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
         }
 
         /// <summary>
@@ -99,19 +104,34 @@ namespace Archiver.TapeServer.TapeDrivers
 
         public void Eject()
         {
-            MagneticTapeOperation op;
-            op.Count = 1;
-            op.Operation = MTOFFL;
-            
-            int result = Ioctl(_tapeHandle, MTIOCTOP, op);
+	    IntPtr ptr = IntPtr.Zero;
 
-            if (result < 0)
-                throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
-                
-            // int result = PrepareTape(m_handleValue, TAPE_UNLOAD, FALSE);
+ 	    try
+	    {
+		    MagneticTapeOperation op = new MagneticTapeOperation();
+		    op.Count = 1;
+		    op.Operation = MTOFFL;
 
-            // if ( result != NO_ERROR )
-            //     throw new TapeOperatorWin32Exception("PrepareTape", Marshal.GetLastWin32Error());
+		    int size = Marshal.SizeOf(op);
+		    ptr = Marshal.AllocHGlobal(size);
+
+		    Marshal.StructureToPtr(op, ptr, false);
+		    
+		    int result = Ioctl(_tapeHandle, MTIOCTOP, ptr);
+
+		    if (result < 0)
+			throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
+			
+		    // int result = PrepareTape(m_handleValue, TAPE_UNLOAD, FALSE);
+
+		    // if ( result != NO_ERROR )
+		    //     throw new TapeOperatorWin32Exception("PrepareTape", Marshal.GetLastWin32Error());
+	    }
+	    finally
+	    {
+		    if (ptr != IntPtr.Zero)
+			    Marshal.FreeHGlobal(ptr);
+	    }
         }
 
         /// <summary>
