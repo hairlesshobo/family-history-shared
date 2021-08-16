@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Text;
 using Archiver.Shared;
 using Archiver.Shared.Interfaces;
-using Archiver.TapeServer.Classes.Config;
+using Archiver.Shared.Models.Config;
 using Archiver.TapeServer.TapeDrivers;
 
 namespace Archiver.TapeServer
@@ -18,20 +19,49 @@ namespace Archiver.TapeServer
             // ITapeDrive tapeDrive = TapeServerHelpers.GetTapeDrive(config);
 
             // NetworkServer server = new NetworkServer(config, tapeDrive);
-            NativeLinuxTapeDriver tapeDriver = new NativeLinuxTapeDriver(config.TapeDrive);
-
-            
-
-            // byte[] buffer = new byte[1024];
-            // bool endOfData = tapeDriver.Read(buffer);
-            tapeDriver.Eject();
 
             int pid = GetPid();
             
             Console.WriteLine($"Archive TapeServer component starting up. (PID: {pid})");
-            SystemInformation.WriteSystemInfo();
+            Console.WriteLine();
+            SystemInformation.WriteSystemInfo(true);
             Console.WriteLine();
             Console.WriteLine();
+
+            uint blockSize = 512; //512 * 512;
+            int maxBlocks = 512;
+            int currentBlock = 0;
+            string device = "/home/flip/archive/test.txt"; // config.TapeDrive;
+            string text = String.Empty;
+
+            using (NativeLinuxTapeDriver tapeDrive = new NativeLinuxTapeDriver(device, blockSize))
+            {
+                tapeDrive.Open();
+                byte[] buffer = new byte[blockSize];
+                bool endOfData = false;
+
+                do
+                {
+                    endOfData = tapeDrive.Read(buffer);
+
+                    int strlen = Array.IndexOf(buffer, (byte)0);
+
+                    if (!endOfData)
+                    {
+                        if (strlen > 0)
+                            text += Encoding.UTF8.GetString(buffer, 0, strlen);
+                        else
+                            text += Encoding.UTF8.GetString(buffer, 0, buffer.Length);
+                    }
+
+                    currentBlock++;
+                }
+                while (!endOfData && currentBlock <= maxBlocks);
+
+                Console.WriteLine(text);
+            }
+            
+
             // server.StartControlServer();
         }
     }

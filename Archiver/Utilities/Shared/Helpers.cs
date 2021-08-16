@@ -7,8 +7,9 @@ using System.Text;
 using System.Threading;
 using Archiver.Classes.Disc;
 using Archiver.Classes.Tape;
+using Archiver.Shared.Utilities;
 using Archiver.Utilities.Disc;
-using Newtonsoft.Json;
+// using Newtonsoft.Json;
 
 namespace Archiver.Utilities.Shared
 {
@@ -118,7 +119,7 @@ namespace Archiver.Utilities.Shared
                         Console.CursorLeft = 0;
                         Console.Write(line);
 
-                        DiscDetail discDetail = JsonConvert.DeserializeObject<DiscDetail>(File.ReadAllText(jsonFile));
+                        DiscDetail discDetail = Newtonsoft.Json.JsonConvert.DeserializeObject<DiscDetail>(File.ReadAllText(jsonFile));
                         discDetail.Files.ForEach(x => x.DestinationDisc = discDetail);
 
                         discs.Add(discDetail);
@@ -156,7 +157,7 @@ namespace Archiver.Utilities.Shared
                         Console.CursorLeft = 0;
                         Console.Write(line);
 
-                        TapeDetail tapeDetail = JsonConvert.DeserializeObject<TapeDetail>(File.ReadAllText(jsonFile));
+                        TapeDetail tapeDetail = Newtonsoft.Json.JsonConvert.DeserializeObject<TapeDetail>(File.ReadAllText(jsonFile));
                         tapeDetail.FlattenFiles().ToList().ForEach(x => x.Tape = tapeDetail);
                         
                         tapes.Add(tapeDetail);
@@ -266,10 +267,10 @@ namespace Archiver.Utilities.Shared
 
             string jsonFilePath = destinationDir + "/" + fileName;
 
-            string json = JsonConvert.SerializeObject(disc, new JsonSerializerSettings() {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            string json = Newtonsoft.Json.JsonConvert.SerializeObject(disc, new Newtonsoft.Json.JsonSerializerSettings() {
+                ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
                 Formatting = Newtonsoft.Json.Formatting.Indented,
-                NullValueHandling = NullValueHandling.Ignore
+                NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore
             });
 
             // Write the json data needed for future runs of this app
@@ -286,8 +287,8 @@ namespace Archiver.Utilities.Shared
 
             string jsonFilePath = destinationDir + "/" + fileName;
 
-            string json = JsonConvert.SerializeObject(tape, new JsonSerializerSettings() {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            string json = Newtonsoft.Json.JsonConvert.SerializeObject(tape, new Newtonsoft.Json.JsonSerializerSettings() {
+                ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
                 Formatting = Newtonsoft.Json.Formatting.Indented
             });
 

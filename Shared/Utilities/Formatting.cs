@@ -1,8 +1,6 @@
 using System;
-using Archiver.Classes;
-using Archiver.Classes.Disc;
 
-namespace Archiver.Utilities.Shared
+namespace Archiver.Shared.Utilities
 {
     public static class Formatting
     {
@@ -21,9 +19,6 @@ namespace Archiver.Utilities.Shared
             Console.WriteLine(inputString);
             Console.ForegroundColor = originalColor;
         }
-
-        public static string GetDiscName(DiscDetail disc)
-            => $"Disc {disc.DiscNumber.ToString("0000")}";
 
         public static string FormatElapsedTime(TimeSpan elapsed)
         {

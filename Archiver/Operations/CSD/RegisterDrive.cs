@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Archiver.Classes.CSD;
 using Archiver.Classes.Disc;
+using Archiver.Shared.Utilities;
 using Archiver.Utilities;
 using Archiver.Utilities.CSD;
 using Archiver.Utilities.Disc;

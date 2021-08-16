@@ -4,9 +4,9 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Archiver.Shared.Classes;
+using Archiver.Shared.Models;
+using Archiver.Shared.Models.Config;
 using Archiver.Shared.Interfaces;
-using Archiver.TapeServer.Classes.Config;
 
 namespace Archiver.TapeServer
 {

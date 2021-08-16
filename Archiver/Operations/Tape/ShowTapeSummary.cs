@@ -1,4 +1,5 @@
 using System;
+using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 using Archiver.Utilities.Tape;
 

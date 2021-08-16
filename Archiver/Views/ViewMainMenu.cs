@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Archiver.Classes.Views;
+using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 using Terminal.Gui;
 

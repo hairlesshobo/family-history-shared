@@ -1,10 +1,9 @@
 using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
-using Archiver.Classes;
-using Archiver.Classes.Disc;
 using Archiver.Classes.Tape;
+using Archiver.Shared.Utilities;
+using Archiver.Utilities;
 using Archiver.Utilities.Shared;
 
 namespace Archiver.Utilities.Tape
@@ -125,10 +124,10 @@ namespace Archiver.Utilities.Tape
 
                 WriteLine(_summaryLine, "Files Found", _tapeDetail.FileCount.ToString("N0"), ConsoleColor.Blue);
 
-                WriteLine(_summaryLine+1, "Source Size", Shared.Formatting.GetFriendlySize(_tapeDetail.DataSizeBytes), ConsoleColor.Blue);
+                WriteLine(_summaryLine+1, "Source Size", Formatting.GetFriendlySize(_tapeDetail.DataSizeBytes), ConsoleColor.Blue);
 
                 ConsoleColor capacityColor = (_tapeDetail.TotalArchiveBytes > info.MediaInfo.Capacity ? ConsoleColor.Yellow : ConsoleColor.Green);
-                WriteLine(_summaryLine+2, "Tape Capacity", Shared.Formatting.GetFriendlySize(info.MediaInfo.Capacity), capacityColor);
+                WriteLine(_summaryLine+2, "Tape Capacity", Formatting.GetFriendlySize(info.MediaInfo.Capacity), capacityColor);
 
                 double requiredCompressionRatio = ((double)_tapeDetail.TotalArchiveBytes / (double)info.MediaInfo.Capacity);
                 
@@ -145,9 +144,9 @@ namespace Archiver.Utilities.Tape
             {
                 ConsoleColor defaultColor = Console.ForegroundColor;
 
-                WriteLine(_exitSummaryLine, "Archive Size", Shared.Formatting.GetFriendlySize(_tapeDetail.TotalArchiveBytes), ConsoleColor.Blue);
-                WriteLine(_exitSummaryLine+1, "Size on Tape", Shared.Formatting.GetFriendlySize(_tapeDetail.ArchiveBytesOnTape), ConsoleColor.Blue);
-                WriteLine(_exitSummaryLine+2, "Tape Capacity Remaining", Shared.Formatting.GetFriendlySize(info.MediaInfo.Remaining), ConsoleColor.Blue);
+                WriteLine(_exitSummaryLine, "Archive Size", Formatting.GetFriendlySize(_tapeDetail.TotalArchiveBytes), ConsoleColor.Blue);
+                WriteLine(_exitSummaryLine+1, "Size on Tape", Formatting.GetFriendlySize(_tapeDetail.ArchiveBytesOnTape), ConsoleColor.Blue);
+                WriteLine(_exitSummaryLine+2, "Tape Capacity Remaining", Formatting.GetFriendlySize(info.MediaInfo.Remaining), ConsoleColor.Blue);
                 WriteLine(_exitSummaryLine+3, "Compression Ratio on Tape", $"{Math.Round(_tapeDetail.CompressionRatio, 2).ToString("0.00")}:1", ConsoleColor.Blue);
             }
         }
@@ -158,13 +157,13 @@ namespace Archiver.Utilities.Tape
 
             if (progress != null)
             {
-                line += Shared.Formatting.GetFriendlySize(progress.TarBytesWritten).PadLeft(10);
+                line += Formatting.GetFriendlySize(progress.TarBytesWritten).PadLeft(10);
                 line += " ";
                 line += $"[{progress.TarStatus.ToString().PadRight(8)}]";
                 line += " ";
-                line += $"[{Shared.Formatting.GetFriendlyTransferRate(progress.TarInstantTransferRate).PadLeft(12)}]";
+                line += $"[{Formatting.GetFriendlyTransferRate(progress.TarInstantTransferRate).PadLeft(12)}]";
                 line += " ";
-                line += $"[{Shared.Formatting.GetFriendlyTransferRate(progress.TarAverageTransferRate).PadLeft(12)}]";
+                line += $"[{Formatting.GetFriendlyTransferRate(progress.TarAverageTransferRate).PadLeft(12)}]";
                 line += " ";
                 line += StatusHelpers.FileCountPosition(progress.TarCurrentFileCount, progress.TarTotalFiles, 7);
             }
@@ -186,13 +185,13 @@ namespace Archiver.Utilities.Tape
 
                 _bufferLastPercent = progress.BufferPercent;
 
-                line += Shared.Formatting.GetFriendlySize(progress.TapeBytesWritten).PadLeft(10);
+                line += Formatting.GetFriendlySize(progress.TapeBytesWritten).PadLeft(10);
                 line += " ";
                 line += $"[{progress.TapeStatus.ToString().PadRight(8)}]";
                 line += " ";
-                line += $"[{Shared.Formatting.GetFriendlyTransferRate(progress.TapeInstantTransferRate).PadLeft(12)}]";
+                line += $"[{Formatting.GetFriendlyTransferRate(progress.TapeInstantTransferRate).PadLeft(12)}]";
                 line += " ";
-                line += $"[{Shared.Formatting.GetFriendlyTransferRate(progress.TapeAverageTransferRate).PadLeft(12)}]";
+                line += $"[{Formatting.GetFriendlyTransferRate(progress.TapeAverageTransferRate).PadLeft(12)}]";
                 line += " ";
                 line += StatusHelpers.GeneratePercentBar(20, progress.BufferPercent, progress.BufferPercent == 100.0, increasing, true);
 

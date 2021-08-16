@@ -2,7 +2,8 @@ using System;
 using Archiver.Shared;
 using Archiver.Shared.Exceptions;
 using Archiver.Shared.Interfaces;
-using Archiver.TapeServer.Classes.Config;
+using Archiver.Shared.Models.Config;
+using Archiver.Shared.Utilities;
 using Archiver.TapeServer.Providers;
 using Microsoft.Extensions.Configuration;
 

@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using Archiver.Classes.Tape;
+using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 using Archiver.Utilities.Tape;
 

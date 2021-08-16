@@ -3,7 +3,8 @@ using Archiver.Operations;
 using Archiver.Utilities.Shared;
 using Terminal.Gui;
 using Archiver.Shared;
-using Archiver.Shared.Classes;
+using Archiver.Shared.Models;
+using Archiver.Shared.Utilities;
 
 namespace Archiver
 {

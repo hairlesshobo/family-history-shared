@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Archiver.Classes.Disc;
+using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 
 namespace Archiver.Operations.Disc

@@ -4,8 +4,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using Archiver.Classes;
 using Archiver.Classes.Disc;
+using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 
 namespace Archiver.Utilities.Disc
@@ -237,7 +237,7 @@ namespace Archiver.Utilities.Disc
             line += $"{Formatting.GetFriendlySize(disc.DataSize).PadLeft(10)} data size";
 
             Console.SetCursorPosition(0, _discLine + GetDiscIndex(disc));
-            StatusHelpers.WriteStatusLine(Formatting.GetDiscName(disc), line, ConsoleColor.Blue);
+            StatusHelpers.WriteStatusLine(DiscFormatting.GetDiscName(disc), line, ConsoleColor.Blue);
         }
 
         public void WriteDiscVerifyingLine(
@@ -261,7 +261,7 @@ namespace Archiver.Utilities.Disc
             line += "[" + Formatting.GetFriendlyTransferRate(averageTransferRate).PadLeft(12) + "]";
 
             Console.SetCursorPosition(0, _discLine + GetDiscIndex(disc));
-            StatusHelpers.WriteStatusLineWithPct(Formatting.GetDiscName(disc), line, currentPercent, (currentPercent == 100.0), ConsoleColor.DarkYellow);
+            StatusHelpers.WriteStatusLineWithPct(DiscFormatting.GetDiscName(disc), line, currentPercent, (currentPercent == 100.0), ConsoleColor.DarkYellow);
         }
 
         private void WriteDiscVerificationPassed(
@@ -276,7 +276,7 @@ namespace Archiver.Utilities.Disc
             line += "(" + disc.Verifications.OrderBy(x => x.VerificationDTM).Last().VerificationDTM.ToString("MM/dd/yyyy") + ")";
 
             Console.SetCursorPosition(0, _discLine + GetDiscIndex(disc));
-            StatusHelpers.WriteStatusLine(Formatting.GetDiscName(disc), line, ConsoleColor.Green);
+            StatusHelpers.WriteStatusLine(DiscFormatting.GetDiscName(disc), line, ConsoleColor.Green);
         }
 
         private void WriteDiscVerificationFailed(
@@ -289,7 +289,7 @@ namespace Archiver.Utilities.Disc
             line += "Verification FAILED!".PadRight(12);
 
             Console.SetCursorPosition(0, _discLine + GetDiscIndex(disc));
-            StatusHelpers.WriteStatusLine(Formatting.GetDiscName(disc), line, ConsoleColor.Red);
+            StatusHelpers.WriteStatusLine(DiscFormatting.GetDiscName(disc), line, ConsoleColor.Red);
         }
     }
 }

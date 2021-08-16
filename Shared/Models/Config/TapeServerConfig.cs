@@ -1,6 +1,6 @@
 using System;
 
-namespace Archiver.TapeServer.Classes.Config
+namespace Archiver.Shared.Models.Config
 {
     public class TapeServerConfig
     {

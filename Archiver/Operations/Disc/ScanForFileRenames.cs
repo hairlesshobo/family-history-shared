@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Archiver.Classes.Disc;
+using Archiver.Shared.Utilities;
 using Archiver.Utilities;
 using Archiver.Utilities.Disc;
 using Archiver.Utilities.Shared;
@@ -80,7 +81,7 @@ namespace Archiver.Operations.Disc
                              && existingFile.RelativeDirectory == existingFile.RelativeDirectory)
                                 existingFile.OriginalFile = null;
 
-                            Console.Write($"Saving {Formatting.GetDiscName(existingFile.DestinationDisc)} ...");
+                            Console.Write($"Saving {DiscFormatting.GetDiscName(existingFile.DestinationDisc)} ...");
                             existingFile.DestinationDisc.SaveToJson();
                             StatusHelpers.ClearLine();
                         }
@@ -133,7 +134,7 @@ namespace Archiver.Operations.Disc
 
             StatusHelpers.ClearLine();
             Formatting.WriteC(ConsoleColor.Blue, "    Existing Disc: ");
-            Console.WriteLine(Formatting.GetDiscName(sourceFile.DestinationDisc));
+            Console.WriteLine(DiscFormatting.GetDiscName(sourceFile.DestinationDisc));
             Console.WriteLine();
 
             StatusHelpers.ClearLine();

@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
-using Archiver.Shared.Classes;
+using Archiver.Shared.Models;
+using Archiver.Shared.Utilities;
 
 namespace Archiver.Shared
 {
@@ -30,12 +31,25 @@ namespace Archiver.Shared
             //     _osType = OSType.OSX;
         }
 
-        public static void WriteSystemInfo()
+        public static void WriteSystemInfo(bool color = false)
         {
-            Console.WriteLine("System Information:");
-            Console.WriteLine($"  OS Platform: {SystemInformation.OperatingSystemType.ToString()} ({SystemInformation.Architecture.ToString()})");
-            Console.WriteLine($"  Description: {SystemInformation.Description}");
-            Console.WriteLine($"  Identifier: {SystemInformation.Identifier}");
+            if (color)
+            {
+                Formatting.WriteLineC(ConsoleColor.Green, "System Information:");
+                Formatting.WriteC(ConsoleColor.Cyan, "  OS Platform: ");
+                Console.WriteLine($"{SystemInformation.OperatingSystemType.ToString()} ({SystemInformation.Architecture.ToString()})");
+                Formatting.WriteC(ConsoleColor.Cyan, "  Description: ");
+                Console.WriteLine(SystemInformation.Description);
+                Formatting.WriteC(ConsoleColor.Cyan, "  Identifier: ");
+                Console.WriteLine(SystemInformation.Identifier);
+            }
+            else
+            {
+                Console.WriteLine("System Information:");
+                Console.WriteLine($"  OS Platform: {SystemInformation.OperatingSystemType.ToString()} ({SystemInformation.Architecture.ToString()})");
+                Console.WriteLine($"  Description: {SystemInformation.Description}");
+                Console.WriteLine($"  Identifier: {SystemInformation.Identifier}");
+            }
         }
     }
 }

@@ -300,15 +300,13 @@ namespace Archiver.Utilities
         }
 
         public void RewindTape()
-        {
-            SetTapeBlockPosition(0);
-        }
+            => SetTapeBlockPosition(0);
 
         public void EjectTape()
         {
             int result = PrepareTape(m_handleValue, TAPE_UNLOAD, FALSE);
 
-            if ( result != NO_ERROR )
+            if (result != NO_ERROR)
                 throw new TapeOperatorWin32Exception("PrepareTape", Marshal.GetLastWin32Error());
         }
 
@@ -358,9 +356,7 @@ namespace Archiver.Utilities
         }
 
         public bool Read(byte[] buffer)
-        {
-            return this.Read(buffer, null);
-        }
+            => this.Read(buffer, null);
         
         /// <summary>
         /// Closes handler of the current tape

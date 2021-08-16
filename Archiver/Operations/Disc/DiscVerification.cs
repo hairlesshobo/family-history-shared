@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Archiver.Classes;
 using Archiver.Classes.Disc;
+using Archiver.Shared.Utilities;
 using Archiver.Utilities;
 using Archiver.Utilities.Disc;
 using Archiver.Utilities.Shared;
@@ -42,7 +43,7 @@ namespace Archiver.Operations.Disc
             {
                 entries.Add(new CliMenuEntry<DiscDetail>()
                 {
-                    Name = $"{Formatting.GetDiscName(disc)} `R|`N `BDate Archived:`N {disc.ArchiveDTM.ToString("MM-dd-yyyy")} `R|`N `BData Size:`N {Formatting.GetFriendlySize(disc.DataSize).PadLeft(10)}",
+                    Name = $"{DiscFormatting.GetDiscName(disc)} `R|`N `BDate Archived:`N {disc.ArchiveDTM.ToString("MM-dd-yyyy")} `R|`N `BData Size:`N {Formatting.GetFriendlySize(disc.DataSize).PadLeft(10)}",
                     SelectedValue = disc
                 });
             }

@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Archiver.Classes;
 using Archiver.Classes.Disc;
+using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 
 namespace Archiver.Utilities.Disc
@@ -75,7 +76,7 @@ namespace Archiver.Utilities.Disc
             line += $"{Formatting.GetFriendlySize(disc.DataSize).PadLeft(10)} data size";
 
             Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
-            StatusHelpers.WriteStatusLine(Formatting.GetDiscName(disc), line, ConsoleColor.Blue);
+            StatusHelpers.WriteStatusLine(DiscFormatting.GetDiscName(disc), line, ConsoleColor.Blue);
         }
 
         public static void WriteDiscCopyLine(
@@ -105,7 +106,7 @@ namespace Archiver.Utilities.Disc
                 complete = true;
 
             Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
-            StatusHelpers.WriteStatusLineWithPct(Formatting.GetDiscName(disc), line, currentPercent, complete, ConsoleColor.DarkYellow);
+            StatusHelpers.WriteStatusLineWithPct(DiscFormatting.GetDiscName(disc), line, currentPercent, complete, ConsoleColor.DarkYellow);
         }
 
         public static void WriteDiscIndex(DiscDetail disc, TimeSpan elapsed, double currentPercent)
@@ -116,7 +117,7 @@ namespace Archiver.Utilities.Disc
             line += "Writing disc index:";
 
             Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
-            StatusHelpers.WriteStatusLineWithPct(Formatting.GetDiscName(disc), line, currentPercent, (currentPercent == 100.0), ConsoleColor.DarkYellow);
+            StatusHelpers.WriteStatusLineWithPct(DiscFormatting.GetDiscName(disc), line, currentPercent, (currentPercent == 100.0), ConsoleColor.DarkYellow);
         }
 
         public static void WriteDiscHashListFile(DiscDetail disc, TimeSpan elapsed, double currentPercent)
@@ -127,7 +128,7 @@ namespace Archiver.Utilities.Disc
             line += "Writing disc hash file:";
 
             Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
-            StatusHelpers.WriteStatusLineWithPct(Formatting.GetDiscName(disc), line, currentPercent, (currentPercent == 100.0), ConsoleColor.DarkYellow);
+            StatusHelpers.WriteStatusLineWithPct(DiscFormatting.GetDiscName(disc), line, currentPercent, (currentPercent == 100.0), ConsoleColor.DarkYellow);
         }
 
         public static void WriteDiscIso(DiscDetail disc, TimeSpan elapsed, int currentPercent)
@@ -140,7 +141,7 @@ namespace Archiver.Utilities.Disc
             line += "Creating ISO:";
 
             Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
-            StatusHelpers.WriteStatusLineWithPct(Formatting.GetDiscName(disc), line, currentPercent, complete, ConsoleColor.DarkYellow);
+            StatusHelpers.WriteStatusLineWithPct(DiscFormatting.GetDiscName(disc), line, currentPercent, complete, ConsoleColor.DarkYellow);
         }
         
         public static void WriteDiscIsoHash(DiscDetail disc, TimeSpan elapsed, double currentPercent = 0.0)
@@ -151,7 +152,7 @@ namespace Archiver.Utilities.Disc
             line += "Reading ISO MD5:";
 
             Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
-            StatusHelpers.WriteStatusLineWithPct(Formatting.GetDiscName(disc), line, currentPercent, (currentPercent == 100.0), ConsoleColor.DarkYellow);
+            StatusHelpers.WriteStatusLineWithPct(DiscFormatting.GetDiscName(disc), line, currentPercent, (currentPercent == 100.0), ConsoleColor.DarkYellow);
         }
 
         public static void WriteDiscJsonLine(DiscDetail disc, TimeSpan elapsed)
@@ -162,7 +163,7 @@ namespace Archiver.Utilities.Disc
             line += "Saving disc details to json file ...";
 
             Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
-            StatusHelpers.WriteStatusLine(Formatting.GetDiscName(disc), line, ConsoleColor.DarkYellow);
+            StatusHelpers.WriteStatusLine(DiscFormatting.GetDiscName(disc), line, ConsoleColor.DarkYellow);
         }
 
         public static void WriteDiscComplete(DiscDetail disc, TimeSpan elapsed)
@@ -173,7 +174,7 @@ namespace Archiver.Utilities.Disc
             line += "Complete!";
 
             Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
-            StatusHelpers.WriteStatusLine(Formatting.GetDiscName(disc), line, ConsoleColor.DarkGreen);
+            StatusHelpers.WriteStatusLine(DiscFormatting.GetDiscName(disc), line, ConsoleColor.DarkGreen);
         }
 
 

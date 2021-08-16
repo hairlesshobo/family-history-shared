@@ -1,7 +1,7 @@
 using System.IO;
 using Microsoft.Extensions.Configuration;
 
-namespace Archiver.Shared
+namespace Archiver.Shared.Utilities
 {
     public static partial class Utils
     {

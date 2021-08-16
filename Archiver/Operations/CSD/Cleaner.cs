@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Archiver.Classes.CSD;
+using Archiver.Shared.Utilities;
 using Archiver.Utilities.CSD;
 using Archiver.Utilities.Shared;
 

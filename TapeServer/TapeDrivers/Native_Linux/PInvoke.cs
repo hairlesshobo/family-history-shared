@@ -6,22 +6,22 @@ namespace Archiver.TapeServer.TapeDrivers
     public partial class NativeLinuxTapeDriver : IDisposable
     {
         [DllImport("libc.so.6", EntryPoint = "open", SetLastError = true)]
-        private static extern int Open(string fileName, int mode);
+        private static extern int POpen(string fileName, int mode);
         
         [DllImport("libc.so.6", EntryPoint = "close", SetLastError = true)]
-        private static extern int Close(int handle);
+        private static extern int PClose(int handle);
 
 
 
         [DllImport("libc.so.6", EntryPoint = "read", SetLastError = true)]
-        private static extern int Read(int handle, byte[] data, int length);
+        private static extern int PRead(int handle, byte[] data, int length);
 
         [DllImport("libc.so.6", EntryPoint = "write", SetLastError = true)]
-        private static extern int Write(int handle, byte[] data, int length);
+        private static extern int PWrite(int handle, byte[] data, int length);
 
 
         [DllImport("libc.so.6", EntryPoint = "ioctl", SetLastError = true)]
-        private extern static int Ioctl(int fd, ulong request, IntPtr data);
+        private extern static int PIoctl(int fd, ulong request, IntPtr data);
 
     }
 }

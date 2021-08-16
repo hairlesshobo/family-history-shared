@@ -1,14 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading;
 using Archiver.Classes.Tape;
+using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
-using ICSharpCode.SharpZipLib.Tar;
-using Newtonsoft.Json;
 
 namespace Archiver.Utilities.Tape
 {
@@ -192,9 +188,9 @@ namespace Archiver.Utilities.Tape
                                          .Replace("<%WRITE_DATE%>", _tapeDetail.WriteDTM.ToString())
                                          .Replace("<%FILE_COUNT%>", String.Format("{0:n0}", _tapeDetail.FileCount))
                                          .Replace("<%DIR_COUNT%>", String.Format("{0:n0}", _tapeDetail.DirectoryCount))
-                                         .Replace("<%SIZE_FRIENDLY%>", Shared.Formatting.GetFriendlySize(_tapeDetail.DataSizeBytes))
+                                         .Replace("<%SIZE_FRIENDLY%>", Formatting.GetFriendlySize(_tapeDetail.DataSizeBytes))
                                          .Replace("<%SIZE_BYTES%>", String.Format("{0:n0}", _tapeDetail.DataSizeBytes))
-                                         .Replace("<%ARCHIVE_SIZE_FRIENDLY%>", Shared.Formatting.GetFriendlySize(_tapeDetail.TotalArchiveBytes))
+                                         .Replace("<%ARCHIVE_SIZE_FRIENDLY%>", Formatting.GetFriendlySize(_tapeDetail.TotalArchiveBytes))
                                          .Replace("<%ARCHIVE_SIZE_BYTES%>", String.Format("{0:n0}", _tapeDetail.TotalArchiveBytes))
                                          .Replace("<%DIRECTORY_LIST%>", dirList)
                                          + "\n";
@@ -215,7 +211,7 @@ namespace Archiver.Utilities.Tape
 
             using (TapeOperator tape = new TapeOperator(Config.TapeDrive, (uint)Config.TapeTextBlockSize, false))
             {
-                string json = JsonConvert.SerializeObject(_tapeDetail.GetSummary(), Newtonsoft.Json.Formatting.None);
+                string json = Newtonsoft.Json.JsonConvert.SerializeObject(_tapeDetail.GetSummary(), Newtonsoft.Json.Formatting.None);
                 byte[] buffer = TapeUtils.GetStringPaddedBytes(json, tape.BlockSize);
 
                 TapeUtils.WriteBytesToTape(tape, buffer, true);

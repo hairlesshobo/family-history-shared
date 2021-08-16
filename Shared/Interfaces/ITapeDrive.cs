@@ -1,5 +1,5 @@
 using System;
-using Archiver.Shared.Classes;
+using Archiver.Shared.Models;
 
 namespace Archiver.Shared.Interfaces
 {

@@ -1,6 +1,6 @@
 using System;
 
-namespace Archiver.Shared.Classes
+namespace Archiver.Shared.Models
 {
     public class TapeCartridgeDetails
     {

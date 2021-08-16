@@ -4,9 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using Archiver.Shared;
-using Archiver.Shared.Classes;
+using Archiver.Shared.Models;
 using Archiver.Shared.Exceptions;
 using Archiver.Shared.Interfaces;
+using Archiver.Shared.Utilities;
 
 namespace Archiver.TapeServer.Providers
 {

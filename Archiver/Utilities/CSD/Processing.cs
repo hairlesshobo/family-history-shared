@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Archiver.Classes.CSD;
+using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 
 namespace Archiver.Utilities.CSD
