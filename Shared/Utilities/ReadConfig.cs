@@ -1,4 +1,5 @@
 using System.IO;
+using Archiver.Shared.Models.Config;
 using Microsoft.Extensions.Configuration;
 
 namespace Archiver.Shared.Utilities
@@ -27,7 +28,7 @@ namespace Archiver.Shared.Utilities
             return dir;
         }
 
-        public static IConfiguration ReadConfig()
+        public static IConfiguration ReadConfigFile()
         {
             string configDir = GetConfigDirectory();
 
@@ -40,6 +41,16 @@ namespace Archiver.Shared.Utilities
                 .Build();
 
             return _config;
+        }
+
+        public static ArchiverConfig ReadConfig()
+        {
+            IConfiguration _config = Utils.ReadConfigFile();
+
+            ArchiverConfig config = new ArchiverConfig();
+            _config.Bind(config);
+            
+            return config;
         }
     }
 }

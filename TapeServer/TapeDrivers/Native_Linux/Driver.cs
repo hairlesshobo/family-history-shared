@@ -93,19 +93,15 @@ namespace Archiver.TapeServer.TapeDrivers
 
         /// <summary>
         ///     Read one logical block from tape 
-        ///     starting on the given position
         /// </summary>
-        /// <returns></returns>
-        public bool Read(byte[] buffer, Nullable<long> startPosition)
+        /// <returns>boolean value indicating whether the end of the current file has been reached</returns>
+        public bool Read(byte[] buffer)
         {
             if (!this.IsOpen)
                 throw new TapeDriveNotOpenException("Read");
                 
             bool endOfData = false;
 
-            // if (startPosition.HasValue)
-            //     SetTapeBlockPosition(startPosition.Value);
-            
             try
             {
                 // we empty the buffer before we read from tape
@@ -129,19 +125,22 @@ namespace Archiver.TapeServer.TapeDrivers
             return endOfData;
         }
 
-        public bool Read(byte[] buffer)
-            => this.Read(buffer, null);
-
+        /// <Summary>
+        ///     Eject the tape that is currently in the drive
+        /// <Summary>
         public void Eject()
             => PerformTapeOp("Eject", TapeOpType.MTOFFL);
 
+        /// <Summary>
+        ///     Rewind the tape that is currently in the drive
+        /// <Summary>
         public void Rewind()
             => PerformTapeOp("Rewind", TapeOpType.MTREW);
 
         /// <summary>
         ///     Sets new tape position (current seek)
         /// </summary>
-        /// <param name="logicalBlock">Block number of file on tape to seek to</param>
+        /// <param name="fileNumber">File number on tape to seek to</param>
         public void SetTapeFilePosition(int fileNumber)
         {
             // TODO: Test

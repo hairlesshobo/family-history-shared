@@ -13,7 +13,7 @@ namespace Archiver.TapeServer
     {
         internal static ITapeDrive GetTapeDrive(TapeServerConfig config)
         {
-            string tapeDrive = config.TapeDrive;
+            string tapeDrive = config.DrivePath;
             
             if (tapeDrive.ToLower().StartsWith("simulate-"))
             {
@@ -23,16 +23,6 @@ namespace Archiver.TapeServer
             }
 
             throw new TapeDriveNotFoundException(tapeDrive);
-        }
-
-        internal static TapeServerConfig ReadConfig()
-        {
-            IConfiguration _config = Utils.ReadConfig();
-
-            TapeServerConfig config = new TapeServerConfig();
-            _config.Bind("TapeServer", config);
-            
-            return config;
         }
     }
 }

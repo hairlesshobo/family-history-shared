@@ -2,8 +2,8 @@
 using System.Runtime.InteropServices;
 using System.Text;
 using Archiver.Shared;
-using Archiver.Shared.Interfaces;
 using Archiver.Shared.Models.Config;
+using Archiver.Shared.Utilities;
 using Archiver.TapeServer.TapeDrivers;
 
 namespace Archiver.TapeServer
@@ -15,7 +15,7 @@ namespace Archiver.TapeServer
 
         static void Main()
         {
-            TapeServerConfig config = TapeServerHelpers.ReadConfig();
+            ArchiverConfig config = Utils.ReadConfig();
             // ITapeDrive tapeDrive = TapeServerHelpers.GetTapeDrive(config);
 
             // NetworkServer server = new NetworkServer(config, tapeDrive);
