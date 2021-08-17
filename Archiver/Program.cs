@@ -13,6 +13,7 @@ namespace Archiver
         static void Main(string[] args)
         {
             Utils.RequireSupportedOS();
+            SysInfo.InitPlatform();
 
             try
             {

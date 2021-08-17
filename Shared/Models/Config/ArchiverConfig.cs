@@ -35,10 +35,10 @@ namespace Archiver.Shared.Models.Config
             
             List<ValidationError> results = new List<ValidationError>();
 
-            results.AddRange(Disc.Validate(Utils.BuildValidationPrefix(prefix, nameof(this.Disc))));
-            results.AddRange(Tape.Validate(Utils.BuildValidationPrefix(prefix, nameof(this.Tape))));
-            results.AddRange(CSD.Validate(Utils.BuildValidationPrefix(prefix, nameof(this.CSD))));
-            results.AddRange(TapeServer.Validate(Utils.BuildValidationPrefix(prefix, nameof(this.TapeServer))));
+            results.AddRange(Disc.Validate(ConfigUtils.BuildValidationPrefix(prefix, nameof(this.Disc))));
+            results.AddRange(Tape.Validate(ConfigUtils.BuildValidationPrefix(prefix, nameof(this.Tape))));
+            results.AddRange(CSD.Validate(ConfigUtils.BuildValidationPrefix(prefix, nameof(this.CSD))));
+            results.AddRange(TapeServer.Validate(ConfigUtils.BuildValidationPrefix(prefix, nameof(this.TapeServer))));
 
             if (SysInfo.OSType == OSType.Windows)
             {

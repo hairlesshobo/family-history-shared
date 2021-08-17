@@ -9,7 +9,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Archiver.Shared.Utilities
 {
-    public static partial class Utils
+    public static partial class ConfigUtils
     {
         public static string GetConfigDirectory()
         {
@@ -50,7 +50,7 @@ namespace Archiver.Shared.Utilities
 
         public static ArchiverConfig ReadConfig(out List<ValidationError> validationErrors)
         {
-            IConfiguration _config = Utils.ReadConfigFile();
+            IConfiguration _config = ReadConfigFile();
 
             ArchiverConfig config = new ArchiverConfig();
             _config.Bind(config);

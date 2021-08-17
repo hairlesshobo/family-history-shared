@@ -176,7 +176,9 @@ namespace Archiver.Views
 				// 	win.SetChildNeedsDisplay();
                 //     // top.SetChildNeedsDisplay();
 				// }),
-				new StatusItem (Key.CharMask, Application.Driver.GetType().Name, null),
+                new StatusItem (Key.CharMask, "Tape Driver: " + (SysInfo.IsTapeDrivePresent ? SysInfo.TapeDrive : "NOT Detected"), null),
+                new StatusItem (Key.CharMask, "Optical Drives: " + (OpticalDriveUtils.GetDriveNames().Length), null),
+				new StatusItem (Key.CharMask, "GUI Driver: " + Application.Driver.GetType().Name, null)
 			};
 
             top.Add(statusBar);
@@ -259,20 +261,12 @@ namespace Archiver.Views
                 DropFromGui = true
             });
 
-            AddHyperlink(mainWindow, new HyperlinkInfo() 
-            {
-                Text = "Search Tape Archive",
-                Action = Operations.Tape.TapeSearcher.StartOperation,
-                Color = GuiGlobals.Colors.Green,
-                DropFromGui = true
-            });
-
             //! not implemented
             AddHyperlink(mainWindow, new HyperlinkInfo() 
             {
                 Text = "Restore entire tape (to tar file)",
                 Action = Operations.Tape.RestoreTapeToTar.StartOperation,
-                Disabled = !Config.TapeDrivePresent || true, // remove once implemented
+                Disabled = !SysInfo.IsTapeDrivePresent || true, // remove once implemented
                 Color = GuiGlobals.Colors.Green,
                 DropFromGui = true
             });
@@ -282,7 +276,7 @@ namespace Archiver.Views
             {
                 Text = "Restore entire tape (to original file structure)",
                 Action = NotImplemented,
-                Disabled = !Config.TapeDrivePresent || true, // remove once implemented
+                Disabled = !SysInfo.IsTapeDrivePresent || true, // remove once implemented
                 Color = GuiGlobals.Colors.Green,
                 DropFromGui = true
             });
@@ -291,7 +285,7 @@ namespace Archiver.Views
             {
                 Text = "Read Tape Summary",
                 Action = Operations.Tape.ShowTapeSummary.StartOperation,
-                Disabled = !Config.TapeDrivePresent,
+                Disabled = !SysInfo.IsTapeDrivePresent,
                 Color = GuiGlobals.Colors.Blue,
                 DropFromGui = true
             });
@@ -310,7 +304,7 @@ namespace Archiver.Views
             {
                 Text = "Verify Tape",
                 Action = Operations.Tape.TapeVerification.StartOperation,
-                Disabled = SysInfo.IsReadonlyFilesystem || !Config.TapeDrivePresent,
+                Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsTapeDrivePresent,
                 Color = GuiGlobals.Colors.Yellow,
                 DropFromGui = true
             });
@@ -319,7 +313,7 @@ namespace Archiver.Views
             {
                 Text = "Run tape archive",
                 Action = Operations.Tape.TapeArchiver.StartOperation,
-                Disabled = SysInfo.IsReadonlyFilesystem || !Config.TapeDrivePresent,
+                Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsTapeDrivePresent,
                 Color = GuiGlobals.Colors.Red,
                 DropFromGui = true
             });

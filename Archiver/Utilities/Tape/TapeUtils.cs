@@ -16,36 +16,7 @@ namespace Archiver.Utilities.Tape
 {
     public static class TapeUtils
     {
-        public static bool TapeDrivePresent()
-        {
-            if (Config.TapeDriver.ToLower() != "auto-remote")
-            {
-                if (SysInfo.OSType == OSType.Windows)
-                    return WindowsTapeDrivePresent();
-                else if (SysInfo.OSType == OSType.Linux)
-                    return false;
-            }
-
-            // TODO: finish implementing tape drive detection
-            return false;
-        }
-
-        public static bool WindowsTapeDrivePresent()
-        {
-            try
-            {
-                using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(Config.TapeDrive, false))
-                {}
-            }
-            catch (TapeOperatorWin32Exception exception)
-            {
-                if (exception.HResult == -2146232832)
-                    return false;
-            }
-
-            return true;
-        }
-
+        
         public static TapeDetail GetTapeDetail(int id)
         {
             List<TapeDetail> tapes = new List<TapeDetail>();

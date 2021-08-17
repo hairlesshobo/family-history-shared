@@ -17,7 +17,7 @@ namespace Archiver.TapeServer.Providers
 
         public SimulatedTapeDrive(string driveType)
         {
-            string emulationJsonPath = Path.Combine(Utils.GetConfigDirectory(), "emulation.json");
+            string emulationJsonPath = Path.Combine(ConfigUtils.GetConfigDirectory(), "emulation.json");
             string emulationJson = File.ReadAllText(emulationJsonPath);
             List<SimulatedTapeSpecs> driveTypes = JsonSerializer.Deserialize<List<SimulatedTapeSpecs>>(emulationJson);
 

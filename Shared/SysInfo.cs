@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using Archiver.Shared.Models;
 using Archiver.Shared.Models.Config;
@@ -8,41 +10,49 @@ using Archiver.Shared.Utilities;
 
 namespace Archiver.Shared
 {
-    public enum SysInfoTemplate
+    public enum SysInfoMode
     {
-        None = 0,
+        Unknown = 0,
         Archiver = 1,
-        TapeServer = 2
+        TapeServer = 2,
+        TestCLI = 3
     }
 
     public static class SysInfo
     {
-        private static OSType _osType = OSType.Unknown;
+        private static bool _didInit = false;
         private static ArchiverConfig _config = null;
+        private static SysInfoMode _mode = SysInfoMode.Unknown;
+        private static OSType _osType = OSType.Unknown;
         private static bool _isOpticalDrivePresent = false;
         private static bool _isReadonlyFilesystem = true;
+        private static bool _isTapeDrivePresent = true;
+        private static List<ValidationError> _configErrors;
 
-        public static ArchiverConfig Config => _config; 
 
+        public static ArchiverConfig Config => _config;
+        public static List<ValidationError> ConfigErrors => _configErrors;
 
         public static OSType OSType => _osType;
+        public static SysInfoMode Mode => _mode;
         public static bool IsOpticalDrivePresent => _isOpticalDrivePresent;
         public static bool IsReadonlyFilesystem => _isReadonlyFilesystem;
+        public static bool IsTapeDrivePresent => _isTapeDrivePresent;
+        public static string TapeDrive => _mode == SysInfoMode.Archiver ? Config.Tape.Drive : Config.TapeServer.DrivePath;
         public static Architecture Architecture => System.Runtime.InteropServices.RuntimeInformation.OSArchitecture;
         public static string Description => System.Runtime.InteropServices.RuntimeInformation.OSDescription;
         public static string Identifier => System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier;
         
         
         static SysInfo()
-        {            
+        {
+            _mode = GetMode();
+
             if (OperatingSystem.IsWindows())
                 _osType = OSType.Windows;
             else if (OperatingSystem.IsLinux())
                 _osType = OSType.Linux;
-
-            _isOpticalDrivePresent = OpticalDriveUtils.GetDriveNames().Any();
-            _isReadonlyFilesystem = TestForReadonlyFs();
-
+            
             // these are commented out because we have not yet built support for them into the app. For now, they will 
             // be identified as "Unknown" and the app will not lauch on an unknown platform.
             // else if (OperatingSystem.IsFreeBSD())
@@ -51,16 +61,25 @@ namespace Archiver.Shared
             //     _osType = OSType.OSX;
         }
 
+        public static void InitPlatform()
+        {
+            if (!_didInit)
+            {
+                _config = ConfigUtils.ReadConfig(out _configErrors);
+                
+                _isOpticalDrivePresent = OpticalDriveUtils.GetDriveNames().Any();
+                _isReadonlyFilesystem = TestForReadonlyFs();
+                _isTapeDrivePresent = TapeUtilsNew.IsTapeDrivePresent();
+            }
+        }
+
         internal static void SetConfig(ArchiverConfig config)
         {
             if (_config == null)
                 _config = config;
         }
 
-        public static void WriteSystemInfo(bool color = false)
-            => WriteSystemInfo(null, SysInfoTemplate.None, color);
-
-        public static void WriteSystemInfo(ArchiverConfig config, SysInfoTemplate template, bool color = false)
+        public static void WriteSystemInfo(bool writeConfig = false, bool color = false)
         {
             // TODO: Add GUI window for system info
             PrintHeader(color, "System Information:");
@@ -68,11 +87,11 @@ namespace Archiver.Shared
             PrintField(color, 11, "Description", SysInfo.Description);
             PrintField(color, 11, "Identifier", SysInfo.Identifier);
 
-            if (config != null && template == SysInfoTemplate.TapeServer)
+            if (writeConfig && Mode == SysInfoMode.TapeServer)
             {
                 Console.WriteLine();
                 PrintHeader(color, "Configuration:");
-                PrintField(color, 12, "Tape Drive", config.TapeServer.DrivePath);
+                PrintField(color, 12, "Tape Drive", Config.TapeServer.DrivePath);
             }
         }
 
@@ -93,6 +112,26 @@ namespace Archiver.Shared
             }
             else
                 Console.WriteLine($"  {fieldName.PadLeft(width)}: {value}");
+        }
+
+        private static SysInfoMode GetMode()
+        {
+            string assemblyName = Assembly.GetEntryAssembly().GetName().Name;
+
+            switch (assemblyName)
+            {
+                case "Archiver":
+                    return SysInfoMode.Archiver;
+
+                case "TapeServer":
+                    return SysInfoMode.TapeServer;
+
+                case "TestCLI":
+                    return SysInfoMode.TestCLI;
+                
+                default:
+                    return SysInfoMode.Unknown;
+            }
         }
 
         private static bool TestForReadonlyFs()

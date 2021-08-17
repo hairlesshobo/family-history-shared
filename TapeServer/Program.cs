@@ -19,25 +19,24 @@ namespace Archiver.TapeServer
         static void Main()
         {
             Utils.RequireSupportedOS();
-
-            List<ValidationError> configErrors;
-            ArchiverConfig config = Utils.ReadConfig(out configErrors);
+            SysInfo.InitPlatform();
+            
 
             int pid = GetPid();
             
             Formatting.WriteLineC(ConsoleColor.Green, $"Archive TapeServer component starting up. (PID: {pid})");
             Console.WriteLine("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-            SysInfo.WriteSystemInfo(config, SysInfoTemplate.TapeServer, true);
+            SysInfo.WriteSystemInfo(true);
 
-            if (configErrors.Count > 0)
+            if (SysInfo.ConfigErrors.Count > 0)
             {
                 Console.WriteLine("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-                Formatting.WriteLineC(ConsoleColor.Red, $"{configErrors.Count} Configuration ERROR(s) Found!");
+                Formatting.WriteLineC(ConsoleColor.Red, $"{SysInfo.ConfigErrors.Count} Configuration ERROR(s) Found!");
                 Console.WriteLine();
 
-                int fieldWidth = configErrors.Max(x => x.Field.Length)+2;
+                int fieldWidth = SysInfo.ConfigErrors.Max(x => x.Field.Length)+2;
 
-                foreach (ValidationError error in configErrors)
+                foreach (ValidationError error in SysInfo.ConfigErrors)
                 {
                     Formatting.WriteC(ConsoleColor.Cyan, "Field: ");
                     Console.WriteLine(error.Field.PadRight(fieldWidth));

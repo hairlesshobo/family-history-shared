@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using Archiver.Shared.Exceptions;
@@ -28,7 +29,7 @@ namespace Archiver.Shared.Utilities
 
             string driveNameLine = lines.FirstOrDefault(x => x.ToLower().StartsWith("drive name"));
             string stringValue = driveNameLine.Substring(driveNameLine.IndexOf(':')+1).Trim('\t').Trim();
-            string[] driveNames = stringValue.Split('\t').OrderBy(x => x).ToArray();
+            string[] driveNames = stringValue.Split('\t').Where(x => !String.IsNullOrWhiteSpace(x)).OrderBy(x => x).ToArray();
 
             return driveNames;
         }

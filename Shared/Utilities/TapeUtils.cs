@@ -1,8 +1,10 @@
 using System;
+using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using Archiver.Shared.Exceptions;
 using Archiver.Shared.Models;
+using Archiver.Shared.TapeDrivers;
 
 namespace Archiver.Shared.Utilities
 {
@@ -42,6 +44,44 @@ namespace Archiver.Shared.Utilities
             return rawData;
         }
 
-        
+        // TODO: Find a way to split this that works for archiver and tape server
+        public static bool IsTapeDrivePresent()
+        {
+            if (SysInfo.Config.Tape.Driver.ToLower() != "auto-remote")
+            {
+                if (SysInfo.OSType == OSType.Windows)
+                    return WindowsIsTapeDrivePresent();
+                else if (SysInfo.OSType == OSType.Linux)
+                    return LinuxIsTapeDrivePresent();
+            }
+
+            // TODO: finish implementing tape drive detection
+            return false;
+        }
+
+        #region Linux Utilities
+        private static bool LinuxIsTapeDrivePresent()
+            => File.Exists(SysInfo.TapeDrive);
+            
+        #endregion
+
+        #region Windows Utilities
+        private static bool WindowsIsTapeDrivePresent()
+        {
+            try
+            {
+                using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(SysInfo.TapeDrive, false))
+                {}
+            }
+            catch (TapeOperatorWin32Exception exception)
+            {
+                if (exception.HResult == -2146232832)
+                    return false;
+            }
+
+            return true;
+        }
+        #endregion
+
     }
 }

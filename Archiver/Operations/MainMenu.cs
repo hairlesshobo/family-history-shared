@@ -73,7 +73,7 @@ namespace Archiver.Operations
 
                 string tapeMenuAppend = String.Empty;
 
-                if (Config.TapeDrivePresent == false)
+                if (SysInfo.IsTapeDrivePresent == false)
                     tapeMenuAppend += " (drive not detected)";
 
                 string discMenuAppend = String.Empty;
@@ -149,20 +149,20 @@ namespace Archiver.Operations
                     new CliMenuEntry<bool>() {
                         Name = "Restore entire tape (to tar file)",
                         Action = Tape.RestoreTapeToTar.StartOperation,
-                        Disabled = !Config.TapeDrivePresent || true, // remove once implemented
+                        Disabled = !SysInfo.IsTapeDrivePresent || true, // remove once implemented
                         ForegroundColor = ConsoleColor.Green
                     },
                     //! not implemented
                     new CliMenuEntry<bool>() {
                         Name = "Restore entire tape (to original file structure)",
                         Action = NotImplemented,
-                        Disabled = !Config.TapeDrivePresent || true, // remove once implemented
+                        Disabled = !SysInfo.IsTapeDrivePresent || true, // remove once implemented
                         ForegroundColor = ConsoleColor.Green
                     },
                     new CliMenuEntry<bool>() {
                         Name = "Read Tape Summary",
                         Action = Tape.ShowTapeSummary.StartOperation,
-                        Disabled = !Config.TapeDrivePresent,
+                        Disabled = !SysInfo.IsTapeDrivePresent,
                         // SelectedValue = true, // do not show the "press enter to return to main menu" message
                         ForegroundColor = ConsoleColor.Blue
                     },
@@ -175,13 +175,13 @@ namespace Archiver.Operations
                     new CliMenuEntry<bool>() {
                         Name = "Verify Tape",
                         Action = Tape.TapeVerification.StartOperation,
-                        Disabled = SysInfo.IsReadonlyFilesystem || !Config.TapeDrivePresent,
+                        Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsTapeDrivePresent,
                         ForegroundColor = ConsoleColor.DarkYellow
                     },
                     new CliMenuEntry<bool>() {
                         Name = "Run tape archive",
                         Action = Tape.TapeArchiver.StartOperation,
-                        Disabled = SysInfo.IsReadonlyFilesystem || !Config.TapeDrivePresent,
+                        Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsTapeDrivePresent,
                         ForegroundColor = ConsoleColor.Red
                     },
 

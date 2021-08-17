@@ -66,7 +66,7 @@ namespace Archiver.Shared.Models.Config
             if (this.Ports == null)
                 results.AddValidationError(prefix, nameof(Ports), $"Object must be provided!");
             else
-                results.AddRange(Ports.Validate(Utils.BuildValidationPrefix(prefix, nameof(this.Ports))));
+                results.AddRange(Ports.Validate(ConfigUtils.BuildValidationPrefix(prefix, nameof(this.Ports))));
 
             return results;
         }

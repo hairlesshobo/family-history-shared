@@ -2,8 +2,6 @@ using System;
 using System.IO;
 using System.Linq;
 using Archiver.Shared.Utilities;
-using Archiver.Utilities.Shared;
-using Archiver.Utilities.Tape;
 using Microsoft.Extensions.Configuration;
 
 namespace Archiver
@@ -20,17 +18,6 @@ namespace Archiver
 
         public static long CsdReservedCapacity { get; set; }
         public static int CsdAutoSaveInterval { get; set; }
-
-
-        public static bool TapeDrivePresent 
-        { 
-            get
-            {
-                return _tapeDrivePresent;
-            }
-        }
-
-        private static bool _tapeDrivePresent;
 
         public static void ReadConfig()
         {
@@ -98,8 +85,6 @@ namespace Archiver
                 if (File.Exists(cleanExcPath) || Directory.Exists(cleanExcPath))
                     DiscGlobals._discExcludePaths.Add(cleanExcPath);
             }
-
-            _tapeDrivePresent = TapeUtils.TapeDrivePresent();
         }
 
         
