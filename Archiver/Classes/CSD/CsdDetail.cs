@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Archiver.Shared;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.CSD;
 using Archiver.Utilities.Shared;
@@ -66,7 +67,7 @@ namespace Archiver.Classes.CSD
         public IEnumerable<CsdSourceFile> PendingFiles => _pendingFiles;
 
         [JsonIgnore]
-        public long UsableFreeSpace => this.TotalSpace - Config.CsdReservedCapacity - this._dataSizeOnDisk - this._pendingBytesOnDisk;
+        public long UsableFreeSpace => this.TotalSpace - SysInfo.Config.CSD.ReservedCapacityBytes - this._dataSizeOnDisk - this._pendingBytesOnDisk;
         [JsonIgnore]
         public long PendingBytes => _pendingBytes;
         [JsonIgnore]

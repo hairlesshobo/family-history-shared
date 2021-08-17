@@ -16,6 +16,9 @@ namespace Archiver.Shared
     public static class SysInfo
     {
         private static OSType _osType = OSType.Unknown;
+        private static ArchiverConfig _config = null;
+
+        public static ArchiverConfig Config => _config; 
 
 
         public static OSType OSType => _osType;
@@ -37,6 +40,12 @@ namespace Archiver.Shared
             //     _osType = OSType.FreeBSD;
             // else if (OperatingSystem.IsMacOS())
             //     _osType = OSType.OSX;
+        }
+
+        internal static void SetConfig(ArchiverConfig config)
+        {
+            if (_config == null)
+                _config = config;
         }
 
         public static void WriteSystemInfo(bool color = false)

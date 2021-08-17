@@ -6,6 +6,7 @@ using System.Management;
 using System.Text;
 using System.Threading;
 using Archiver.Classes.CSD;
+using Archiver.Shared.Exceptions;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 
@@ -90,7 +91,7 @@ namespace Archiver.Utilities.CSD
                                                                    x.UsableFreeSpace > HelpersNew.RoundToNextMultiple(FileSize, x.BlockSize));
 
             if (matchingCsd == null)
-                throw new InsufficientCsdCapacityException($"No CSD Drive with sufficient capacity to store a {FileSize} byte ({Formatting.GetFriendlySize(FileSize)}) file");
+                throw new CsdInsufficientCapacityException($"No CSD Drive with sufficient capacity to store a {FileSize} byte ({Formatting.GetFriendlySize(FileSize)}) file");
             else
                 return matchingCsd;
         }

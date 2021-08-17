@@ -8,7 +8,7 @@ namespace Archiver.Shared.Models.Config
     {
         // Amount of storage on CSD to reserve for index purposes
         // Default: 1 GiB
-        public ulong ReservedCapacityBytes { get; set; } = 1073741824; 
+        public long ReservedCapacityBytes { get; set; } = 1073741824; 
 
         public string[] SourcePaths { get; set; }
 
