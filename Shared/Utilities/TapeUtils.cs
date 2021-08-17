@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using System.Text.RegularExpressions;
 using Archiver.Shared.Exceptions;
 using Archiver.Shared.Models;
@@ -30,6 +31,15 @@ namespace Archiver.Shared.Utilities
             }
 
             return path;
+        }
+
+        public static byte[] GetStringPaddedBytes(string Input, uint BlockSize)
+        {
+            byte[] rawData = Encoding.UTF8.GetBytes(Input);
+            int lengthNeeded = (int)HelpersNew.RoundToNextMultiple(rawData.Length, (int)BlockSize);
+            Array.Resize(ref rawData, lengthNeeded);
+
+            return rawData;
         }
     }
 }

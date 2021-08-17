@@ -15,16 +15,6 @@ namespace Archiver.Utilities.Shared
 {
     public class Helpers
     {
-        public static long RoundToNextMultiple(long value, int multiple)
-        {
-            if (value == 0)
-                return 0;
-                
-            long nearestMultiple = (long)Math.Round((value / (double)multiple), MidpointRounding.ToPositiveInfinity) * multiple;
-
-            return nearestMultiple;
-        }
-
         public static int GetCdromId(string DriveLetter)
         {
             DriveLetter = DriveLetter.Trim('/');
@@ -170,35 +160,6 @@ namespace Archiver.Utilities.Shared
             return tapes;
         }
 
-        
-
-        public static string CleanPath(string inPath)
-            => inPath.Replace(@"\", "/").TrimEnd('/');
-
-        public static string DirtyPath(string inPath)
-            => inPath.Replace("/", @"\");
-
-        public static string GetRelativePath(string inPath)
-        {
-            if (inPath.StartsWith("//"))
-            {
-                inPath = inPath.TrimStart('/');
-                return inPath.Substring(inPath.IndexOf('/'));
-            }
-                
-            return inPath.Split(':')[1];
-        }
-
-        public static string GetFileName(string FullPath)
-        {
-            FullPath = Helpers.CleanPath(FullPath);
-
-            return FullPath.Substring(FullPath.LastIndexOf('/')+1);
-
-            // string[] nameParts = FullPath.Split('/');
-            
-            // return nameParts[nameParts.Length-1];
-        }
 
         public static DiscDetail GetDestinationDisc(long FileSize)
         {
@@ -230,7 +191,7 @@ namespace Archiver.Utilities.Shared
             string isoPath = DiscGlobals._discStagingDir + "/iso/index.iso";
             string isoName = "Archive Index";
 
-            ISO_Creator creator = new ISO_Creator(isoName, Helpers.DirtyPath(Globals._indexDiscDir), isoPath);
+            ISO_Creator creator = new ISO_Creator(isoName, PathUtils.DirtyPath(Globals._indexDiscDir), isoPath);
 
             creator.OnProgressChanged += (currentPercent) => {
                 string line = StatusHelpers.GeneratePercentBar(Console.WindowWidth, 0, 0, currentPercent, (currentPercent == 100));
@@ -294,49 +255,6 @@ namespace Archiver.Utilities.Shared
 
             // Write the json data needed for future runs of this app
             File.WriteAllText(jsonFilePath, json, Encoding.UTF8);
-        }
-
-
-        public static bool YesNoConfirm(string message, bool yesDefault, bool clearScreen)
-        {
-            if (clearScreen)
-                Console.Clear();
-
-            if (!message.EndsWith("?"))
-                message += "?";
-
-            Console.Write($"{message} (");
-            
-            if (yesDefault)
-            {
-                Formatting.WriteC(ConsoleColor.Blue, "YES");
-                Console.Write("/no");
-            }
-            else
-            {
-                Console.Write("yes/");
-                Formatting.WriteC(ConsoleColor.Blue, "NO");
-            }
-
-            Console.Write(") ");
-
-            bool prevCtrlValue = Console.TreatControlCAsInput;
-
-            Console.TreatControlCAsInput = false;
-            Console.CursorVisible = true;
-            string response = Console.ReadLine();
-            Console.CursorVisible = false;
-            Console.TreatControlCAsInput = prevCtrlValue;
-
-            bool responseWasYes = response.ToLower().StartsWith("yes");
-
-            if (!responseWasYes && yesDefault && response.Trim().Length == 0)
-                responseWasYes = true;
-
-            if (clearScreen)
-                Console.Clear();
-
-            return responseWasYes;
         }
     }
 }

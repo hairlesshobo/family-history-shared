@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 
 namespace Archiver.Utilities.Disc
@@ -29,7 +30,7 @@ namespace Archiver.Utilities.Disc
 
         public void CreateISO()
         {
-            string procArgs = $" --burn-data -folder[\\]:\"{Helpers.DirtyPath(_sourceDirectory)}\" -name:\"{_discName}\" -udf:2.5 -iso:\"{Helpers.DirtyPath(_destinationPath)}\"";
+            string procArgs = $" --burn-data -folder[\\]:\"{PathUtils.DirtyPath(_sourceDirectory)}\" -name:\"{_discName}\" -udf:2.5 -iso:\"{PathUtils.DirtyPath(_destinationPath)}\"";
 
             Process process = new Process();
             process.StartInfo.FileName = Globals._cdbxpPath;

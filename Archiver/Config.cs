@@ -1,12 +1,14 @@
 using System;
 using System.IO;
 using System.Linq;
+using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 using Archiver.Utilities.Tape;
 using Microsoft.Extensions.Configuration;
 
 namespace Archiver
 {
+    [Obsolete]
     public static class Config
     {
         public static string TapeDriver { get; set; }
@@ -94,7 +96,7 @@ namespace Archiver
 
             foreach (string excPath in _config.GetSection("CSD:ExcludePaths").Get<string[]>())
             {
-                string cleanExcPath = Helpers.CleanPath(excPath);
+                string cleanExcPath = PathUtils.CleanPath(excPath);
 
                 if (File.Exists(cleanExcPath) || Directory.Exists(cleanExcPath))
                     CsdGlobals._csdExcludePaths.Add(cleanExcPath);
@@ -109,7 +111,7 @@ namespace Archiver
 
             foreach (string excPath in _config.GetSection("Disc:ExcludePaths").Get<string[]>())
             {
-                string cleanExcPath = Helpers.CleanPath(excPath);
+                string cleanExcPath = PathUtils.CleanPath(excPath);
 
                 if (File.Exists(cleanExcPath) || Directory.Exists(cleanExcPath))
                     DiscGlobals._discExcludePaths.Add(cleanExcPath);

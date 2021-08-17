@@ -196,7 +196,7 @@ namespace Archiver.Utilities.Tape
                                          + "\n";
                 }
 
-                byte[] buffer = TapeUtils.GetStringPaddedBytes(summaryOutput, tape.BlockSize);
+                byte[] buffer = TapeUtilsNew.GetStringPaddedBytes(summaryOutput, tape.BlockSize);
                 TapeUtils.WriteBytesToTape(tape, buffer, false);
                 tape.WriteFilemark();
             }
@@ -212,7 +212,7 @@ namespace Archiver.Utilities.Tape
             using (TapeOperator tape = new TapeOperator(Config.TapeDrive, (uint)Config.TapeTextBlockSize, false))
             {
                 string json = Newtonsoft.Json.JsonConvert.SerializeObject(_tapeDetail.GetSummary(), Newtonsoft.Json.Formatting.None);
-                byte[] buffer = TapeUtils.GetStringPaddedBytes(json, tape.BlockSize);
+                byte[] buffer = TapeUtilsNew.GetStringPaddedBytes(json, tape.BlockSize);
 
                 TapeUtils.WriteBytesToTape(tape, buffer, true);
                 tape.WriteFilemark();

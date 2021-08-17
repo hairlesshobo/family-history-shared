@@ -6,6 +6,7 @@ using Archiver.Classes.CSD;
 
 namespace Archiver
 {
+    [Obsolete]
     public static class CsdGlobals
     {
         public static List<CsdSourceFile> _jsonReadSourceFiles = new List<CsdSourceFile>();

@@ -17,7 +17,7 @@ namespace Archiver.Operations.CSD
             Formatting.WriteC(ConsoleColor.Red, "WARNING: ");
             Console.WriteLine("This cannot be undone!");
 
-            bool doProcess = Helpers.YesNoConfirm("Do you want to continue?", false, true);
+            bool doProcess = ConsoleUtils.YesNoConfirm("Do you want to continue?", false, true);
 
             if (!doProcess)
             {
@@ -40,7 +40,7 @@ namespace Archiver.Operations.CSD
 
             foreach (string file in files)
             {
-                string relativePath = Helpers.CleanPath(file).Substring(root.Length);
+                string relativePath = PathUtils.CleanPath(file).Substring(root.Length);
 
                 bool fileExists = csd.Files.Any(x => x.RelativePath.ToLower() == relativePath.ToLower());
 
@@ -62,7 +62,7 @@ namespace Archiver.Operations.CSD
 
                 if (noFilesInDir)
                 {
-                    string relativeDirPath = Helpers.CleanPath(fi.Directory.FullName).Substring(root.Length);
+                    string relativeDirPath = PathUtils.CleanPath(fi.Directory.FullName).Substring(root.Length);
 
                     Console.WriteLine($"Removing extra directory: {relativeDirPath}");
 

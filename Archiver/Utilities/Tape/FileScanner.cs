@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using Archiver.Classes;
 using Archiver.Classes.Tape;
+using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 
 namespace Archiver.Utilities.Tape
@@ -54,8 +55,8 @@ namespace Archiver.Utilities.Tape
 
         private TapeSourceDirectory ScanRootDirectory(string sourcePath)
         {
-            sourcePath = Helpers.CleanPath(sourcePath);
-            string relativePath = Helpers.GetRelativePath(sourcePath);
+            sourcePath = PathUtils.CleanPath(sourcePath);
+            string relativePath = PathUtils.GetRelativePath(sourcePath);
 
             DirectoryInfo sourceDirInfo = new DirectoryInfo(sourcePath);
             List<DirectoryInfo> directoryParts = new List<DirectoryInfo>() {
@@ -122,7 +123,7 @@ namespace Archiver.Utilities.Tape
 
         private TapeSourceDirectory FindExistingDirectoryByAboslutePath(string absolutePath)
         {
-            string relativePath = Helpers.GetRelativePath(Helpers.CleanPath(absolutePath));
+            string relativePath = PathUtils.GetRelativePath(PathUtils.CleanPath(absolutePath));
             return FindExistingDirectory(relativePath);
         }
 
@@ -153,7 +154,7 @@ namespace Archiver.Utilities.Tape
 
         private TapeSourceDirectory ScanDirectory(string sourcePath)
         {
-            TapeSourceDirectory directory = new TapeSourceDirectory(Helpers.CleanPath(sourcePath));
+            TapeSourceDirectory directory = new TapeSourceDirectory(PathUtils.CleanPath(sourcePath));
             return ScanDirectory(directory);
         }
 
@@ -164,7 +165,7 @@ namespace Archiver.Utilities.Tape
 
             foreach (string dir in Directory.GetDirectories(directory.FullPath))
             {
-                string cleanDir = Helpers.CleanPath(dir);
+                string cleanDir = PathUtils.CleanPath(dir);
 
                 if (!(_tapeDetail.SourceInfo.ExcludePaths.Any(x => cleanDir.ToLower().StartsWith(x.ToLower()))))
                     directory.Directories.Add(ScanDirectory(dir));
@@ -172,12 +173,12 @@ namespace Archiver.Utilities.Tape
 
             foreach (string file in Directory.GetFiles(directory.FullPath))
             {
-                string cleanFile = Helpers.CleanPath(file);
+                string cleanFile = PathUtils.CleanPath(file);
 
                 if (_tapeDetail.SourceInfo.ExcludePaths.Any(x => cleanFile.ToLower().StartsWith(x.ToLower())))
                     _tapeDetail.ExcludedFileCount++;
 
-                else if (_tapeDetail.SourceInfo.ExcludeFiles.Any(x => Helpers.GetFileName(cleanFile).ToLower().EndsWith(x.ToLower())))
+                else if (_tapeDetail.SourceInfo.ExcludeFiles.Any(x => PathUtils.GetFileName(cleanFile).ToLower().EndsWith(x.ToLower())))
                     _tapeDetail.ExcludedFileCount++;
 
                 else

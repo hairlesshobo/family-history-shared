@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Archiver.Shared.Utilities;
 using Archiver.Utilities.CSD;
 using Archiver.Utilities.Shared;
 using Newtonsoft.Json;
@@ -128,7 +129,7 @@ namespace Archiver.Classes.CSD
 
                 _totalFiles++;
                 _dataSize += file.Size;
-                _dataSizeOnDisk += Helpers.RoundToNextMultiple(file.Size, this.BlockSize);
+                _dataSizeOnDisk += HelpersNew.RoundToNextMultiple(file.Size, this.BlockSize);
             }   
             else
             {
@@ -136,7 +137,7 @@ namespace Archiver.Classes.CSD
 
                 this._pendingFileCount++;
                 this._pendingBytes += file.Size;
-                this._pendingBytesOnDisk += Helpers.RoundToNextMultiple(file.Size, this.BlockSize);
+                this._pendingBytesOnDisk += HelpersNew.RoundToNextMultiple(file.Size, this.BlockSize);
             }
         }
 
@@ -164,14 +165,14 @@ namespace Archiver.Classes.CSD
         {
             this._totalFiles = this._files.Count();
             this._dataSize = this._files.Sum(x => x.Size);
-            this._dataSizeOnDisk = this._files.Sum(x => Helpers.RoundToNextMultiple(x.Size, this.BlockSize));
+            this._dataSizeOnDisk = this._files.Sum(x => HelpersNew.RoundToNextMultiple(x.Size, this.BlockSize));
             this.BytesCopied = this.DataSize;
 
             if (includePending)
             {
                 this._pendingFileCount = this._pendingFiles.Count();
                 this._pendingBytes = this._pendingFiles.Sum(x => x.Size);
-                this._pendingBytesOnDisk = this._pendingFiles.Sum(x => Helpers.RoundToNextMultiple(x.Size, this.BlockSize));
+                this._pendingBytesOnDisk = this._pendingFiles.Sum(x => HelpersNew.RoundToNextMultiple(x.Size, this.BlockSize));
             }
         }
 
@@ -183,7 +184,7 @@ namespace Archiver.Classes.CSD
 
                 _pendingFileCount--;
                 _pendingBytes -= file.Size;
-                _pendingBytesOnDisk -= Helpers.RoundToNextMultiple(file.Size, this.BlockSize);
+                _pendingBytesOnDisk -= HelpersNew.RoundToNextMultiple(file.Size, this.BlockSize);
             }
 
             if (!_files.Contains(file))
@@ -192,7 +193,7 @@ namespace Archiver.Classes.CSD
 
                 _totalFiles++;
                 _dataSize += file.Size;
-                _dataSizeOnDisk += Helpers.RoundToNextMultiple(file.Size, this.BlockSize);
+                _dataSizeOnDisk += HelpersNew.RoundToNextMultiple(file.Size, this.BlockSize);
             }
         }
 

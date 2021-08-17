@@ -1,9 +1,8 @@
-using System.Collections.Generic;
-using Archiver.Classes;
-using Archiver.Classes.Disc;
+using System;
 
 namespace Archiver
 {
+    [Obsolete]
     public static class Globals
     {
         public static int _leftHeaderWidth = 12;

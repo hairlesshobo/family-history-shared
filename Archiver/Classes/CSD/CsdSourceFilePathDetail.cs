@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Archiver.Classes.Shared;
+using Archiver.Shared.Utilities;
 using Archiver.Utilities;
 using Archiver.Utilities.Shared;
 using Newtonsoft.Json;
@@ -28,10 +29,10 @@ namespace Archiver.Classes.CSD
             } 
             set
             {
-                _FullPath = Helpers.CleanPath(value);
+                _FullPath = PathUtils.CleanPath(value);
 
-                this.Name = Helpers.GetFileName(_FullPath);
-                this.RelativePath = Helpers.GetRelativePath(value);
+                this.Name = PathUtils.GetFileName(_FullPath);
+                this.RelativePath = PathUtils.GetRelativePath(value);
                 this.RelativeDirectory = this.RelativePath.Substring(0, this.RelativePath.LastIndexOf('/'));
             }
         }

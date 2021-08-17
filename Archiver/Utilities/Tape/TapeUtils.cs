@@ -310,14 +310,5 @@ namespace Archiver.Utilities.Tape
                 return tape.TapeLoaded();
             }
         }
-
-        public static byte[] GetStringPaddedBytes(string Input, uint BlockSize)
-        {
-            byte[] rawData = Encoding.UTF8.GetBytes(Input);
-            int lengthNeeded = (int)Helpers.RoundToNextMultiple(rawData.Length, (int)BlockSize);
-            Array.Resize(ref rawData, lengthNeeded);
-
-            return rawData;
-        }
     }
 }

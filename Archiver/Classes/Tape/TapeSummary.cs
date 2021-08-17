@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 
 namespace Archiver.Classes.Tape
@@ -47,7 +48,7 @@ namespace Archiver.Classes.Tape
 
                     // data, rounded to next 512 bytes.. only if the file is greater than 0 bytes
                     if (file.Size > 0)
-                        size += Helpers.RoundToNextMultiple(file.Size, 512);
+                        size += HelpersNew.RoundToNextMultiple(file.Size, 512);
                 }
 
                 // account for directory entries
@@ -57,7 +58,7 @@ namespace Archiver.Classes.Tape
                 size += 1024;
 
                 // round to next block size
-                size = Helpers.RoundToNextMultiple(size, (512 * Config.TapeBlockingFactor));
+                size = HelpersNew.RoundToNextMultiple(size, (512 * Config.TapeBlockingFactor));
 
                 return size;
             }

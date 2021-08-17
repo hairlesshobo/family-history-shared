@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 using Newtonsoft.Json;
 
@@ -19,10 +20,10 @@ namespace Archiver.Classes.Tape
             } 
             set
             {
-                _FullPath = Helpers.CleanPath(value);
+                _FullPath = PathUtils.CleanPath(value);
 
-                this.Name = Helpers.GetFileName(_FullPath);
-                this.RelativePath = Helpers.GetRelativePath(value).TrimEnd('/');
+                this.Name = PathUtils.GetFileName(_FullPath);
+                this.RelativePath = PathUtils.GetRelativePath(value).TrimEnd('/');
             }
         }
         public string RelativePath { get; set; }
@@ -37,7 +38,7 @@ namespace Archiver.Classes.Tape
             this.Files = new List<TapeSourceFile>();
             this.Directories = new List<TapeSourceDirectory>();
 
-            this.FullPath = Helpers.CleanPath(sourcePath);
+            this.FullPath = PathUtils.CleanPath(sourcePath);
 
             if (!Directory.Exists(this.FullPath))
                 throw new DirectoryNotFoundException($"Source directory does not exist: {sourcePath}");

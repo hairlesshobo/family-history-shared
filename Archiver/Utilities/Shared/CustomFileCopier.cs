@@ -5,6 +5,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using Archiver.Classes.Shared;
+using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 
 namespace Archiver.Utilities.Shared
@@ -36,8 +37,8 @@ namespace Archiver.Utilities.Shared
         private void Initialize(ISourceFile sourceFile, string destinationRoot, string newFileName = null)
         {
             this.SourceFile = sourceFile;
-            this.DestinationRoot = Helpers.CleanPath(destinationRoot);
-            this.DestinationDirectory = Helpers.CleanPath($"{this.DestinationRoot}/{this.SourceFile.RelativeDirectory}");
+            this.DestinationRoot = PathUtils.CleanPath(destinationRoot);
+            this.DestinationDirectory = PathUtils.CleanPath($"{this.DestinationRoot}/{this.SourceFile.RelativeDirectory}");
 
             if (!File.Exists(this.SourceFile.FullPath))
                 throw new FileNotFoundException($"Source file doesn't exist: {this.SourceFile.FullPath}");
@@ -53,7 +54,7 @@ namespace Archiver.Utilities.Shared
                 this.DestinationFilePath = Path.Join(this.DestinationDirectory, fi.Name);
             }
 
-            this.DestinationFilePath = Helpers.CleanPath(this.DestinationFilePath);
+            this.DestinationFilePath = PathUtils.CleanPath(this.DestinationFilePath);
 
             this.OnComplete += delegate { };
             this.OnProgressChanged += delegate { };

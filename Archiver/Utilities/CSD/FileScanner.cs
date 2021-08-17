@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using Archiver.Classes;
 using Archiver.Classes.CSD;
+using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 
 namespace Archiver.Utilities.CSD
@@ -35,7 +36,7 @@ namespace Archiver.Utilities.CSD
 
             foreach (string dirtySourcePath in CsdGlobals._csdSourcePaths)
             {
-                string sourcePath = Helpers.CleanPath(dirtySourcePath);
+                string sourcePath = PathUtils.CleanPath(dirtySourcePath);
 
                 ScanDirectory(dirtySourcePath);
             }
@@ -52,7 +53,7 @@ namespace Archiver.Utilities.CSD
             try {
                 foreach (string dir in Directory.GetDirectories(sourcePath))
                 {
-                    string cleanDir = Helpers.CleanPath(dir);
+                    string cleanDir = PathUtils.CleanPath(dir);
 
                     if (!(CsdGlobals._csdExcludePaths.Any(x => cleanDir.ToLower().StartsWith(x.ToLower()))))
                         ScanDirectory(dir);
@@ -67,8 +68,8 @@ namespace Archiver.Utilities.CSD
             {
                 _totalFileCount++;
 
-                string cleanFile = Helpers.CleanPath(file);
-                string fileName = Helpers.GetFileName(cleanFile);
+                string cleanFile = PathUtils.CleanPath(file);
+                string fileName = PathUtils.GetFileName(cleanFile);
 
                 if (CsdGlobals._csdExcludePaths.Any(x => cleanFile.ToLower().StartsWith(x.ToLower())))
                     CsdGlobals._excludedFileCount++;
