@@ -176,7 +176,7 @@ namespace Archiver.Views
 				// 	win.SetChildNeedsDisplay();
                 //     // top.SetChildNeedsDisplay();
 				// }),
-                new StatusItem (Key.CharMask, "Tape Driver: " + (SysInfo.IsTapeDrivePresent ? SysInfo.TapeDrive : "NOT Detected"), null),
+                new StatusItem (Key.CharMask, "Tape Drive: " + (SysInfo.IsTapeDrivePresent ? SysInfo.TapeDrive : "NOT Detected"), null),
                 new StatusItem (Key.CharMask, "Optical Drives: " + (OpticalDriveUtils.GetDriveNames().Length), null),
 				new StatusItem (Key.CharMask, "GUI Driver: " + Application.Driver.GetType().Name, null)
 			};
