@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using Archiver.Shared;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 
@@ -33,7 +34,7 @@ namespace Archiver.Utilities.Disc
             string procArgs = $" --burn-data -folder[\\]:\"{PathUtils.DirtyPath(_sourceDirectory)}\" -name:\"{_discName}\" -udf:2.5 -iso:\"{PathUtils.DirtyPath(_destinationPath)}\"";
 
             Process process = new Process();
-            process.StartInfo.FileName = Globals._cdbxpPath;
+            process.StartInfo.FileName = SysInfo.Config.CdbxpPath;
             process.StartInfo.Arguments = procArgs;
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.CreateNoWindow = false;

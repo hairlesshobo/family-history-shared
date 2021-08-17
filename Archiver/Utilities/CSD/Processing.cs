@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Archiver.Classes.CSD;
+using Archiver.Shared;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 
@@ -117,7 +118,7 @@ namespace Archiver.Utilities.CSD
                 CsdSourceFile file = csd.PendingFiles.First();
 
                 // check if we need to save the index
-                if ((sw.ElapsedMilliseconds - lastIndexSave) > (Archiver.Config.CsdAutoSaveInterval * 1000))
+                if ((sw.ElapsedMilliseconds - lastIndexSave) > (SysInfo.Config.CSD.AutoSaveInterval * 1000))
                 {
                     indexSaveCallback();
 
@@ -218,10 +219,10 @@ namespace Archiver.Utilities.CSD
         {
             Status.WriteCsdIndex(csd, masterSw.Elapsed, 0.0);
 
-            if (!Directory.Exists(Globals._indexDiscDir))
-                Directory.CreateDirectory(Globals._indexDiscDir);
+            if (!Directory.Exists(SysInfo.Directories.Index))
+                Directory.CreateDirectory(SysInfo.Directories.Index);
 
-            string txtIndexPath = Globals._indexDiscDir + "/index.txt";
+            string txtIndexPath = PathUtils.CleanPathCombine(SysInfo.Directories.Index, "index.txt");
 
             bool createMasterIndex = !File.Exists(txtIndexPath);      
             string headerLine = $"CSD   {"Archive Date (UTC)".PadRight(19)}   {"Create Date (UTC)".PadRight(19)}   {"Modify Date (UTC)".PadRight(19)}   {"Size".PadLeft(12)}   Path";      
@@ -234,7 +235,7 @@ namespace Archiver.Utilities.CSD
                     if (createMasterIndex)
                         masterIndex.WriteLine(headerLine);
 
-                    string csdIndexTxtPath = $"{driveLetter}/index.txt";
+                    string csdIndexTxtPath = PathUtils.CleanPathCombine(driveLetter, "index.txt");
 
                     using (FileStream csdIndexFS = File.Open(csdIndexTxtPath, FileMode.Create, FileAccess.Write))
                     {

@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using Archiver.Classes.Shared;
+using Archiver.Shared;
 using Archiver.Utilities.Shared;
 
 namespace Archiver.Utilities.Disc
@@ -68,9 +69,7 @@ namespace Archiver.Utilities.Disc
         }
 
         public bool CanGetHash()
-        {
-            return File.Exists(Globals._ddPath);
-        }
+            => File.Exists(SysInfo.Config.DdPath);
 
         public void GenerateHash()
         {
@@ -93,7 +92,7 @@ namespace Archiver.Utilities.Disc
                 int size = 64 * 1024; // 1 MiB buffer
 
                 Process process = new Process();
-                process.StartInfo.FileName = Globals._ddPath;
+                process.StartInfo.FileName = SysInfo.Config.DdPath;
                 process.StartInfo.Arguments = $"if=/dev/sr{_driveId} bs={size} status=none";
                 process.StartInfo.RedirectStandardOutput = true;
                 process.StartInfo.CreateNoWindow = false;

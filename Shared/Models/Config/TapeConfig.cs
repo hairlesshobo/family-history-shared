@@ -97,9 +97,9 @@ namespace Archiver.Shared.Models.Config
             if (!drivePathValid)
             {
                 if (SysInfo.OSType == OSType.Linux)
-                    results.AddValidationError(prefix, nameof(Drive), $"Invalid path provided: `{this.Drive}`. On Linux, the path must be either `auto` or in the form of `/dev/nstX`");
+                    results.AddValidationError(prefix, nameof(Drive), $"Invalid drive provided: `{this.Drive}`. On Linux, the path must be either `auto` or in the form of `/dev/nstX`");
                 if (SysInfo.OSType == OSType.Windows)
-                    results.AddValidationError(prefix, nameof(Drive), @$"Invalid path provided: `{this.Drive}`. On Windows, the path must be either `auto` or in the form of `\\.\TapeX`");
+                    results.AddValidationError(prefix, nameof(Drive), @$"Invalid drive provided: `{this.Drive}`. On Windows, the path must be either `auto` or in the form of `\\.\TapeX`");
             }
 
             // TODO: Add handling for ip/hostname drive paths

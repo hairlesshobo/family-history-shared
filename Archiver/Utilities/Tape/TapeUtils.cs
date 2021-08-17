@@ -21,11 +21,9 @@ namespace Archiver.Utilities.Tape
         {
             List<TapeDetail> tapes = new List<TapeDetail>();
 
-            string jsonDir = Globals._indexDiscDir + "/json";
-
-            if (Directory.Exists(jsonDir))
+            if (Directory.Exists(SysInfo.Directories.JSON))
             {
-                string[] jsonFiles = Directory.GetFiles(jsonDir, $"tape_{id.ToString("000")}.json");
+                string[] jsonFiles = Directory.GetFiles(SysInfo.Directories.JSON, $"tape_{id.ToString("000")}.json");
                 int totalFiles = jsonFiles.Length;
                 
                 if (totalFiles == 1)
@@ -49,7 +47,7 @@ namespace Archiver.Utilities.Tape
 
         public static void RewindTape()
         {
-            using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(Config.TapeDrive, false))
+            using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(SysInfo.TapeDrive, false))
             {
                 tape.RewindTape();
             }
@@ -93,7 +91,7 @@ namespace Archiver.Utilities.Tape
 
         public static bool TapeHasJsonRecord()
         {
-            using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(Config.TapeDrive))
+            using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(SysInfo.TapeDrive))
             {
                 // lets test if the second file record is the start of a tar, or a json file. if
                 // a json file, then we know that the tape is a new style with the tar located
@@ -116,7 +114,7 @@ namespace Archiver.Utilities.Tape
 
         public static string ReadTxtSummaryFromTape()
         {
-            using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(Config.TapeDrive))
+            using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(SysInfo.TapeDrive))
             {
                 byte[] buffer = new byte[tape.BlockSize];
 
@@ -171,7 +169,7 @@ namespace Archiver.Utilities.Tape
 
         public static TapeInfo GetTapeInfo()
         {
-            using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(Config.TapeDrive, false))
+            using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(SysInfo.TapeDrive, false))
             {
                 return GetTapeInfo(tape);
             }
@@ -184,7 +182,7 @@ namespace Archiver.Utilities.Tape
             if (!hasJson)
                 throw new InvalidOperationException("Tape does not have json record!");
 
-            using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(Config.TapeDrive, (uint)Config.TapeTextBlockSize, false))
+            using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(SysInfo.TapeDrive, (uint)SysInfo.Config.Tape.TextBlockSize, false))
             {
                 byte[] buffer = new byte[tape.BlockSize];
 
@@ -219,14 +217,14 @@ namespace Archiver.Utilities.Tape
         {
             bool hasJson = TapeHasJsonRecord();
 
-            using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(Config.TapeDrive, Config.TapeBlockingFactor * 512))
+            using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(SysInfo.TapeDrive, SysInfo.Config.Tape.BlockingFactor * 512))
             {
                 byte[] buffer = new byte[tape.BlockSize];
 
                 // seek the tape to the beginning of the file marker
                 tape.SetTapeFilePosition(hasJson ? 2 : 1);
 
-                TarArchive archive = TarArchive.CreateInputTarArchive(tape.Stream, Config.TapeBlockingFactor);
+                TarArchive archive = TarArchive.CreateInputTarArchive(tape.Stream, SysInfo.Config.Tape.BlockingFactor);
                 archive.ProgressMessageEvent += ShowTarProgressMessage;
                 archive.ListContents();
             }
@@ -277,7 +275,7 @@ namespace Archiver.Utilities.Tape
 
         public static bool IsTapeLoaded()
         {
-            using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(Config.TapeDrive, false))
+            using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(SysInfo.TapeDrive, false))
             {
                 return tape.TapeLoaded();
             }

@@ -6,6 +6,7 @@ using System.Management;
 using System.Text;
 using System.Threading;
 using Archiver.Classes.CSD;
+using Archiver.Shared;
 using Archiver.Shared.Exceptions;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
@@ -22,7 +23,7 @@ namespace Archiver.Utilities.CSD
 
         public static CsdDetail ReadCsdIndex(string driveLetter)
         {
-            string infoFilePath = $"{driveLetter}/info.json";
+            string infoFilePath = PathUtils.CleanPathCombine(driveLetter, "info.json");
 
             if (!File.Exists(infoFilePath))
                 throw new DriveNotFoundException($"Unable to find index file at the following location: {infoFilePath}");
@@ -46,7 +47,7 @@ namespace Archiver.Utilities.CSD
         {
             List<CsdDetail> csds = new List<CsdDetail>();
 
-            string jsonDir = Globals._indexDiscDir + "/json";
+            string jsonDir = SysInfo.Directories.JSON;
 
             if (Directory.Exists(jsonDir))
             {
@@ -222,12 +223,12 @@ namespace Archiver.Utilities.CSD
         }
 
         public static void SaveSummaryToCsd(string driveLetter, CsdDetail csd)
-            => SaveCsdDetailToJson($"{driveLetter}/info.json", csd);
+            => SaveCsdDetailToJson(PathUtils.CleanPathCombine(driveLetter, "info.json"), csd);
 
         public static void SaveDetailToIndex(CsdDetail csd)
         {
-            string destDir = $"{Globals._indexDiscDir}/json";
-            string jsonFilePath = $"{destDir}/csd_{csd.CsdNumber.ToString("000")}.json";
+            string destDir = SysInfo.Directories.JSON;
+            string jsonFilePath = PathUtils.CleanPathCombine(destDir, $"csd_{csd.CsdNumber.ToString("000")}.json");
 
             if (!Directory.Exists(destDir))
                 Directory.CreateDirectory(destDir);

@@ -10,6 +10,7 @@ Linux support:
 * Add ISO creation support
 * Add disc burn support
 * Add disc verification support
+* Explore the idea of bundling archiver into an `appimage` file
 
 
 Global Functionality:
@@ -21,7 +22,6 @@ Global Functionality:
 * Port entire application to Terminal.Gui
 * Finish config validation
 * Port archiver to new config binding
-* Eliminate `Globals.cs`
 * Eliminate `DiscGlobals.cs`
 * Eliminate `CsdGlobals.cs`
 * Eliminate `Globals.cs`

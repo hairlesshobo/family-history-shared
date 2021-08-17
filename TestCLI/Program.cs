@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
 using Archiver.Shared;
 using Archiver.Shared.Models;
 using Archiver.Shared.Models.Config;
@@ -54,7 +55,10 @@ namespace Archiver.TestCLI
             // TODO: Test this with disc in the drive
             //var drives = DriveInfo.GetDrives().Where(x => x.DriveType == DriveType.CDRom);
 
-            string[] drives = OpticalDriveUtils.GetDriveNames();
+            Console.WriteLine(JsonSerializer.Serialize(SysInfo.Config.CSD, new JsonSerializerOptions()
+            {
+                WriteIndented = true
+            }));
 
         }
 

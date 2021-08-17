@@ -24,11 +24,6 @@ namespace Archiver
         public static long _excludedFileCount = 0;
         public static long _totalSizePending = 0;
 
-
-        public static string[] _csdSourcePaths;
-        public static List<string> _csdExcludePaths = new List<string>();
-        public static List<string> _csdExcludeFiles = new List<string>();
-
         public static void Reset()
         {
             _sourceFileDict.Clear();

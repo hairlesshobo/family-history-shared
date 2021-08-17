@@ -8,6 +8,8 @@ using System.Threading;
 using Archiver.Classes.Disc;
 using Newtonsoft.Json;
 using Archiver.Utilities.Shared;
+using Archiver.Shared;
+using Archiver.Shared.Utilities;
 
 namespace Archiver.Utilities.Disc
 {
@@ -151,7 +153,7 @@ namespace Archiver.Utilities.Disc
         {
             Status.WriteDiscHashListFile(disc, masterSw.Elapsed, 0.0);
 
-            string destinationFile = disc.RootStagingPath + "/hashlist.txt";
+            string destinationFile = PathUtils.CleanPathCombine(disc.RootStagingPath, "/hashlist.txt");
 
             using (FileStream fs = File.Open(destinationFile, FileMode.OpenOrCreate, FileAccess.Write))
             {
@@ -186,10 +188,10 @@ namespace Archiver.Utilities.Disc
         {
             Status.WriteDiscIndex(disc, masterSw.Elapsed, 0.0);
 
-            if (!Directory.Exists(Globals._indexDiscDir))
-                Directory.CreateDirectory(Globals._indexDiscDir);
+            if (!Directory.Exists(SysInfo.Directories.Index))
+                Directory.CreateDirectory(SysInfo.Directories.Index);
 
-            string txtIndexPath = Globals._indexDiscDir + "/index.txt";
+            string txtIndexPath = PathUtils.CleanPathCombine(SysInfo.Directories.Index, "/index.txt");
 
             bool createMasterIndex = !File.Exists(txtIndexPath);      
             string headerLine = $"Disc   {"Archive Date (UTC)".PadRight(19)}   {"Create Date (UTC)".PadRight(19)}   {"Modify Date (UTC)".PadRight(19)}   {"Size".PadLeft(12)}   Path";      
@@ -202,7 +204,7 @@ namespace Archiver.Utilities.Disc
                     if (createMasterIndex)
                         masterIndex.WriteLine(headerLine);
 
-                    string discIndexTxtPath = disc.RootStagingPath + "/index.txt";
+                    string discIndexTxtPath = PathUtils.CleanPathCombine(disc.RootStagingPath, "/index.txt");
 
                     using (FileStream discIndexFS = File.Open(discIndexTxtPath, FileMode.Create, FileAccess.Write))
                     {
@@ -258,7 +260,7 @@ namespace Archiver.Utilities.Disc
                 Formatting = Newtonsoft.Json.Formatting.Indented
             };
 
-            string jsonFilePath = disc.RootStagingPath + $"/disc_info.json";
+            string jsonFilePath = PathUtils.CleanPathCombine(disc.RootStagingPath, "/disc_info.json");
             string json = JsonConvert.SerializeObject(discInfo, settings);
             File.WriteAllText(jsonFilePath, json, Encoding.UTF8);
 
@@ -268,10 +270,9 @@ namespace Archiver.Utilities.Disc
         public static void CreateISOFile(DiscDetail disc, Stopwatch masterSw)
         {
             Status.WriteDiscIso(disc, masterSw.Elapsed, 0);
-            string isoRoot = DiscGlobals._discStagingDir + "/iso";
 
-            if (!Directory.Exists(isoRoot))
-                Directory.CreateDirectory(isoRoot);
+            if (!Directory.Exists(SysInfo.Directories.ISO))
+                Directory.CreateDirectory(SysInfo.Directories.ISO);
 
             ISO_Creator creator = new ISO_Creator(disc.DiscName, disc.RootStagingPath, disc.IsoPath);
 

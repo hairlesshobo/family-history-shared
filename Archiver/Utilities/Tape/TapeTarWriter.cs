@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 using System.Threading;
+using Archiver.Shared;
 using Archiver.Shared.Classes.Tape;
 using Archiver.Shared.TapeDrivers;
 using ICSharpCode.SharpZipLib.Tar;
@@ -87,7 +88,7 @@ namespace Archiver.Utilities.Tape
             _blockCount = BufferBlockCount;
 
             _tapeBuffer = new TapeBuffer(_blockSize, _blockCount, BufferFillPercent);
-            _tarOutStream = new TarOutputStream(_tapeBuffer, Config.TapeBlockingFactor);
+            _tarOutStream = new TarOutputStream(_tapeBuffer, SysInfo.Config.Tape.BlockingFactor);
             _archive = new CustomTarArchive(_tarOutStream);
 
             this.OnProgressChanged += delegate {};

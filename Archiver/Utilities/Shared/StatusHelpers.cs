@@ -24,7 +24,7 @@ namespace Archiver.Utilities.Shared
             int leftWidth = line.Length + 1;
 
             if (left != null)
-                leftWidth += Globals._leftHeaderWidth + 2;
+                leftWidth += GuiGlobals.ConsoleLeftHeaderWidth + 2;
 
             line += GeneratePercentBar(Console.WindowWidth, leftWidth, 0, percent, complete, increasing);
 
@@ -52,10 +52,10 @@ namespace Archiver.Utilities.Shared
 
         public static void WriteStatusLine(string left, string right, ConsoleColor rightColor)
         {
-            int padRight = Console.WindowWidth - Globals._leftHeaderWidth - 2 - 1;
+            int padRight = Console.WindowWidth - GuiGlobals.ConsoleLeftHeaderWidth - 2 - 1;
 
             if (left != null)
-                Formatting.WriteC(ConsoleColor.DarkCyan, $"{left.PadLeft(Globals._leftHeaderWidth)}: ");
+                Formatting.WriteC(ConsoleColor.DarkCyan, $"{left.PadLeft(GuiGlobals.ConsoleLeftHeaderWidth)}: ");
 
             Formatting.WriteC(rightColor, $"{right.PadRight(padRight)}");
         }

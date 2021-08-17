@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using Archiver.Classes;
 using Archiver.Classes.CSD;
+using Archiver.Shared;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 
@@ -34,7 +35,7 @@ namespace Archiver.Utilities.CSD
         {
             _sw.Start();
 
-            foreach (string dirtySourcePath in CsdGlobals._csdSourcePaths)
+            foreach (string dirtySourcePath in SysInfo.Config.CSD.SourcePaths)
             {
                 string sourcePath = PathUtils.CleanPath(dirtySourcePath);
 
@@ -55,7 +56,7 @@ namespace Archiver.Utilities.CSD
                 {
                     string cleanDir = PathUtils.CleanPath(dir);
 
-                    if (!(CsdGlobals._csdExcludePaths.Any(x => cleanDir.ToLower().StartsWith(x.ToLower()))))
+                    if (!(SysInfo.Config.CSD.ExcludePaths.Any(x => cleanDir.ToLower().StartsWith(x.ToLower()))))
                         ScanDirectory(dir);
                 }
             }
@@ -71,10 +72,10 @@ namespace Archiver.Utilities.CSD
                 string cleanFile = PathUtils.CleanPath(file);
                 string fileName = PathUtils.GetFileName(cleanFile);
 
-                if (CsdGlobals._csdExcludePaths.Any(x => cleanFile.ToLower().StartsWith(x.ToLower())))
+                if (SysInfo.Config.CSD.ExcludePaths.Any(x => cleanFile.ToLower().StartsWith(x.ToLower())))
                     CsdGlobals._excludedFileCount++;
 
-                else if (CsdGlobals._csdExcludeFiles.Any(x => fileName.ToLower().EndsWith(x.ToLower())))
+                else if (SysInfo.Config.CSD.ExcludeFiles.Any(x => fileName.ToLower().EndsWith(x.ToLower())))
                     CsdGlobals._excludedFileCount++;
 
                 else

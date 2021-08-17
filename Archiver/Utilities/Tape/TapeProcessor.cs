@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using Archiver.Shared;
 using Archiver.Shared.Classes.Tape;
 using Archiver.Shared.TapeDrivers;
 using Archiver.Shared.Utilities;
@@ -70,7 +71,7 @@ namespace Archiver.Utilities.Tape
                 WriteTapeJsonToIndex();
                 RewindTape();
 
-                if (Config.TapeAutoEject)
+                if (SysInfo.Config.Tape.AutoEject)
                     EjectTape();
             }
 
@@ -89,7 +90,7 @@ namespace Archiver.Utilities.Tape
                 _status.WriteStatus("Rewinding tape");
             }
 
-            using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(Config.TapeDrive, false))
+            using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(SysInfo.TapeDrive, false))
             {
                 tape.RewindTape();
             }
@@ -102,7 +103,7 @@ namespace Archiver.Utilities.Tape
                 _status.WriteStatus("Ejecting tape");
             }
 
-            using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(Config.TapeDrive, false))
+            using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(SysInfo.TapeDrive, false))
             {
                 tape.EjectTape();
             }
@@ -176,7 +177,7 @@ namespace Archiver.Utilities.Tape
                 _status.WriteStatus("Writing summary to tape");
             }
 
-            using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(Config.TapeDrive, (uint)Config.TapeTextBlockSize, false))
+            using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(SysInfo.TapeDrive, (uint)SysInfo.Config.Tape.TextBlockSize, false))
             {
                 string templatePath = Path.Join(Directory.GetCurrentDirectory(), "templates", "tape_summary.txt");
                 string[] lines = File.ReadAllLines(templatePath);
@@ -210,7 +211,7 @@ namespace Archiver.Utilities.Tape
                 _status.WriteStatus("Writing json record to tape");
             }
 
-            using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(Config.TapeDrive, (uint)Config.TapeTextBlockSize, false))
+            using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(SysInfo.TapeDrive, (uint)SysInfo.Config.Tape.TextBlockSize, false))
             {
                 string json = Newtonsoft.Json.JsonConvert.SerializeObject(_tapeDetail.GetSummary(), Newtonsoft.Json.Formatting.None);
                 byte[] buffer = TapeUtilsNew.GetStringPaddedBytes(json, tape.BlockSize);
@@ -224,14 +225,14 @@ namespace Archiver.Utilities.Tape
         
         private void ArchiveFiles()
         {
-            uint blockSize = (uint)(512 * Config.TapeBlockingFactor);
-            uint bufferBlockCount = (uint)Config.TapeMemoryBufferBlockCount;
-            uint minBufferPercent = (uint)Config.TapeMemoryBufferMinFill;
+            uint blockSize = (uint)(512 * SysInfo.Config.Tape.BlockingFactor);
+            uint bufferBlockCount = (uint)SysInfo.Config.Tape.MemoryBufferBlockCount;
+            uint minBufferPercent = (uint)SysInfo.Config.Tape.MemoryBufferMinFill;
 
             TapeInfo beforeInfo = TapeUtils.GetTapeInfo();
             long remainingCapacityBefore = beforeInfo.MediaInfo.Capacity - beforeInfo.MediaInfo.Remaining;
 
-            using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(Config.TapeDrive, blockSize, false))
+            using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(SysInfo.TapeDrive, blockSize, false))
             {
                 tape.SetDriveCompression();
 

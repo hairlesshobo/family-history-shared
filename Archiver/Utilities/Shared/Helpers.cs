@@ -6,6 +6,7 @@ using System.Management;
 using System.Text;
 using System.Threading;
 using Archiver.Classes.Disc;
+using Archiver.Shared;
 using Archiver.Shared.Classes.Tape;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Disc;
@@ -88,11 +89,9 @@ namespace Archiver.Utilities.Shared
         {
             List<DiscDetail> discs = new List<DiscDetail>();
 
-            string jsonDir = Globals._indexDiscDir + "/json";
-
-            if (Directory.Exists(jsonDir))
+            if (Directory.Exists(SysInfo.Directories.JSON))
             {
-                string[] jsonFiles = Directory.GetFiles(jsonDir, "disc_*.json");
+                string[] jsonFiles = Directory.GetFiles(SysInfo.Directories.JSON, "disc_*.json");
                 int totalFiles = jsonFiles.Length;
                 
                 if (totalFiles > 0)
@@ -126,11 +125,9 @@ namespace Archiver.Utilities.Shared
         {
             List<TapeDetail> tapes = new List<TapeDetail>();
 
-            string jsonDir = Globals._indexDiscDir + "/json";
-
-            if (Directory.Exists(jsonDir))
+            if (Directory.Exists(SysInfo.Directories.JSON))
             {
-                string[] jsonFiles = Directory.GetFiles(jsonDir, "tape_*.json");
+                string[] jsonFiles = Directory.GetFiles(SysInfo.Directories.JSON, "tape_*.json");
                 int totalFiles = jsonFiles.Length;
                 
                 if (totalFiles > 0)
@@ -188,10 +185,10 @@ namespace Archiver.Utilities.Shared
             Formatting.WriteC(ConsoleColor.Magenta, "Creating index iso file...");
             Console.WriteLine();
 
-            string isoPath = DiscGlobals._discStagingDir + "/iso/index.iso";
+            string isoPath = PathUtils.CleanPathCombine(SysInfo.Directories.ISO, "index.iso");
             string isoName = "Archive Index";
 
-            ISO_Creator creator = new ISO_Creator(isoName, PathUtils.DirtyPath(Globals._indexDiscDir), isoPath);
+            ISO_Creator creator = new ISO_Creator(isoName, PathUtils.DirtyPath(SysInfo.Directories.Index), isoPath);
 
             creator.OnProgressChanged += (currentPercent) => {
                 string line = StatusHelpers.GeneratePercentBar(Console.WindowWidth, 0, 0, currentPercent, (currentPercent == 100));
@@ -218,7 +215,7 @@ namespace Archiver.Utilities.Shared
         public static void SaveDestinationDisc(DiscDetail disc, string destinationDir = null, string fileName = null)
         {
             if (destinationDir == null)
-                destinationDir = Globals._indexDiscDir + "/json";
+                destinationDir = SysInfo.Directories.JSON;
 
             if (fileName == null)
                 fileName = $"disc_{disc.DiscNumber.ToString("0000")}.json";
@@ -240,13 +237,12 @@ namespace Archiver.Utilities.Shared
 
         public static void SaveTape(TapeDetail tape)
         {
-            string destinationDir = Globals._indexDiscDir + "/json";
             string fileName = $"tape_{tape.ID.ToString("000")}.json";
 
-            if (!Directory.Exists(destinationDir))
-                Directory.CreateDirectory(destinationDir);
+            if (!Directory.Exists(SysInfo.Directories.JSON))
+                Directory.CreateDirectory(SysInfo.Directories.JSON);
 
-            string jsonFilePath = destinationDir + "/" + fileName;
+            string jsonFilePath = PathUtils.CleanPathCombine(SysInfo.Directories.JSON, fileName);
 
             string json = Newtonsoft.Json.JsonConvert.SerializeObject(tape, new Newtonsoft.Json.JsonSerializerSettings() {
                 ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,

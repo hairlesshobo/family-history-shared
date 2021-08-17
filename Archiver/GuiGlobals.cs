@@ -6,6 +6,8 @@ namespace Archiver
 {
     public static class GuiGlobals
     {
+        public static int ConsoleLeftHeaderWidth = 12;
+        
         public static class Colors
         {
             private static bool _isInitalized = false;

@@ -8,17 +8,6 @@ namespace Archiver
 {
     public static class Config
     {
-        public static string TapeDriver { get; set; }
-        public static string TapeDrive { get; set; }
-        public static int TapeBlockingFactor { get; set; }
-        public static int TapeMemoryBufferBlockCount { get; set; }
-        public static int TapeMemoryBufferMinFill { get; set; }
-        public static int TapeTextBlockSize { get; set; }
-        public static bool TapeAutoEject { get; set; }
-
-        public static long CsdReservedCapacity { get; set; }
-        public static int CsdAutoSaveInterval { get; set; }
-
         public static void ReadConfig()
         {
             // we set the directory to where the exe is
@@ -40,36 +29,6 @@ namespace Archiver
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("./config/appsettings.json", true, true)
                 .Build();
-
-            // global config
-            Globals._cdbxpPath = _config["CdbxpPath"];
-            Globals._ddPath = _config["DdPath"];
-            Globals._indexDiscDir = Directory.GetCurrentDirectory();
-
-            // Tape config
-            Archiver.Config.TapeDriver = _config["Tape:Driver"];
-            Archiver.Config.TapeDrive = _config["Tape:Drive"];
-            Archiver.Config.TapeBlockingFactor = _config.GetSection("Tape:BlockingFactor").Get<int>();
-            Archiver.Config.TapeMemoryBufferBlockCount = _config.GetSection("Tape:MemoryBufferBlockCount").Get<int>();
-            Archiver.Config.TapeMemoryBufferMinFill = _config.GetSection("Tape:MemoryBufferMinFill").Get<int>();
-            Archiver.Config.TapeTextBlockSize = _config.GetSection("Tape:TextBlockSize").Get<int>();
-            Archiver.Config.TapeAutoEject = _config.GetSection("Tape:AutoEject").Get<bool>();
-            
-            // CSD Config
-            Archiver.Config.CsdReservedCapacity = _config.GetSection("CSD:ReservedCapacityBytes").Get<long>();
-            Archiver.Config.CsdAutoSaveInterval = _config.GetSection("CSD:AutoSaveInterval").Get<int>();
-
-            CsdGlobals._csdExcludeFiles = _config.GetSection("CSD:ExcludeFiles").Get<string[]>().ToList();
-            CsdGlobals._csdSourcePaths = _config.GetSection("CSD:SourcePaths").Get<string[]>();
-            Array.Sort(CsdGlobals._csdSourcePaths);
-
-            foreach (string excPath in _config.GetSection("CSD:ExcludePaths").Get<string[]>())
-            {
-                string cleanExcPath = PathUtils.CleanPath(excPath);
-
-                if (File.Exists(cleanExcPath) || Directory.Exists(cleanExcPath))
-                    CsdGlobals._csdExcludePaths.Add(cleanExcPath);
-            }
 
             // disc config
             DiscGlobals._discCapacityLimit = _config.GetSection("Disc:CapacityLimit").Get<long>();

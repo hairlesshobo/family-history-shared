@@ -13,7 +13,7 @@ namespace Archiver.TapeServer
     {
         internal static ITapeDrive GetTapeDrive(TapeServerConfig config)
         {
-            string tapeDrive = config.DrivePath;
+            string tapeDrive = config.Drive;
             
             if (tapeDrive.ToLower().StartsWith("simulate-"))
             {

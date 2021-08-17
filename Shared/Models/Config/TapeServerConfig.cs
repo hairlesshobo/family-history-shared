@@ -19,7 +19,7 @@ namespace Archiver.Shared.Models.Config
         ///       /dev/nstX: Linux only
         ///       \\\\.\\TapeX: Windows only (you can also use //./TapeX form)
         /// </Summary>
-        public string DrivePath { get; set; } = "auto";
+        public string Drive { get; set; } = "auto";
 
         /// <Summary> 
         ///     Local IP address to listen on
@@ -38,26 +38,26 @@ namespace Archiver.Shared.Models.Config
 
         public List<ValidationError> Validate(string prefix = null)
         {
-            this.DrivePath = TapeUtilsNew.CleanTapeDrivePath(this.DrivePath);
+            this.Drive = TapeUtilsNew.CleanTapeDrivePath(this.Drive);
 
             List<ValidationError> results = new List<ValidationError>();
 
             bool drivePathValid = false;
 
             // Check for Linux
-            if (!drivePathValid && SysInfo.OSType == OSType.Linux && Regex.Match(this.DrivePath, @"/dev/nst\d").Success)
+            if (!drivePathValid && SysInfo.OSType == OSType.Linux && Regex.Match(this.Drive, @"/dev/nst\d").Success)
                 drivePathValid = true;
 
             // check for Windows
-            if (!drivePathValid && SysInfo.OSType == OSType.Windows && Regex.Match(this.DrivePath, @"\\\\\.\\Tape\d").Success)
+            if (!drivePathValid && SysInfo.OSType == OSType.Windows && Regex.Match(this.Drive, @"\\\\\.\\Tape\d").Success)
                 drivePathValid = true;
 
             if (!drivePathValid)
             {
                 if (SysInfo.OSType == OSType.Linux)
-                    results.AddValidationError(prefix, nameof(DrivePath), $"Invalid path provided: `{this.DrivePath}`. On Linux, the path must be either `auto` or in the form of `/dev/nstX`");
+                    results.AddValidationError(prefix, nameof(Drive), $"Invalid drive provided: `{this.Drive}`. On Linux, the path must be either `auto` or in the form of `/dev/nstX`");
                 if (SysInfo.OSType == OSType.Windows)
-                    results.AddValidationError(prefix, nameof(DrivePath), @$"Invalid path provided: `{this.DrivePath}`. On Windows, the path must be either `auto` or in the form of `\\.\TapeX`");
+                    results.AddValidationError(prefix, nameof(Drive), @$"Invalid drive provided: `{this.Drive}`. On Windows, the path must be either `auto` or in the form of `\\.\TapeX`");
             }
 
             if (!IPAddress.TryParse(this.ListenAddress, out _))

@@ -60,7 +60,7 @@ namespace Archiver.TapeServer
             // uint blockSize = 512; //512 * 512;
             // int maxBlocks = 512;
             // int currentBlock = 0;
-            // string device = "/home/flip/archive/test.txt"; // config.TapeDrive;
+            // string device = "/home/flip/archive/test.txt"; // SysInfo.TapeDrive;
             // string text = String.Empty;
 
             // using (NativeLinuxTapeDriver tapeDrive = new NativeLinuxTapeDriver(device, blockSize))

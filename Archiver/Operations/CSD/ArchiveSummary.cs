@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Archiver.Classes.CSD;
+using Archiver.Shared;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.CSD;
 using Archiver.Utilities.Shared;
@@ -41,7 +42,7 @@ namespace Archiver.Operations.CSD
                 long totalDriveCapacity = existingCsdDrives.Sum(x => x.TotalSpace);
                 long totalDataSize = existingCsdDrives.Sum(x => x.DataSize);
                 long totalDataSizeOnDisk = existingCsdDrives.Sum(x => x.DataSizeOnDisc);
-                long totalFreeSpace = totalDriveCapacity - totalDataSize - (driveCount * Config.CsdReservedCapacity);
+                long totalFreeSpace = totalDriveCapacity - totalDataSize - (driveCount * SysInfo.Config.CSD.ReservedCapacityBytes);
                 double capacityUsed = Math.Round(((double)totalDataSize / (double)totalDriveCapacity)*100.0, 1);
 
                 if (existingCsdDrives.Count() > 0)
@@ -65,12 +66,12 @@ namespace Archiver.Operations.CSD
 
                     foreach (CsdDetail csd in existingCsdDrives)
                     {
-                        long usableFreeSpace = csd.FreeSpace - Config.CsdReservedCapacity;
+                        long usableFreeSpace = csd.FreeSpace - SysInfo.Config.CSD.ReservedCapacityBytes;
                         
                         if (usableFreeSpace < 0 || usableFreeSpace == csd.BlockSize)
                             usableFreeSpace = 0;
 
-                        double csdPctUsed = Math.Round(((double)csd.DataSizeOnDisc / (double)(csd.TotalSpace-Config.CsdReservedCapacity))*100.0, 1);
+                        double csdPctUsed = Math.Round(((double)csd.DataSizeOnDisc / (double)(csd.TotalSpace-SysInfo.Config.CSD.ReservedCapacityBytes))*100.0, 1);
 
                         pager.AppendLine(csd.CsdName + "    " + Formatting.GetFriendlySize(usableFreeSpace).PadLeft(11) + "    " + Formatting.GetFriendlySize(csd.TotalSpace).PadLeft(11) + "    " + $"{csdPctUsed.ToString("N1")}%".PadLeft(6) + "    " + csd.TotalFiles.ToString("N0").PadLeft(10));
                     }

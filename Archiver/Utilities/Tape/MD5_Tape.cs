@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 using Archiver.Classes.Shared;
+using Archiver.Shared;
 using Archiver.Shared.Classes.Tape;
 using Archiver.Shared.TapeDrivers;
 using Archiver.Utilities.Shared;
@@ -38,7 +39,7 @@ namespace Archiver.Utilities.Tape
         public void GenerateHash()
         {
             bool hasJson = TapeUtils.TapeHasJsonRecord();
-            int blockSize = Config.TapeBlockingFactor * 512;
+            int blockSize = SysInfo.Config.Tape.BlockingFactor * 512;
 
             if (_requiresJsonRecord && !hasJson)
                 throw new InvalidOperationException("MD5 class was created without a source size, therefore the tape must have the json summary record");
@@ -50,7 +51,7 @@ namespace Archiver.Utilities.Tape
                 _sourceSize = summary.TotalArchiveBytes;
             }
 
-            using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(Config.TapeDrive, blockSize))
+            using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(SysInfo.TapeDrive, blockSize))
             using (MD5 md5 = MD5.Create())
             {
                 Md5Progress progress = new Md5Progress();
