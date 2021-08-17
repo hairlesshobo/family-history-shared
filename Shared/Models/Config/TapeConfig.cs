@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Archiver.Shared.Interfaces;
+using Archiver.Shared.Utilities;
 
 namespace Archiver.Shared.Models.Config
 {
@@ -78,7 +80,29 @@ namespace Archiver.Shared.Models.Config
 
         public List<ValidationError> Validate(string prefix = null)
         {
+            this.Drive = TapeUtilsNew.CleanTapeDrivePath(this.Drive);
+
             List<ValidationError> results = new List<ValidationError>();
+
+            bool drivePathValid = false;
+
+            // Check for Linux
+            if (!drivePathValid && SysInfo.OSType == OSType.Linux && Regex.Match(this.Drive, @"/dev/nst\d").Success)
+                drivePathValid = true;
+
+            // check for Windows
+            if (!drivePathValid && SysInfo.OSType == OSType.Windows && Regex.Match(this.Drive, @"\\\\\.\\Tape\d").Success)
+                drivePathValid = true;
+
+            if (!drivePathValid)
+            {
+                if (SysInfo.OSType == OSType.Linux)
+                    results.AddValidationError(prefix, nameof(Drive), $"Invalid path provided: `{this.Drive}`. On Linux, the path must be either `auto` or in the form of `/dev/nstX`");
+                if (SysInfo.OSType == OSType.Windows)
+                    results.AddValidationError(prefix, nameof(Drive), @$"Invalid path provided: `{this.Drive}`. On Windows, the path must be either `auto` or in the form of `\\.\TapeX`");
+            }
+
+            // TODO: Add handling for ip/hostname drive paths
 
             return results;
         }

@@ -55,9 +55,9 @@ namespace Archiver.Shared.Models.Config
             if (!drivePathValid)
             {
                 if (SysInfo.OSType == OSType.Linux)
-                    results.AddValidationError(prefix, nameof(ListenAddress), $"Invalid path provided: `{this.DrivePath}`. On Linux, the path must be either `auto` or in the form of `/dev/nstX`");
+                    results.AddValidationError(prefix, nameof(DrivePath), $"Invalid path provided: `{this.DrivePath}`. On Linux, the path must be either `auto` or in the form of `/dev/nstX`");
                 if (SysInfo.OSType == OSType.Windows)
-                    results.AddValidationError(prefix, nameof(ListenAddress), @$"Invalid path provided: `{this.DrivePath}`. On Windows, the path must be either `auto` or in the form of `\\.\TapeX`");
+                    results.AddValidationError(prefix, nameof(DrivePath), @$"Invalid path provided: `{this.DrivePath}`. On Windows, the path must be either `auto` or in the form of `\\.\TapeX`");
             }
 
             if (!IPAddress.TryParse(this.ListenAddress, out _))
