@@ -1,3 +1,5 @@
+using Archiver.Shared.TapeDrivers;
+
 namespace Archiver.Shared.Classes.Tape
 {
     public class TapeInfo

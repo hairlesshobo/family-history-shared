@@ -9,152 +9,13 @@ using System.Text;
 using Archiver.Shared.Classes.Tape;
 //using Bsw.Types.Logger; 
 
-namespace Archiver.Utilities
+namespace Archiver.Shared.TapeDrivers
 {
-    #region Typedefenitions
-    using BOOL = System.Int32;
-    #endregion
-
-    #region Types
-    public enum DriveStatus
-    {
-        Ready = 0,
-        ErrorEndOfMedia = 1100,
-        ErrorMediaChanged = 1110,
-        ErrorNoMediaInDrive = 1112,
-        ErrorWriteProtect = 19,
-    }
-
-    
-
-    [StructLayout( LayoutKind.Sequential )]
-    public class TapeSetDriveParameters
-    {
-        public byte ECC;
-        public byte Compression;
-        public byte DataPadding;
-        public byte ReportSetMarks;
-
-        public uint EOTWarningZoneSize;
-    }
-    #endregion
-
     /// <summary>
     /// Low level Tape operator
     /// </summary>
-    public class TapeOperator : IDisposable
+    public partial class NativeWindowsTapeDriver : IDisposable
     {
-        #region Private constants
-        private const short FILE_ATTRIBUTE_NORMAL = 0x80;
-        private const short INVALID_HANDLE_VALUE = -1;
-        private const uint GENERIC_READ = 0x80000000;
-        private const uint GENERIC_WRITE = 0x40000000;
-        private const uint CREATE_NEW = 1;
-        private const uint CREATE_ALWAYS = 2;
-        private const uint OPEN_EXISTING = 3;
-        private const uint FILE_ATTRIBUTE_ARCHIVE = 0x00000020;
-        private const uint FILE_FLAG_BACKUP_SEMANTICS = 0x02000000;
-
-        private const uint NO_ERROR = 0;
-        private const int TAPE_LOAD = 0;
-        private const int TAPE_UNLOAD = 1;
-
-        private const int TAPE_SETMARKS = 0;
-        private const int TAPE_FILEMARKS = 1;
-        private const int TAPE_SHORT_FILEMARKS = 2;
-        private const int TAPE_LONG_FILEMARKS = 3;
-
-
-
-        private const int TAPE_REWIND = 0;
-        private const int TAPE_LOGICAL_POSITION = 1;
-        private const int TAPE_LOGICAL_BLOCK = 2;
-        private const int TAPE_SPACE_END_OF_DATA = 4;
-        private const int TAPE_RELATIVE_BLOCKS = 5;
-        private const int TAPE_SPACE_FILEMARKS = 6;
-        private const int TAPE_SPACE_SEQUENTIAL_FMKS = 7;
-        private const int TAPE_SPACE_SETMARKS = 8;
-        private const int TAPE_SPACE_SEQUENTIAL_SMKS = 9;
-
-        private const int FALSE = 0;
-        private const int TRUE = 0;
-
-        private const int SET_TAPE_MEDIA_INFORMATION = 0;
-        private const int SET_TAPE_DRIVE_INFORMATION = 1;
-
-        private const int MEDIA_PARAMS = 0;
-        private const int DRIVE_PARAMS = 1;
-        #endregion
-
-        #region PInvoke
-        // Use interop to call the CreateFile function.
-        // For more information about CreateFile,
-        // see the unmanaged MSDN reference library.
-        [DllImport( "kernel32.dll", SetLastError = true )]
-        private static extern SafeFileHandle CreateFile(
-            string lpFileName,
-            uint dwDesiredAccess,
-            uint dwShareMode,
-            IntPtr lpSecurityAttributes,
-            uint dwCreationDisposition,
-            uint dwFlagsAndAttributes,
-            IntPtr hTemplateFile
-            );
-
-        [DllImport( "kernel32", SetLastError = true )]
-        private static extern int PrepareTape(
-            SafeFileHandle handle,
-            int prepareType,
-            BOOL isImmediate
-            );
-
-
-        [DllImport( "kernel32", SetLastError = true )]
-        private static extern int SetTapePosition(
-            SafeFileHandle handle,
-            int positionType,
-            int partition,
-            int offsetLow,
-            int offsetHigh,
-            BOOL isImmediate
-            );
-
-        [DllImport( "kernel32", SetLastError = true )]
-        private static extern int GetTapePosition(
-            SafeFileHandle handle,
-            int positionType,
-            out int partition,
-            out int offsetLow,
-            out int offsetHigh
-            );
-
-        [DllImport( "kernel32", SetLastError = true )]
-        private static extern int WriteTapemark(
-            SafeFileHandle handle,
-            int tapemarkType,
-            int tapemarkCount,
-            BOOL isImmediate
-            );
-
-        [DllImport( "kernel32", SetLastError = true )]
-        private static extern int GetTapeParameters(
-           SafeFileHandle handle,
-           int operationType,
-           ref int size,
-           IntPtr mediaInfo
-           );
-
-        [DllImport( "kernel32", SetLastError = true )]
-        private static extern int SetTapeParameters(
-           SafeFileHandle handle,
-           int operationType,
-           TapeSetDriveParameters parameters
-           );
-
-        [DllImport( "kernel32", SetLastError = true )]
-        private static extern int GetLastError();
-        #endregion
-
         #region Private variables
         private FileStream m_stream;
         private SafeFileHandle m_handleValue = null;
@@ -169,29 +30,29 @@ namespace Archiver.Utilities
         /// <summary>
         /// Loads tape with given name. 
         /// </summary>
-        public TapeOperator(string tapeName): this(tapeName, null, true)
+        public NativeWindowsTapeDriver(string tapeName) : this(tapeName, null, true)
         {
         }
 
         /// <summary>
         /// Loads tape with given name. 
         /// </summary>
-        public TapeOperator(string tapeName, bool loadTape): this(tapeName, null, loadTape)
+        public NativeWindowsTapeDriver(string tapeName, bool loadTape) : this(tapeName, null, loadTape)
         {
         }
 
         /// <summary>
         /// Loads tape with given name and block size. 
         /// </summary>
-        public TapeOperator(string tapeName, int blockSize): this(tapeName, (uint)blockSize, true)
+        public NativeWindowsTapeDriver(string tapeName, int blockSize) : this(tapeName, (uint)blockSize, true)
         {
-        }   
-        
+        }
+
         /// <summary>
         /// Loads tape with given name. 
         /// </summary>
-        public TapeOperator(string tapeName, Nullable<uint> blockSize, bool loadTape = true)
-        {            
+        public NativeWindowsTapeDriver(string tapeName, Nullable<uint> blockSize, bool loadTape = true)
+        {
             // Try to open the file.
             m_handleValue = CreateFile(
                 tapeName,
@@ -209,7 +70,8 @@ namespace Archiver.Utilities
 
             // lets check to see if the tape has changed, if it did
             // then we have to force a load of the tape
-            try {
+            try
+            {
                 GetDriveInfo();
             }
             catch (TapeChangedException)
@@ -222,7 +84,7 @@ namespace Archiver.Utilities
             {
                 int result = PrepareTape(m_handleValue, TAPE_LOAD, TRUE);
 
-                if ( result != NO_ERROR )
+                if (result != NO_ERROR)
                     throw new TapeOperatorWin32Exception("PrepareTape", Marshal.GetLastWin32Error());
             }
 
@@ -249,20 +111,20 @@ namespace Archiver.Utilities
                 var tmpMediaInfo = new TapeMediaInfo();
 
                 // Allocate unmanaged memory
-                int size = Marshal.SizeOf( tmpMediaInfo );
-                ptr = Marshal.AllocHGlobal( size );
+                int size = Marshal.SizeOf(tmpMediaInfo);
+                ptr = Marshal.AllocHGlobal(size);
 
                 Marshal.StructureToPtr(
                     tmpMediaInfo,
                     ptr,
                     false
                 );
-                
+
                 result = GetTapeParameters(m_handleValue, MEDIA_PARAMS, ref size, ptr);
             }
             finally
             {
-                if ( ptr != IntPtr.Zero )
+                if (ptr != IntPtr.Zero)
                     Marshal.FreeHGlobal(ptr);
             }
 
@@ -294,7 +156,7 @@ namespace Archiver.Utilities
                 throw new InvalidOperationException("The bytes to write must be equal to the block size");
 
             // Write data to the device
-            m_stream.Write( stream, 0, stream.Length );
+            m_stream.Write(stream, 0, stream.Length);
             m_stream.Flush();
         }
 
@@ -309,7 +171,7 @@ namespace Archiver.Utilities
 
             if (startPosition.HasValue)
                 SetTapeBlockPosition(startPosition.Value);
-            
+
             try
             {
                 // we empty the buffer before we read from tape
@@ -322,7 +184,7 @@ namespace Archiver.Utilities
             {
                 // filemark detected error code
                 if (e.HResult == -2147023795)
-                    endOfData = true;   
+                    endOfData = true;
             }
 
             return endOfData;
@@ -330,13 +192,13 @@ namespace Archiver.Utilities
 
         public bool Read(byte[] buffer)
             => this.Read(buffer, null);
-        
+
         /// <summary>
         /// Closes handler of the current tape
         /// </summary>
         public void Close()
         {
-            if ( m_handleValue != null && !m_handleValue.IsInvalid && !m_handleValue.IsClosed )
+            if (m_handleValue != null && !m_handleValue.IsInvalid && !m_handleValue.IsClosed)
                 m_handleValue.Close();
         }
 
@@ -417,7 +279,7 @@ namespace Archiver.Utilities
             if (GetTapePosition(m_handleValue, TAPE_LOGICAL_POSITION, out partition, out offsetLow, out offsetHigh) != NO_ERROR)
                 throw new TapeOperatorWin32Exception("GetTapePosition", Marshal.GetLastWin32Error());
 
-            long offset = ( long )( offsetHigh * Math.Pow( 2, 32 ) + offsetLow );
+            long offset = (long)(offsetHigh * Math.Pow(2, 32) + offsetLow);
 
             return offset;
         }
@@ -432,7 +294,7 @@ namespace Archiver.Utilities
                 return m_stream;
             }
         }
-        
+
         /// <summary>
         /// Returns opened file handle
         /// </summary>
@@ -442,7 +304,7 @@ namespace Archiver.Utilities
             {
                 // If the handle is valid,
                 // return it.
-                if ( !m_handleValue.IsInvalid )
+                if (!m_handleValue.IsInvalid)
                 {
                     return m_handleValue;
                 }
@@ -496,10 +358,10 @@ namespace Archiver.Utilities
         #endregion
 
         #region Private methods
-        
+
         private void GetDriveInfo()
         {
-            if ( !m_driveInfo.HasValue )
+            if (!m_driveInfo.HasValue)
             {
                 IntPtr ptr = IntPtr.Zero;
                 try
@@ -529,15 +391,15 @@ namespace Archiver.Utilities
                 }
                 finally
                 {
-                    if ( ptr != IntPtr.Zero )
-                        Marshal.FreeHGlobal( ptr );
+                    if (ptr != IntPtr.Zero)
+                        Marshal.FreeHGlobal(ptr);
                 }
-            } 
+            }
         }
 
         private void GetMediaInfo()
         {
-            if ( !m_mediaInfo.HasValue )
+            if (!m_mediaInfo.HasValue)
             {
                 IntPtr ptr = IntPtr.Zero;
                 try
@@ -545,8 +407,8 @@ namespace Archiver.Utilities
                     m_mediaInfo = new TapeMediaInfo();
 
                     // Allocate unmanaged memory
-                    int size = Marshal.SizeOf( m_mediaInfo );
-                    ptr = Marshal.AllocHGlobal( size );
+                    int size = Marshal.SizeOf(m_mediaInfo);
+                    ptr = Marshal.AllocHGlobal(size);
 
                     Marshal.StructureToPtr(
                         m_mediaInfo,
@@ -554,7 +416,7 @@ namespace Archiver.Utilities
                         false
                     );
 
-                    
+
                     int result = 0;
                     if ((result = GetTapeParameters(m_handleValue, MEDIA_PARAMS, ref size, ptr)) != NO_ERROR)
                         throw new TapeOperatorWin32Exception("GetTapeParameters", Marshal.GetLastWin32Error());
@@ -564,12 +426,12 @@ namespace Archiver.Utilities
                 }
                 finally
                 {
-                    if ( ptr != IntPtr.Zero )
+                    if (ptr != IntPtr.Zero)
                     {
-                        Marshal.FreeHGlobal( ptr );
+                        Marshal.FreeHGlobal(ptr);
                     }
                 }
-            } 
+            }
         }
 
         public void Dispose()
@@ -586,17 +448,18 @@ namespace Archiver.Utilities
     /// </summary>
     public class TapeOperatorWin32Exception : ApplicationException
     {
-        public TapeOperatorWin32Exception( string methodName, int win32ErroCode ):
-            base( string.Format(
+        public TapeOperatorWin32Exception(string methodName, int win32ErroCode) :
+            base(string.Format(
                 "WIN32 API method failed : {0} failed with error code {1}",
                 methodName,
                 win32ErroCode
-            ) ){}
+            ))
+        { }
     }
 
     public class TapeChangedException : Exception
     {
-        public TapeChangedException(): base()
+        public TapeChangedException() : base()
         {
 
         }
@@ -604,8 +467,8 @@ namespace Archiver.Utilities
 
     public class TapeException : Exception
     {
-        public TapeException(string message): base(message)
-        {}
+        public TapeException(string message) : base(message)
+        { }
     }
 
 }

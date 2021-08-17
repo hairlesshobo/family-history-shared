@@ -5,6 +5,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Threading;
 using Archiver.Shared.Classes.Tape;
+using Archiver.Shared.TapeDrivers;
 using ICSharpCode.SharpZipLib.Tar;
 
 namespace Archiver.Utilities.Tape
@@ -62,7 +63,7 @@ namespace Archiver.Utilities.Tape
     {
         private const int _updateMilliseconds = 500;
         private TapeBuffer _tapeBuffer;
-        private TapeOperator _tape;
+        private NativeWindowsTapeDriver _tape;
         private CustomTarArchive _archive;
         private TapeDetail _tapeDetail;
         private TarOutputStream _tarOutStream;
@@ -78,7 +79,7 @@ namespace Archiver.Utilities.Tape
         public event TapeTarProgressDelegate OnProgressChanged;
         public event TapeTarCompleteDelegate OnTapeComplete;
 
-        public TapeTarWriter(TapeDetail tapeDetail, TapeOperator tape, uint BlockSize, uint BufferBlockCount, uint BufferFillPercent)
+        public TapeTarWriter(TapeDetail tapeDetail, NativeWindowsTapeDriver tape, uint BlockSize, uint BufferBlockCount, uint BufferFillPercent)
         {
             _tapeDetail = tapeDetail;
             _tape = tape;

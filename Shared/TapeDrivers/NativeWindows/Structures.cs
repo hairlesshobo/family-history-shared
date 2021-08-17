@@ -1,10 +1,17 @@
 using System.Runtime.InteropServices;
 
-namespace Archiver.Shared.Classes.Tape
+namespace Archiver.Shared.TapeDrivers
 {
-    // TODO: 
-    // convert these to shared classes that will work for any driver, then
-    // move the structures back to the windows driver
+    public enum DriveStatus
+    {
+        Ready = 0,
+        ErrorEndOfMedia = 1100,
+        ErrorMediaChanged = 1110,
+        ErrorNoMediaInDrive = 1112,
+        ErrorWriteProtect = 19,
+    }
+
+    // TODO: convert these to shared classes that will work for any driver
     [StructLayout(LayoutKind.Sequential)] 
     public struct TapeMediaInfo
     {
@@ -33,5 +40,16 @@ namespace Archiver.Shared.Classes.Tape
         public uint FeaturesLow;
         public uint FeaturesHigh;
         public uint EOTWarningZone;
+    }
+
+    [StructLayout( LayoutKind.Sequential )]
+    public class TapeSetDriveParameters
+    {
+        public byte ECC;
+        public byte Compression;
+        public byte DataPadding;
+        public byte ReportSetMarks;
+
+        public uint EOTWarningZoneSize;
     }
 }

@@ -4,6 +4,7 @@ using System.IO;
 using System.Security.Cryptography;
 using Archiver.Classes.Shared;
 using Archiver.Shared.Classes.Tape;
+using Archiver.Shared.TapeDrivers;
 using Archiver.Utilities.Shared;
 
 namespace Archiver.Utilities.Tape
@@ -49,7 +50,7 @@ namespace Archiver.Utilities.Tape
                 _sourceSize = summary.TotalArchiveBytes;
             }
 
-            using (TapeOperator tape = new TapeOperator(Config.TapeDrive, blockSize))
+            using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(Config.TapeDrive, blockSize))
             using (MD5 md5 = MD5.Create())
             {
                 Md5Progress progress = new Md5Progress();
