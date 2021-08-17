@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Archiver.TapeServer.TapeDrivers
+namespace Archiver.Shared.TapeDrivers
 {
     public partial class NativeLinuxTapeDriver
     {

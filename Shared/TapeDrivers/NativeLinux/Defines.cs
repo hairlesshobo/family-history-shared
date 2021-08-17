@@ -1,6 +1,6 @@
 using System;
 
-namespace Archiver.TapeServer.TapeDrivers
+namespace Archiver.Shared.TapeDrivers
 {
     public partial class NativeLinuxTapeDriver
     {

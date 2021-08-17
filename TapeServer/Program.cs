@@ -7,7 +7,7 @@ using Archiver.Shared;
 using Archiver.Shared.Models;
 using Archiver.Shared.Models.Config;
 using Archiver.Shared.Utilities;
-using Archiver.TapeServer.TapeDrivers;
+using Archiver.Shared.TapeDrivers;
 
 namespace Archiver.TapeServer
 {

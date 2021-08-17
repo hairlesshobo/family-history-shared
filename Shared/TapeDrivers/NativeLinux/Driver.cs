@@ -2,7 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using Archiver.Shared.Exceptions;
 
-namespace Archiver.TapeServer.TapeDrivers
+namespace Archiver.Shared.TapeDrivers
 {
     public partial class NativeLinuxTapeDriver : IDisposable
     {
