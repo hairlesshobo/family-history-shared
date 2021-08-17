@@ -110,7 +110,7 @@ namespace Archiver.Operations
                     new CliMenuEntry<bool>() {
                         Name = "Verify Discs",
                         Action = Disc.DiscVerification.StartOperation,
-                        Disabled = Config.ReadOnlyFilesystem || !SysInfo.IsOpticalDrivePresent,
+                        Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsOpticalDrivePresent,
                         ForegroundColor = ConsoleColor.DarkYellow
                     },
                     new CliMenuEntry<bool>() {
@@ -126,7 +126,7 @@ namespace Archiver.Operations
                     new CliMenuEntry<bool>() {
                         Name = "Run Archive process",
                         Action = Disc.DiscArchiver.StartOperation,
-                        Disabled = Config.ReadOnlyFilesystem || !SysInfo.IsOpticalDrivePresent,
+                        Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsOpticalDrivePresent,
                         ForegroundColor = ConsoleColor.Red
                     },
                     
@@ -175,13 +175,13 @@ namespace Archiver.Operations
                     new CliMenuEntry<bool>() {
                         Name = "Verify Tape",
                         Action = Tape.TapeVerification.StartOperation,
-                        Disabled = Config.ReadOnlyFilesystem || !Config.TapeDrivePresent,
+                        Disabled = SysInfo.IsReadonlyFilesystem || !Config.TapeDrivePresent,
                         ForegroundColor = ConsoleColor.DarkYellow
                     },
                     new CliMenuEntry<bool>() {
                         Name = "Run tape archive",
                         Action = Tape.TapeArchiver.StartOperation,
-                        Disabled = Config.ReadOnlyFilesystem || !Config.TapeDrivePresent,
+                        Disabled = SysInfo.IsReadonlyFilesystem || !Config.TapeDrivePresent,
                         ForegroundColor = ConsoleColor.Red
                     },
 
@@ -225,20 +225,20 @@ namespace Archiver.Operations
                         Name = "Verify CSD Drive",
                         Action = NotImplemented,
                         // Action = TapeVerification.StartOperation,
-                        Disabled = Config.ReadOnlyFilesystem || true, // remove once implemented
+                        Disabled = SysInfo.IsReadonlyFilesystem || true, // remove once implemented
                         ForegroundColor = ConsoleColor.DarkYellow
                     },
                     new CliMenuEntry<bool>() {
                         Name = "Clean CSD Drive - Remove files not in index",
                         Action = CSD.Cleaner.StartOperation,
                         // Action = TapeVerification.StartOperation,
-                        Disabled = Config.ReadOnlyFilesystem, // remove once implemented
+                        Disabled = SysInfo.IsReadonlyFilesystem, // remove once implemented
                         ForegroundColor = ConsoleColor.DarkYellow
                     },
                     new CliMenuEntry<bool>() {
                         Name = "Run CSD Archive Process",
                         Action = CSD.Archiver.StartOperation,
-                        Disabled = Config.ReadOnlyFilesystem,
+                        Disabled = SysInfo.IsReadonlyFilesystem,
                         ForegroundColor = ConsoleColor.Red
                     },
 
@@ -252,12 +252,12 @@ namespace Archiver.Operations
                     new CliMenuEntry<bool>() {
                         Name = "Copy Tools to Local Disk",
                         Action = NotImplemented,
-                        Disabled = !Config.ReadOnlyFilesystem
+                        Disabled = !SysInfo.IsReadonlyFilesystem
                     },
                     new CliMenuEntry<bool>() {
                         Name = "Create Index ISO",
                         Action = Helpers.CreateIndexIso,
-                        Disabled = Config.ReadOnlyFilesystem
+                        Disabled = SysInfo.IsReadonlyFilesystem
                     },
                     new CliMenuEntry<bool>() {
                         Name = "Exit",

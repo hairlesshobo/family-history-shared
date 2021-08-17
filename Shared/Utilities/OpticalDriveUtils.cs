@@ -7,9 +7,6 @@ namespace Archiver.Shared.Utilities
 {
     public static class OpticalDriveUtils
     {
-        public static bool IsDrivePresent()
-            => GetDriveNames().Any();
-
         public static string[] GetDriveNames()
         {
             if (SysInfo.OSType == OSType.Windows)

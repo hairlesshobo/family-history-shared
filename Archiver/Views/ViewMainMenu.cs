@@ -217,7 +217,7 @@ namespace Archiver.Views
                 Text = "Verify Discs", 
                 Color = GuiGlobals.Colors.Yellow,
                 Action = Operations.Disc.DiscVerification.StartOperation,
-                Disabled = Config.ReadOnlyFilesystem || !SysInfo.IsOpticalDrivePresent,
+                Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsOpticalDrivePresent,
                 DropFromGui = true,
             });
             
@@ -242,7 +242,7 @@ namespace Archiver.Views
                 Text = "Run Archive process", 
                 Color = GuiGlobals.Colors.Red,
                 Action = Operations.Disc.DiscArchiver.StartOperation,
-                Disabled = Config.ReadOnlyFilesystem || !SysInfo.IsOpticalDrivePresent,
+                Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsOpticalDrivePresent,
                 DropFromGui = true
             });
         }
@@ -310,7 +310,7 @@ namespace Archiver.Views
             {
                 Text = "Verify Tape",
                 Action = Operations.Tape.TapeVerification.StartOperation,
-                Disabled = Config.ReadOnlyFilesystem || !Config.TapeDrivePresent,
+                Disabled = SysInfo.IsReadonlyFilesystem || !Config.TapeDrivePresent,
                 Color = GuiGlobals.Colors.Yellow,
                 DropFromGui = true
             });
@@ -319,7 +319,7 @@ namespace Archiver.Views
             {
                 Text = "Run tape archive",
                 Action = Operations.Tape.TapeArchiver.StartOperation,
-                Disabled = Config.ReadOnlyFilesystem || !Config.TapeDrivePresent,
+                Disabled = SysInfo.IsReadonlyFilesystem || !Config.TapeDrivePresent,
                 Color = GuiGlobals.Colors.Red,
                 DropFromGui = true
             });
@@ -371,7 +371,7 @@ namespace Archiver.Views
                 Text = "Verify CSD Drive",
                 Action = NotImplemented,
                 // Action = TapeVerification.StartOperation,
-                //Disabled = Config.ReadOnlyFilesystem || true, // remove once implemented
+                //Disabled = SysInfo.IsReadonlyFilesystem || true, // remove once implemented
                 Color = GuiGlobals.Colors.Yellow,
                 DropFromGui = true
             });
@@ -380,7 +380,7 @@ namespace Archiver.Views
                 Text = "Clean CSD Drive - Remove files not in index",
                 Action = Operations.CSD.Cleaner.StartOperation,
                 // Action = TapeVerification.StartOperation,
-                //Disabled = Config.ReadOnlyFilesystem, // remove once implemented
+                //Disabled = SysInfo.IsReadonlyFilesystem, // remove once implemented
                 Color = GuiGlobals.Colors.Yellow,
                 DropFromGui = true
             });
@@ -388,7 +388,7 @@ namespace Archiver.Views
             AddHyperlink(mainWindow, new HyperlinkInfo() {
                 Text = "Run CSD Archive Process",
                 Action = Operations.CSD.Archiver.StartOperation,
-                //Disabled = Config.ReadOnlyFilesystem,
+                //Disabled = SysInfo.IsReadonlyFilesystem,
                 Color = GuiGlobals.Colors.Red,
                 DropFromGui = true
             });
@@ -402,14 +402,14 @@ namespace Archiver.Views
             AddHyperlink(mainWindow, new HyperlinkInfo() {
                 Text = "Copy Tools to Local Disk",
                 Action = NotImplemented,
-                //Disabled = !Config.ReadOnlyFilesystem,
+                //Disabled = !SysInfo.IsReadonlyFilesystem,
                 DropFromGui = true
             });
 
             AddHyperlink(mainWindow, new HyperlinkInfo() {
                 Text = "Create Index ISO",
                 Action = Helpers.CreateIndexIso,
-                //Disabled = Config.ReadOnlyFilesystem,
+                //Disabled = SysInfo.IsReadonlyFilesystem,
                 DropFromGui = true
             });
 

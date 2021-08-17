@@ -30,16 +30,7 @@ namespace Archiver
             }
         }
 
-        public static bool ReadOnlyFilesystem
-        {
-            get
-            {
-                return _readOnlyFilesystem;
-            }
-        }
-
         private static bool _tapeDrivePresent;
-        private static bool _readOnlyFilesystem;
 
         public static void ReadConfig()
         {
@@ -109,40 +100,8 @@ namespace Archiver
             }
 
             _tapeDrivePresent = TapeUtils.TapeDrivePresent();
-            _readOnlyFilesystem = TestForReadonlyFs();
         }
 
-        private static bool TestForReadonlyFs()
-        {
-            string currentdir = Directory.GetCurrentDirectory();
-            string testFile = Path.Join(currentdir, "__accesstest.tmp");
-            bool canWrite = true;
-
-            if (File.Exists(testFile))
-            {
-                try
-                {
-                    File.Delete(testFile);
-                }
-                catch
-                {
-                    canWrite = false;
-                }
-            }
-
-            try
-            {
-                using (FileStream stream = File.Create(testFile))
-                { }
-
-                File.Delete(testFile);
-            }
-            catch
-            {
-                canWrite = false;
-            }
-
-            return !canWrite;
-        }
+        
     }
 }

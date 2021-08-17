@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Archiver.Shared.Models;
 using Archiver.Shared.Models.Config;
@@ -17,12 +19,15 @@ namespace Archiver.Shared
     {
         private static OSType _osType = OSType.Unknown;
         private static ArchiverConfig _config = null;
+        private static bool _isOpticalDrivePresent = false;
+        private static bool _isReadonlyFilesystem = true;
 
         public static ArchiverConfig Config => _config; 
 
 
         public static OSType OSType => _osType;
-        public static bool IsOpticalDrivePresent => OpticalDriveUtils.IsDrivePresent();
+        public static bool IsOpticalDrivePresent => _isOpticalDrivePresent;
+        public static bool IsReadonlyFilesystem => _isReadonlyFilesystem;
         public static Architecture Architecture => System.Runtime.InteropServices.RuntimeInformation.OSArchitecture;
         public static string Description => System.Runtime.InteropServices.RuntimeInformation.OSDescription;
         public static string Identifier => System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier;
@@ -34,6 +39,9 @@ namespace Archiver.Shared
                 _osType = OSType.Windows;
             else if (OperatingSystem.IsLinux())
                 _osType = OSType.Linux;
+
+            _isOpticalDrivePresent = OpticalDriveUtils.GetDriveNames().Any();
+            _isReadonlyFilesystem = TestForReadonlyFs();
 
             // these are commented out because we have not yet built support for them into the app. For now, they will 
             // be identified as "Unknown" and the app will not lauch on an unknown platform.
@@ -85,6 +93,39 @@ namespace Archiver.Shared
             }
             else
                 Console.WriteLine($"  {fieldName.PadLeft(width)}: {value}");
+        }
+
+        private static bool TestForReadonlyFs()
+        {
+            string currentdir = Directory.GetCurrentDirectory();
+            string testFile = Path.Join(currentdir, "__accesstest.tmp");
+            bool canWrite = true;
+
+            if (File.Exists(testFile))
+            {
+                try
+                {
+                    File.Delete(testFile);
+                }
+                catch
+                {
+                    canWrite = false;
+                }
+            }
+
+            try
+            {
+                using (FileStream stream = File.Create(testFile))
+                { }
+
+                File.Delete(testFile);
+            }
+            catch
+            {
+                canWrite = false;
+            }
+
+            return !canWrite;
         }
     }
 }

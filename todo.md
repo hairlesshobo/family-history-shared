@@ -9,6 +9,7 @@ Linux support:
 * Add CSD support
 * Add ISO creation support
 * Add disc burn support
+* Add disc verification support
 
 
 Global Functionality:
