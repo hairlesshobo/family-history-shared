@@ -7,9 +7,9 @@ namespace Archiver.Shared.Models.Config
 {
     public class DiscConfig : IValidatableConfig
     {
-        public ulong CapacityLimit { get; set; } = 24928845824;
+        public long CapacityLimit { get; set; } = 24928845824;
 
-        public ulong DVDCapacityLimit { get; set; } = 4566155264;
+        public long DVDCapacityLimit { get; set; } = 4566155264;
 
         public string[] SourcePaths { get; set; }
 

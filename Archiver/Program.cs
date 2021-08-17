@@ -23,9 +23,9 @@ namespace Archiver
                 Console.TreatControlCAsInput = true;
                 Console.BackgroundColor = ConsoleColor.Black;
 
-                Console.Write("Reading configuration... ");
-                Config.ReadConfig();
-                Console.WriteLine("done");
+                // Console.Write("Reading configuration... ");
+                // Config.ReadConfig();
+                // Console.WriteLine("done");
                 
                 Console.Clear();
 

@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using Archiver.Classes;
 using Archiver.Classes.Disc;
+using Archiver.Shared;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 
@@ -32,7 +33,7 @@ namespace Archiver.Utilities.Disc
         {
             _sw.Start();
 
-            foreach (string dirtySourcePath in DiscGlobals._discSourcePaths)
+            foreach (string dirtySourcePath in SysInfo.Config.Disc.SourcePaths)
             {
                 string sourcePath = PathUtils.CleanPath(dirtySourcePath);
 
@@ -52,7 +53,7 @@ namespace Archiver.Utilities.Disc
             {
                 string cleanDir = PathUtils.CleanPath(dir);
 
-                if (!(DiscGlobals._discExcludePaths.Any(x => cleanDir.ToLower().StartsWith(x.ToLower()))))
+                if (!(SysInfo.Config.Disc.ExcludePaths.Any(x => cleanDir.ToLower().StartsWith(x.ToLower()))))
                     ScanDirectory(dir);
             }
 
@@ -60,10 +61,10 @@ namespace Archiver.Utilities.Disc
             {
                 string cleanFile = PathUtils.CleanPath(file);
 
-                if (DiscGlobals._discExcludePaths.Any(x => cleanFile.ToLower().StartsWith(x.ToLower())))
+                if (SysInfo.Config.Disc.ExcludePaths.Any(x => cleanFile.ToLower().StartsWith(x.ToLower())))
                     DiscGlobals._excludedFileCount++;
 
-                else if (DiscGlobals._discExcludeFiles.Any(x => PathUtils.GetFileName(cleanFile).ToLower().EndsWith(x.ToLower())))
+                else if (SysInfo.Config.Disc.ExcludeFiles.Any(x => PathUtils.GetFileName(cleanFile).ToLower().EndsWith(x.ToLower())))
                     DiscGlobals._excludedFileCount++;
 
                 else

@@ -19,13 +19,6 @@ namespace Archiver
         public static long _totalSize = 0;
         public static long _excludedFileCount = 0;
 
-
-        public static string[] _discSourcePaths;
-        public static List<string> _discExcludePaths = new List<string>();
-        public static List<string> _discExcludeFiles = new List<string>();
-        public static long _discCapacityLimit = 0;
-        public static string _discStagingDir;
-
         public static void Reset()
         {
             _discSourceFiles.Clear();

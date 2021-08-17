@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Archiver.Shared;
+using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 using Newtonsoft.Json;
 
@@ -21,27 +23,13 @@ namespace Archiver.Classes.Disc
         public bool IsoCreated { get; set; } = false;
         
         [JsonIgnore]
-        public string IsoPath { 
-            get
-            {
-                return DiscGlobals._discStagingDir + $"/iso/{this.DiscName}.iso";
-            }
-        }
-        [JsonIgnore]
-        public string RootStagingPath { 
-            get
-            {
-                return DiscGlobals._discStagingDir + $"/stage/disc {this.DiscNumber.ToString("0000")}";
-            }
-        }
+        public string IsoPath => PathUtils.CleanPathCombine(SysInfo.Directories.ISO, $"{this.DiscName}.iso");
 
-        public int FilesCopied 
-        { 
-            get
-            {
-                return this.Files.Where(x => x.Copied == true).Count();
-            }
-        }
+        [JsonIgnore]
+        public string RootStagingPath => PathUtils.CleanPathCombine(SysInfo.Directories.DiscStaging, $"disc {this.DiscNumber.ToString("0000")}");
+
+        public int FilesCopied => this.Files.Where(x => x.Copied == true).Count();
+        
         [JsonIgnore]
         public int DaysSinceLastVerify {
             get

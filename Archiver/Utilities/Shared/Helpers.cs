@@ -160,7 +160,7 @@ namespace Archiver.Utilities.Shared
 
         public static DiscDetail GetDestinationDisc(long FileSize)
         {
-            DiscDetail matchingDisc = DiscGlobals._destinationDiscs.FirstOrDefault(x => x.NewDisc == true && (x.DataSize + FileSize) < DiscGlobals._discCapacityLimit);
+            DiscDetail matchingDisc = DiscGlobals._destinationDiscs.FirstOrDefault(x => x.NewDisc == true && (x.DataSize + FileSize) < SysInfo.Config.Disc.CapacityLimit);
 
             if (matchingDisc == null)
             {
