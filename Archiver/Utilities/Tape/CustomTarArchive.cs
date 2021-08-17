@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using System.Security.Cryptography;
-using Archiver.Classes.Tape;
+using Archiver.Shared.Classes.Tape;
 using ICSharpCode.SharpZipLib.Tar;
 
 namespace Archiver.Utilities.Tape

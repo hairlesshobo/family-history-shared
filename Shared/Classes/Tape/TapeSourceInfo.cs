@@ -1,4 +1,4 @@
-namespace Archiver.Classes.Tape
+namespace Archiver.Shared.Classes.Tape
 {
     public class TapeSourceInfo
     {

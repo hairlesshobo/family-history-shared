@@ -1,6 +1,6 @@
 using System;
 
-namespace Archiver.Classes.Shared
+namespace Archiver.Shared.Interfaces
 {
     public interface ISourceFile
     {

@@ -1,12 +1,10 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
-using Archiver.Classes.Shared;
+using Archiver.Shared.Interfaces;
 using Archiver.Shared.Utilities;
-using Archiver.Utilities.Shared;
 using Newtonsoft.Json;
 
-namespace Archiver.Classes.Tape
+namespace Archiver.Shared.Classes.Tape
 {
     public class TapeSourceFile : ISourceFile
     {

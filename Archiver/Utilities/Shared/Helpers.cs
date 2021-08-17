@@ -6,7 +6,7 @@ using System.Management;
 using System.Text;
 using System.Threading;
 using Archiver.Classes.Disc;
-using Archiver.Classes.Tape;
+using Archiver.Shared.Classes.Tape;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Disc;
 // using Newtonsoft.Json;

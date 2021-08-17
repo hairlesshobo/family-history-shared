@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Archiver.Classes.Shared;
-using Archiver.Classes.Tape;
+using Archiver.Shared.Classes.Tape;
 using Archiver.Shared;
 using Archiver.Shared.Models;
 using Archiver.Utilities.Shared;

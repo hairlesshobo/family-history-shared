@@ -1,7 +1,5 @@
 using System;
-using Archiver.Classes.Tape;
-using Archiver.Utilities;
-using Archiver.Utilities.Disc;
+using Archiver.Shared.Classes.Tape;
 using Archiver.Utilities.Tape;
 
 namespace Archiver.Operations.Tape

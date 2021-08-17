@@ -1,7 +1,7 @@
 using System;
-using Archiver.Utilities;
+// using Archiver.Utilities;
 
-namespace Archiver.Classes.Tape
+namespace Archiver.Shared.Classes.Tape
 {
     public class TapeInfo
     {

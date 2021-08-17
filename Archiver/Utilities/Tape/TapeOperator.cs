@@ -6,6 +6,7 @@ using Microsoft.Win32.SafeHandles;
 
 using System.Collections.Generic;
 using System.Text;
+using Archiver.Shared.Classes.Tape;
 //using Bsw.Types.Logger; 
 
 namespace Archiver.Utilities
@@ -24,35 +25,7 @@ namespace Archiver.Utilities
         ErrorWriteProtect = 19,
     }
 
-    [StructLayout(LayoutKind.Sequential)] 
-    public struct TapeMediaInfo
-    {
-        public long Capacity;
-        public long Remaining;
-
-        public uint BlockSize;
-        public uint PartitionCount;
-
-        public byte IsWriteProtected;
-    }
-
-    [StructLayout( LayoutKind.Sequential )]
-    public struct TapeDriveInfo
-    {
-        public byte ECC;
-        public byte Compression;
-        public byte DataPadding;
-        public byte ReportSetMarks;
-
-        public uint DefaultBlockSize;
-        public uint MaximumBlockSize;
-        public uint MinimumBlockSize;
-        public uint PartitionCount;
-
-        public uint FeaturesLow;
-        public uint FeaturesHigh;
-        public uint EOTWarningZone;
-    }
+    
 
     [StructLayout( LayoutKind.Sequential )]
     public class TapeSetDriveParameters

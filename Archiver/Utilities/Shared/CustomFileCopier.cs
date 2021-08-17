@@ -1,12 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using Archiver.Classes.Shared;
+using Archiver.Shared.Interfaces;
 using Archiver.Shared.Utilities;
-using Archiver.Utilities.Shared;
 
 namespace Archiver.Utilities.Shared
 {

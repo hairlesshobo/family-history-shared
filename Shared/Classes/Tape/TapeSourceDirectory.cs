@@ -2,10 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Archiver.Shared.Utilities;
-using Archiver.Utilities.Shared;
 using Newtonsoft.Json;
 
-namespace Archiver.Classes.Tape
+namespace Archiver.Shared.Classes.Tape
 {
     public class TapeSourceDirectory
     {

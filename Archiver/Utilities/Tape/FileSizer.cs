@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using Archiver.Classes.Tape;
+using Archiver.Shared.Classes.Tape;
 
 namespace Archiver.Utilities.Tape
 {

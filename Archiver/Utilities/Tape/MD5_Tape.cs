@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 using Archiver.Classes.Shared;
-using Archiver.Classes.Tape;
+using Archiver.Shared.Classes.Tape;
 using Archiver.Utilities.Shared;
 
 namespace Archiver.Utilities.Tape

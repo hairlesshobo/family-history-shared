@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 using System.Threading;
-using Archiver.Classes.Tape;
+using Archiver.Shared.Classes.Tape;
 using ICSharpCode.SharpZipLib.Tar;
 
 namespace Archiver.Utilities.Tape
