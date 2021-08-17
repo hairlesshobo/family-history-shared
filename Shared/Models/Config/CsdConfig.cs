@@ -19,6 +19,7 @@ namespace Archiver.Shared.Models.Config
 
         /// <Summary>
         /// How often the indexes should be saved during archive operation
+        ///
         /// Number provided is in seconds. This interval will be checked between every 
         /// file copy. If the timeout has expired, the index will be written prior to
         /// the next file being copied. 
@@ -31,9 +32,9 @@ namespace Archiver.Shared.Models.Config
         /// </Summary>
         public short AutoSaveInterval { get; set; } = 300;
 
-        public List<string> Validate(string prefix = null)
+        public List<ValidationError> Validate(string prefix = null)
         {
-            List<string> results = new List<string>();
+            List<ValidationError> results = new List<ValidationError>();
 
             return results;
         }

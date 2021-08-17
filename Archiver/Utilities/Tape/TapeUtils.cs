@@ -19,9 +19,9 @@ namespace Archiver.Utilities.Tape
         {
             if (Config.TapeDriver.ToLower() != "auto-remote")
             {
-                if (SystemInformation.OperatingSystemType == OSType.Windows)
+                if (SysInfo.OSType == OSType.Windows)
                     return WindowsTapeDrivePresent();
-                else if (SystemInformation.OperatingSystemType == OSType.Linux)
+                else if (SysInfo.OSType == OSType.Linux)
                     return false;
             }
 

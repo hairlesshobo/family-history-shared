@@ -1,4 +1,9 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
+using Archiver.Shared.Models;
 using Archiver.Shared.Models.Config;
 using Microsoft.Extensions.Configuration;
 
@@ -43,14 +48,19 @@ namespace Archiver.Shared.Utilities
             return _config;
         }
 
-        public static ArchiverConfig ReadConfig()
+        public static ArchiverConfig ReadConfig(out List<ValidationError> validationErrors)
         {
             IConfiguration _config = Utils.ReadConfigFile();
 
             ArchiverConfig config = new ArchiverConfig();
             _config.Bind(config);
+
+            validationErrors = config.Validate();
             
             return config;
         }
+
+        public static string BuildValidationPrefix(params string[] values)
+            => String.Join('.', values.Where(x => !String.IsNullOrWhiteSpace(x)));
     }
 }

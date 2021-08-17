@@ -76,9 +76,9 @@ namespace Archiver.Shared.Models.Config
         /// </Summary>
         public ushort MemoryBufferMinFill { get; set; } = 95;
 
-        public List<string> Validate(string prefix = null)
+        public List<ValidationError> Validate(string prefix = null)
         {
-            List<string> results = new List<string>();
+            List<ValidationError> results = new List<ValidationError>();
 
             return results;
         }

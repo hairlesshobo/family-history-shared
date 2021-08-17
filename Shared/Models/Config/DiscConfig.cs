@@ -18,9 +18,9 @@ namespace Archiver.Shared.Models.Config
         
         public string StagingDir { get; set; } = "../";
 
-        public List<string> Validate(string prefix = null)
+        public List<ValidationError> Validate(string prefix = null)
         {
-            List<string> results = new List<string>();
+            List<ValidationError> results = new List<ValidationError>();
 
             return results;
         }

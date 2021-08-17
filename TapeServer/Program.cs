@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using Archiver.Shared;
+using Archiver.Shared.Models;
 using Archiver.Shared.Models.Config;
 using Archiver.Shared.Utilities;
 using Archiver.TapeServer.TapeDrivers;
@@ -15,51 +18,78 @@ namespace Archiver.TapeServer
 
         static void Main()
         {
-            ArchiverConfig config = Utils.ReadConfig();
+            Utils.RequireSupportedOS();
+
+            List<ValidationError> configErrors;
+            ArchiverConfig config = Utils.ReadConfig(out configErrors);
+
+            int pid = GetPid();
+            
+            Formatting.WriteLineC(ConsoleColor.Green, $"Archive TapeServer component starting up. (PID: {pid})");
+            Console.WriteLine("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+            SysInfo.WriteSystemInfo(config, SysInfoTemplate.TapeServer, true);
+
+            if (configErrors.Count > 0)
+            {
+                Console.WriteLine("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+                Formatting.WriteLineC(ConsoleColor.Red, $"{configErrors.Count} Configuration ERROR(s) Found!");
+                Console.WriteLine();
+
+                int fieldWidth = configErrors.Max(x => x.Field.Length)+2;
+
+                foreach (ValidationError error in configErrors)
+                {
+                    Formatting.WriteC(ConsoleColor.Cyan, "Field: ");
+                    Console.WriteLine(error.Field.PadRight(fieldWidth));
+                    Formatting.WriteC(ConsoleColor.Red, "Error: ");
+                    Console.WriteLine(error.Error);
+                    Console.WriteLine();
+                }
+
+                Formatting.WriteLineC(ConsoleColor.Red, "Application terminating due to error!");
+                Environment.Exit(1);
+            }
+
+            Console.WriteLine("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+            Console.WriteLine();
             // ITapeDrive tapeDrive = TapeServerHelpers.GetTapeDrive(config);
 
             // NetworkServer server = new NetworkServer(config, tapeDrive);
 
-            int pid = GetPid();
-            
-            Console.WriteLine($"Archive TapeServer component starting up. (PID: {pid})");
-            Console.WriteLine();
-            SystemInformation.WriteSystemInfo(true);
-            Console.WriteLine();
-            Console.WriteLine();
 
-            uint blockSize = 512; //512 * 512;
-            int maxBlocks = 512;
-            int currentBlock = 0;
-            string device = "/home/flip/archive/test.txt"; // config.TapeDrive;
-            string text = String.Empty;
 
-            using (NativeLinuxTapeDriver tapeDrive = new NativeLinuxTapeDriver(device, blockSize))
-            {
-                tapeDrive.Open();
-                byte[] buffer = new byte[blockSize];
-                bool endOfData = false;
+            // uint blockSize = 512; //512 * 512;
+            // int maxBlocks = 512;
+            // int currentBlock = 0;
+            // string device = "/home/flip/archive/test.txt"; // config.TapeDrive;
+            // string text = String.Empty;
 
-                do
-                {
-                    endOfData = tapeDrive.Read(buffer);
+            // using (NativeLinuxTapeDriver tapeDrive = new NativeLinuxTapeDriver(device, blockSize))
+            // {
+            //     tapeDrive.Open();
+            //     byte[] buffer = new byte[blockSize];
+            //     bool endOfData = false;
 
-                    int strlen = Array.IndexOf(buffer, (byte)0);
+            //     do
+            //     {
+            //         endOfData = tapeDrive.Read(buffer);
 
-                    if (!endOfData)
-                    {
-                        if (strlen > 0)
-                            text += Encoding.UTF8.GetString(buffer, 0, strlen);
-                        else
-                            text += Encoding.UTF8.GetString(buffer, 0, buffer.Length);
-                    }
+            //         int strlen = Array.IndexOf(buffer, (byte)0);
 
-                    currentBlock++;
-                }
-                while (!endOfData && currentBlock <= maxBlocks);
+            //         if (!endOfData)
+            //         {
+            //             if (strlen > 0)
+            //                 text += Encoding.UTF8.GetString(buffer, 0, strlen);
+            //             else
+            //                 text += Encoding.UTF8.GetString(buffer, 0, buffer.Length);
+            //         }
 
-                Console.WriteLine(text);
-            }
+            //         currentBlock++;
+            //     }
+            //     while (!endOfData && currentBlock <= maxBlocks);
+
+            //     Console.WriteLine(text);
+            // }
             
 
             // server.StartControlServer();
