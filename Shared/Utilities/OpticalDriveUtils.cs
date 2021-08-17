@@ -25,6 +25,9 @@ namespace Archiver.Shared.Utilities
 
         private static string[] LinuxGetOpticalDriveNames()
         {
+            if (!File.Exists("/proc/sys/dev/cdrom/info"))
+                return new string[] { };
+
             string[] lines = File.ReadAllLines("/proc/sys/dev/cdrom/info");
 
             string driveNameLine = lines.FirstOrDefault(x => x.ToLower().StartsWith("drive name"));
