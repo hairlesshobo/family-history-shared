@@ -8,7 +8,6 @@ using Microsoft.Extensions.Configuration;
 
 namespace Archiver
 {
-    [Obsolete]
     public static class Config
     {
         public static string TapeDriver { get; set; }
@@ -30,13 +29,6 @@ namespace Archiver
                 return _tapeDrivePresent;
             }
         }
-        public static bool OpticalDrivePresent
-        {
-            get
-            {
-                return _opticalDrivePresent;
-            }
-        }
 
         public static bool ReadOnlyFilesystem
         {
@@ -47,7 +39,6 @@ namespace Archiver
         }
 
         private static bool _tapeDrivePresent;
-        private static bool _opticalDrivePresent;
         private static bool _readOnlyFilesystem;
 
         public static void ReadConfig()
@@ -118,7 +109,6 @@ namespace Archiver
             }
 
             _tapeDrivePresent = TapeUtils.TapeDrivePresent();
-            _opticalDrivePresent = DriveInfo.GetDrives().Any(x => x.DriveType == DriveType.CDRom);
             _readOnlyFilesystem = TestForReadonlyFs();
         }
 

@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TapeServer", "TapeServer\Ta
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{3D25DFB4-72C5-4354-9B75-A8B94FE8CE9A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestCLI", "TestCLI\TestCLI.csproj", "{42956AEE-F4DC-4951-A20A-9138E56C2A81}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -58,5 +60,17 @@ Global
 		{3D25DFB4-72C5-4354-9B75-A8B94FE8CE9A}.Release|x64.Build.0 = Release|Any CPU
 		{3D25DFB4-72C5-4354-9B75-A8B94FE8CE9A}.Release|x86.ActiveCfg = Release|Any CPU
 		{3D25DFB4-72C5-4354-9B75-A8B94FE8CE9A}.Release|x86.Build.0 = Release|Any CPU
+		{42956AEE-F4DC-4951-A20A-9138E56C2A81}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42956AEE-F4DC-4951-A20A-9138E56C2A81}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42956AEE-F4DC-4951-A20A-9138E56C2A81}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{42956AEE-F4DC-4951-A20A-9138E56C2A81}.Debug|x64.Build.0 = Debug|Any CPU
+		{42956AEE-F4DC-4951-A20A-9138E56C2A81}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{42956AEE-F4DC-4951-A20A-9138E56C2A81}.Debug|x86.Build.0 = Debug|Any CPU
+		{42956AEE-F4DC-4951-A20A-9138E56C2A81}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42956AEE-F4DC-4951-A20A-9138E56C2A81}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42956AEE-F4DC-4951-A20A-9138E56C2A81}.Release|x64.ActiveCfg = Release|Any CPU
+		{42956AEE-F4DC-4951-A20A-9138E56C2A81}.Release|x64.Build.0 = Release|Any CPU
+		{42956AEE-F4DC-4951-A20A-9138E56C2A81}.Release|x86.ActiveCfg = Release|Any CPU
+		{42956AEE-F4DC-4951-A20A-9138E56C2A81}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

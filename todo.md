@@ -13,6 +13,9 @@ Linux support:
 
 Global Functionality:
 ----------------------------------------------------------------
+* Add ability to detect if drive is BD capable (both read and write)
+* Add a per-user config to the user's home directory
+* Add a wizard mode for other users
 * Search entire archive, across media types
 * Port entire application to Terminal.Gui
 * Finish config validation
@@ -94,3 +97,8 @@ Future ideas
     * `n_` (normal / default / reset)
 
 
+Linux Notes
+----------------------------------------------------------------
+* Get optical drive details from /proc/sys/dev/cdrom/info
+* may be able to inspect cd-drive source code to see how it pulls cd drive list:
+    * https://git.savannah.gnu.org/cgit/libcdio.git/tree/src

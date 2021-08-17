@@ -35,6 +35,22 @@
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "externalTerminal",
             "stopAtEntry": false
+        },
+        {
+            "name": "Launch TestCLI",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-testcli",
+            "logging": {
+                "moduleLoad": false
+            },
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/../bin/TestCLI.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
+            "console": "externalTerminal",
+            "stopAtEntry": false
         }
     ]
 }

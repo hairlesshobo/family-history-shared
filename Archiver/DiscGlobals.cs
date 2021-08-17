@@ -6,7 +6,6 @@ using Archiver.Classes.Disc;
 
 namespace Archiver
 {
-    [Obsolete]
     public static class DiscGlobals
     {
         public static List<DiscSourceFile> _newFileEntries => _discSourceFiles.Where(x => x.Copied == false).ToList();

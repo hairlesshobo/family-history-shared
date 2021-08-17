@@ -2,7 +2,6 @@ using System;
 
 namespace Archiver
 {
-    [Obsolete]
     public static class Globals
     {
         public static int _leftHeaderWidth = 12;

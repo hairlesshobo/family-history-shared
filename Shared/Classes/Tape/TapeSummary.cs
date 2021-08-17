@@ -2,15 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Archiver.Shared.Utilities;
-// using Archiver.Utilities.Shared;
 
 namespace Archiver.Shared.Classes.Tape
 {
     public class TapeSummary
     {
-        // TODO: Pull this blocking factor from config!
-        private static readonly int _blockingFactor = 512;
-
         public int ID { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
@@ -61,7 +57,7 @@ namespace Archiver.Shared.Classes.Tape
                 size += 1024;
 
                 // round to next block size
-                size = HelpersNew.RoundToNextMultiple(size, (512 * _blockingFactor));
+                size = HelpersNew.RoundToNextMultiple(size, (512 * this.BlockingFactor));
 
                 return size;
             }
@@ -72,7 +68,8 @@ namespace Archiver.Shared.Classes.Tape
 
         public TapeSummary()
         {
-            this.BlockingFactor = _blockingFactor;
+            // TODO: Can this blocking factor be passed as a parameter?
+            this.BlockingFactor = SysInfo.Config.Tape.BlockingFactor;
             this.Directories = new List<TapeSourceDirectory>();
             this.Files = new List<TapeSourceFile>();
         }

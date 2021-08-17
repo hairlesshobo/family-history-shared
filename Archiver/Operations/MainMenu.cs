@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Archiver.Shared;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 using Archiver.Views;
@@ -77,7 +78,7 @@ namespace Archiver.Operations
 
                 string discMenuAppend = String.Empty;
 
-                if (Config.OpticalDrivePresent == false)
+                if (SysInfo.IsOpticalDrivePresent == false)
                     discMenuAppend += " (drive not detected)";
 
                 _menu = new CliMenu<bool>(new List<CliMenuEntry<bool>>()
@@ -97,7 +98,7 @@ namespace Archiver.Operations
                     new CliMenuEntry<bool>() {
                         Name = "Restore entire disc(s)",
                         Action = NotImplemented,
-                        Disabled = !Config.OpticalDrivePresent || true, // remove once implemented
+                        Disabled = !SysInfo.IsOpticalDrivePresent || true, // remove once implemented
                         ForegroundColor = ConsoleColor.Green
                     },
                     new CliMenuEntry<bool>() {
@@ -109,7 +110,7 @@ namespace Archiver.Operations
                     new CliMenuEntry<bool>() {
                         Name = "Verify Discs",
                         Action = Disc.DiscVerification.StartOperation,
-                        Disabled = Config.ReadOnlyFilesystem || !Config.OpticalDrivePresent,
+                        Disabled = Config.ReadOnlyFilesystem || !SysInfo.IsOpticalDrivePresent,
                         ForegroundColor = ConsoleColor.DarkYellow
                     },
                     new CliMenuEntry<bool>() {
@@ -125,7 +126,7 @@ namespace Archiver.Operations
                     new CliMenuEntry<bool>() {
                         Name = "Run Archive process",
                         Action = Disc.DiscArchiver.StartOperation,
-                        Disabled = Config.ReadOnlyFilesystem || !Config.OpticalDrivePresent,
+                        Disabled = Config.ReadOnlyFilesystem || !SysInfo.IsOpticalDrivePresent,
                         ForegroundColor = ConsoleColor.Red
                     },
                     

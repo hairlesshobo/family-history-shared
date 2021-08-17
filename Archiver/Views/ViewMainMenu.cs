@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Archiver.Classes.Views;
+using Archiver.Shared;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 using Terminal.Gui;
@@ -198,7 +199,7 @@ namespace Archiver.Views
             AddHyperlink(mainWindow, new HyperlinkInfo() 
             {
                 Text = "Restore entire disc(s)", 
-                Disabled = !Config.OpticalDrivePresent || true, // remove once implemented
+                Disabled = !SysInfo.IsOpticalDrivePresent || true, // remove once implemented
                 Color = GuiGlobals.Colors.Green,
                 Action = NotImplemented,
             });
@@ -216,7 +217,7 @@ namespace Archiver.Views
                 Text = "Verify Discs", 
                 Color = GuiGlobals.Colors.Yellow,
                 Action = Operations.Disc.DiscVerification.StartOperation,
-                Disabled = Config.ReadOnlyFilesystem || !Config.OpticalDrivePresent,
+                Disabled = Config.ReadOnlyFilesystem || !SysInfo.IsOpticalDrivePresent,
                 DropFromGui = true,
             });
             
@@ -241,7 +242,7 @@ namespace Archiver.Views
                 Text = "Run Archive process", 
                 Color = GuiGlobals.Colors.Red,
                 Action = Operations.Disc.DiscArchiver.StartOperation,
-                Disabled = Config.ReadOnlyFilesystem || !Config.OpticalDrivePresent,
+                Disabled = Config.ReadOnlyFilesystem || !SysInfo.IsOpticalDrivePresent,
                 DropFromGui = true
             });
         }

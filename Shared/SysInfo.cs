@@ -22,6 +22,7 @@ namespace Archiver.Shared
 
 
         public static OSType OSType => _osType;
+        public static bool IsOpticalDrivePresent => OpticalDriveUtils.IsDrivePresent();
         public static Architecture Architecture => System.Runtime.InteropServices.RuntimeInformation.OSArchitecture;
         public static string Description => System.Runtime.InteropServices.RuntimeInformation.OSDescription;
         public static string Identifier => System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier;
