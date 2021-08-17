@@ -55,10 +55,7 @@ namespace Archiver.TestCLI
             // TODO: Test this with disc in the drive
             //var drives = DriveInfo.GetDrives().Where(x => x.DriveType == DriveType.CDRom);
 
-            Console.WriteLine(JsonSerializer.Serialize(SysInfo.Config.CSD, new JsonSerializerOptions()
-            {
-                WriteIndented = true
-            }));
+            OpticalDriveUtils.GetDriveLabel("sr0");
 
         }
 

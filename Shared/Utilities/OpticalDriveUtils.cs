@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Archiver.Shared.Exceptions;
 using Archiver.Shared.Models;
 
@@ -18,8 +19,75 @@ namespace Archiver.Shared.Utilities
                 throw new UnsupportedOperatingSystemException();
         }
 
+        public static void GetDriveLabel(string drive)
+        {
+            if (SysInfo.OSType == OSType.Linux)
+                LinuxGetDriveLabel(drive);
+        }
+
 
         #region Linux Utilities
+        [StructLayout(LayoutKind.Sequential)] 
+        public struct StatResult {
+               ulong     st_dev;         /* ID of device containing file */
+               ulong     st_ino;         /* Inode number */
+               ulong   st_nlink;       /* Number of hard links */
+               uint    st_mode;        /* File type and mode */
+               uint     st_uid;         /* User ID of owner */
+               uint     st_gid;         /* Group ID of owner */
+               int pad0;
+               ulong     st_rdev;        /* Device ID (if special file) */
+               long     st_size;        /* Total size, in bytes */
+               long st_blksize;     /* Block size for filesystem I/O */
+               long   st_blocks;      /* Number of 512B blocks allocated */
+
+               /* Since Linux 2.6, the kernel supports nanosecond
+                  precision for the following timestamp fields.
+                  For the details before Linux 2.6, see NOTES. */
+
+            //    struct timespec st_atim;  /* Time of last access */
+            //    struct timespec st_mtim;  /* Time of last modification */
+            //    struct timespec st_ctim;  /* Time of last status change */
+
+        //    #define st_atime st_atim.tv_sec      /* Backward compatibility */
+        //    #define st_mtime st_mtim.tv_sec
+        //    #define st_ctime st_ctim.tv_sec
+           };
+
+        [DllImport("libc.so.6", EntryPoint = "__xstat", SetLastError = true)]
+        private static extern int Stat(int statVersion, string path, IntPtr statResult);
+
+        private static string LinuxGetDriveLabel(string drive)
+        {
+            IntPtr ptr = IntPtr.Zero;
+            try
+            {
+                StatResult statResult = new StatResult();
+
+                // Allocate unmanaged memory
+                int size = Marshal.SizeOf(statResult);
+                ptr = Marshal.AllocHGlobal(size);
+
+                Marshal.StructureToPtr(
+                    statResult,
+                    ptr,
+                    false
+                );
+
+                int result = Stat(1, LinuxGetOpticalDrivePath(drive), ptr);
+
+                statResult = (StatResult)Marshal.PtrToStructure(ptr, typeof(StatResult));
+                
+            }
+            finally
+            {
+                if (ptr != IntPtr.Zero)
+                    Marshal.FreeHGlobal(ptr);
+            }
+
+            return String.Empty;
+        }
+
         private static string LinuxGetOpticalDrivePath(string driveName)
             => (driveName.IndexOf('/') >= 0 ? driveName : $"/dev/{driveName}");
 
