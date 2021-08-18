@@ -46,10 +46,6 @@ namespace Archiver.Shared.Utilities
             FullPath = CleanPath(FullPath);
 
             return FullPath.Substring(FullPath.LastIndexOf('/')+1);
-
-            // string[] nameParts = FullPath.Split('/');
-            
-            // return nameParts[nameParts.Length-1];
         }
 
         public static string[] CleanExcludePaths(string[] excludePaths)

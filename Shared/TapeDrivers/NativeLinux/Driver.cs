@@ -1,6 +1,8 @@
 using System;
 using System.Runtime.InteropServices;
 using Archiver.Shared.Exceptions;
+using Archiver.Shared.Native;
+using static Archiver.Shared.Native.Linux;
 
 namespace Archiver.Shared.TapeDrivers
 {
@@ -8,7 +10,7 @@ namespace Archiver.Shared.TapeDrivers
     {
         private string _devicePath = null;
         private Nullable<int> _tapeHandle = null;
-        private Nullable<TapeOpenType> _access = null;
+        private Nullable<OpenType> _access = null;
         private uint _blockSize = 0;
 
         public string DevicePath => _devicePath;
@@ -47,11 +49,11 @@ namespace Archiver.Shared.TapeDrivers
         /// <summary>
         ///     Opens a new handle to the current tape drive
         /// </summary>
-        public void Open(TapeOpenType openType = TapeOpenType.ReadOnly)
+        public void Open(OpenType openType = OpenType.ReadOnly)
         {
             if (!this.IsOpen)
             {
-                _tapeHandle = POpen(_devicePath, (int)openType);
+                _tapeHandle = Linux.Open(_devicePath, openType);
                 _access = openType;
 
                 if (_tapeHandle < 0)
@@ -66,7 +68,7 @@ namespace Archiver.Shared.TapeDrivers
         {
             if (this.IsOpen)
             {
-                int result = PClose(_tapeHandle.Value);
+                int result = Linux.Close(_tapeHandle.Value);
 
                 if (result < 0)
                     throw new TapeDriveNativeException("Close", Marshal.GetLastWin32Error());
@@ -107,7 +109,7 @@ namespace Archiver.Shared.TapeDrivers
                 // we empty the buffer before we read from tape
                 Array.Fill(buffer, (byte)0);
 
-                int result = PRead(_tapeHandle.Value, buffer, buffer.Length);
+                int result = Linux.Read(_tapeHandle.Value, buffer, buffer.Length);
 
                 if (result == 0)
                     endOfData = true;
@@ -264,7 +266,7 @@ namespace Archiver.Shared.TapeDrivers
 
                 Marshal.StructureToPtr(op, ptr, false);
                 
-                int result = PIoctl(_tapeHandle.Value, MTIOCTOP, ptr);
+                int result = Linux.Ioctl(_tapeHandle.Value, MTIOCTOP, ptr);
 
                 if (result < 0)
                     throw new TapeDriveNativeException(callingMethodName, Marshal.GetLastWin32Error());

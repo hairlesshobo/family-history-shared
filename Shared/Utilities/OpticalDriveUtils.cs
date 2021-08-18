@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Archiver.Shared.Exceptions;
 using Archiver.Shared.Models;
+using Archiver.Shared.Native;
 
 namespace Archiver.Shared.Utilities
 {
@@ -19,73 +20,107 @@ namespace Archiver.Shared.Utilities
                 throw new UnsupportedOperatingSystemException();
         }
 
-        public static void GetDriveLabel(string drive)
+        public static string GetDriveLabel(string drive)
         {
             if (SysInfo.OSType == OSType.Linux)
-                LinuxGetDriveLabel(drive);
+                return LinuxGetDriveLabel(drive);
+
+            // TODO: Add windows here
+
+            return null;
         }
 
 
         #region Linux Utilities
-        [StructLayout(LayoutKind.Sequential)] 
-        public struct StatResult {
-               ulong     st_dev;         /* ID of device containing file */
-               ulong     st_ino;         /* Inode number */
-               ulong   st_nlink;       /* Number of hard links */
-               uint    st_mode;        /* File type and mode */
-               uint     st_uid;         /* User ID of owner */
-               uint     st_gid;         /* Group ID of owner */
-               int pad0;
-               ulong     st_rdev;        /* Device ID (if special file) */
-               long     st_size;        /* Total size, in bytes */
-               long st_blksize;     /* Block size for filesystem I/O */
-               long   st_blocks;      /* Number of 512B blocks allocated */
-
-               /* Since Linux 2.6, the kernel supports nanosecond
-                  precision for the following timestamp fields.
-                  For the details before Linux 2.6, see NOTES. */
-
-            //    struct timespec st_atim;  /* Time of last access */
-            //    struct timespec st_mtim;  /* Time of last modification */
-            //    struct timespec st_ctim;  /* Time of last status change */
-
-        //    #define st_atime st_atim.tv_sec      /* Backward compatibility */
-        //    #define st_mtime st_mtim.tv_sec
-        //    #define st_ctime st_ctim.tv_sec
-           };
-
-        [DllImport("libc.so.6", EntryPoint = "__xstat", SetLastError = true)]
-        private static extern int Stat(int statVersion, string path, IntPtr statResult);
-
+        /// <Summary>
+        ///     Get the drive label for the provided drive ID
+        /// </Summary>
+        /// <Retuns>
+        ///     The drive label, if found. If the drive does not have a label or no media is loaded, null is returned
+        /// </Returns>
         private static string LinuxGetDriveLabel(string drive)
         {
-            IntPtr ptr = IntPtr.Zero;
-            try
+            string byLabelDir = "/dev/disk/by-label";
+
+            if (!Directory.Exists(byLabelDir))
+                return null;
+
+            string[] labels = Directory.GetFiles(byLabelDir);
+
+            if (labels.Length == 0)
+                return null;
+
+            ulong driveInode = Linux.GetFileInode(LinuxGetOpticalDrivePath(drive));
+
+            foreach (string deviceLabel in labels)
             {
-                StatResult statResult = new StatResult();
+                ulong labelInode = Linux.GetFileInode(deviceLabel);
 
-                // Allocate unmanaged memory
-                int size = Marshal.SizeOf(statResult);
-                ptr = Marshal.AllocHGlobal(size);
+                if (labelInode == driveInode)
+                {
+                    string label = deviceLabel.Substring(deviceLabel.LastIndexOf('/')+1)
+                                              .Replace(@"\x20", " ");
 
-                Marshal.StructureToPtr(
-                    statResult,
-                    ptr,
-                    false
-                );
+                    return label;
+                }
+            }
 
-                int result = Stat(1, LinuxGetOpticalDrivePath(drive), ptr);
+            return null;
+        }
 
-                statResult = (StatResult)Marshal.PtrToStructure(ptr, typeof(StatResult));
-                
+        public static string LinuxGenerateDiscMd5(string driveName)
+        {
+            string drivePath = LinuxGetOpticalDrivePath(driveName);
+            string md5Hash = String.Empty;
+
+            int fd = Linux.Open(drivePath, Linux.OpenType.ReadOnly);
+
+            try 
+            {
+                byte[] buffer = new byte[256 * 1024]; // 256KB buffer
+
+                using (var md5 = System.Security.Cryptography.MD5.Create())
+                {
+                    // Stopwatch sw = Stopwatch.StartNew();
+                    int currentBlockSize = 0;
+
+                    // long lastSample = sw.ElapsedMilliseconds;
+                    long totalBytesRead = 0;
+                    int md5Offset = 0;
+                    // double currentPercent = 0.0;
+
+                    while ((currentBlockSize = Linux.Read(fd, buffer, buffer.Length)) > 0)
+                    {
+                        totalBytesRead += currentBlockSize;
+
+                        // currentPercent = ((double)totalBytesRead / (double)fileLength) * 100.0;
+                        md5Offset += md5.TransformBlock(buffer, 0, currentBlockSize, buffer, 0);
+                        
+                        // if (sw.ElapsedMilliseconds - lastSample > _sampleDurationMs || currentBlockSize < buffer.Length)
+                        // {
+                        //     OnProgressChanged(currentPercent);
+                        //     lastSample = sw.ElapsedMilliseconds;
+                        // }
+                    }
+
+                    // OnProgressChanged(currentPercent);
+                    // lastSample = sw.ElapsedMilliseconds;
+
+                    // sw.Stop();
+                    md5.TransformFinalBlock(new byte[] { }, 0, 0);
+
+                    // this.MD5_Hash = BitConverter.ToString(md5.Hash).Replace("-","").ToLower();
+                    md5Hash = BitConverter.ToString(md5.Hash).Replace("-","").ToLower();
+
+                    // OnComplete(this.MD5_Hash);
+                }
             }
             finally
             {
-                if (ptr != IntPtr.Zero)
-                    Marshal.FreeHGlobal(ptr);
+                Linux.Close(fd);
             }
 
-            return String.Empty;
+            return md5Hash;
         }
 
         private static string LinuxGetOpticalDrivePath(string driveName)

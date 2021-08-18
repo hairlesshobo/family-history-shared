@@ -5,16 +5,6 @@ namespace Archiver.Shared.TapeDrivers
     public partial class NativeLinuxTapeDriver
     {
         #pragma warning disable CS0414
-        public enum TapeOpenType
-        {
-            ReadOnly = 0,
-            WriteOnly = 1,
-            ReadWrite = 2
-        }
-        [Obsolete]
-        static readonly int OPEN_READ_ONLY = 0;
-        static readonly int OPEN_WRITE_ONLY = 1;
-        static readonly int OPEN_READ_WRITE = 2;
 
         static readonly uint MTIOCTOP = 0x40086D01; //         const struct mtop *
         static readonly uint MTIOCGET = 0x801C6D02; //         struct mtget *
