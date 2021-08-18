@@ -8,7 +8,7 @@ using Archiver.Shared.TapeDrivers;
 
 namespace Archiver.Shared.Utilities
 {
-    public static class TapeUtilsNew
+    public static partial class TapeUtilsNew
     {
         public static string CleanTapeDrivePath(string path)
         {
@@ -58,30 +58,5 @@ namespace Archiver.Shared.Utilities
             // TODO: finish implementing tape drive detection
             return false;
         }
-
-        #region Linux Utilities
-        private static bool LinuxIsTapeDrivePresent()
-            => File.Exists(SysInfo.TapeDrive);
-            
-        #endregion
-
-        #region Windows Utilities
-        private static bool WindowsIsTapeDrivePresent()
-        {
-            try
-            {
-                using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(SysInfo.TapeDrive, false))
-                {}
-            }
-            catch (TapeOperatorWin32Exception exception)
-            {
-                if (exception.HResult == -2146232832)
-                    return false;
-            }
-
-            return true;
-        }
-        #endregion
-
     }
 }

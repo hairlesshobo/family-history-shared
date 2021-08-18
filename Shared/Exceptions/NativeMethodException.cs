@@ -1,15 +1,13 @@
 using System;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
 
 namespace Archiver.Shared.Exceptions
 {
-    public class NativeMethodException : System.ComponentModel.Win32Exception
+    public class NativeMethodException : Exception
     {
-        public NativeMethodException(int errorCode) 
-            : base(errorCode)
-        { }
-
-        public NativeMethodException(string methodName, int errorCode) 
-            : base(errorCode, $"Native API method failed : call to {methodName} failed with error code {errorCode}")
+        public NativeMethodException(string methodName)
+            : base($"Native API method failed : call to {methodName} failed with error code {Marshal.GetLastWin32Error()}", new Win32Exception())
         { }
     }
 }

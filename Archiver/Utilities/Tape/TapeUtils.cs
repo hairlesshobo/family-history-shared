@@ -11,6 +11,7 @@ using Archiver.Utilities.Shared;
 using ICSharpCode.SharpZipLib.Tar;
 using Newtonsoft.Json;
 using Archiver.Shared.TapeDrivers;
+using Archiver.Shared.Native;
 
 namespace Archiver.Utilities.Tape
 {
@@ -161,7 +162,7 @@ namespace Archiver.Utilities.Tape
                 {
                     DriveInfo = tape.DriveInfo,
                     TapePosition = -1,
-                    MediaInfo = default (TapeMediaInfo)
+                    MediaInfo = default (Windows.TapeMediaInfo)
                 };
             }
 

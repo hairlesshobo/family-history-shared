@@ -62,5 +62,9 @@ namespace Archiver.Shared.Utilities
 
             return validatedPaths.ToArray();
         }
+
+
+        public static string LinuxGetDrivePath(string driveName)
+            => (driveName.IndexOf('/') >= 0 ? driveName : $"/dev/{driveName}");
     }
 }

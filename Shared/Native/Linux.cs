@@ -27,6 +27,9 @@ namespace Archiver.Shared.Native
 
         [DllImport("libc.so.6", EntryPoint = "ioctl", SetLastError = true)]
         public extern static int Ioctl(int fd, ulong request, IntPtr data);
+        
+        [DllImport("libc.so.6", EntryPoint = "ioctl", SetLastError = true)]
+        public extern static int Ioctl(int fd, ulong request, out UInt64 data);
     
 
         [DllImport("libc.so.6", EntryPoint = "__xstat", SetLastError = true)]

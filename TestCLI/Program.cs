@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -7,8 +8,10 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using Archiver.Shared;
+using Archiver.Shared.Exceptions;
 using Archiver.Shared.Models;
 using Archiver.Shared.Models.Config;
+using Archiver.Shared.Native;
 using Archiver.Shared.Utilities;
 
 namespace Archiver.TestCLI
@@ -57,10 +60,13 @@ namespace Archiver.TestCLI
             // TODO: Test this with disc in the drive
             //var drives = DriveInfo.GetDrives().Where(x => x.DriveType == DriveType.CDRom);
 
-            // Console.WriteLine($"sr0: {OpticalDriveUtils.GetDriveLabel("sr0")}");
-            Console.WriteLine($"sr0: {OpticalDriveUtils.WindowsGenerateDiscMD5("A:")}");
+            // 0x00001260   BLKGETSIZE            unsigned long *
 
-            Console.ReadLine();
+
+            Console.WriteLine(DiskUtils.LinuxGetFileSize("/home/flip/cv_debug.log"));
+
+            // Console.WriteLine($"sr0: {OpticalDriveUtils.GenerateDiscMD5("sr0")}");
+            // Console.WriteLine($"sr0: {OpticalDriveUtils.WindowsGenerateDiscMD5("A:")}");
 
         }
 

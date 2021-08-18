@@ -16,6 +16,7 @@ Linux support:
 Global Functionality:
 ----------------------------------------------------------------
 * Add ability to detect if drive is BD capable (both read and write)
+* keep track of copy speed performance per tape and csd, use that in future calculations
 * Add a per-user config to the user's home directory
 * Add a wizard mode for other users
 * Search entire archive, across media types
@@ -47,6 +48,7 @@ Tape Functionality:
 * Add scan rate to `Sizer`
 * Add ETA to tape display
 * Factor in long file names when calculating total archive size. long file names require two headers
+* Add "last run" to tape selection list
 
 
 Disc Functionality
