@@ -1,21 +1,18 @@
 using System;
 using System.Runtime.InteropServices;
+using Archiver.Shared.TapeDrivers;
 using Microsoft.Win32.SafeHandles;
-
-#region Typedefenitions
 using BOOL = System.Int32;
-#endregion
 
-namespace Archiver.Shared.TapeDrivers
+namespace Archiver.Shared.Native
 {
-    public partial class NativeWindowsTapeDriver
+    public static partial class Windows
     {
-        #region PInvoke
         // Use interop to call the CreateFile function.
         // For more information about CreateFile,
         // see the unmanaged MSDN reference library.
-        [DllImport( "kernel32.dll", SetLastError = true )]
-        private static extern SafeFileHandle CreateFile(
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern SafeFileHandle CreateFile(
             string lpFileName,
             uint dwDesiredAccess,
             uint dwShareMode,
@@ -25,16 +22,16 @@ namespace Archiver.Shared.TapeDrivers
             IntPtr hTemplateFile
             );
 
-        [DllImport( "kernel32", SetLastError = true )]
-        private static extern int PrepareTape(
+        [DllImport("kernel32", SetLastError = true)]
+        public static extern int PrepareTape(
             SafeFileHandle handle,
             int prepareType,
             BOOL isImmediate
             );
 
 
-        [DllImport( "kernel32", SetLastError = true )]
-        private static extern int SetTapePosition(
+        [DllImport("kernel32", SetLastError = true)]
+        public static extern int SetTapePosition(
             SafeFileHandle handle,
             int positionType,
             int partition,
@@ -43,8 +40,8 @@ namespace Archiver.Shared.TapeDrivers
             BOOL isImmediate
             );
 
-        [DllImport( "kernel32", SetLastError = true )]
-        private static extern int GetTapePosition(
+        [DllImport("kernel32", SetLastError = true)]
+        public static extern int GetTapePosition(
             SafeFileHandle handle,
             int positionType,
             out int partition,
@@ -52,31 +49,30 @@ namespace Archiver.Shared.TapeDrivers
             out int offsetHigh
             );
 
-        [DllImport( "kernel32", SetLastError = true )]
-        private static extern int WriteTapemark(
+        [DllImport("kernel32", SetLastError = true)]
+        public static extern int WriteTapemark(
             SafeFileHandle handle,
             int tapemarkType,
             int tapemarkCount,
             BOOL isImmediate
             );
 
-        [DllImport( "kernel32", SetLastError = true )]
-        private static extern int GetTapeParameters(
+        [DllImport("kernel32", SetLastError = true)]
+        public static extern int GetTapeParameters(
            SafeFileHandle handle,
            int operationType,
            ref int size,
            IntPtr mediaInfo
            );
 
-        [DllImport( "kernel32", SetLastError = true )]
-        private static extern int SetTapeParameters(
+        [DllImport("kernel32", SetLastError = true)]
+        public static extern int SetTapeParameters(
            SafeFileHandle handle,
            int operationType,
            TapeSetDriveParameters parameters
            );
 
-        [DllImport( "kernel32", SetLastError = true )]
-        private static extern int GetLastError();
-        #endregion
+        [DllImport("kernel32", SetLastError = true)]
+        public static extern int GetLastError();
     }
 }

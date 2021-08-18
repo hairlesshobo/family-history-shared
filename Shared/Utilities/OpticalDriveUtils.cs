@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using Archiver.Shared.Exceptions;
 using Archiver.Shared.Models;
 using Archiver.Shared.Native;
+using Microsoft.Win32.SafeHandles;
 
 namespace Archiver.Shared.Utilities
 {
@@ -68,7 +69,7 @@ namespace Archiver.Shared.Utilities
             return null;
         }
 
-        public static string LinuxGenerateDiscMd5(string driveName)
+        public static string LinuxGenerateDiscMD5(string driveName)
         {
             string drivePath = LinuxGetOpticalDrivePath(driveName);
             string md5Hash = String.Empty;
@@ -170,8 +171,83 @@ namespace Archiver.Shared.Utilities
         #endregion
 
         #region Windows Utilities
+        public static string WindowsGenerateDiscMD5(string driveName)
+        {
+            string drivePath = WindowsGetOpticalDrivePath(driveName);
+            string md5Hash = String.Empty;
+
+            SafeFileHandle handle = Windows.CreateFile(
+                drivePath,
+                // GENERIC_READ | GENERIC_WRITE,
+                Windows.GENERIC_READ,
+                0,
+                IntPtr.Zero,
+                Windows.OPEN_EXISTING,
+                0,
+                //FILE_ATTRIBUTE_ARCHIVE | FILE_FLAG_BACKUP_SEMANTICS,
+                IntPtr.Zero
+                );
+
+            byte[] buffer = new byte[256 * 1024]; // 256KB buffer
+
+
+            using (FileStream stream = new FileStream(handle, FileAccess.Read, (int)buffer.Length, false))
+            using (var md5 = System.Security.Cryptography.MD5.Create())
+            {
+                // Stopwatch sw = Stopwatch.StartNew();
+                int currentBlockSize = 0;
+
+                // long lastSample = sw.ElapsedMilliseconds;
+                long totalBytesRead = 0;
+                int md5Offset = 0;
+                // double currentPercent = 0.0;
+
+                // m_stream.Read(buffer, 0, buffer.Length);
+                // m_stream.Flush();
+
+                while ((currentBlockSize = stream.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    totalBytesRead += currentBlockSize;
+
+                    // currentPercent = ((double)totalBytesRead / (double)fileLength) * 100.0;
+                    md5Offset += md5.TransformBlock(buffer, 0, currentBlockSize, buffer, 0);
+                    
+                    // if (sw.ElapsedMilliseconds - lastSample > _sampleDurationMs || currentBlockSize < buffer.Length)
+                    // {
+                    //     OnProgressChanged(currentPercent);
+                    //     lastSample = sw.ElapsedMilliseconds;
+                    // }
+                }
+
+                // OnProgressChanged(currentPercent);
+                // lastSample = sw.ElapsedMilliseconds;
+
+                // sw.Stop();
+                md5.TransformFinalBlock(new byte[] { }, 0, 0);
+
+                // this.MD5_Hash = BitConverter.ToString(md5.Hash).Replace("-","").ToLower();
+                md5Hash = BitConverter.ToString(md5.Hash).Replace("-","").ToLower();
+
+                // OnComplete(this.MD5_Hash);
+            }
+
+            return String.Empty;
+        }
+
         private static string WindowsGetOpticalDrivePath(string driveName)
-            => driveName;
+        {
+            if (driveName.StartsWith(@"\\.\"))
+                return driveName;
+                
+            driveName = driveName.Trim('/');
+            driveName = driveName.Trim('\\');
+            driveName = driveName.ToUpper();
+
+            if (!driveName.EndsWith(":"))
+                driveName += ":";
+
+            return @"\\.\" + driveName;
+        }
 
         // TODO: Test that this actually works
         private static string[] WindowsGetOpticalDriveNames()

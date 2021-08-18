@@ -56,7 +56,7 @@ namespace Archiver.TestCLI
             //var drives = DriveInfo.GetDrives().Where(x => x.DriveType == DriveType.CDRom);
 
             // Console.WriteLine($"sr0: {OpticalDriveUtils.GetDriveLabel("sr0")}");
-            Console.WriteLine($"sr0: {OpticalDriveUtils.LinuxGenerateDiscMd5("sr0")}");
+            Console.WriteLine($"sr0: {OpticalDriveUtils.WindowsGenerateDiscMD5("A:")}");
 
         }
 

@@ -7,6 +7,9 @@ using Microsoft.Win32.SafeHandles;
 using System.Collections.Generic;
 using System.Text;
 using Archiver.Shared.Classes.Tape;
+using Archiver.Shared.Native;
+
+using static Archiver.Shared.Native.Windows;
 //using Bsw.Types.Logger; 
 
 namespace Archiver.Shared.TapeDrivers
@@ -54,7 +57,7 @@ namespace Archiver.Shared.TapeDrivers
         public NativeWindowsTapeDriver(string tapeName, Nullable<uint> blockSize, bool loadTape = true)
         {
             // Try to open the file.
-            m_handleValue = CreateFile(
+            m_handleValue = Windows.CreateFile(
                 tapeName,
                 GENERIC_READ | GENERIC_WRITE,
                 0,
@@ -82,7 +85,7 @@ namespace Archiver.Shared.TapeDrivers
             // Load the tape
             if (loadTape)
             {
-                int result = PrepareTape(m_handleValue, TAPE_LOAD, TRUE);
+                int result = Windows.PrepareTape(m_handleValue, TAPE_LOAD, TRUE);
 
                 if (result != NO_ERROR)
                     throw new TapeOperatorWin32Exception("PrepareTape", Marshal.GetLastWin32Error());
@@ -120,7 +123,7 @@ namespace Archiver.Shared.TapeDrivers
                     false
                 );
 
-                result = GetTapeParameters(m_handleValue, MEDIA_PARAMS, ref size, ptr);
+                result = Windows.GetTapeParameters(m_handleValue, MEDIA_PARAMS, ref size, ptr);
             }
             finally
             {
@@ -139,7 +142,7 @@ namespace Archiver.Shared.TapeDrivers
 
         public void EjectTape()
         {
-            int result = PrepareTape(m_handleValue, TAPE_UNLOAD, FALSE);
+            int result = Windows.PrepareTape(m_handleValue, TAPE_UNLOAD, FALSE);
 
             if (result != NO_ERROR)
                 throw new TapeOperatorWin32Exception("PrepareTape", Marshal.GetLastWin32Error());
@@ -211,7 +214,7 @@ namespace Archiver.Shared.TapeDrivers
             int errorCode = 0;
 
             // TODO: reapit it
-            if ((errorCode = SetTapePosition(m_handleValue, TAPE_SPACE_FILEMARKS, 0, (int)fileNumber, 0, FALSE)) != NO_ERROR)
+            if ((errorCode = Windows.SetTapePosition(m_handleValue, TAPE_SPACE_FILEMARKS, 0, (int)fileNumber, 0, FALSE)) != NO_ERROR)
                 throw new TapeOperatorWin32Exception("SetTapePosition", Marshal.GetLastWin32Error());
         }
 
@@ -222,7 +225,7 @@ namespace Archiver.Shared.TapeDrivers
         {
             int errorCode = 0;
 
-            if ((errorCode = SetTapePosition(m_handleValue, TAPE_SPACE_END_OF_DATA, 0, 0, 0, FALSE)) != NO_ERROR)
+            if ((errorCode = Windows.SetTapePosition(m_handleValue, TAPE_SPACE_END_OF_DATA, 0, 0, 0, FALSE)) != NO_ERROR)
                 throw new TapeOperatorWin32Exception("SetTapePosition", Marshal.GetLastWin32Error());
         }
 
@@ -235,7 +238,7 @@ namespace Archiver.Shared.TapeDrivers
             int errorCode = 0;
 
             // TODO: reapit it
-            if ((errorCode = SetTapePosition(m_handleValue, TAPE_LOGICAL_BLOCK, 0, (int)logicalBlock, 0, FALSE)) != NO_ERROR)
+            if ((errorCode = Windows.SetTapePosition(m_handleValue, TAPE_LOGICAL_BLOCK, 0, (int)logicalBlock, 0, FALSE)) != NO_ERROR)
                 throw new TapeOperatorWin32Exception("SetTapePosition", Marshal.GetLastWin32Error());
         }
 
@@ -243,7 +246,7 @@ namespace Archiver.Shared.TapeDrivers
         {
             int errorCode = 0;
 
-            if ((errorCode = WriteTapemark(m_handleValue, TAPE_FILEMARKS, 1, FALSE)) != NO_ERROR)
+            if ((errorCode = Windows.WriteTapemark(m_handleValue, TAPE_FILEMARKS, 1, FALSE)) != NO_ERROR)
                 throw new TapeOperatorWin32Exception("WriteTapemark", Marshal.GetLastWin32Error());
         }
 
@@ -260,7 +263,7 @@ namespace Archiver.Shared.TapeDrivers
                 ReportSetMarks = info.ReportSetMarks
             };
 
-            int errorCode = SetTapeParameters(m_handleValue, SET_TAPE_DRIVE_INFORMATION, parameters);
+            int errorCode = Windows.SetTapeParameters(m_handleValue, SET_TAPE_DRIVE_INFORMATION, parameters);
 
             if (errorCode != NO_ERROR)
                 throw new TapeOperatorWin32Exception("SetTapeParameters", Marshal.GetLastWin32Error());
@@ -276,7 +279,7 @@ namespace Archiver.Shared.TapeDrivers
             int offsetLow;
             int offsetHigh;
 
-            if (GetTapePosition(m_handleValue, TAPE_LOGICAL_POSITION, out partition, out offsetLow, out offsetHigh) != NO_ERROR)
+            if (Windows.GetTapePosition(m_handleValue, TAPE_LOGICAL_POSITION, out partition, out offsetLow, out offsetHigh) != NO_ERROR)
                 throw new TapeOperatorWin32Exception("GetTapePosition", Marshal.GetLastWin32Error());
 
             long offset = (long)(offsetHigh * Math.Pow(2, 32) + offsetLow);
@@ -374,7 +377,7 @@ namespace Archiver.Shared.TapeDrivers
 
                     Marshal.StructureToPtr(m_driveInfo, ptr, false);
 
-                    int result = GetTapeParameters(m_handleValue, DRIVE_PARAMS, ref size, ptr);
+                    int result = Windows.GetTapeParameters(m_handleValue, DRIVE_PARAMS, ref size, ptr);
                     if (result != NO_ERROR)
                     {
                         if (result == 1110)
@@ -418,7 +421,7 @@ namespace Archiver.Shared.TapeDrivers
 
 
                     int result = 0;
-                    if ((result = GetTapeParameters(m_handleValue, MEDIA_PARAMS, ref size, ptr)) != NO_ERROR)
+                    if ((result = Windows.GetTapeParameters(m_handleValue, MEDIA_PARAMS, ref size, ptr)) != NO_ERROR)
                         throw new TapeOperatorWin32Exception("GetTapeParameters", Marshal.GetLastWin32Error());
 
                     // Get managed media Info
