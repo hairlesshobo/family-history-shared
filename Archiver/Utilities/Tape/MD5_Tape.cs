@@ -1,12 +1,10 @@
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Security.Cryptography;
-using Archiver.Classes.Shared;
 using Archiver.Shared;
 using Archiver.Shared.Classes.Tape;
+using Archiver.Shared.Models;
 using Archiver.Shared.TapeDrivers;
-using Archiver.Utilities.Shared;
 
 namespace Archiver.Utilities.Tape
 {

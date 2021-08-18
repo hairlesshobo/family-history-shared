@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using Archiver.Classes.Shared;
+using Archiver.Shared.Models;
 
 namespace Archiver.Utilities.Shared
 {

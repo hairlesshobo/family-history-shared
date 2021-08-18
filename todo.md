@@ -12,6 +12,13 @@ Linux support:
 * Add disc verification support
 * Explore the idea of bundling archiver into an `appimage` file
 
+Windows support:
+----------------------------------------------------------------
+* Natively determine disc size
+* Add WindowsNativeStreamReader
+* Add Native ISO creation
+* Add disc burning support
+
 
 Global Functionality:
 ----------------------------------------------------------------
@@ -61,11 +68,6 @@ Disc Functionality
 * Add scan rate to `Distributor`
 * Port file scanner performance improvements
 * Port sizer and distributor performance improvements
-
-Windows support:
-----------------------------------------------------------------
-* Add Native ISO creation
-* Add disc burning support
 
 
 

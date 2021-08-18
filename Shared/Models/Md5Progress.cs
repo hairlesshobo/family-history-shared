@@ -1,6 +1,6 @@
 using System;
 
-namespace Archiver.Classes.Shared
+namespace Archiver.Shared.Models
 {
     public delegate void MD5_CompleteDelegate(string hash);
     public delegate void MD5_ProgressChangedDelegate(Md5Progress progress);

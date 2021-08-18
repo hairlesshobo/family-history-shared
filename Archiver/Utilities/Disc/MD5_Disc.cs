@@ -2,11 +2,9 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 using System.Threading;
-using Archiver.Classes.Shared;
 using Archiver.Shared;
+using Archiver.Shared.Models;
 using Archiver.Utilities.Shared;
 
 namespace Archiver.Utilities.Disc

@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using Archiver.Shared;
+using Archiver.Shared.Classes;
 using Archiver.Shared.Exceptions;
 using Archiver.Shared.Models;
 using Archiver.Shared.Models.Config;
@@ -62,8 +63,28 @@ namespace Archiver.TestCLI
 
             // 0x00001260   BLKGETSIZE            unsigned long *
 
+            //% slax bootloader, known good MD5: 3c78799690d95bd975e352020fc2acb8 linux dd OK, linux archiver OK, windows dd ??, windows archiver ??
+            //% archive 0001   , known good MD5: d8f3a48ab0205c2debe1aa55bc0bb6ea linux dd OK, linux archiver OK, windows dd ??, windows archiver ??
 
-            Console.WriteLine(DiskUtils.LinuxGetFileSize("/home/flip/cv_debug.log"));
+            using (LinuxNativeStreamReader reader = new LinuxNativeStreamReader(LinuxNativeStreamReader.StreamSourceType.Disk, "/dev/sr0"))
+            {
+                Md5StreamGenerator generator = new Md5StreamGenerator(reader);
+                generator.OnProgressChanged += (progress) =>
+                {
+                    Console.WriteLine($"{progress.PercentCopied}%");
+                };
+
+                generator.OnComplete += (hash) =>
+                {
+                    Console.WriteLine(hash);
+                };
+
+                generator.Generate();
+
+                // Console.WriteLine(md5hash);
+            }
+
+            // Console.WriteLine(DiskUtils.LinuxGetFileSize("/home/flip/cv_debug.log"));
 
             // Console.WriteLine($"sr0: {OpticalDriveUtils.GenerateDiscMD5("sr0")}");
             // Console.WriteLine($"sr0: {OpticalDriveUtils.WindowsGenerateDiscMD5("A:")}");

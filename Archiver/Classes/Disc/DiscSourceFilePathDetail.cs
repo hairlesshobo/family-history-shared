@@ -1,11 +1,5 @@
 using System;
-using System.IO;
-using System.Linq;
-using Archiver.Classes.Shared;
 using Archiver.Shared.Utilities;
-using Archiver.Utilities;
-using Archiver.Utilities.Shared;
-using Newtonsoft.Json;
 
 namespace Archiver.Classes.Disc
 {
