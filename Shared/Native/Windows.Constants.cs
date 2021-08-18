@@ -14,6 +14,11 @@ namespace Archiver.Shared.Native
         public const uint FILE_ATTRIBUTE_ARCHIVE = 0x00000020;
         public const uint FILE_FLAG_BACKUP_SEMANTICS = 0x02000000;
 
+        public const uint FILE_SHARE_NONE = 0;
+        public const uint FILE_SHARE_READ = 1;
+        public const uint FILE_SHARE_WRITE = 2;
+        public const uint FILE_SHARE_DELETE = 4;
+
         public const uint NO_ERROR = 0;
         public const int TAPE_LOAD = 0;
         public const int TAPE_UNLOAD = 1;

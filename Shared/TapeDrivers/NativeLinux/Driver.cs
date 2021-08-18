@@ -57,7 +57,7 @@ namespace Archiver.Shared.TapeDrivers
                 _access = openType;
 
                 if (_tapeHandle < 0)
-                    throw new TapeDriveNativeException("Open", Marshal.GetLastWin32Error());
+                    throw new NativeMethodException("Open", Marshal.GetLastWin32Error());
             }
         }
 
@@ -71,7 +71,7 @@ namespace Archiver.Shared.TapeDrivers
                 int result = Linux.Close(_tapeHandle.Value);
 
                 if (result < 0)
-                    throw new TapeDriveNativeException("Close", Marshal.GetLastWin32Error());
+                    throw new NativeMethodException("Close", Marshal.GetLastWin32Error());
 
                 _tapeHandle = null;
             }
@@ -116,7 +116,7 @@ namespace Archiver.Shared.TapeDrivers
 
                 // a negative return value means an error occurred
                 if (result < 0)
-                    throw new TapeDriveNativeException("Read", Marshal.GetLastWin32Error());
+                    throw new NativeMethodException("Read", Marshal.GetLastWin32Error());
 
             }
             catch (Exception e)
@@ -269,7 +269,7 @@ namespace Archiver.Shared.TapeDrivers
                 int result = Linux.Ioctl(_tapeHandle.Value, MTIOCTOP, ptr);
 
                 if (result < 0)
-                    throw new TapeDriveNativeException(callingMethodName, Marshal.GetLastWin32Error());
+                    throw new NativeMethodException(callingMethodName, Marshal.GetLastWin32Error());
             }
             finally
             {

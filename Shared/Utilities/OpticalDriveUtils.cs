@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -180,13 +181,18 @@ namespace Archiver.Shared.Utilities
                 drivePath,
                 // GENERIC_READ | GENERIC_WRITE,
                 Windows.GENERIC_READ,
-                0,
+                Windows.FILE_SHARE_READ | Windows.FILE_SHARE_WRITE,
                 IntPtr.Zero,
                 Windows.OPEN_EXISTING,
                 0,
                 //FILE_ATTRIBUTE_ARCHIVE | FILE_FLAG_BACKUP_SEMANTICS,
                 IntPtr.Zero
                 );
+
+            if (handle.IsInvalid)
+                throw new Win32Exception(Marshal.GetLastWin32Error());
+                // throw new NativeMethodException("CreateFile", Marshal.GetLastWin32Error());
+                // throw new TapeOperatorWin32Exception("CreateFile", Marshal.GetLastWin32Error());
 
             byte[] buffer = new byte[256 * 1024]; // 256KB buffer
 
@@ -231,7 +237,7 @@ namespace Archiver.Shared.Utilities
                 // OnComplete(this.MD5_Hash);
             }
 
-            return String.Empty;
+            return md5Hash;
         }
 
         private static string WindowsGetOpticalDrivePath(string driveName)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -22,7 +23,7 @@ namespace Archiver.TestCLI
             Utils.RequireSupportedOS();
             SysInfo.InitPlatform();
 
-            int pid = GetPid();
+            int pid = SysInfo.OSType == OSType.Linux ? GetPid() : Process.GetCurrentProcess().Id;
             
             Formatting.WriteLineC(ConsoleColor.Green, $"Archive TestCLI component starting up. (PID: {pid})");
             Console.WriteLine("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
@@ -46,6 +47,7 @@ namespace Archiver.TestCLI
                 }
 
                 Formatting.WriteLineC(ConsoleColor.Red, "Application terminating due to error!");
+                Console.ReadLine();
                 Environment.Exit(1);
             }
 
@@ -57,6 +59,8 @@ namespace Archiver.TestCLI
 
             // Console.WriteLine($"sr0: {OpticalDriveUtils.GetDriveLabel("sr0")}");
             Console.WriteLine($"sr0: {OpticalDriveUtils.WindowsGenerateDiscMD5("A:")}");
+
+            Console.ReadLine();
 
         }
 

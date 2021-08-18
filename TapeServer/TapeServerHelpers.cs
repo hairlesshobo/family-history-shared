@@ -5,7 +5,6 @@ using Archiver.Shared.Interfaces;
 using Archiver.Shared.Models.Config;
 using Archiver.Shared.Utilities;
 using Archiver.TapeServer.Providers;
-using Microsoft.Extensions.Configuration;
 
 namespace Archiver.TapeServer
 {
