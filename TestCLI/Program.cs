@@ -27,9 +27,7 @@ namespace Archiver.TestCLI
             Utils.RequireSupportedOS();
             SysInfo.InitPlatform();
 
-            int pid = SysInfo.OSType == OSType.Linux ? GetPid() : Process.GetCurrentProcess().Id;
-            
-            Formatting.WriteLineC(ConsoleColor.Green, $"Archive TestCLI component starting up. (PID: {pid})");
+            Formatting.WriteLineC(ConsoleColor.Green, $"Archive TestCLI component starting up. (PID: {SysInfo.PID})");
             Console.WriteLine("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
             SysInfo.WriteSystemInfo(true);
 
@@ -71,6 +69,13 @@ namespace Archiver.TestCLI
 
             Console.WriteLine(JsonSerializer.Serialize(drives, new JsonSerializerOptions() { WriteIndented = true }));
             // Console.WriteLine(OpticalDriveUtils.LinuxGetMountPoint("sr0"));
+
+            if (SysInfo.OSType == OSType.Windows)
+            {
+                Console.WriteLine();
+                Console.WriteLine("Press any key to close the window...");
+                Console.ReadKey();
+            }
 
         }
 

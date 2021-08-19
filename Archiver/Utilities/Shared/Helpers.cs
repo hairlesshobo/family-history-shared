@@ -8,6 +8,7 @@ using System.Threading;
 using Archiver.Classes.Disc;
 using Archiver.Shared;
 using Archiver.Shared.Classes.Tape;
+using Archiver.Shared.Models;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Disc;
 
@@ -43,7 +44,7 @@ namespace Archiver.Utilities.Shared
 
         public static string SelectCdromDrive()
         {
-            string[] drives = OpticalDriveUtils.GetDriveNames();
+            List<OpticalDrive> drives = OpticalDriveUtils.GetDrives();
 
             // List<DriveInfo> drives = DriveInfo.GetDrives().Where(x => x.DriveType == DriveType.CDRom).ToList();
 
@@ -51,13 +52,13 @@ namespace Archiver.Utilities.Shared
                 throw new DriveNotFoundException("No optical drives were detected on this system!");
         
             if (drives.Count() == 1)
-                return drives[0];
+                return drives[0].Name;
 
-            string selectedDrive = drives[0];
+            string selectedDrive = drives[0].Name;
 
             List<CliMenuEntry<string>> entries = new List<CliMenuEntry<string>>();
 
-            foreach (string drive in drives)
+            foreach (OpticalDrive drive in drives)
             {
                 CliMenuEntry<string> newEntry = new CliMenuEntry<string>();
                 newEntry.Name = drive.Name.TrimEnd('\\') + " (Disc Loaded: ";
@@ -66,7 +67,7 @@ namespace Archiver.Utilities.Shared
                 };
 
                 if (drive.IsReady)
-                    newEntry.Name += $"YES | Volume name: {drive.VolumeLabel} | Format: {drive.DriveFormat})";
+                    newEntry.Name += $"YES | Volume name: {drive.VolumeLabel} | Format: {drive.VolumeFormat})";
                 else
                     newEntry.Name += "NO)";
 

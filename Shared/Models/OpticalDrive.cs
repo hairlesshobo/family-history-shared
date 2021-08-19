@@ -7,10 +7,10 @@ namespace Archiver.Shared.Models
         public string Name { get; set; }
         public string FullPath { get; set; }
         public string MountPoint { get; set; }
-        public string DriveLabel { get; set; }
+        public string VolumeLabel { get; set; }
 
         // TODO: Figure out what format is and decide if it is needed
-        public string Format { get; set; }
+        public string VolumeFormat { get; set; }
         public bool IsReady { get; set; }
         public bool IsDiscLoaded { get; set; }
 

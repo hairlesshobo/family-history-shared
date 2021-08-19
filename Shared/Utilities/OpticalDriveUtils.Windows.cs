@@ -15,7 +15,21 @@ namespace Archiver.Shared.Utilities
     {
         private static List<OpticalDrive> WindowsGetDrives()
         {
-            throw new NotImplementedException();
+            return DriveInfo.GetDrives().Where(x => x.DriveType == DriveType.CDRom).Select(x => 
+            {
+                string driveName = WindowsCleanDriveName(x.Name);
+
+                return new OpticalDrive()
+                {
+                    Name = driveName,
+                    MountPoint = driveName,
+                    FullPath = WindowsGetOpticalDrivePath(driveName),
+                    IsReady = x.IsReady,
+                    VolumeLabel = (x.IsReady ? x.VolumeLabel : null),
+                    VolumeFormat = (x.IsReady ? x.DriveFormat : null),
+                    IsDiscLoaded = x.IsReady
+                };
+            }).ToList();
         }
 
         private static string WindowsGetDriveLabel(string driveName)

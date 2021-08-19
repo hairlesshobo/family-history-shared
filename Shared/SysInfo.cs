@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -44,6 +45,7 @@ namespace Archiver.Shared
         public static Architecture Architecture => System.Runtime.InteropServices.RuntimeInformation.OSArchitecture;
         public static string Description => System.Runtime.InteropServices.RuntimeInformation.OSDescription;
         public static string Identifier => System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier;
+        public static int PID => Process.GetCurrentProcess().Id; //(SysInfo.OSType == OSType.Linux ? Linux.GetPid() : Process.GetCurrentProcess().Id);
         
         
         static SysInfo()
