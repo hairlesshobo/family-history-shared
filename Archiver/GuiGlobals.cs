@@ -1,4 +1,6 @@
 using System;
+using Archiver.Shared;
+using Archiver.Shared.Utilities;
 using Terminal.Gui;
 using TAttribute = Terminal.Gui.Attribute;
 
@@ -75,5 +77,6 @@ namespace Archiver
                 }
             }
         }
+
     }
 }
