@@ -63,7 +63,7 @@ namespace Archiver.Shared.Utilities
                     FullPath = PathUtils.LinuxGetDrivePath(x),
                     VolumeLabel = LinuxGetDriveLabel(x),
                     MountPoint = LinuxGetMountPoint(x),
-                    VolumeFormat = LinuxGetMountFormat(x).ToUpper(),
+                    VolumeFormat = LinuxGetMountFormat(x)?.ToUpper(),
                     IsDiscLoaded = discLoaded,
                     IsReady = discLoaded
                 };

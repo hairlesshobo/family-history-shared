@@ -42,7 +42,7 @@ namespace Archiver.Shared.Utilities
             
             IConfiguration _config = new ConfigurationBuilder()
                 .SetBasePath(configDir)
-                .AddJsonFile("appsettings.json", true, true)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false)
                 .Build();
 
             return _config;

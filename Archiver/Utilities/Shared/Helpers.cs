@@ -42,11 +42,9 @@ namespace Archiver.Utilities.Shared
             throw new DriveNotFoundException($"Could not find drive {DriveLetter}");
         }
 
-        public static string SelectCdromDrive()
+        public static string SelectCdromDrive(CancellationTokenSource cts)
         {
             List<OpticalDrive> drives = OpticalDriveUtils.GetDrives();
-
-            // List<DriveInfo> drives = DriveInfo.GetDrives().Where(x => x.DriveType == DriveType.CDRom).ToList();
 
             if (drives.Count() == 0)
                 throw new DriveNotFoundException("No optical drives were detected on this system!");
@@ -76,7 +74,7 @@ namespace Archiver.Utilities.Shared
 
             CliMenu<string> menu = new CliMenu<string>(entries);
             menu.MenuLabel = "Select drive...";
-            menu.OnCancel += Operations.MainMenu.StartOperation;
+            menu.OnCancel += () => cts.Cancel();
 
             menu.Show(true);
 

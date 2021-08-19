@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Archiver.Classes;
 using Archiver.Classes.Disc;
 using Archiver.Shared.Utilities;
@@ -14,15 +15,28 @@ namespace Archiver.Operations.Disc
     {
         public static void StartOperation()
         {
+
+        }
+
+        public static void StartOperationOld()
+        {
+            CancellationTokenSource cts = new CancellationTokenSource();
+
             DiscGlobals._destinationDiscs = Helpers.ReadDiscIndex();
             Console.Clear();
 
             Console.WriteLine("Disc verification process beginning...");
             Console.WriteLine();
 
-            string selectedDrive = Helpers.SelectCdromDrive();
+            string selectedDrive = Helpers.SelectCdromDrive(cts);
 
-            bool verifyAll = AskVerifyAllDiscs();
+            if (cts.IsCancellationRequested == true)
+                return;
+
+            bool verifyAll = AskVerifyAllDiscs(cts);
+
+            if (cts.IsCancellationRequested == true)
+                return;
 
             DiscVerifier verifier;
             
@@ -36,7 +50,7 @@ namespace Archiver.Operations.Disc
             DiscGlobals._destinationDiscs.Clear();
         }
         
-        private static bool AskVerifyAllDiscs()
+        private static bool AskVerifyAllDiscs(CancellationTokenSource cts)
         {
             bool verifyAll = false;
 
@@ -53,7 +67,7 @@ namespace Archiver.Operations.Disc
             });
 
             menu.MenuLabel = "What do you want to verify?";
-            menu.OnCancel += Operations.MainMenu.StartOperation;
+            menu.OnCancel += () => cts.Cancel();
             menu.Show(true);
 
             return verifyAll;

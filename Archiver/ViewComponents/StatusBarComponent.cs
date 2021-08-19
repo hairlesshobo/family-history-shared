@@ -1,6 +1,7 @@
 using System;
 using Archiver.Shared;
 using Archiver.Shared.Utilities;
+using Archiver.Views;
 using Terminal.Gui;
 
 namespace Archiver.ViewComponents
@@ -31,6 +32,7 @@ namespace Archiver.ViewComponents
 					// 	_runningScenario.RequestStop();
 					// }
 				}),
+                new StatusItem(Key.F2, "~F2~ About", AboutView.Show),
 				// new StatusItem(Key.F10, "~F10~ Hide/Show Status Bar", () => 
                 // {
 				// 	statusBar.Visible = !statusBar.Visible;
