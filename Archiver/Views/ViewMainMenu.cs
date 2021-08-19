@@ -45,7 +45,7 @@ namespace Archiver.Views
             BuildCsdMenu(mainWindow);
             BuildUniversalMenu(mainWindow);
             
-            StatusBarComponent.Add(top, () => { _quit = true; });
+            StatusBarComponent.Add(top, () => { _quit = true; }, true);
 
             Application.Run();
 
@@ -100,6 +100,8 @@ namespace Archiver.Views
                     Application.Shutdown();
                     Console.Clear();
                 }
+                else
+                    Application.RequestStop();
 
                 if (_actionLink.Action != null)
                     _actionLink.Action();
@@ -135,7 +137,7 @@ namespace Archiver.Views
                 Width = Dim.Fill(),
                 Height = Dim.Fill(1),
                 CanFocus = false,
-                ColorScheme = GuiGlobals.Colors.GlobalScheme
+                // ColorScheme = GuiGlobals.Colors.GlobalScheme
             };
 
             top.Add(mainWindow);

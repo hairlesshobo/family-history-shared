@@ -5,6 +5,7 @@ using Terminal.Gui;
 using Archiver.Shared;
 using Archiver.Shared.Models;
 using Archiver.Shared.Utilities;
+using Archiver.Views;
 
 namespace Archiver
 {
@@ -17,17 +18,17 @@ namespace Archiver
 
             try
             {
-                Console.CancelKeyPress += (sender, e) => {
-                    e.Cancel = true;
-                };
-                Console.TreatControlCAsInput = true;
-                Console.BackgroundColor = ConsoleColor.Black;
+                // Console.CancelKeyPress += (sender, e) => {
+                //     e.Cancel = true;
+                // };
+                // Console.TreatControlCAsInput = true;
+                // Console.BackgroundColor = ConsoleColor.Black;
 
                 // Console.Write("Reading configuration... ");
                 // Config.ReadConfig();
                 // Console.WriteLine("done");
                 
-                Console.Clear();
+                // Console.Clear();
 
                 MainMenu.StartOperation();
             }

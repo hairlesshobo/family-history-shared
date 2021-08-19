@@ -1,0 +1,3 @@
+[submodule "Terminal.GUI"]
+	path = Terminal.GUI
+	url = [git@git.foxhollow.cc:3022]:hairlesshobo/terminal.gui.git

@@ -150,8 +150,8 @@ namespace Archiver.Classes.Views {
 			Height = 1;
 			Frame = new Rect (Frame.Location, new Size (w, 1));
 
-            if (_info != null && _info.Color != null)
-                base.ColorScheme = _info.Color;
+            // if (_info != null && _info.Color != null)
+            //     base.ColorScheme = _info.Color;
 
 			SetNeedsDisplay ();
 		}

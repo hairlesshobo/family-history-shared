@@ -1,5 +1,9 @@
 using System;
+using System.Data;
+using Archiver.Shared;
+using Archiver.ViewComponents;
 using Terminal.Gui;
+using Terminal.Gui.Views;
 
 namespace Archiver.Views
 {
@@ -7,20 +11,28 @@ namespace Archiver.Views
     {
         public static void Show()
         {
-            Button doneButton = new Button("Done", true);
-            doneButton.HotKey = Key.Q | Key.CtrlMask;
-            doneButton.Clicked += () => 
+            Toplevel top = new Toplevel();
+            top.ColorScheme = Colors.Base;
+
+            // Button doneButton = new Button("Done", true);
+            // doneButton.HotKey = Key.Q | Key.CtrlMask;
+            // doneButton.Clicked += () =>
+            // {
+            //     Application.RequestStop();
+            // };
+
+            
+            // dialog.AddButton(doneButton);
+
+            Window aboutWindow = new Window("Archiver: About")
             {
-                Application.RequestStop();
+                Width = Dim.Fill(),
+                Height = 10
+                // Height = Dim.Fill(1)
             };
 
-            Dialog dialog = new Dialog("Archiver: About", 0, 0, doneButton) {
-                Width = Dim.Percent(50),
-                Height = Dim.Percent(50)
-            };
-
-            string aboutText = 
-                    "    The ~~archiver~~ application is cross platform tool designed to handle all data " +
+            string aboutText =
+                "    The ~~archiver~~ application is cross platform tool designed to handle all data " +
                 "archival and backup needs using a variety of media types as backup media. \n" +
                 "\n" +
                 "Supported storage types: \n" +
@@ -29,22 +41,51 @@ namespace Archiver.Views
                 "    Tape drives (only LTO4 is tested, but should work with others)\n";
 
 
-            Label label  = new Label(0, 1, aboutText);
+            Label aboutLabel = new Label(0, 1, aboutText);
 
-            label.LayoutStyle = LayoutStyle.Computed;
-            label.TextAlignment = TextAlignment.Left;
-            label.X = 0;
-            label.Y = 0;
-            label.Width = Dim.Fill (2);
-            label.AutoSize = true;
+            aboutLabel.LayoutStyle = LayoutStyle.Computed;
+            aboutLabel.TextAlignment = TextAlignment.Left;
+            aboutLabel.X = 0;
+            aboutLabel.Y = 0;
+            aboutLabel.Width = Dim.Fill(2);
+            aboutLabel.AutoSize = true;
             //label.Height = Dim.Fill (1);
 
-            dialog.Add (label);
+            string sysInfoText = 
+            $"OS Platform: {SysInfo.OSType.ToString()} ({SysInfo.Architecture.ToString()})\n" +
+            $"Description: {SysInfo.Description}\n" +
+            $" Identifier: {SysInfo.Identifier}";
+
+
+            Label sysInfoLabel = new Label(0, 0, sysInfoText);
+            sysInfoLabel.LayoutStyle = LayoutStyle.Computed;
+            sysInfoLabel.TextAlignment = TextAlignment.Left;
+            sysInfoLabel.X = 0;
+            sysInfoLabel.Y = 0;
+            sysInfoLabel.AutoSize = true;
+
+
+            Window sysInfoWindow = new Window("System Information")
+            {
+                // LayoutStyle = LayoutStyle.Absolute,
+                Width = Dim.Fill(),
+                Height = 5,
+                X = 0,
+                Y = Pos.Bottom(aboutWindow),
+                Text = "meow!!"
+            };
 
             
+            aboutWindow.Add(aboutLabel);
+            sysInfoWindow.Add(sysInfoLabel);
+            // window.Add(line);
+            // window.Add(sysInfoLabel);
 
-            LineView line 
-            Application.Run(dialog);
+            top.Add(aboutWindow);
+            top.Add(sysInfoWindow);
+            StatusBarComponent.Add(top, () => Application.RequestStop(), StatusBarOptions.HideAbout);
+
+            Application.Run(top);
         }
     }
 }
