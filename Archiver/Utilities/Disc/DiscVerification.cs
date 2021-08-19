@@ -109,9 +109,9 @@ namespace Archiver.Utilities.Disc
         {
             DiscDetail insertedDisc = default(DiscDetail);
 
-            DriveInfo di = DriveInfo.GetDrives().Where(x => x.Name.TrimEnd('\\').ToUpper() == _driveLetter.ToUpper()).FirstOrDefault();
+            DriveInfo driveInfo = DriveInfo.GetDrives().Where(x => x.Name.TrimEnd('\\').ToUpper() == _driveLetter.ToUpper()).FirstOrDefault();
 
-            if (di != null)
+            if (driveInfo != null)
             {
                 string append = "";
 
@@ -120,17 +120,17 @@ namespace Archiver.Utilities.Disc
 
                 while (_cancel == false)
                 {
-                    if (di.IsReady == false)
+                    if (driveInfo.IsReady == false)
                         SetStatus($"Please insert archive disc{append}...");
 
                     else
                     {
-                        if (di.VolumeLabel.ToLower().StartsWith("archive ") == false)
+                        if (driveInfo.VolumeLabel.ToLower().StartsWith("archive ") == false)
                             SetStatus("Unknown disc inserted...");
 
                         else
                         {
-                            string discIdStr = di.VolumeLabel.Substring(8);
+                            string discIdStr = driveInfo.VolumeLabel.Substring(8);
                             int discId = Int32.Parse(discIdStr);
 
                             if (_pendingDiscs.Contains(discId))

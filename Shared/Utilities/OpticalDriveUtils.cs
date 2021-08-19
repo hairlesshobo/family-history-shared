@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Archiver.Shared.Exceptions;
 using Archiver.Shared.Models;
 
@@ -31,6 +32,16 @@ namespace Archiver.Shared.Utilities
                 return WindowsGenerateDiscMD5(drive);
             else if (SysInfo.OSType == OSType.Linux)
                 return LinuxGenerateDiscMD5(drive);
+            else
+                throw new UnsupportedOperatingSystemException();
+        }
+
+        public static List<OpticalDrive> GetDrives()
+        {
+            if (SysInfo.OSType == OSType.Windows)
+                return WindowsGetDrives();
+            else if (SysInfo.OSType == OSType.Linux)
+                return LinuxGetDrives();
             else
                 throw new UnsupportedOperatingSystemException();
         }

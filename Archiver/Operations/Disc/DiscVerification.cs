@@ -12,6 +12,30 @@ namespace Archiver.Operations.Disc
 {
     public static class DiscVerification
     {
+        public static void StartOperation()
+        {
+            DiscGlobals._destinationDiscs = Helpers.ReadDiscIndex();
+            Console.Clear();
+
+            Console.WriteLine("Disc verification process beginning...");
+            Console.WriteLine();
+
+            string selectedDrive = Helpers.SelectCdromDrive();
+
+            bool verifyAll = AskVerifyAllDiscs();
+
+            DiscVerifier verifier;
+            
+            if (verifyAll)
+                verifier = new DiscVerifier(selectedDrive);
+            else
+                verifier = new DiscVerifier(selectedDrive, AskDiskToVerify());
+
+            verifier.StartVerification();
+
+            DiscGlobals._destinationDiscs.Clear();
+        }
+        
         private static bool AskVerifyAllDiscs()
         {
             bool verifyAll = false;
@@ -55,30 +79,6 @@ namespace Archiver.Operations.Disc
             List<DiscDetail> discsToVerify = menu.Show(true);
 
             return discsToVerify;
-        }
-
-        public static void StartOperation()
-        {
-            DiscGlobals._destinationDiscs = Helpers.ReadDiscIndex();
-            Console.Clear();
-
-            Console.WriteLine("Disc verification process beginning...");
-            Console.WriteLine();
-
-            string selectedDrive = Helpers.SelectCdromDrive();
-
-            bool verifyAll = AskVerifyAllDiscs();
-
-            DiscVerifier verifier;
-            
-            if (verifyAll)
-                verifier = new DiscVerifier(selectedDrive);
-            else
-                verifier = new DiscVerifier(selectedDrive, AskDiskToVerify());
-
-            verifier.StartVerification();
-
-            DiscGlobals._destinationDiscs.Clear();
         }
     }
 }

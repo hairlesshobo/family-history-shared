@@ -13,6 +13,11 @@ namespace Archiver.Shared.Utilities
 {
     public static partial class OpticalDriveUtils
     {
+        private static List<OpticalDrive> WindowsGetDrives()
+        {
+            throw new NotImplementedException();
+        }
+
         private static string WindowsGetDriveLabel(string driveName)
         {
             DriveInfo drive = DriveInfo.GetDrives().FirstOrDefault(x => WindowsCleanDriveName(x.Name) == WindowsCleanDriveName(driveName));

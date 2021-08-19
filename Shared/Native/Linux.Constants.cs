@@ -4,6 +4,8 @@ namespace Archiver.Shared.Native
 {
     public static partial class Linux
     {
+        #pragma warning disable CS0414
+
         public enum OpenType
         {
             ReadOnly = 0,
@@ -11,12 +13,21 @@ namespace Archiver.Shared.Native
             ReadWrite = 2
         }
 
-            #pragma warning disable CS0414
 
+        /* IOCTL calls */
         public const uint MTIOCTOP = 0x40086D01; // const struct mtop *
         public const uint MTIOCGET = 0x801C6D02; // struct mtget *
         public const uint MTIOCPOS = 0x80046D03; // struct mtpos *
         public const uint BLKGETSIZE64 = 0x80081272; // get the byte size of a device
+        public const uint CDROMREADTOCHDR = 0x00005305; // Read TOC header (struct cdrom_tochdr)
+        public const uint CDROMSTART = 0x00005308;
+        public const uint CDROM_DRIVE_STATUS = 0x00005326; // Check drive status
+
+        public const int CDS_NO_INFO = 0;	/* if not implemented */
+        public const int CDS_NO_DISC = 1;
+        public const int CDS_TRAY_OPEN = 2;
+        public const int CDS_DRIVE_NOT_READY = 3;
+        public const int CDS_DISC_OK = 4;
 
         /* Magnetic Tape operations [Not all operations supported by all drivers]: */
         public enum TapeOpType
@@ -182,6 +193,12 @@ namespace Archiver.Shared.Native
             /// </summary>
             MTMKPART = 34
         }
+
+        /// <summary>
+        ///     No medium found
+        /// </summary>
+        public const int ENOMEDIUM = 123;
+
         #pragma warning restore	CS0414
     }
 }

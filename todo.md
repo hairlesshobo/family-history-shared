@@ -30,6 +30,7 @@ Global Functionality:
 * Port entire application to Terminal.Gui
 * Finish config validation
 * Port archiver to new config binding
+* Add optical drive model to select drive list
 * Eliminate `DiscGlobals.cs`
 * Eliminate `CsdGlobals.cs`
 * Eliminate `Globals.cs`

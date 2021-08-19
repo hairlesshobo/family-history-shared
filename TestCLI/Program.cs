@@ -61,8 +61,21 @@ namespace Archiver.TestCLI
             // TODO: Test this with disc in the drive
             //var drives = DriveInfo.GetDrives().Where(x => x.DriveType == DriveType.CDRom);
 
-            // 0x00001260   BLKGETSIZE            unsigned long *
 
+            // Console.WriteLine(DiskUtils.LinuxGetFileSize("/home/flip/cv_debug.log"));
+
+            // Console.WriteLine($"sr0: {OpticalDriveUtils.GenerateDiscMD5("sr0")}");
+            // Console.WriteLine($"sr0: {OpticalDriveUtils.WindowsGenerateDiscMD5("A:")}");
+
+            List<OpticalDrive> drives = OpticalDriveUtils.GetDrives();
+
+            Console.WriteLine(JsonSerializer.Serialize(drives, new JsonSerializerOptions() { WriteIndented = true }));
+            // Console.WriteLine(OpticalDriveUtils.LinuxGetMountPoint("sr0"));
+
+        }
+
+        private static void MakeMD5()
+        {
             //% slax bootloader, known good MD5: 3c78799690d95bd975e352020fc2acb8 linux dd OK, linux archiver OK, windows dd ??, windows archiver ??
             //% archive 0001   , known good MD5: d8f3a48ab0205c2debe1aa55bc0bb6ea linux dd OK, linux archiver OK, windows dd ??, windows archiver ??
 
@@ -83,11 +96,6 @@ namespace Archiver.TestCLI
 
                 // Console.WriteLine(md5hash);
             }
-
-            // Console.WriteLine(DiskUtils.LinuxGetFileSize("/home/flip/cv_debug.log"));
-
-            // Console.WriteLine($"sr0: {OpticalDriveUtils.GenerateDiscMD5("sr0")}");
-            // Console.WriteLine($"sr0: {OpticalDriveUtils.WindowsGenerateDiscMD5("A:")}");
 
         }
 

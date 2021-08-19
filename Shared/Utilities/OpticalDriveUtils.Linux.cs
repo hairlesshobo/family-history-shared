@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -46,6 +47,120 @@ namespace Archiver.Shared.Utilities
             }
 
             return null;
+        }
+
+        private static List<OpticalDrive> LinuxGetDrives()
+        {
+            List<OpticalDrive> allDrives = new List<OpticalDrive>();
+
+            allDrives = LinuxGetOpticalDriveNames().Select(x => 
+            {
+                bool discLoaded = LinuxIsDiscLoaded(x);
+
+                return new OpticalDrive()
+                {
+                    Name = x,
+                    FullPath = PathUtils.LinuxGetDrivePath(x),
+                    DriveLabel = LinuxGetDriveLabel(x),
+                    MountPoint = LinuxGetMountPoint(x),
+                    Format = LinuxGetMountFormat(x),
+                    IsDiscLoaded = discLoaded,
+                    IsReady = discLoaded
+                };
+            }).ToList();
+
+            return allDrives;
+        }
+
+        public static bool LinuxIsDiscLoaded(string driveName)
+        {
+            string drivePath = PathUtils.LinuxGetDrivePath(driveName);
+
+            int handle = Linux.Open(drivePath, Linux.OpenType.ReadOnly);
+
+            if (handle < 0)
+            {
+                int errno = Marshal.GetLastWin32Error();
+
+                if (errno == Linux.ENOMEDIUM)
+                    return false;
+                    
+                throw new NativeMethodException("Open");
+            }
+
+            try
+            {
+                int result = Linux.Ioctl(handle, Linux.CDROM_DRIVE_STATUS);
+
+                if (result < 0)
+                    throw new NativeMethodException("Ioctl");
+
+                return (result == 4);
+            }
+            finally
+            {
+                if (handle >= 0)
+                    Linux.Close(handle);
+            }
+        }
+        
+
+        private static string LinuxGetMountFormat(string driveName)
+        {
+            /*
+                See LinuxGetMountPoint for info about the /proc/self/mountinfo file
+            */
+
+            string drivePath = PathUtils.LinuxGetDrivePath(driveName);
+
+            string mountLine = File.ReadAllLines("/proc/self/mountinfo").FirstOrDefault(x => x.Split(" - ")[1].Trim().Split(' ')[1].ToLower() == drivePath);
+
+            if (String.IsNullOrWhiteSpace(mountLine))
+                return null;
+
+            string format = mountLine.Split(" - ")[1].Split(' ')[0].Trim();
+
+            if (String.IsNullOrWhiteSpace(format))
+                return null;
+
+            return format;
+        }
+
+        private static string LinuxGetMountPoint(string driveName)
+        {
+            /*
+                36 35 98:0 /mnt1 /mnt2 rw,noatime master:1 - ext3 /dev/root rw,errors=continue
+                (1)(2)(3)   (4)   (5)      (6)      (7)   (8) (9)   (10)         (11)
+
+                561 32 11:0 / /media/flip/archive\0400001 ro,nosuid,nodev,relatime shared:89 - udf /dev/sr0 ro,uid=1000,gid=1000,iocharset=utf8
+                (1) (2) (3) (4)          (5)                        (6)              (7)    (8)(9)   (10)                  (11)
+
+                (1) mount ID:  unique identifier of the mount (may be reused after umount)
+                (2) parent ID:  ID of parent (or of self for the top of the mount tree)
+                (3) major:minor:  value of st_dev for files on filesystem
+                (4) root:  root of the mount within the filesystem
+                (5) mount point:  mount point relative to the process's root
+                (6) mount options:  per mount options
+                (7) optional fields:  zero or more fields of the form "tag[:value]"
+                (8) separator:  marks the end of the optional fields
+                (9) filesystem type:  name of filesystem of the form "type[.subtype]"
+                (10) mount source:  filesystem specific information or "none"
+                (11) super options:  per super block options
+            */
+
+            string drivePath = PathUtils.LinuxGetDrivePath(driveName);
+
+            string mountLine = File.ReadAllLines("/proc/self/mountinfo").FirstOrDefault(x => x.Split(" - ")[1].Trim().Split(' ')[1].ToLower() == drivePath);
+
+            if (String.IsNullOrWhiteSpace(mountLine))
+                return null;
+
+            string mountPoint = mountLine.Split(' ')[4].Trim().Replace(@"\040", " ");
+
+            if (String.IsNullOrWhiteSpace(mountPoint))
+                return null;
+                
+            return mountPoint;
         }
 
         private static string LinuxGenerateDiscMD5(string driveName)
