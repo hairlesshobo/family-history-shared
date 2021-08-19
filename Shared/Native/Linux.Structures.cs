@@ -5,7 +5,6 @@ namespace Archiver.Shared.Native
 {
     public static partial class Linux
     {
-
         [StructLayout(LayoutKind.Sequential)]
         public struct StatResult
         {
@@ -21,18 +20,21 @@ namespace Archiver.Shared.Native
             public long BlockSize;     /* Block size for filesystem I/O */
             public long BlockCount;      /* Number of 512B blocks allocated */
 
-            /* Since Linux 2.6, the kernel supports nanosecond
-               precision for the following timestamp fields.
-               For the details before Linux 2.6, see NOTES. */
+            public LinuxTimeSpec TimeLastAccess;  /* Time of last access */
+            public LinuxTimeSpec TimeLastModify;  /* Time of last modification */
+            public LinuxTimeSpec TimeLastStatusChange;  /* Time of last status change */
 
-            //    struct timespec st_atim;  /* Time of last access */
-            //    struct timespec st_mtim;  /* Time of last modification */
-            //    struct timespec st_ctim;  /* Time of last status change */
+            public long reserved1;
+            public long reserved2;
+            public long reserved3;
+        }
 
-            //    #define st_atime st_atim.tv_sec      /* Backward compatibility */
-            //    #define st_mtime st_mtim.tv_sec
-            //    #define st_ctime st_ctim.tv_sec
-        };
+        [StructLayout(LayoutKind.Sequential)]
+        public struct LinuxTimeSpec
+        {
+            long tv_sec;		/* Seconds.  */
+            long tv_nsec;	/* Nanoseconds.  */
+        }
 
         [StructLayout(LayoutKind.Sequential)]
         public struct MagneticTapeOperation

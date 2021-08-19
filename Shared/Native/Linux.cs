@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using Archiver.Shared.Exceptions;
 
 namespace Archiver.Shared.Native
 {
@@ -24,6 +25,11 @@ namespace Archiver.Shared.Native
         [DllImport("libc.so.6", EntryPoint = "write", SetLastError = true)]
         public static extern int Write(int handle, byte[] data, int length);
 
+
+        [DllImport("libc.so.6", EntryPoint = "ioctl", SetLastError = true)]
+        public extern static int Ioctl(int fd, ulong request, int param);
+        public static int Ioctl(int fd, ulong request)
+             => Ioctl(fd, request, 0);
 
         [DllImport("libc.so.6", EntryPoint = "ioctl", SetLastError = true)]
         public extern static int Ioctl(int fd, ulong request, IntPtr data);
@@ -56,15 +62,15 @@ namespace Archiver.Shared.Native
                     false
                 );
 
-                result = Linux._Stat(path, ptr);
-
-                // TODO: Error handling
+                if (Linux._Stat(path, ptr) < 0)
+                    throw new NativeMethodException("Ioctl");
 
                 statResult = (Linux.StatResult)Marshal.PtrToStructure(ptr, typeof(Linux.StatResult));
                 
             }
             finally
             {
+                // Free unmanaged memory
                 if (ptr != IntPtr.Zero)
                     Marshal.FreeHGlobal(ptr);
             }
