@@ -40,11 +40,25 @@ namespace Archiver.Views
             Toplevel top = Application.Top;
             Window mainWindow = BuildMainWindow(top);
 
+            // ScrollView sv = new ScrollView ()
+            // {
+            //     X = 0,
+            //     Y = 0,
+            //     Height = Dim.Fill(),
+            //     Width = Dim.Fill(),
+            //     ContentSize = new Size (25, 30),
+			//     ShowVerticalScrollIndicator = true,
+			//     ShowHorizontalScrollIndicator = false,
+                
+            // };
+
+            // mainWindow.Add(sv);
+
             BuildDiscMenu(mainWindow);
             BuildTapeMenu(mainWindow);
             BuildCsdMenu(mainWindow);
             BuildUniversalMenu(mainWindow);
-            
+
             StatusBarComponent.Add(top, () => { _quit = true; }, true);
 
             Application.Run();
@@ -54,7 +68,7 @@ namespace Archiver.Views
             return _quit;
         }
 
-        private void AddLabel(Window win, string text, int marginAbove = 0)
+        private void AddLabel(View view, string text, int marginAbove = 0)
         {
             int newY = GetNextLocation(marginAbove);
             _menuEntryIndex.Add(newY);
@@ -64,10 +78,10 @@ namespace Archiver.Views
                 X = 0,
                 Y = newY
             };
-            win.Add(newLabel);
+            view.Add(newLabel);
         }
 
-        private void AddHyperlink(Window win, HyperlinkInfo info, int marginAbove = 0)
+        private void AddHyperlink(View view, HyperlinkInfo info, int marginAbove = 0)
         {
             int newY = GetNextLocation(marginAbove);
             _menuEntryIndex.Add(newY);
@@ -78,7 +92,7 @@ namespace Archiver.Views
                 Y = newY,
                 ActionHandler = MenuItemSelected
             };
-            win.Add(newHyperlink);
+            view.Add(newHyperlink);
         }
 
         private int GetNextLocation(int marginAbove = 0)
@@ -145,11 +159,11 @@ namespace Archiver.Views
             return mainWindow;
         }
 
-        private void BuildDiscMenu(Window mainWindow)
+        private void BuildDiscMenu(View view)
         {
-            AddLabel(mainWindow, "Disc Operations");
+            AddLabel(view, "Disc Operations");
 
-            AddHyperlink(mainWindow, new HyperlinkInfo() 
+            AddHyperlink(view, new HyperlinkInfo() 
             {
                 Text = "Search Disc Archive", 
                 Color = GuiGlobals.Colors.Green,
@@ -159,7 +173,7 @@ namespace Archiver.Views
             
 
             //! not implemented
-            AddHyperlink(mainWindow, new HyperlinkInfo() 
+            AddHyperlink(view, new HyperlinkInfo() 
             {
                 Text = "Restore entire disc(s)", 
                 Disabled = !SysInfo.IsOpticalDrivePresent || true, // remove once implemented
@@ -167,7 +181,7 @@ namespace Archiver.Views
                 Action = NotImplemented,
             });
 
-            AddHyperlink(mainWindow, new HyperlinkInfo() 
+            AddHyperlink(view, new HyperlinkInfo() 
             {
                 Text = "View Archive Summary", 
                 Color = GuiGlobals.Colors.Blue,
@@ -175,7 +189,7 @@ namespace Archiver.Views
                 DropFromGui = true
             });
             
-            AddHyperlink(mainWindow, new HyperlinkInfo() 
+            AddHyperlink(view, new HyperlinkInfo() 
             {
                 Text = "Verify Discs", 
                 Color = GuiGlobals.Colors.Yellow,
@@ -184,7 +198,7 @@ namespace Archiver.Views
                 DropFromGui = true,
             });
             
-            AddHyperlink(mainWindow, new HyperlinkInfo() 
+            AddHyperlink(view, new HyperlinkInfo() 
             {
                 Text = "Scan For Changes", 
                 Color = GuiGlobals.Colors.Yellow,
@@ -192,7 +206,7 @@ namespace Archiver.Views
                 DropFromGui = true
             });
             
-            AddHyperlink(mainWindow, new HyperlinkInfo() 
+            AddHyperlink(view, new HyperlinkInfo() 
             {
                 Text = "Scan For Renamed/Moved Files", 
                 Color = GuiGlobals.Colors.Yellow,
@@ -200,7 +214,7 @@ namespace Archiver.Views
                 DropFromGui = true
             });
             
-            AddHyperlink(mainWindow, new HyperlinkInfo() 
+            AddHyperlink(view, new HyperlinkInfo() 
             {
                 Text = "Run Archive process", 
                 Color = GuiGlobals.Colors.Red,
@@ -210,11 +224,11 @@ namespace Archiver.Views
             });
         }
 
-        private void BuildTapeMenu(Window mainWindow)
+        private void BuildTapeMenu(View view)
         {
-            AddLabel(mainWindow, "Tape Operations", 1);
+            AddLabel(view, "Tape Operations", 1);
 
-            AddHyperlink(mainWindow, new HyperlinkInfo() 
+            AddHyperlink(view, new HyperlinkInfo() 
             {
                 Text = "Search Tape Archive",
                 Action = Operations.Tape.TapeSearcher.StartOperation,
@@ -223,7 +237,7 @@ namespace Archiver.Views
             });
 
             //! not implemented
-            AddHyperlink(mainWindow, new HyperlinkInfo() 
+            AddHyperlink(view, new HyperlinkInfo() 
             {
                 Text = "Restore entire tape (to tar file)",
                 Action = Operations.Tape.RestoreTapeToTar.StartOperation,
@@ -233,7 +247,7 @@ namespace Archiver.Views
             });
 
             //! not implemented
-            AddHyperlink(mainWindow, new HyperlinkInfo() 
+            AddHyperlink(view, new HyperlinkInfo() 
             {
                 Text = "Restore entire tape (to original file structure)",
                 Action = NotImplemented,
@@ -242,7 +256,7 @@ namespace Archiver.Views
                 DropFromGui = true
             });
 
-            AddHyperlink(mainWindow, new HyperlinkInfo() 
+            AddHyperlink(view, new HyperlinkInfo() 
             {
                 Text = "Read Tape Summary",
                 Action = Operations.Tape.ShowTapeSummary.StartOperation,
@@ -251,7 +265,7 @@ namespace Archiver.Views
                 DropFromGui = true
             });
 
-            AddHyperlink(mainWindow, new HyperlinkInfo() 
+            AddHyperlink(view, new HyperlinkInfo() 
             {
                 Text = "View Archive Summary",
                 Action = Operations.Tape.TapeArchiveSummary.StartOperation,
@@ -261,7 +275,7 @@ namespace Archiver.Views
                 PauseAfterOperation = false
             });
 
-            AddHyperlink(mainWindow, new HyperlinkInfo() 
+            AddHyperlink(view, new HyperlinkInfo() 
             {
                 Text = "Verify Tape",
                 Action = Operations.Tape.TapeVerification.StartOperation,
@@ -270,7 +284,7 @@ namespace Archiver.Views
                 DropFromGui = true
             });
 
-            AddHyperlink(mainWindow, new HyperlinkInfo() 
+            AddHyperlink(view, new HyperlinkInfo() 
             {
                 Text = "Run tape archive",
                 Action = Operations.Tape.TapeArchiver.StartOperation,
@@ -281,12 +295,12 @@ namespace Archiver.Views
 
         }
 
-        private void BuildCsdMenu(Window mainWindow)
+        private void BuildCsdMenu(View view)
         {
-            AddLabel(mainWindow, "Cold Storage Disk (HDD) Operations", 1);
+            AddLabel(view, "Cold Storage Disk (HDD) Operations", 1);
 
 
-            AddHyperlink(mainWindow, new HyperlinkInfo() {
+            AddHyperlink(view, new HyperlinkInfo() {
                 Text = "Register CSD Drive",
                 Action = Operations.CSD.RegisterDrive.StartOperation,
                 Color = GuiGlobals.Colors.Green,
@@ -294,7 +308,7 @@ namespace Archiver.Views
             });
 
             //! not implemented
-            AddHyperlink(mainWindow, new HyperlinkInfo() {
+            AddHyperlink(view, new HyperlinkInfo() {
                 Text = "Restore entire CSD Drive",
                 Action = NotImplemented,
                 //Disabled = true, // remove once implemented
@@ -303,7 +317,7 @@ namespace Archiver.Views
             });
 
             //! not implemented
-            AddHyperlink(mainWindow, new HyperlinkInfo() {
+            AddHyperlink(view, new HyperlinkInfo() {
                 Text = "Read CSD Drive Summary",
                 Action = NotImplemented,         
                 // Action = ShowTapeSummary.StartOperation,
@@ -313,7 +327,7 @@ namespace Archiver.Views
                 DropFromGui = true
             });
 
-            AddHyperlink(mainWindow, new HyperlinkInfo() {
+            AddHyperlink(view, new HyperlinkInfo() {
                 Text = "View CSD Archive Summary",
                 Action = Operations.CSD.ArchiveSummary.StartOperation,
                 // SelectedValue = true, // do not show the "press enter to return to main menu" message
@@ -322,7 +336,7 @@ namespace Archiver.Views
             });
 
             //! not implemented
-            AddHyperlink(mainWindow, new HyperlinkInfo() {
+            AddHyperlink(view, new HyperlinkInfo() {
                 Text = "Verify CSD Drive",
                 Action = NotImplemented,
                 // Action = TapeVerification.StartOperation,
@@ -331,7 +345,7 @@ namespace Archiver.Views
                 DropFromGui = true
             });
 
-            AddHyperlink(mainWindow, new HyperlinkInfo() {
+            AddHyperlink(view, new HyperlinkInfo() {
                 Text = "Clean CSD Drive - Remove files not in index",
                 Action = Operations.CSD.Cleaner.StartOperation,
                 // Action = TapeVerification.StartOperation,
@@ -340,7 +354,7 @@ namespace Archiver.Views
                 DropFromGui = true
             });
 
-            AddHyperlink(mainWindow, new HyperlinkInfo() {
+            AddHyperlink(view, new HyperlinkInfo() {
                 Text = "Run CSD Archive Process",
                 Action = Operations.CSD.Archiver.StartOperation,
                 //Disabled = SysInfo.IsReadonlyFilesystem,
@@ -350,25 +364,25 @@ namespace Archiver.Views
 
         }
 
-        private void BuildUniversalMenu(Window mainWindow)
+        private void BuildUniversalMenu(View view)
         {
-            AddLabel(mainWindow, "Universal Operations", 1);
+            AddLabel(view, "Universal Operations", 1);
 
-            AddHyperlink(mainWindow, new HyperlinkInfo() {
+            AddHyperlink(view, new HyperlinkInfo() {
                 Text = "Copy Tools to Local Disk",
                 Action = NotImplemented,
                 //Disabled = !SysInfo.IsReadonlyFilesystem,
                 DropFromGui = true
             });
 
-            AddHyperlink(mainWindow, new HyperlinkInfo() {
+            AddHyperlink(view, new HyperlinkInfo() {
                 Text = "Create Index ISO",
                 Action = Helpers.CreateIndexIso,
                 //Disabled = SysInfo.IsReadonlyFilesystem,
                 DropFromGui = true
             });
 
-            AddHyperlink(mainWindow, new HyperlinkInfo() {
+            AddHyperlink(view, new HyperlinkInfo() {
                 Text = "Exit",
                 Action = () => 
                 {

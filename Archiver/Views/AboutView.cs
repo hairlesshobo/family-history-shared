@@ -3,7 +3,6 @@ using System.Data;
 using Archiver.Shared;
 using Archiver.ViewComponents;
 using Terminal.Gui;
-using Terminal.Gui.Views;
 
 namespace Archiver.Views
 {
