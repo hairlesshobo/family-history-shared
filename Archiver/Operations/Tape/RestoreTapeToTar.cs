@@ -5,7 +5,6 @@ using Archiver.Shared.Classes.Tape;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 using Archiver.Utilities.Tape;
-using Archiver.Views;
 
 namespace Archiver.Operations.Tape
 {
@@ -13,8 +12,6 @@ namespace Archiver.Operations.Tape
     {
         public static void StartOperation()
         {
-            SelectOutputPath sop = new SelectOutputPath();
-
             return;
             // Console.WriteLine("Reading tape information...");
             // Console.WriteLine();

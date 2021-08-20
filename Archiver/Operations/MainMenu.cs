@@ -4,8 +4,6 @@ using System.Linq;
 using Archiver.Shared;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
-using Archiver.Views;
-using Terminal.Gui;
 
 namespace Archiver.Operations
 {
@@ -16,24 +14,24 @@ namespace Archiver.Operations
 
         public static void StartOperation()
         {
-            // ShowMenuOld();
-            ShowMenuNew();
+            ShowMenuOld();
+            // ShowMenuNew();
         }
 
-        private static void ShowMenuNew()
-        {
-            ViewMainMenu vmm = new ViewMainMenu();
+        // private static void ShowMenuNew()
+        // {
+        //     ViewMainMenu vmm = new ViewMainMenu();
 
-            bool quit = false;
-            do
-            {
-                quit = vmm.Show();
-            } 
-            while (!quit);
+        //     bool quit = false;
+        //     do
+        //     {
+        //         quit = vmm.Show();
+        //     } 
+        //     while (!quit);
 
-            Application.Shutdown();
-            Console.Clear();
-        }
+        //     Application.Shutdown();
+        //     Console.Clear();
+        // }
 
         private static void ShowMenuOld()
         {

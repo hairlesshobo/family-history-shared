@@ -1,11 +1,7 @@
 ﻿using System;
 using Archiver.Operations;
-using Archiver.Utilities.Shared;
-using Terminal.Gui;
 using Archiver.Shared;
-using Archiver.Shared.Models;
 using Archiver.Shared.Utilities;
-using Archiver.Views;
 
 namespace Archiver
 {
@@ -18,11 +14,11 @@ namespace Archiver
 
             try
             {
-                // Console.CancelKeyPress += (sender, e) => {
-                //     e.Cancel = true;
-                // };
-                // Console.TreatControlCAsInput = true;
-                // Console.BackgroundColor = ConsoleColor.Black;
+                Console.CancelKeyPress += (sender, e) => {
+                    e.Cancel = true;
+                };
+                Console.TreatControlCAsInput = true;
+                Console.BackgroundColor = ConsoleColor.Black;
 
                 // Console.Write("Reading configuration... ");
                 // Config.ReadConfig();
@@ -34,8 +30,8 @@ namespace Archiver
             }
             catch (Exception e)
             {
-                Application.Shutdown();
-                Console.Clear();
+                // Application.Shutdown();
+                // Console.Clear();
                 Console.CursorLeft = 0;
                 Console.CursorTop = Console.CursorTop + 5;
                 Formatting.WriteLineC(ConsoleColor.Red, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
