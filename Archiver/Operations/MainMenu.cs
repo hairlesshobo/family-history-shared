@@ -19,21 +19,6 @@ namespace Archiver.Operations
             // ShowMenuNew();
         }
 
-        // private static void ShowMenuNew()
-        // {
-        //     ViewMainMenu vmm = new ViewMainMenu();
-
-        //     bool quit = false;
-        //     do
-        //     {
-        //         quit = vmm.Show();
-        //     } 
-        //     while (!quit);
-
-        //     Application.Shutdown();
-        //     Console.Clear();
-        // }
-
         private static void ShowMenuOld()
         {
             Initialize();
