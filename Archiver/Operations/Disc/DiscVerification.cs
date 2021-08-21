@@ -15,11 +15,6 @@ namespace Archiver.Operations.Disc
     {
         public static void StartOperation()
         {
-
-        }
-
-        public static void StartOperationOld()
-        {
             CancellationTokenSource cts = new CancellationTokenSource();
 
             DiscGlobals._destinationDiscs = Helpers.ReadDiscIndex();

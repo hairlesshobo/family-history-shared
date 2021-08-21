@@ -69,6 +69,7 @@ namespace Archiver.Utilities.Shared
         #region Private Fields
         private List<CliMenuEntry<TKey>> _entries;
         private ConsoleColor _foregroundColor;
+        private ConsoleColor _backgroundColor;
         private bool _multiSelect;
         private int _cursorIndex = -1;
         private bool _canceled = false;
@@ -112,14 +113,13 @@ namespace Archiver.Utilities.Shared
 
         #region Public Methods
         public List<TKey> Show()
-        {
-            return Show(false);
-        }
+            => Show(false);
 
         public List<TKey> Show(bool ClearScreen)
         {
             Console.CursorVisible = false;
             _foregroundColor = Console.ForegroundColor;
+            _backgroundColor = Console.BackgroundColor;
 
             if (ClearScreen)
                 Console.Clear();
@@ -162,6 +162,8 @@ namespace Archiver.Utilities.Shared
             Console.Write(" or ");
             Formatting.WriteC(this.KeyColor, "q");
             Console.Write(" to cancel");
+            Console.WriteLine();
+
 
             while (1 == 1)
             {
@@ -336,10 +338,14 @@ namespace Archiver.Utilities.Shared
             
 
             if (Entry.Header)
+            {
                 Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.BackgroundColor = _backgroundColor;
+            }
 
             else
             {
+                Console.BackgroundColor = _backgroundColor;
                 Console.Write("    ");
 
                 if (entryIndex == _cursorIndex)
@@ -352,10 +358,14 @@ namespace Archiver.Utilities.Shared
                 else if (Entry.Disabled)
                 {
                     Console.ForegroundColor = this.DisabledForegroundColor;
+                    Console.BackgroundColor = _backgroundColor;
                     Console.Write("  ");
                 }
                 else
+                {
+                    Console.BackgroundColor = _backgroundColor;
                     Console.Write("  ");
+                }
             }
 
             if (_multiSelect == true)
@@ -432,7 +442,8 @@ namespace Archiver.Utilities.Shared
 
             Console.CursorLeft = 0;
 
-            Console.ResetColor();
+            Console.ForegroundColor = _foregroundColor;
+            Console.BackgroundColor = _backgroundColor;
         }
         #endregion Private Methods
     }
