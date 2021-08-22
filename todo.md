@@ -27,7 +27,6 @@ Global Functionality:
 * Add a per-user config to the user's home directory
 * Add a wizard mode for other users
 * Search entire archive, across media types
-* Port entire application to Terminal.Gui
 * Finish config validation
 * Port archiver to new config binding
 * Add optical drive model to select drive list
@@ -91,7 +90,7 @@ Future ideas
     * `m_` (magenta)
     * `y_` (yellow)
     * `w_` (white)
-    * `G_` (gray)
+    * `a_` (gray)
     * `dr_` (dark red)
     * `db_` (dark blue)
     * `dg_` (dark green)
@@ -99,7 +98,7 @@ Future ideas
     * `dm_` (dark magenta)
     * `dy_` (dark yellow)
     * `dw_` (dark white)
-    * `dG_` (dark gray)
+    * `da_` (dark gray)
     * `n_` (normal / default / reset)
 
 

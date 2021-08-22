@@ -6,7 +6,7 @@ using Archiver.Shared;
 using Archiver.Shared.Classes;
 using Archiver.Shared.Utilities;
 using TerminalUI;
-using TerminalUI.Objects;
+using TerminalUI.Elements;
 
 namespace Archiver
 {
@@ -50,17 +50,42 @@ namespace Archiver
                     e.Cancel = true;
                 };
                 Console.TreatControlCAsInput = true;
-                Console.BackgroundColor = ConsoleColor.DarkBlue;
-                Console.Clear();
 
+                Terminal.SetDefaultBackgroundColor(ConsoleColor.Black);
+                Terminal.ResetColor();
+                Terminal.Clear();
+
+                TerminalColor.ProgressBarFilled = ConsoleColor.DarkRed;
 
                 Console.CursorVisible = false;
 
                 var splitHeader = new SplitLine("Verify Disc MD5 Hash", "Archiver");
                 Terminal.NextLine();
-                var hl1 = new HorizontalLine();
+                var hl1 = new HorizontalLine(ConsoleColor.Magenta);
                 Terminal.NextLine();
-                Terminal.NextLine();
+
+                // Key key = Key.MakeKey(ConsoleKey.C, ConsoleModifiers.Control | ConsoleModifiers.Shift);
+                // Key key2 = Key.MakeKey(ConsoleKey.C, ConsoleModifiers.Shift | ConsoleModifiers.Control);
+
+                // Terminal.WriteLine(key.ToString());
+                // Terminal.WriteLine(key2.ToString());
+
+                // Terminal.WriteLineColor(ConsoleColor.Black, "Black");
+                // Terminal.WriteLineColor(ConsoleColor.Blue, "Blue");
+                // Terminal.WriteLineColor(ConsoleColor.DarkBlue, "DarkBlue");
+                // Terminal.WriteLineColor(ConsoleColor.Green, "Green");
+                // Terminal.WriteLineColor(ConsoleColor.DarkGreen, "DarkGreen");
+                // Terminal.WriteLineColor(ConsoleColor.Cyan, "Cyan");
+                // Terminal.WriteLineColor(ConsoleColor.DarkCyan, "DarkCyan");
+                // Terminal.WriteLineColor(ConsoleColor.Red, "Red");
+                // Terminal.WriteLineColor(ConsoleColor.DarkRed, "DarkRed");
+                // Terminal.WriteLineColor(ConsoleColor.Magenta, "Magenta");
+                // Terminal.WriteLineColor(ConsoleColor.DarkMagenta, "DarkMagenta");
+                // Terminal.WriteLineColor(ConsoleColor.Yellow, "Yellow");
+                // Terminal.WriteLineColor(ConsoleColor.DarkYellow, "DarkYellow");
+                // Terminal.WriteLineColor(ConsoleColor.Gray, "Gray");
+                // Terminal.WriteLineColor(ConsoleColor.DarkGray, "DarkGray");
+                // Terminal.WriteLineColor(ConsoleColor.White, "White");
 
                 var kvtDiscName = new KeyValueText("Disc Name", OpticalDriveUtils.GetDriveLabel("sr0"), 14);
                 Terminal.NextLine();
@@ -73,41 +98,67 @@ namespace Archiver
 
                 var kvtAvgRate = new KeyValueText("Average Rate", Formatting.GetFriendlyTransferRate(0), 14);
                 Terminal.NextLine();
+                Terminal.NextLine();
 
                 var progressBar = new ProgressBar();
                 Terminal.NextLine(); 
 
+                StatusBar.GetInstance().ShowItems(
+                    new StatusBarItem(
+                        "Quit",
+                        (key) => {
+                            // Console.Clear();
+                            Terminal.NextLine();
+                            Terminal.WriteLine("MEOW!");
+                            // Console.ReadKey();
+                            Environment.Exit(0);
+                        },
+                        Key.MakeKey(ConsoleKey.Q)
+                    ),
+                    new StatusBarItem(
+                        "Navigate",
+                        (key) => { },
+                        Key.MakeKey(ConsoleKey.UpArrow),
+                        Key.MakeKey(ConsoleKey.DownArrow)
+                    )
+                );
+
                 //% slax bootloader, known good MD5: 3c78799690d95bd975e352020fc2acb8 linux dd OK, linux archiver OK, windows dd ??, windows archiver ??
                 //% archive 0001   , known good MD5: d8f3a48ab0205c2debe1aa55bc0bb6ea linux dd OK, linux archiver OK, windows dd ??, windows archiver ??
 
-                using (LinuxNativeStreamReader reader = new LinuxNativeStreamReader(LinuxNativeStreamReader.StreamSourceType.Disk, "/dev/sr0"))
+                // using (LinuxNativeStreamReader reader = new LinuxNativeStreamReader(LinuxNativeStreamReader.StreamSourceType.Disk, "/dev/sr0"))
+                // {
+                //     Md5StreamGenerator generator = new Md5StreamGenerator(reader);
+                //     generator.OnProgressChanged += (progress) =>
+                //     {
+                //         kvtVerified.UpdateValue($"{Formatting.GetFriendlySize(progress.TotalCopiedBytes)} / {Formatting.GetFriendlySize(progress.TotalBytes)}");
+                //         kvtAvgRate.UpdateValue(Formatting.GetFriendlyTransferRate(progress.AverageTransferRate));
+                //         kvtCurrentRate.UpdateValue(Formatting.GetFriendlyTransferRate(progress.InstantTransferRate));
+
+                //         progressBar.UpdateProgress(progress.PercentCopied / 100.0);
+                //         // Console.WriteLine($"{progress.PercentCopied}%");
+                //     };
+
+                //     generator.OnComplete += (hash) =>
+                //     {
+                //         // Console.WriteLine(hash);
+                //     };
+
+                //     generator.Generate();
+
+                //     // Console.WriteLine(md5hash);
+                // }
+
+                KeyInput.ListenForKeys();
+
+                for (int i = 0; i < 1000; i += 27)
                 {
-                    Md5StreamGenerator generator = new Md5StreamGenerator(reader);
-                    generator.OnProgressChanged += (progress) =>
-                    {
-                        kvtVerified.UpdateValue($"{Formatting.GetFriendlySize(progress.TotalCopiedBytes)} / {Formatting.GetFriendlySize(progress.TotalBytes)}");
-                        kvtAvgRate.UpdateValue(Formatting.GetFriendlyTransferRate(progress.AverageTransferRate));
-                        kvtCurrentRate.UpdateValue(Formatting.GetFriendlyTransferRate(progress.InstantTransferRate));
-
-                        progressBar.UpdateProgress(progress.PercentCopied / 100.0);
-                        // Console.WriteLine($"{progress.PercentCopied}%");
-                    };
-
-                    generator.OnComplete += (hash) =>
-                    {
-                        // Console.WriteLine(hash);
-                    };
-
-                    generator.Generate();
-
-                    // Console.WriteLine(md5hash);
+                    Thread.Sleep(400);
+                    progressBar.UpdateProgress((double)i / 1000.0);
+                    kvtVerified.UpdateValue(i.ToString());
                 }
 
-                // for (int i = 0; i < 1000; i += 27)
-                // {
-                //     Thread.Sleep(400);
-                //     updateProgress((double)i / 1000.0);
-                // }
+                // ShortcutKeyHelper.StopListening();
 
                 // MainMenu.StartOperation();
             }

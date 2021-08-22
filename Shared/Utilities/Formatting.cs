@@ -116,20 +116,6 @@ namespace Archiver.Shared.Utilities
 
             return currentSizeFriendly;
         }
-        
-        private static class BoxChars
-        {
-            public const char ThinTopLeft = '\u250C';
-            public const char ThinBottomLeft = '\u2514';
-            public const char ThinTopRight = '\u2510';
-            public const char ThinBottomRight = '\u2518';
-            public const char ThinVertical = '\u2502';
-
-            public const char ThinHorizontal = '\u2500';
-            public const char ThickHorizontal = '\u2501';
-            public const char ThinDashHorizontal = '\u2504';
-            public const char ThickDashHorizontal = '\u2505';
-        }
     }
 
     
