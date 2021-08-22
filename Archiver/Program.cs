@@ -62,6 +62,9 @@ namespace Archiver
                 Terminal.NextLine();
                 Terminal.NextLine();
 
+                var kvtDiscName = new KeyValueText("Disc Name", OpticalDriveUtils.GetDriveLabel("sr0"), 14);
+                Terminal.NextLine();
+
                 var kvtVerified = new KeyValueText("Verified", Formatting.GetFriendlySize(0), 14);
                 Terminal.NextLine();
 
