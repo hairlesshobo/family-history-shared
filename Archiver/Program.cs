@@ -35,7 +35,7 @@ namespace Archiver
         // }
         
 
-        
+        private static volatile bool cancelMd5 = false;        
 
         static void Main(string[] args)
         {
@@ -51,77 +51,31 @@ namespace Archiver
                 };
                 Console.TreatControlCAsInput = true;
 
-                Terminal.SetDefaultBackgroundColor(ConsoleColor.Black);
                 Terminal.ResetColor();
-                Terminal.Clear();
-
-                TerminalColor.ProgressBarFilled = ConsoleColor.DarkRed;
+                Terminal.Clear(true);
 
                 Console.CursorVisible = false;
 
-                var splitHeader = new SplitLine("Verify Disc MD5 Hash", "Archiver");
-                Terminal.NextLine();
-                var hl1 = new HorizontalLine(ConsoleColor.Magenta);
-                Terminal.NextLine();
+                // Terminal.InitHeader("Verify Disc MD5 Hash", "Archiver");
+                Terminal.InitHeader("Loading...", "Archiver");
+                Terminal.InitStatusBar();
+                Terminal.RootPoint.MoveTo();
 
-                // Key key = Key.MakeKey(ConsoleKey.C, ConsoleModifiers.Control | ConsoleModifiers.Shift);
-                // Key key2 = Key.MakeKey(ConsoleKey.C, ConsoleModifiers.Shift | ConsoleModifiers.Control);
+                // var kvtDiscName = new KeyValueText("Disc Name", OpticalDriveUtils.GetDriveLabel("sr0"), 14);
+                // Terminal.NextLine();
 
-                // Terminal.WriteLine(key.ToString());
-                // Terminal.WriteLine(key2.ToString());
+                // var kvtVerified = new KeyValueText("Verified", Formatting.GetFriendlySize(0), 14);
+                // Terminal.NextLine();
 
-                // Terminal.WriteLineColor(ConsoleColor.Black, "Black");
-                // Terminal.WriteLineColor(ConsoleColor.Blue, "Blue");
-                // Terminal.WriteLineColor(ConsoleColor.DarkBlue, "DarkBlue");
-                // Terminal.WriteLineColor(ConsoleColor.Green, "Green");
-                // Terminal.WriteLineColor(ConsoleColor.DarkGreen, "DarkGreen");
-                // Terminal.WriteLineColor(ConsoleColor.Cyan, "Cyan");
-                // Terminal.WriteLineColor(ConsoleColor.DarkCyan, "DarkCyan");
-                // Terminal.WriteLineColor(ConsoleColor.Red, "Red");
-                // Terminal.WriteLineColor(ConsoleColor.DarkRed, "DarkRed");
-                // Terminal.WriteLineColor(ConsoleColor.Magenta, "Magenta");
-                // Terminal.WriteLineColor(ConsoleColor.DarkMagenta, "DarkMagenta");
-                // Terminal.WriteLineColor(ConsoleColor.Yellow, "Yellow");
-                // Terminal.WriteLineColor(ConsoleColor.DarkYellow, "DarkYellow");
-                // Terminal.WriteLineColor(ConsoleColor.Gray, "Gray");
-                // Terminal.WriteLineColor(ConsoleColor.DarkGray, "DarkGray");
-                // Terminal.WriteLineColor(ConsoleColor.White, "White");
+                // var kvtCurrentRate = new KeyValueText("Current Rate", Formatting.GetFriendlyTransferRate(0), 14);
+                // Terminal.NextLine();
 
-                var kvtDiscName = new KeyValueText("Disc Name", OpticalDriveUtils.GetDriveLabel("sr0"), 14);
-                Terminal.NextLine();
+                // var kvtAvgRate = new KeyValueText("Average Rate", Formatting.GetFriendlyTransferRate(0), 14);
+                // Terminal.NextLine();
+                // Terminal.NextLine();
 
-                var kvtVerified = new KeyValueText("Verified", Formatting.GetFriendlySize(0), 14);
-                Terminal.NextLine();
-
-                var kvtCurrentRate = new KeyValueText("Current Rate", Formatting.GetFriendlyTransferRate(0), 14);
-                Terminal.NextLine();
-
-                var kvtAvgRate = new KeyValueText("Average Rate", Formatting.GetFriendlyTransferRate(0), 14);
-                Terminal.NextLine();
-                Terminal.NextLine();
-
-                var progressBar = new ProgressBar();
-                Terminal.NextLine(); 
-
-                StatusBar.GetInstance().ShowItems(
-                    new StatusBarItem(
-                        "Quit",
-                        (key) => {
-                            // Console.Clear();
-                            Terminal.NextLine();
-                            Terminal.WriteLine("MEOW!");
-                            // Console.ReadKey();
-                            Environment.Exit(0);
-                        },
-                        Key.MakeKey(ConsoleKey.Q)
-                    ),
-                    new StatusBarItem(
-                        "Navigate",
-                        (key) => { },
-                        Key.MakeKey(ConsoleKey.UpArrow),
-                        Key.MakeKey(ConsoleKey.DownArrow)
-                    )
-                );
+                // var progressBar = new ProgressBar();
+                // Terminal.NextLine(); 
 
                 //% slax bootloader, known good MD5: 3c78799690d95bd975e352020fc2acb8 linux dd OK, linux archiver OK, windows dd ??, windows archiver ??
                 //% archive 0001   , known good MD5: d8f3a48ab0205c2debe1aa55bc0bb6ea linux dd OK, linux archiver OK, windows dd ??, windows archiver ??
@@ -149,18 +103,88 @@ namespace Archiver
                 //     // Console.WriteLine(md5hash);
                 // }
 
-                KeyInput.ListenForKeys();
+                // KeyInput.ListenForKeys();
+                
+                // Terminal.InitStatusBar(
+                //     new StatusBarItem(
+                //         "Cancel",
+                //         (key) => cancelMd5 = true,
+                //         Key.MakeKey(ConsoleKey.C, ConsoleModifiers.Control)
+                //     )
+                // );
 
-                for (int i = 0; i < 1000; i += 27)
-                {
-                    Thread.Sleep(400);
-                    progressBar.UpdateProgress((double)i / 1000.0);
-                    kvtVerified.UpdateValue(i.ToString());
-                }
+                // for (int i = 0; i < 1000; i += 27)
+                // {
+                //     Thread.Sleep(150);
+                //     progressBar.UpdateProgress((double)i / 1000.0);
+                //     kvtVerified.UpdateValue(i.ToString());
+
+                //     if (cancelMd5)
+                //         break;
+                // }
+
+                // Terminal.Clear();
+                // Terminal.InitHeader("Main Menu", "Meow");
+                // Terminal.InitStatusBar(
+                //     new StatusBarItem(
+                //         "Quit",
+                //         (key) => {
+                //             // Console.Clear();
+                //             Terminal.NextLine();
+                //             Terminal.WriteLine("MEOW!");
+                //             // Console.ReadKey();
+                //             Environment.Exit(0);
+                //         },
+                //         Key.MakeKey(ConsoleKey.Q)
+                //     ),
+                //     new StatusBarItem(
+                //         "Navigate",
+                //         (key) => { },
+                //         Key.MakeKey(ConsoleKey.UpArrow),
+                //         Key.MakeKey(ConsoleKey.DownArrow)
+                //     )
+                // );
+
+                // Terminal.WriteLineColor(ConsoleColor.Black, "Black");
+                // Terminal.WriteLineColor(ConsoleColor.Blue, "Blue");
+                // Terminal.WriteLineColor(ConsoleColor.DarkBlue, "DarkBlue");
+                // Terminal.WriteLineColor(ConsoleColor.Green, "Green");
+                // Terminal.WriteLineColor(ConsoleColor.DarkGreen, "DarkGreen");
+                // Terminal.WriteLineColor(ConsoleColor.Cyan, "Cyan");
+                // Terminal.WriteLineColor(ConsoleColor.DarkCyan, "DarkCyan");
+                // Terminal.WriteLineColor(ConsoleColor.Red, "Red");
+                // Terminal.WriteLineColor(ConsoleColor.DarkRed, "DarkRed");
+                // Terminal.WriteLineColor(ConsoleColor.Magenta, "Magenta");
+                // Terminal.WriteLineColor(ConsoleColor.DarkMagenta, "DarkMagenta");
+                // Terminal.WriteLineColor(ConsoleColor.Yellow, "Yellow");
+                // Terminal.WriteLineColor(ConsoleColor.DarkYellow, "DarkYellow");
+                // Terminal.WriteLineColor(ConsoleColor.Gray, "Gray");
+                // Terminal.WriteLineColor(ConsoleColor.DarkGray, "DarkGray");
+                // Terminal.WriteLineColor(ConsoleColor.White, "White");
+
+                // Terminal.Clear();
+
+                // Terminal.WriteLine("Black");
+                // Terminal.WriteLine("Blue");
+                // Terminal.WriteLine("DarkBlue");
+                // Terminal.WriteLine("Green");
+                // Terminal.WriteLine("DarkGreen");
+                // Terminal.WriteLine("Cyan");
+                // Terminal.WriteLine("DarkCyan");
+                // Terminal.WriteLine("Red");
+                // Terminal.WriteLine("DarkRed");
+                // Terminal.WriteLine("Magenta");
+                // Terminal.WriteLine("DarkMagenta");
+                // Terminal.WriteLine("Yellow");
+                // Terminal.WriteLine("DarkYellow");
+                // Terminal.WriteLine("Gray");
+                // Terminal.WriteLine("DarkGray");
+                // Terminal.WriteLine("White");
 
                 // ShortcutKeyHelper.StopListening();
 
-                // MainMenu.StartOperation();
+                KeyInput.ListenForKeys();
+                MainMenu.StartOperation();
             }
             catch (Exception e)
             {

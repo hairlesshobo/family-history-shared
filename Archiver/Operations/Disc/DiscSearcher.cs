@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using Archiver.Classes.Disc;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
+using TerminalUI;
 
 namespace Archiver.Operations.Disc
 {
@@ -14,16 +15,18 @@ namespace Archiver.Operations.Disc
         {
             List<DiscDetail> discs = Helpers.ReadDiscIndex();
 
-            Console.Clear();
+            Terminal.InitHeader("Search Disc Archive", "Archiver");
+            Terminal.InitStatusBar();
+            Terminal.Clear();
             
             while (true)
             {
                 Console.SetCursorPosition(0, 2);
-                Console.Write("Press ");
-                Formatting.WriteC(ConsoleColor.DarkYellow, "<ctrl>+C");
-                Console.Write(" to cancel");
+                // Console.Write("Press ");
+                // Formatting.WriteC(ConsoleColor.DarkYellow, "<ctrl>+C");
+                // Console.Write(" to cancel");
 
-                Console.SetCursorPosition(0, 0);
+                // Console.SetCursorPosition(0, 0);
                 Console.Write("Term to search for in file/directory: ");
                 Console.TreatControlCAsInput = false;
                 string searchString = Console.ReadLine();

@@ -4,6 +4,7 @@ using System.Linq;
 using Archiver.Shared;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
+using TerminalUI;
 using static Archiver.Shared.Utilities.Formatting;
 
 namespace Archiver.Operations
@@ -23,35 +24,39 @@ namespace Archiver.Operations
         {
             Initialize();
 
-            while (1 == 1)
-            {
-                Console.Clear();
-                Formatting.WriteLineSplit("Main Menu", "Archiver");
-                Formatting.DrawHorizontalLine(LineType.Thin); 
-                Console.CursorTop += 0; Console.CursorLeft = 0;
+            // while (1 == 1)
+            // {
+                Terminal.Clear();
+                Terminal.InitHeader("Main Menu", "Archiver");
 
-                bool result = _menu.Show(false).First();
-
-                if (result == false)
+                _menu.Show((results) => 
                 {
-                    Console.WriteLine();
-                    Console.Write("Process complete, press ");
-                    Formatting.WriteC(ConsoleColor.DarkYellow, "<enter>");
-                    Console.Write(", ");
-                    Formatting.WriteC(ConsoleColor.DarkYellow, "<esc>");
-                    Console.Write(", or ");
-                    Formatting.WriteC(ConsoleColor.DarkYellow, "q");
-                    Console.Write(" to return to the main menu...");
+                    if (results == null)
+                        return;
 
-                    while (true)
+                    bool result = results.First();
+
+                    if (result == false)
                     {
-                        ConsoleKeyInfo key = Console.ReadKey(true);
+                        Console.WriteLine();
+                        Console.Write("Process complete, press ");
+                        Formatting.WriteC(ConsoleColor.DarkYellow, "<enter>");
+                        Console.Write(", ");
+                        Formatting.WriteC(ConsoleColor.DarkYellow, "<esc>");
+                        Console.Write(", or ");
+                        Formatting.WriteC(ConsoleColor.DarkYellow, "q");
+                        Console.Write(" to return to the main menu...");
 
-                        if (key.Key == ConsoleKey.Q || key.Key == ConsoleKey.Enter || key.Key == ConsoleKey.Escape)
-                            break;
+                        while (true)
+                        {
+                            ConsoleKeyInfo key = Console.ReadKey(true);
+
+                            if (key.Key == ConsoleKey.Q || key.Key == ConsoleKey.Enter || key.Key == ConsoleKey.Escape)
+                                break;
+                        }
                     }
-                }
-            }
+                });
+            // }
         }
 
         private static void Initialize()
@@ -72,10 +77,10 @@ namespace Archiver.Operations
 
                 _menu = new CliMenu<bool>(entries);
                 //_menu.MenuLabel = "Archiver, main menu...";
-                _menu.OnCancel += () =>
-                {
-                    Environment.Exit(0);
-                };
+                // _menu.OnCancel += () =>
+                // {
+                //     Environment.Exit(0);
+                // };
             }
         }
 

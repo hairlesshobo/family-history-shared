@@ -2,7 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using Archiver.Shared.Utilities;
+using TerminalUI;
+using TerminalUI.Elements;
 
 namespace Archiver.Utilities.Shared
 {
@@ -50,20 +53,10 @@ namespace Archiver.Utilities.Shared
         public ConsoleColor CursorArrowColor { get; set; } = ConsoleColor.Green;
         public ConsoleColor DisabledForegroundColor { get; set; } = ConsoleColor.DarkGray;
         public Boolean MultiSelect { 
-            get
-            {
-                return _multiSelect;
-            }
-            private set
-            {
-                _multiSelect = value;
-            } 
+            get => _multiSelect;
+            private set => _multiSelect = value;
         }
-        public List<TKey> SelectedEntries {
-            get {
-                return _entries.Where(x => x.Selected).Select(x => x.SelectedValue).ToList();
-            }
-        }
+        public List<TKey> SelectedEntries => _entries.Where(x => x.Selected).Select(x => x.SelectedValue).ToList();
         #endregion Public Properties
 
         #region Private Fields
@@ -73,6 +66,7 @@ namespace Archiver.Utilities.Shared
         private bool _multiSelect;
         private int _cursorIndex = -1;
         private bool _canceled = false;
+        private List<TKey> _choosenItems = null;
 
         private int _startLine;
         #endregion Private Fields
@@ -113,16 +107,22 @@ namespace Archiver.Utilities.Shared
 
         #region Public Methods
         public List<TKey> Show()
-            => Show(false);
+            => throw new NotImplementedException();
 
-        public List<TKey> Show(bool ClearScreen)
+        public List<TKey> Show(bool clearScreen)
+            => throw new NotImplementedException();
+
+        public void Show(Action<List<TKey>> callback)
+            => Show(callback, true);
+
+        public void Show(Action<List<TKey>> callback, bool clearScreen)
         {
             Console.CursorVisible = false;
             _foregroundColor = Console.ForegroundColor;
             _backgroundColor = Console.BackgroundColor;
 
-            if (ClearScreen)
-                Console.Clear();
+            if (clearScreen)
+                Terminal.Clear();
 
             Console.WriteLine();
 
@@ -154,144 +154,199 @@ namespace Archiver.Utilities.Shared
                 Console.WriteLine();
             }
 
-            Console.WriteLine();
-            Console.Write("Press ");
-            Formatting.WriteC(this.KeyColor, "<enter>");
-            Console.Write($" {message}, ");
-            Formatting.WriteC(this.KeyColor, "<esc>");
-            Console.Write(" or ");
-            Formatting.WriteC(this.KeyColor, "q");
-            Console.Write(" to cancel");
-            Console.WriteLine();
+            // Console.WriteLine();
+            // Console.Write("Press ");
+            // Formatting.WriteC(this.KeyColor, "<enter>");
+            // Console.Write($" {message}, ");
+            // Formatting.WriteC(this.KeyColor, "<esc>");
+            // Console.Write(" or ");
+            // Formatting.WriteC(this.KeyColor, "q");
+            // Console.Write(" to cancel");
+            // Console.WriteLine();
 
+            Terminal.StatusBar.ShowItems(
+                new StatusBarItem(
+                    "Quit Application",
+                    (key) => Environment.Exit(0),
+                    Key.MakeKey(ConsoleKey.Q)
+                ),
+                new StatusBarItem(
+                    "Select Item",
+                    (key) => {
+                        // Console.CursorVisible = true;
+                        // Console.SetCursorPosition(0, _startLine+_entries.Count()+1);
 
-            while (1 == 1)
-            {
-                ConsoleKeyInfo key = Console.ReadKey(true);
-
-                CliMenuEntry<TKey> selectedEntry = _entries[_cursorIndex];
-                CliMenuEntry<TKey> previousEntry = selectedEntry;
-
-                if (_multiSelect == false && (key.Key == ConsoleKey.UpArrow || key.Key == ConsoleKey.DownArrow))
-                    selectedEntry.Selected = false;
-
-                if (_multiSelect == true)
-                {
-                    if (key.Key == ConsoleKey.Spacebar)
-                    {
-                        selectedEntry.Selected = !selectedEntry.Selected;
-                        WriteMenuEntry(selectedEntry);
-                    }
-                    else if (key.Modifiers == ConsoleModifiers.Shift)
-                    {
-                        if (key.Key == ConsoleKey.A)
-                        {
-                            foreach (CliMenuEntry<TKey> entry in _entries)
+                        // if (_canceled == false)
+                        // {
+                            if (_multiSelect == false)
                             {
-                                entry.Selected = true;
-                                WriteMenuEntry(entry);
+                                CliMenuEntry<TKey> finalEntry = _entries.First(x => x.Selected);
+
+                                if (clearScreen)
+                                    Terminal.Clear();
+
+                                if (finalEntry != null && finalEntry.Action != null)
+                                    finalEntry.Action();
+
+                                callback(new List<TKey>() {
+                                    finalEntry.SelectedValue
+                                });
                             }
-                        }
-                        else if (key.Key == ConsoleKey.D)
+                            else
+                                callback(this.SelectedEntries);
+                        // }
+                        // else
+                        // {
+                        //     this.OnCancel();
+                        //     return null;
+                        // }
+                    },
+                    Key.MakeKey(ConsoleKey.Enter)
+                ),
+                new StatusBarItem(
+                    "Navigate",
+                    (key) => {
+                        CliMenuEntry<TKey> selectedEntry = _entries[_cursorIndex];
+                        CliMenuEntry<TKey> previousEntry = selectedEntry;
+
+                        if (_multiSelect == false)
+                            selectedEntry.Selected = false;
+
+                        if (key.RootKey == ConsoleKey.DownArrow)
+                            MoveCursor(selectedEntry, true);
+                        else if (key.RootKey == ConsoleKey.UpArrow)
+                            MoveCursor(selectedEntry, false);
+
+
+                        if (_multiSelect == false && (key.RootKey == ConsoleKey.UpArrow || key.RootKey == ConsoleKey.DownArrow))
                         {
-                            foreach (CliMenuEntry<TKey> entry in _entries)
-                            {
-                                entry.Selected = false;
-                                WriteMenuEntry(entry);
-                            }
+                            WriteMenuEntry(previousEntry);
+                            selectedEntry = _entries[_cursorIndex];
+                            selectedEntry.Selected = true;
+                            WriteMenuEntry(selectedEntry);
                         }
-                    }
-                }
-
-                if (key.Key == ConsoleKey.Escape || key.Key == ConsoleKey.Q || (key.Key == ConsoleKey.C && key.Modifiers == ConsoleModifiers.Control))
-                {
-                    _canceled = true;
-                    break;
-                }
-                else if (key.Key == ConsoleKey.DownArrow)
-                    MoveCursor(selectedEntry, true);
-                else if (key.Key == ConsoleKey.UpArrow)
-                    MoveCursor(selectedEntry, false);
-
-                // a single, lower case character was pressed (that wasn't Q.. because that is caught in the if above)
-                else if (key.KeyChar >= 97 && key.KeyChar <= 122)
-                {
-                    CliMenuEntry<TKey> entry = _entries.FirstOrDefault(x => x.ShortcutKey == key.Key);
-
-                    // we found a menu entry with that shortcut key
-                    if (entry != null)
-                    {
-                        int entryIndex = _entries.IndexOf(entry);
-
-                        // if it is a header entry, we need to move to the next non-header line
-                        if (entry.Header == true)
+                        else
                         {
-                            while (1 == 1)
-                            {
-                                entryIndex++;
-
-                                if (_entries.Count <= entryIndex)
-                                {
-                                    entryIndex = -1;
-                                    break;
-                                }
-
-                                if (_entries[entryIndex].Header == false)
-                                    break;
-                            }
+                            WriteMenuEntry(previousEntry);
+                            WriteMenuEntry(_entries[_cursorIndex]);
                         }
 
-                        if (entryIndex >= 0)
-                        {
-                            MoveCursor(selectedEntry, _entries[entryIndex]);
-                        }
-                    }
-                }
+                        // if (key.Key == ConsoleKey.Enter)
+                        //     break;
+                    },
+                    Key.MakeKey(ConsoleKey.UpArrow),
+                    Key.MakeKey(ConsoleKey.DownArrow)
+                )
+            );
 
-                if (_multiSelect == false && (key.Key == ConsoleKey.UpArrow || key.Key == ConsoleKey.DownArrow))
-                {
-                    WriteMenuEntry(previousEntry);
-                    selectedEntry = _entries[_cursorIndex];
-                    selectedEntry.Selected = true;
-                    WriteMenuEntry(selectedEntry);
-                }
-                else
-                {
-                    WriteMenuEntry(previousEntry);
-                    WriteMenuEntry(_entries[_cursorIndex]);
-                }
 
-                if (key.Key == ConsoleKey.Enter)
-                    break;
-            }
+            // while (1 == 1)
+            // {
+            //     ConsoleKeyInfo key = Console.ReadKey(true);
 
-            Console.CursorVisible = true;
-            Console.SetCursorPosition(0, _startLine+_entries.Count()+1);
+            //     CliMenuEntry<TKey> selectedEntry = _entries[_cursorIndex];
+            //     CliMenuEntry<TKey> previousEntry = selectedEntry;
 
-            if (_canceled == false)
-            {
-                if (_multiSelect == false)
-                {
-                    CliMenuEntry<TKey> finalEntry = _entries.First(x => x.Selected);
+            //     if (_multiSelect == false && (key.Key == ConsoleKey.UpArrow || key.Key == ConsoleKey.DownArrow))
+            //         selectedEntry.Selected = false;
 
-                    if (ClearScreen)
-                        Console.Clear();
+            //     // if (_multiSelect == true)
+            //     // {
+            //     //     if (key.Key == ConsoleKey.Spacebar)
+            //     //     {
+            //     //         selectedEntry.Selected = !selectedEntry.Selected;
+            //     //         WriteMenuEntry(selectedEntry);
+            //     //     }
+            //     //     else if (key.Modifiers == ConsoleModifiers.Shift)
+            //     //     {
+            //     //         if (key.Key == ConsoleKey.A)
+            //     //         {
+            //     //             foreach (CliMenuEntry<TKey> entry in _entries)
+            //     //             {
+            //     //                 entry.Selected = true;
+            //     //                 WriteMenuEntry(entry);
+            //     //             }
+            //     //         }
+            //     //         else if (key.Key == ConsoleKey.D)
+            //     //         {
+            //     //             foreach (CliMenuEntry<TKey> entry in _entries)
+            //     //             {
+            //     //                 entry.Selected = false;
+            //     //                 WriteMenuEntry(entry);
+            //     //             }
+            //     //         }
+            //     //     }
+            //     // }
 
-                    if (finalEntry != null && finalEntry.Action != null)
-                        finalEntry.Action();
+            //     // if (key.Key == ConsoleKey.Escape || key.Key == ConsoleKey.Q || (key.Key == ConsoleKey.C && key.Modifiers == ConsoleModifiers.Control))
+            //     // {
+            //     //     _canceled = true;
+            //     //     break;
+            //     // }
+            //     // else if
+            //      if (key.Key == ConsoleKey.DownArrow)
+            //         MoveCursor(selectedEntry, true);
+            //     else if (key.Key == ConsoleKey.UpArrow)
+            //         MoveCursor(selectedEntry, false);
 
-                    return new List<TKey>() {
-                        finalEntry.SelectedValue
-                    };
-                }
-                else
-                    return this.SelectedEntries;
-            }
-            else
-            {
-                this.OnCancel();
-                return null;
-            }
+
+            //     if (_multiSelect == false && (key.Key == ConsoleKey.UpArrow || key.Key == ConsoleKey.DownArrow))
+            //     {
+            //         WriteMenuEntry(previousEntry);
+            //         selectedEntry = _entries[_cursorIndex];
+            //         selectedEntry.Selected = true;
+            //         WriteMenuEntry(selectedEntry);
+            //     }
+            //     else
+            //     {
+            //         WriteMenuEntry(previousEntry);
+            //         WriteMenuEntry(_entries[_cursorIndex]);
+            //     }
+
+            //     if (key.Key == ConsoleKey.Enter)
+            //         break;
+            // }
+
+
+
+            // // Console.CursorVisible = true;
+            // // Console.SetCursorPosition(0, _startLine+_entries.Count()+1);
+
+            // if (_canceled == false)
+            // {
+            //     if (_multiSelect == false)
+            //     {
+            //         CliMenuEntry<TKey> finalEntry = _entries.First(x => x.Selected);
+
+            //         if (ClearScreen)
+            //             Console.Clear();
+
+            //         if (finalEntry != null && finalEntry.Action != null)
+            //             finalEntry.Action();
+
+            //         return new List<TKey>() {
+            //             finalEntry.SelectedValue
+            //         };
+            //     }
+            //     else
+            //         return this.SelectedEntries;
+            // }
+            // else
+            // {
+            //     this.OnCancel();
+            //     return null;
+            // }
+
+            // while (_choosenItems == null && _canceled == false)
+            // {
+            //     Thread.Sleep(10);
+            //     // delay until the user does something
+            // }
+
+            // if (_canceled)
+            //     return null;
+
+            // return _choosenItems;
         }
         #endregion Public Methods
 
