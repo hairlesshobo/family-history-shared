@@ -6,6 +6,7 @@ using Archiver.Shared;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.CSD;
 using Archiver.Utilities.Shared;
+using TerminalUI.Elements;
 
 namespace Archiver.Operations.CSD
 {

@@ -4,6 +4,7 @@ using System.Linq;
 using Archiver.Classes.Disc;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
+using TerminalUI.Elements;
 
 namespace Archiver.Operations.Disc
 {

@@ -5,6 +5,7 @@ using Archiver.Classes.Disc;
 using Archiver.Shared.Classes.Tape;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
+using TerminalUI.Elements;
 
 namespace Archiver.Operations.Tape
 {
