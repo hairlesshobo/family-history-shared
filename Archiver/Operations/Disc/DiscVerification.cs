@@ -2,73 +2,90 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Archiver.Classes;
 using Archiver.Classes.Disc;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities;
 using Archiver.Utilities.Disc;
 using Archiver.Utilities.Shared;
+using TerminalUI;
+using TerminalUI.Elements;
 
 namespace Archiver.Operations.Disc
 {
     public static class DiscVerification
     {
-        public static void StartOperation()
+        public static async Task StartOperation()
         {
+            Terminal.Header.UpdateLeft("Verify Discs");
+            Terminal.Clear();
+
             CancellationTokenSource cts = new CancellationTokenSource();
 
             DiscGlobals._destinationDiscs = Helpers.ReadDiscIndex();
-            Console.Clear();
 
-            Console.WriteLine("Disc verification process beginning...");
-            Console.WriteLine();
+            Terminal.WriteLine("Disc verification process beginning...");
+            Terminal.WriteLine();
 
-            string selectedDrive = Helpers.SelectCdromDrive(cts);
+            Terminal.Header.UpdateLeft("Verify Discs > Select Drive");
+            string selectedDrive = await Helpers.SelectCdromDrive();
 
-            if (cts.IsCancellationRequested == true)
+            if (selectedDrive == null)
                 return;
 
-            bool verifyAll = AskVerifyAllDiscs(cts);
+            Terminal.Header.UpdateLeft("Verify Discs");
+            bool? verifyAll = await AskVerifyAllDiscs();
 
-            if (cts.IsCancellationRequested == true)
+            if (verifyAll == null)
                 return;
 
             DiscVerifier verifier;
             
-            if (verifyAll)
+            if (verifyAll.Value == true)
                 verifier = new DiscVerifier(selectedDrive);
             else
-                verifier = new DiscVerifier(selectedDrive, AskDiskToVerify());
+            {
+                List<DiscDetail> discsToVerify = await AskDiskToVerify();
+                
+                if (discsToVerify == null)
+                    return;
 
-            verifier.StartVerification();
+                verifier = new DiscVerifier(selectedDrive, discsToVerify);
+            }
+
+            // verifier.StartVerification();
+
+            await Task.Delay(0);
 
             DiscGlobals._destinationDiscs.Clear();
         }
         
-        private static bool AskVerifyAllDiscs(CancellationTokenSource cts)
+        private static async Task<Nullable<bool>> AskVerifyAllDiscs()
         {
-            bool verifyAll = false;
-
-            CliMenu<string> menu = new CliMenu<string>(new List<CliMenuEntry<string>>()
+            CliMenu<bool> menu = new CliMenu<bool>(new List<CliMenuEntry<bool>>()
             {
-                new CliMenuEntry() {
+                new CliMenuEntry<bool>() {
                     Name = "All Discs",
-                    Action = () => verifyAll = true
+                    SelectedValue = true
                 },
-                new CliMenuEntry() {
+                new CliMenuEntry<bool>() {
                     Name = "Single Disc",
-                    Action = () => verifyAll = false
+                    SelectedValue = false
                 }
             });
 
+            menu.EnableCancel = true;
             menu.MenuLabel = "What do you want to verify?";
-            menu.OnCancel += () => cts.Cancel();
-            menu.Show(true);
+            List<bool> result = await menu.Show(true);
 
-            return verifyAll;
+            if (result == null)
+                return null;
+
+            return result[0];
         }
 
-        public static List<DiscDetail> AskDiskToVerify()
+        public static async Task<List<DiscDetail>> AskDiskToVerify()
         {
             List<CliMenuEntry<DiscDetail>> entries = new List<CliMenuEntry<DiscDetail>>();
 
@@ -83,9 +100,9 @@ namespace Archiver.Operations.Disc
 
             CliMenu<DiscDetail> menu = new CliMenu<DiscDetail>(entries, true);
             menu.MenuLabel = "Select disc(s) to verify...";
-            menu.OnCancel += Operations.MainMenu.StartOperation;
+            menu.EnableCancel = true;
 
-            List<DiscDetail> discsToVerify = menu.Show(true);
+            List<DiscDetail> discsToVerify = await menu.Show(true);
 
             return discsToVerify;
         }

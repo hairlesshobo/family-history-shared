@@ -10,6 +10,7 @@ using ICSharpCode.SharpZipLib.Tar;
 using Newtonsoft.Json;
 using Archiver.Shared.TapeDrivers;
 using Archiver.Shared.Native;
+using TerminalUI.Elements;
 
 namespace Archiver.Utilities.Tape
 {
@@ -78,9 +79,12 @@ namespace Archiver.Utilities.Tape
 
             CliMenu<TapeSourceInfo> menu = new CliMenu<TapeSourceInfo>(entries);
             menu.MenuLabel = "Select tape...";
-            menu.OnCancel += Operations.MainMenu.StartOperation;
+            // TODO: Fix
+            // menu.OnCancel += Operations.MainMenu.StartOperation;
             
-            List<TapeSourceInfo> selectedItems = menu.Show(true);
+            List<TapeSourceInfo> selectedItems = new List<TapeSourceInfo>();
+            // TODO: fix
+            // menu.Show(true);
 
             if (selectedItems != null && selectedItems.Count() >= 1)
                 return selectedItems.First();

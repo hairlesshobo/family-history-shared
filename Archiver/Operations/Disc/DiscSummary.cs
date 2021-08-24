@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Archiver.Classes.Disc;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
+using TerminalUI;
 using TerminalUI.Elements;
 
 namespace Archiver.Operations.Disc
@@ -22,10 +24,12 @@ namespace Archiver.Operations.Disc
             Console.WriteLine();
         }
         
-        public static void StartOperation()
+        public static async Task StartOperation()
         {
+            Terminal.Header.UpdateLeft("Disc Archive Summary");
             DiscGlobals._destinationDiscs = Helpers.ReadDiscIndex();
-            Console.Clear();
+            
+            Terminal.Clear();
 
             using (Pager pager = new Pager())
             {
@@ -65,7 +69,7 @@ namespace Archiver.Operations.Disc
                     pager.AppendLine($"{extension.PadLeft(columnWidth)}: {type.Count.ToString().PadLeft(maxCountWidth+2)}");
                 }
 
-                pager.WaitForExit();
+                await Task.Run(() => pager.WaitForExit());
             }
 
             DiscGlobals._destinationDiscs.Clear();

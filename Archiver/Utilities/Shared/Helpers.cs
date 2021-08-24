@@ -5,12 +5,15 @@ using System.Linq;
 using System.Management;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Archiver.Classes.Disc;
 using Archiver.Shared;
 using Archiver.Shared.Classes.Tape;
 using Archiver.Shared.Models;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Disc;
+using TerminalUI;
+using TerminalUI.Elements;
 
 namespace Archiver.Utilities.Shared
 {
@@ -42,7 +45,7 @@ namespace Archiver.Utilities.Shared
             throw new DriveNotFoundException($"Could not find drive {DriveLetter}");
         }
 
-        public static string SelectCdromDrive(CancellationTokenSource cts)
+        public static async Task<string> SelectCdromDrive()
         {
             List<OpticalDrive> drives = OpticalDriveUtils.GetDrives();
 
@@ -52,33 +55,34 @@ namespace Archiver.Utilities.Shared
             if (drives.Count() == 1)
                 return drives[0].Name;
 
-            string selectedDrive = drives[0].Name;
+            CliMenu<string> menu = new CliMenu<string>();
+            menu.EnableCancel = true;
+            menu.MenuLabel = "Select drive...";
 
             List<CliMenuEntry<string>> entries = new List<CliMenuEntry<string>>();
 
             foreach (OpticalDrive drive in drives)
             {
                 CliMenuEntry<string> newEntry = new CliMenuEntry<string>();
-                newEntry.Name = drive.Name.TrimEnd('\\') + " (Disc Loaded: ";
-                newEntry.Action = () => {
-                    selectedDrive = drive.Name.TrimEnd('\\');
-                };
+                newEntry.Name = drive.Name + " (Disc Loaded: ";
+                newEntry.SelectedValue = drive.Name;
 
                 if (drive.IsReady)
                     newEntry.Name += $"YES | Volume name: {drive.VolumeLabel} | Format: {drive.VolumeFormat})";
                 else
                     newEntry.Name += "NO)";
 
-                    entries.Add(newEntry);
+                entries.Add(newEntry);
             }
 
-            CliMenu<string> menu = new CliMenu<string>(entries);
-            menu.MenuLabel = "Select drive...";
-            menu.OnCancel += () => cts.Cancel();
+            menu.SetMenuItems(entries);
 
-            menu.Show(true);
+            List<string> selectedDrives = await menu.Show(true);
 
-            return selectedDrive;
+            if (selectedDrives == null)
+                return null;
+            
+            return selectedDrives[0];
         }
 
 

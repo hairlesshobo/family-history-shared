@@ -2,15 +2,41 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build-archiver",
+            "label": "build-and-watch-archiver",
+            "dependsOn": [
+                "build-archiver-cmd",
+                "watch-archiver-debug-log"
+            ],
+            "dependsOrder": "sequence",
+        },
+        {
+            "label": "watch-archiver-debug-log",
+            "command": "tail",
+            "type": "process",
+            "args": [
+                "-f",
+                "${workspaceFolder}/archiver.dbglog"
+            ]
+        },
+        {
+            "label": "build-archiver-cmd",
             "command": "dotnet",
             "type": "process",
+            "presentation": {
+                "echo": true,
+                "reveal": "never",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
             "args": [
                 "build",
                 "${workspaceFolder}/Archiver/Archiver.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
+
             "problemMatcher": "$msCompile"
         },
         {

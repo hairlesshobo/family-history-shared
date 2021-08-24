@@ -8,13 +8,17 @@
             "name": "Launch Archiver",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build-archiver",
+            "preLaunchTask": "build-archiver-cmd",
             "logging": {
                 "moduleLoad": false
             },
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/../bin/Archiver.dll",
             "args": [],
+            "env": {
+                "TUI_DEBUG_LOG": "${workspaceFolder}/archiver.dbglog"
+            },
+            "internalConsoleOptions": "neverOpen",
             "cwd": "${workspaceFolder}/../",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "externalTerminal",

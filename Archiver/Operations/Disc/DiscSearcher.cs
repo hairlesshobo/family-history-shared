@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using Archiver.Classes.Disc;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
@@ -12,57 +14,55 @@ namespace Archiver.Operations.Disc
 {
     public static class DiscSearcher
     {
-        public static void StartOperation()
+        public async static Task StartOperation()
         {
             List<DiscDetail> discs = Helpers.ReadDiscIndex();
 
+            var cts = new CancellationTokenSource();
+
             Terminal.InitHeader("Search Disc Archive", "Archiver");
-            Terminal.InitStatusBar();
+            Terminal.InitStatusBar(
+                new StatusBarItem(
+                    "Cancel",
+                    (key) => 
+                    {
+                        cts.Cancel();
+                        return Task.Delay(0);
+                    },
+                    Key.MakeKey(ConsoleKey.C, ConsoleModifiers.Control)
+                )
+            );
+
             Terminal.Clear();
             
-            // while (true)
-            // {
-                // TODO: handle ctrl+c
+            Terminal.Write("Term to search for in file/directory: ");
 
-                // Console.SetCursorPosition(0, 2);
-                // Console.Write("Press ");
-                // Formatting.WriteC(ConsoleColor.DarkYellow, "<ctrl>+C");
-                // Console.Write(" to cancel");
+            string searchString = await KeyInput.ReadStringAsync(cts.Token);
+            
+            searchString = searchString?.Trim()?.ToLower();
 
-                // Console.SetCursorPosition(0, 0);
-                Console.Write("Term to search for in file/directory: ");
-                // Console.TreatControlCAsInput = false;
-                // string searchString = Console.ReadLine();
-                // Console.TreatControlCAsInput = true;
-                KeyInput.ReadString((searchString) =>
-                {
-                    Terminal.Clear();
+            if (String.IsNullOrWhiteSpace(searchString))
+                return;
+            
+            Terminal.Clear();
 
-                    if (String.IsNullOrWhiteSpace(searchString))
-                        return;
+            List<DiscSourceFile> files = discs.SelectMany(x => x.Files).Where(x => x.RelativePath.ToLower().Contains(searchString)).ToList();
+            Console.WriteLine("Matching files: " + files.Count().ToString("N0"));
 
-                    searchString = searchString.Trim().ToLower();
+            using (Pager pager = new Pager())
+            {
+                pager.ShowHeader = true;
+                pager.HeaderText = $"{"Disc".PadRight(4)}   {"Update Date/Time".PadRight(22)}   {"File"}";
+                pager.HighlightText = searchString;
+                pager.Highlight = true;
+                pager.HighlightColor = ConsoleColor.DarkYellow;
 
-                    List<DiscSourceFile> files = discs.SelectMany(x => x.Files).Where(x => x.RelativePath.ToLower().Contains(searchString)).ToList();
-                    Console.WriteLine("Matching files: " + files.Count().ToString("N0"));
+                foreach (DiscSourceFile file in files)
+                    pager.AppendLine($"{file.DestinationDisc.DiscNumber.ToString("0000")}   {file.LastWriteTimeUtc.ToLocalTime().ToString().PadRight(22)}   {file.RelativePath}");
 
-                    using (Pager pager = new Pager())
-                    {
-                        pager.StartLine = 1;
-                        pager.ShowHeader = true;
-                        pager.HeaderText = $"{"Disc".PadRight(4)}   {"Update Date/Time".PadRight(22)}   {"File"}";
-                        pager.HighlightText = searchString;
-                        pager.Highlight = true;
-                        pager.HighlightColor = ConsoleColor.DarkYellow;
-
-                        foreach (DiscSourceFile file in files)
-                            pager.AppendLine($"{file.DestinationDisc.DiscNumber.ToString("0000")}   {file.LastWriteTimeUtc.ToLocalTime().ToString().PadRight(22)}   {file.RelativePath}");
-
-                        pager.Start();
-                        pager.WaitForExit();
-                    }
-                });
-            // }
+                pager.Start();
+                pager.WaitForExit();
+            }
         }
     }
 }

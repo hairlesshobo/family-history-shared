@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Archiver.Classes.Disc;
 using Archiver.Operations;
 using Archiver.Shared;
@@ -187,32 +188,12 @@ namespace Archiver
 
                 // ShortcutKeyHelper.StopListening();
 
-                KeyInput.ListenForKeys();
+                // KeyInput.StartLoop();
+                // Terminal.WriteDebugLine("meow!");
 
-                List<DiscDetail> discs = Helpers.ReadDiscIndex();
-
-                string searchString = "jpg"; //searchString.Trim().ToLower();
-
-                List<DiscSourceFile> files = discs.SelectMany(x => x.Files).Where(x => x.RelativePath.ToLower().Contains(searchString)).ToList();
-                Console.WriteLine("Matching files: " + files.Count().ToString("N0"));
-
-                using (Pager pager = new Pager())
-                {
-                    // pager.StartLine = 1;
-                    pager.ShowHeader = true;
-                    pager.HeaderText = $"{"Disc".PadRight(4)}   {"Update Date/Time".PadRight(22)}   {"File"}";
-                    pager.HighlightText = searchString;
-                    pager.Highlight = true;
-                    pager.HighlightColor = ConsoleColor.DarkYellow;
-
-                    foreach (DiscSourceFile file in files)
-                        pager.AppendLine($"{file.DestinationDisc.DiscNumber.ToString("0000")}   {file.LastWriteTimeUtc.ToLocalTime().ToString().PadRight(22)}   {file.RelativePath}");
-
-                    pager.Start();
-                    pager.WaitForExit();
-                }
-                KeyInput.StopListening();
-                // MainMenu.StartOperation();
+                Task.Run(() => MainMenu.StartOperation());
+                Terminal.Start();
+                // KeyInput.StopListening();
             }
             catch (Exception e)
             {

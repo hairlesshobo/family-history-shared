@@ -10,6 +10,7 @@ using Archiver.Shared;
 using Archiver.Shared.Exceptions;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
+using TerminalUI.Elements;
 
 namespace Archiver.Utilities.CSD
 {
@@ -195,15 +196,16 @@ namespace Archiver.Utilities.CSD
                 entries.Add(new CliMenuEntry<string>()
                 {
                     Name = $"{driveLetter} (Volume name: {drive.VolumeLabel} | Format: {drive.DriveFormat})",
-                    Action = () => {
-                        selectedDrive = driveLetter;
-                    }
+                    // Task = () => {
+                    //     selectedDrive = driveLetter;
+                    // }
                 });
             }
 
             CliMenu<string> menu = new CliMenu<string>(entries);
             menu.MenuLabel = "Select drive...";
-            menu.OnCancel += Operations.MainMenu.StartOperation;
+            // TODO: fix
+            // menu.OnCancel += Operations.MainMenu.StartOperation;
 
             menu.Show(true);
 
