@@ -45,7 +45,7 @@ namespace Archiver.Utilities.Shared
             throw new DriveNotFoundException($"Could not find drive {DriveLetter}");
         }
 
-        public static async Task<string> SelectCdromDrive()
+        public static async Task<string> SelectCdromDriveAsync()
         {
             List<OpticalDrive> drives = OpticalDriveUtils.GetDrives();
 
@@ -77,7 +77,7 @@ namespace Archiver.Utilities.Shared
 
             menu.SetMenuItems(entries);
 
-            List<string> selectedDrives = await menu.Show(true);
+            List<string> selectedDrives = await menu.ShowAsync(true);
 
             if (selectedDrives == null)
                 return null;

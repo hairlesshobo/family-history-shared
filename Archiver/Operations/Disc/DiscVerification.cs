@@ -16,7 +16,7 @@ namespace Archiver.Operations.Disc
 {
     public static class DiscVerification
     {
-        public static async Task StartOperation()
+        public static async Task StartOperationAsync()
         {
             Terminal.Header.UpdateLeft("Verify Discs");
             Terminal.Clear();
@@ -25,17 +25,17 @@ namespace Archiver.Operations.Disc
 
             DiscGlobals._destinationDiscs = Helpers.ReadDiscIndex();
 
+            Terminal.Clear();
             Terminal.WriteLine("Disc verification process beginning...");
-            Terminal.WriteLine();
 
             Terminal.Header.UpdateLeft("Verify Discs > Select Drive");
-            string selectedDrive = await Helpers.SelectCdromDrive();
+            string selectedDrive = await Helpers.SelectCdromDriveAsync();
 
             if (selectedDrive == null)
                 return;
 
             Terminal.Header.UpdateLeft("Verify Discs");
-            bool? verifyAll = await AskVerifyAllDiscs();
+            bool? verifyAll = await AskVerifyAllDiscsAsync();
 
             if (verifyAll == null)
                 return;
@@ -46,8 +46,8 @@ namespace Archiver.Operations.Disc
                 verifier = new DiscVerifier(selectedDrive);
             else
             {
-                List<DiscDetail> discsToVerify = await AskDiskToVerify();
-                
+                List<DiscDetail> discsToVerify = await AskDiskToVerifyAsync();
+
                 if (discsToVerify == null)
                     return;
 
@@ -61,7 +61,7 @@ namespace Archiver.Operations.Disc
             DiscGlobals._destinationDiscs.Clear();
         }
         
-        private static async Task<Nullable<bool>> AskVerifyAllDiscs()
+        private static async Task<Nullable<bool>> AskVerifyAllDiscsAsync()
         {
             CliMenu<bool> menu = new CliMenu<bool>(new List<CliMenuEntry<bool>>()
             {
@@ -77,7 +77,7 @@ namespace Archiver.Operations.Disc
 
             menu.EnableCancel = true;
             menu.MenuLabel = "What do you want to verify?";
-            List<bool> result = await menu.Show(true);
+            List<bool> result = await menu.ShowAsync(true);
 
             if (result == null)
                 return null;
@@ -85,11 +85,12 @@ namespace Archiver.Operations.Disc
             return result[0];
         }
 
-        public static async Task<List<DiscDetail>> AskDiskToVerify()
+        public static async Task<List<DiscDetail>> AskDiskToVerifyAsync()
         {
             List<CliMenuEntry<DiscDetail>> entries = new List<CliMenuEntry<DiscDetail>>();
 
-            foreach (DiscDetail disc in DiscGlobals._destinationDiscs.Where(x => x.NewDisc == false).OrderBy(x => x.DiscNumber))
+            // TODO: Remove 10 limit
+            foreach (DiscDetail disc in DiscGlobals._destinationDiscs.Where(x => x.NewDisc == false).OrderBy(x => x.DiscNumber).Take(10))
             {
                 entries.Add(new CliMenuEntry<DiscDetail>()
                 {
@@ -102,7 +103,7 @@ namespace Archiver.Operations.Disc
             menu.MenuLabel = "Select disc(s) to verify...";
             menu.EnableCancel = true;
 
-            List<DiscDetail> discsToVerify = await menu.Show(true);
+            List<DiscDetail> discsToVerify = await menu.ShowAsync(true);
 
             return discsToVerify;
         }

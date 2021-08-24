@@ -207,7 +207,7 @@ namespace Archiver.Utilities.CSD
             // TODO: fix
             // menu.OnCancel += Operations.MainMenu.StartOperation;
 
-            menu.Show(true);
+            menu.ShowAsync(true);
 
             return selectedDrive;
         }

@@ -14,7 +14,7 @@ namespace Archiver.Operations.Disc
 {
     public static class DiscSearcher
     {
-        public async static Task StartOperation()
+        public async static Task StartOperationAsync()
         {
             List<DiscDetail> discs = Helpers.ReadDiscIndex();
 

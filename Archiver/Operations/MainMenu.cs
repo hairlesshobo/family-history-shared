@@ -101,14 +101,14 @@ namespace Archiver.Operations
                 },
                 new CliMenuEntry<bool>() {
                     Name = "Search Disc Archive",
-                    Task = Disc.DiscSearcher.StartOperation,
+                    Task = Disc.DiscSearcher.StartOperationAsync,
                     ForegroundColor = ConsoleColor.Green,
                     SelectedValue = true, // do not show the "press enter to return to main menu" message
                 },
                 //! not implemented
                 new CliMenuEntry<bool>() {
                     Name = "Restore entire disc(s)",
-                    Task = NotImplemented,
+                    Task = NotImplementedAsync,
                     SelectedValue = true,
                     Disabled = !SysInfo.IsOpticalDrivePresent || true, // remove once implemented
                     ForegroundColor = ConsoleColor.Green
@@ -121,7 +121,7 @@ namespace Archiver.Operations
                 },
                 new CliMenuEntry<bool>() {
                     Name = "Verify Discs",
-                    Task = Disc.DiscVerification.StartOperation,
+                    Task = Disc.DiscVerification.StartOperationAsync,
                     Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsOpticalDrivePresent,
                     ForegroundColor = ConsoleColor.DarkYellow
                 }
@@ -292,7 +292,7 @@ namespace Archiver.Operations
         //     };
         // }
 
-        private async static Task NotImplemented()
+        private async static Task NotImplementedAsync()
         {
             bool proceed = false;
 
