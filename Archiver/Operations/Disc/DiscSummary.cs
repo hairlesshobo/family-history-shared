@@ -27,7 +27,7 @@ namespace Archiver.Operations.Disc
         public static async Task StartOperation()
         {
             Terminal.Header.UpdateLeft("Disc Archive Summary");
-            DiscGlobals._destinationDiscs = Helpers.ReadDiscIndex();
+            DiscGlobals._destinationDiscs = await Helpers.ReadDiscIndexAsync();
             
             Terminal.Clear();
 

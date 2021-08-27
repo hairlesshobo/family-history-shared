@@ -55,9 +55,9 @@ namespace Archiver.Utilities.Shared
             if (drives.Count() == 1)
                 return drives[0].Name;
 
+            Terminal.Clear();
             CliMenu<string> menu = new CliMenu<string>();
             menu.EnableCancel = true;
-            menu.MenuLabel = "Select drive...";
 
             List<CliMenuEntry<string>> entries = new List<CliMenuEntry<string>>();
 
@@ -89,38 +89,63 @@ namespace Archiver.Utilities.Shared
 
         
 
-        public static List<DiscDetail> ReadDiscIndex()
+        public static async Task<List<DiscDetail>> ReadDiscIndexAsync()
         {
+            bool cancel = false;
+            
+            Terminal.Header.UpdateLeft("Read Disc Index...");
+            Terminal.StatusBar.ShowItems(
+                new StatusBarItem(
+                    "Cancel",
+                    (key) => {
+                        cancel = true;
+                        return Task.Delay(0);
+                    },
+                    Key.MakeKey(ConsoleKey.C, ConsoleModifiers.Control)
+                )
+            );
+
+            if (!Directory.Exists(SysInfo.Directories.JSON))
+                return null;
+
             List<DiscDetail> discs = new List<DiscDetail>();
 
-            if (Directory.Exists(SysInfo.Directories.JSON))
+            string[] jsonFiles = Directory.GetFiles(SysInfo.Directories.JSON, "disc_*.json");
+            int totalFiles = jsonFiles.Length;
+            
+            if (totalFiles == 0)
+                return null;
+
+            Text text = new Text();
+            text.Show();
+            Terminal.NextLine();
+            ProgressBar progress = new ProgressBar();
+            progress.Show();
+
+            int currentFile = 0;
+
+            foreach (string jsonFile in jsonFiles)
             {
-                string[] jsonFiles = Directory.GetFiles(SysInfo.Directories.JSON, "disc_*.json");
-                int totalFiles = jsonFiles.Length;
-                
-                if (totalFiles > 0)
-                {
-                    int currentFile = 0;
+                if (cancel)
+                    return null;
 
-                    foreach (string jsonFile in jsonFiles)
-                    {
-                        currentFile++;
+                currentFile++;
 
-                        string line = "Reading disc index files... ";
-                        line += $"{currentFile.ToString().PadLeft(totalFiles.ToString().Length)}/{totalFiles}";
+                double currentPct = (double)currentFile / (double)totalFiles;
 
-                        Console.CursorLeft = 0;
-                        Console.Write(line);
+                progress.UpdateProgress(currentPct);
 
-                        DiscDetail discDetail = Newtonsoft.Json.JsonConvert.DeserializeObject<DiscDetail>(File.ReadAllText(jsonFile));
-                        discDetail.Files.ForEach(x => x.DestinationDisc = discDetail);
+                text.UpdateValue($"Reading disc index files... {currentFile.ToString().PadLeft(totalFiles.ToString().Length)}/{totalFiles}");
 
-                        discs.Add(discDetail);
-                    }
+                DiscDetail discDetail = Newtonsoft.Json.JsonConvert.DeserializeObject<DiscDetail>(File.ReadAllText(jsonFile));
+                discDetail.Files.ForEach(x => x.DestinationDisc = discDetail);
 
-                    Console.WriteLine();
-                }
+                discs.Add(discDetail);
             }
+
+            Terminal.WriteLine();
+
+            await Task.Delay(0);
 
             return discs;
         }

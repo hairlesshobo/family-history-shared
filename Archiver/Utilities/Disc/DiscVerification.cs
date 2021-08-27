@@ -4,126 +4,284 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Archiver.Classes.Disc;
+using Archiver.Shared.Classes;
+using Archiver.Shared.Models;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
+using TerminalUI;
+using TerminalUI.Elements;
 
 namespace Archiver.Utilities.Disc
 {
     public class DiscVerifier
     {
-        private static int _nextLine = -1;
-        private static int _discLine = -1;
-        private static int _statusLine = -1;
-        private static int _cancelLine = -1;
-        private static int _discCount = 0;
+        private List<DiscDetail> _pendingDiscs => _discsToVerify.Where(x => x.DaysSinceLastVerify > 7)
+                                                                .ToList();
+
+        private List<DiscDetail> _completedDiscs => _discsToVerify.Where(x => x.DaysSinceLastVerify <= 7)
+                                                                  .ToList();
+
+        private int _discCount = 0;
         private List<DiscDetail> _discsToVerify;
-        private List<int> _pendingDiscs = new List<int>();
-        private List<int> _completedDiscs = new List<int>();
-        private string _driveLetter;
+        private List<int> _pendingDiscIds;
+        private List<int> _completedDiscIds;
+
+        private string _drive;
         private volatile bool _cancel = false;
-        Thread _generateThread;
 
-        public DiscVerifier(string DriveLetter)
-        {
-            _discsToVerify = DiscGlobals._destinationDiscs.Where(x => x.NewDisc == false).OrderBy(x => x.DiscNumber).ToList();
-
-            Initialize(DriveLetter, false);
-        }
+        #region GUI Objects
+        private KeyValueText kvtStatus;
+        private KeyValueText kvtDiscs;
+        private KeyValueText kvtElapsedTime;
+        private KeyValueText kvtDiscName;
+        private KeyValueText kvtVerified;
+        private KeyValueText kvtCurrentRate;
+        private KeyValueText kvtAvgRate;
+        private ProgressBar progressBar;
+        private Text pendingLabel;
+        private DataTable dataTable;
+        private NotificationBox box;
+        #endregion
 
         public DiscVerifier(string DriveLetter, List<DiscDetail> discsToVerify)
         {
             _discsToVerify = discsToVerify;
-
-            Initialize(DriveLetter, true);
-        }
-
-        private void Initialize (string DriveLetter, bool force)
-        {
-            // we only want to verify discs that haven't been verified in the past week, 
-            // or have never been verified at all
-            if (force == true)
-            {
-                _pendingDiscs = _discsToVerify.Select(x => x.DiscNumber)
-                                              .ToList();
-            }
-            else
-            {
-                _pendingDiscs = _discsToVerify.Where(x => x.DaysSinceLastVerify > 7)
-                                            .Select(x => x.DiscNumber)
-                                            .ToList();
-                                        
-                _completedDiscs = _discsToVerify.Where(x => x.DaysSinceLastVerify <= 7)
-                                                .Select(x => x.DiscNumber)
-                                                .ToList();
-            }
-
-            _driveLetter = DriveLetter;
-
-            // prepare the status output lines and whatnot
+            _drive = DriveLetter;
             _discCount = _discsToVerify.Count();
 
-            _nextLine = Console.CursorTop;
-            _nextLine += 2;
-            _discLine = _nextLine;
+            _pendingDiscIds = _pendingDiscs.Select(x => x.DiscNumber).ToList();
+            _completedDiscIds = _completedDiscs.Select(x => x.DiscNumber).ToList();
 
-            _nextLine = _discLine + _discCount;
-            _nextLine += 2;
-            _statusLine = _nextLine;
-            _nextLine += 2;
-            _cancelLine = _nextLine;
-            _nextLine += 2;
+            TerminalPoint prevPoint = TerminalPoint.GetCurrent();
+            Terminal.RootPoint.MoveTo();
 
-            Console.SetCursorPosition(0, _discLine);
-            Console.CursorLeft = 0;
-            Formatting.WriteC(ConsoleColor.Magenta, "Verifying discs...");
+            Terminal.Clear();
 
-            foreach (DiscDetail disc in _discsToVerify)
+            kvtStatus = new KeyValueText("Status", null, -16);
+            Terminal.NextLine();
+            kvtDiscs = new KeyValueText("Discs Verified", $"{this._completedDiscIds.Count}/{this._discCount}", -16);
+            Terminal.NextLine();
+            Terminal.NextLine();
+            kvtElapsedTime = new KeyValueText("Elapsed Time", null, -16);
+            Terminal.NextLine();
+            kvtDiscName = new KeyValueText("Disc Name", null, -16);
+            Terminal.NextLine();
+
+            box = new NotificationBox(5, 0);
+            box.SetTextJustify(0, TextJustify.Center);
+            box.SetTextJustify(1, TextJustify.Center);
+
+            kvtVerified = new KeyValueText("Verified", Formatting.GetFriendlySize(0), -16);
+            Terminal.NextLine();
+
+            kvtCurrentRate = new KeyValueText("Current Rate", Formatting.GetFriendlyTransferRate(0), -16);
+            Terminal.NextLine();
+
+            kvtAvgRate = new KeyValueText("Average Rate", Formatting.GetFriendlyTransferRate(0), -16);
+            Terminal.NextLine();
+            Terminal.NextLine();
+
+            progressBar = new ProgressBar();
+            Terminal.NextLine();
+            Terminal.NextLine();
+
+            pendingLabel = new Text(ConsoleColor.Magenta, "Discs Pending Verification...");
+            Terminal.NextLine();
+
+            dataTable = new DataTable();
+            dataTable.ShowHeader = false;
+            dataTable.Columns = new List<DataTableColumn>()
             {
-                if (disc.DaysSinceLastVerify > 7)
-                    WriteDiscPendingLine(disc, default(TimeSpan));
-                else
+                new DataTableColumn("DiscName", "Disc Name", 12),
+                new DataTableColumn(null, "Status", 20)
                 {
-                    if (disc.LastVerifySuccess)
-                        WriteDiscVerificationPassed(disc, default(TimeSpan));
-                    else
-                        WriteDiscVerificationFailed(disc, default(TimeSpan));
+                    Format = (value) => 
+                    {
+                        DiscDetail detail = (DiscDetail)value;
+                        int lastVerifyDays = detail.DaysSinceLastVerify;
+
+                        if (lastVerifyDays > 7)
+                            return "Pending";
+                        else
+                        {
+                            if (detail.LastVerifySuccess == true)
+                                return "Verification Passed";
+                            else
+                                return "Verification FAILED";
+                        }
+                        
+                    }
+                },
+                new DataTableColumn("DaysSinceLastVerify", null, 23)
+                {
+                    Format = (value) => $"Days Since Verify: {value.ToString().PadLeft(4)}"
+                },
+                new DataTableColumn("DataSize", "Data Size", 25)
+                {
+                    Format = (value) => "Data Size: " + Formatting.GetFriendlySize((long)value)
                 }
-            }
+            };
+
+            dataTable.DataStore = this._pendingDiscs;
 
             SetStatus("Starting...");
+        }
 
-            Console.SetCursorPosition(0, _cancelLine);
-            Console.Write("Press ");
-            Formatting.WriteC(ConsoleColor.DarkYellow, "<ctrl+c>");
-            Console.Write(" to cancel");
+        private async Task ShowVerifySuccessAsync(DiscDetail disc)
+        {
+            box.BorderColor = ConsoleColor.Green;
+            box.SetLineColor(0, ConsoleColor.Green);
+            box.UpdateText(0, "Verification Successful");
+            box.UpdateText(1, $"Disc `{disc.DiscName}` was successfully verified!");
+
+            box.Show();
+
+            await Task.Delay(5000);
+
+            box.Hide();
+        }
+
+        private async Task ShowVerifyFailedAsync(DiscDetail disc)
+        {
+            box.BorderColor = ConsoleColor.Red;
+            box.SetLineColor(0, ConsoleColor.Red);
+            box.UpdateText(0, "Verification FAILED");
+            box.UpdateText(1, $"Disc `{disc.DiscName}` failed verification!");
+
+            box.Show();
+
+            await Task.Delay(5000);
+
+            box.Hide();
+        }
+
+        public async Task StartVerificationAsync()
+        {
+            kvtStatus.Show();
+            kvtDiscs.Show();
+            pendingLabel.Show();
+            dataTable.Show();
+
+            CancellationTokenSource cts = new CancellationTokenSource();
+
+            Terminal.InitStatusBar(
+                new StatusBarItem(
+                    "Cancel",
+                    (key) => {
+                        cts.Cancel();
+                        return Task.Delay(0);
+                    },
+                    Key.MakeKey(ConsoleKey.C, ConsoleModifiers.Control)
+                )
+            );
+
+            HideProgress();
+
+            while (_pendingDiscs.Count() > 0 && !cts.Token.IsCancellationRequested)
+            {
+                DiscDetail disc = await WaitForDiscAsync(cts.Token);
+
+                if (disc == null)
+                    break;
+
+                kvtDiscName.UpdateValue(OpticalDriveUtils.GetDriveLabel(_drive));
+                kvtDiscName.Show();
+                kvtElapsedTime.Show();
+                kvtVerified.Show();
+                kvtCurrentRate.Show();
+                kvtAvgRate.Show();
+                progressBar.Show();
+
+                Stopwatch sw = Stopwatch.StartNew();
+
+                using (Stream reader = OpticalDriveUtils.GetDriveRawStream(_drive))
+                {
+                    Md5StreamGenerator generator = new Md5StreamGenerator(reader);
+                    generator.OnProgressChanged += (progress) =>
+                    {
+                        kvtVerified.UpdateValue($"{Formatting.GetFriendlySize(progress.TotalCopiedBytes)} / {Formatting.GetFriendlySize(progress.TotalBytes)}");
+                        kvtAvgRate.UpdateValue(Formatting.GetFriendlyTransferRate(progress.AverageTransferRate));
+                        kvtCurrentRate.UpdateValue(Formatting.GetFriendlyTransferRate(progress.InstantTransferRate));
+
+                        progressBar.UpdateProgress(progress.PercentCopied / 100.0);
+                        kvtElapsedTime.UpdateValue(sw.Elapsed.ToString());
+                    };
+
+                    generator.OnComplete += async (hash) =>
+                    {
+                        sw.Stop();
+
+                        bool discValid = (disc.Hash.ToLower() == hash.ToLower());
+
+                        disc.RecordVerification(DateTime.UtcNow, discValid);
+                        Helpers.SaveDestinationDisc(disc);
+
+                        _pendingDiscIds.Remove(disc.DiscNumber);
+                        _completedDiscIds.Add(disc.DiscNumber);
+
+                        this.HideProgress();
+
+                        OpticalDriveUtils.EjectDrive(_drive);
+
+                        if (discValid)
+                            await ShowVerifySuccessAsync(disc);
+                        else
+                            await ShowVerifyFailedAsync(disc);
+                    };
+
+                    await generator.GenerateAsync(cts.Token);
+                }
+
+                dataTable.DataStore = this._pendingDiscs;
+                dataTable.Redraw();
+            }
+
+            if (cts.Token.IsCancellationRequested)
+                SetStatus("Process canceled");
+            else
+                SetStatus("All Discs have been verified");
+                
+            await Task.Delay(0);
         }
 
         private void SetStatus(string status)
+            => kvtStatus.UpdateValue(status);
+
+        private void HideProgress()
         {
-            Console.SetCursorPosition(0, _statusLine);
-            StatusHelpers.WriteStatusLine("Status", status);
+            kvtElapsedTime.Hide();
+            kvtDiscName.Hide();
+            kvtVerified.Hide();
+            kvtCurrentRate.Hide();
+            kvtAvgRate.Hide();
+            progressBar.Hide();
         }
 
-        private DiscDetail WaitForDisc()
+        private async Task<DiscDetail> WaitForDiscAsync(CancellationToken cToken)
         {
             DiscDetail insertedDisc = default(DiscDetail);
 
-            DriveInfo driveInfo = DriveInfo.GetDrives().Where(x => x.Name.TrimEnd('\\').ToUpper() == _driveLetter.ToUpper()).FirstOrDefault();
+            OpticalDrive driveInfo = OpticalDriveUtils.GetDrives().FirstOrDefault(x => x.Name == _drive);
+
+            // DriveInfo driveInfo = DriveInfo.GetDrives().Where(x => x.Name.TrimEnd('\\').ToUpper() == _drive.ToUpper()).FirstOrDefault();
 
             if (driveInfo != null)
             {
                 string append = "";
 
-                if (_pendingDiscs.Count() == 1)
-                    append = " " + _pendingDiscs[0].ToString();
+                if (_pendingDiscIds.Count() == 1)
+                    append = " " + _pendingDiscIds[0].ToString();
 
-                while (_cancel == false)
+                while (!cToken.IsCancellationRequested)
                 {
+                    driveInfo = OpticalDriveUtils.GetDrives().FirstOrDefault(x => x.Name == _drive);
+
                     if (driveInfo.IsReady == false)
                         SetStatus($"Please insert archive disc{append}...");
 
-                    else
+                    else if (driveInfo.VolumeLabel != null)
                     {
                         if (driveInfo.VolumeLabel.ToLower().StartsWith("archive ") == false)
                             SetStatus("Unknown disc inserted...");
@@ -133,163 +291,33 @@ namespace Archiver.Utilities.Disc
                             string discIdStr = driveInfo.VolumeLabel.Substring(8);
                             int discId = Int32.Parse(discIdStr);
 
-                            if (_pendingDiscs.Contains(discId))
+                            if (_pendingDiscIds.Contains(discId))
                             {
                                 SetStatus($"Verifying disc {discId}");
                                 return _discsToVerify.FirstOrDefault(x => x.DiscNumber == discId);
                             }
-                            else if (_completedDiscs.Contains(discId))
+                            else if (_completedDiscIds.Contains(discId))
                             {
-                                if (_pendingDiscs.Count() == 1)
-                                    SetStatus($"Archive disc {discId} has already been verified, please insert disc {_pendingDiscs[0].ToString()}");
+                                if (_pendingDiscIds.Count() == 1)
+                                    SetStatus($"Archive disc {discId} has already been verified, please insert disc {_pendingDiscIds[0].ToString()}");
                                 else
                                     SetStatus($"Archive disc {discId} has already been verified, please insert another disc");
                             }
                             else
                             {
-                                if (_pendingDiscs.Count() == 1)
-                                    SetStatus($"Archive disc {discId} does not need to be verified, please insert disc {_pendingDiscs[0].ToString()}");
+                                if (_pendingDiscIds.Count() == 1)
+                                    SetStatus($"Archive disc {discId} does not need to be verified, please insert disc {_pendingDiscIds[0].ToString()}");
                                 else
                                     SetStatus($"Archive disc {discId} does not need to be verified, please insert another disc");
                             }
                         }
                     }
 
-                    Thread.Sleep(500);
+                    await Task.Delay(500);
                 }
             }
 
             return insertedDisc;
-        }
-
-        public void StartVerification()
-        {
-            Console.CursorVisible = false;
-            Console.TreatControlCAsInput = false;
-            Console.CancelKeyPress += (sender, e) => {
-                _cancel = true;
-
-                if (_generateThread != null && _generateThread.IsAlive)
-                    _generateThread.Abort();
-            };
-
-            while (_pendingDiscs.Count() > 0 && _cancel == false)
-            {
-                DiscDetail disc = WaitForDisc();
-
-                if (disc == null)
-                    break;
-
-                Stopwatch sw = Stopwatch.StartNew();
-
-                MD5_Disc md5disc = new MD5_Disc(_driveLetter);
-
-                md5disc.OnProgressChanged += (progress) => {
-                    WriteDiscVerifyingLine(disc, sw.Elapsed, progress.PercentCopied, progress.TotalCopiedBytes, progress.InstantTransferRate, progress.AverageTransferRate);
-                };
-
-                md5disc.OnComplete += (hash) => {
-                    sw.Stop();
-
-                    bool discValid = (disc.Hash.ToLower() == hash.ToLower());
-
-                    disc.RecordVerification(DateTime.UtcNow, discValid);
-                    Helpers.SaveDestinationDisc(disc);
-
-                    _pendingDiscs.Remove(disc.DiscNumber);
-                    _completedDiscs.Add(disc.DiscNumber);
-
-                    if (discValid)
-                        WriteDiscVerificationPassed(disc, sw.Elapsed);
-                    else
-                        WriteDiscVerificationFailed(disc, sw.Elapsed);
-                };
-
-                _generateThread = new Thread(md5disc.GenerateHash);
-                _generateThread.Start();
-                _generateThread.Join();
-            }
-
-            if (_cancel == true)
-                SetStatus("Process canceled");
-            else
-                SetStatus("All Discs have been verified, review results above.");
-                
-            Console.SetCursorPosition(0, _nextLine);
-            Console.CursorVisible = true;
-            Console.TreatControlCAsInput = true;
-        }
-
-        private int GetDiscIndex(DiscDetail disc)
-        {
-            return _discsToVerify.IndexOf(disc)+1;
-        }
-
-        private void WriteDiscPendingLine(
-            DiscDetail disc, 
-            TimeSpan elapsed = default(TimeSpan))
-        {
-            string line = "";
-            line += Formatting.FormatElapsedTime(elapsed);
-            line += " ";
-            line += "Pending".PadRight(12);
-            line += " ";
-            line += $"{Formatting.GetFriendlySize(disc.DataSize).PadLeft(10)} data size";
-
-            Console.SetCursorPosition(0, _discLine + GetDiscIndex(disc));
-            StatusHelpers.WriteStatusLine(DiscFormatting.GetDiscName(disc), line, ConsoleColor.Blue);
-        }
-
-        public void WriteDiscVerifyingLine(
-            DiscDetail disc, 
-            TimeSpan elapsed, 
-            double currentPercent,
-            long bytesRead,
-            double instantTransferRate,
-            double averageTransferRate
-        )
-        {
-            string line = "";
-            line += Formatting.FormatElapsedTime(elapsed);
-            line += " ";
-            line += "Reading:";
-            line += " ";
-            line += $"{Formatting.GetFriendlySize(bytesRead).PadLeft(10)}";
-            line += " ";
-            line += "[" + Formatting.GetFriendlyTransferRate(instantTransferRate).PadLeft(12) + "]";
-            line += " ";
-            line += "[" + Formatting.GetFriendlyTransferRate(averageTransferRate).PadLeft(12) + "]";
-
-            Console.SetCursorPosition(0, _discLine + GetDiscIndex(disc));
-            StatusHelpers.WriteStatusLineWithPct(DiscFormatting.GetDiscName(disc), line, currentPercent, (currentPercent == 100.0), ConsoleColor.DarkYellow);
-        }
-
-        private void WriteDiscVerificationPassed(
-            DiscDetail disc, 
-            TimeSpan elapsed = default(TimeSpan))
-        {
-            string line = "";
-            line += Formatting.FormatElapsedTime(elapsed);
-            line += " ";
-            line += "Verification Passed!";
-            line += "   ";
-            line += "(" + disc.Verifications.OrderBy(x => x.VerificationDTM).Last().VerificationDTM.ToString("MM/dd/yyyy") + ")";
-
-            Console.SetCursorPosition(0, _discLine + GetDiscIndex(disc));
-            StatusHelpers.WriteStatusLine(DiscFormatting.GetDiscName(disc), line, ConsoleColor.Green);
-        }
-
-        private void WriteDiscVerificationFailed(
-            DiscDetail disc, 
-            TimeSpan elapsed = default(TimeSpan))
-        {
-            string line = "";
-            line += Formatting.FormatElapsedTime(elapsed);
-            line += " ";
-            line += "Verification FAILED!".PadRight(12);
-
-            Console.SetCursorPosition(0, _discLine + GetDiscIndex(disc));
-            StatusHelpers.WriteStatusLine(DiscFormatting.GetDiscName(disc), line, ConsoleColor.Red);
         }
     }
 }

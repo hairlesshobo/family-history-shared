@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Archiver.Classes.Disc;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities;
@@ -11,9 +12,9 @@ namespace Archiver.Operations.Disc
 {
     public static class DiscArchiver
     {
-        public static void RunArchive(bool askBeforeArchive = false)
+        public static async Task RunArchiveAsync(bool askBeforeArchive = false)
         {
-            DiscGlobals._destinationDiscs = Helpers.ReadDiscIndex();
+            DiscGlobals._destinationDiscs = await Helpers.ReadDiscIndexAsync();
             Console.Clear();
 
             Formatting.WriteLineC(ConsoleColor.Magenta, "Preparing...");
@@ -72,10 +73,10 @@ namespace Archiver.Operations.Disc
             DiscGlobals._destinationDiscs.Clear();
         }
 
-        public static void StartScanOnly()
-            => RunArchive(true);
+        public static async Task StartScanOnly()
+            => await RunArchiveAsync(true);
 
-        public static void StartOperation()
-            => RunArchive(false);
+        public static async Task StartOperation()
+            => await RunArchiveAsync(false);
     }
 }

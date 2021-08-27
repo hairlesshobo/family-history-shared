@@ -17,32 +17,7 @@ namespace Archiver
 {
     class Program
     {
-        // public static void DrawBox(int width, int height, string text)
-        // {
-        //     if (width < 3 || height < 3)
-        //         throw new InvalidOperationException();
-
-        //     Console.Write(BoxChars.ThinTopLeft);
-
-        //     for (int curWidth = 1; curWidth < (width-1); curWidth++)
-        //         Console.Write(BoxChars.ThinHorizontal);
-
-        //     Console.Write(BoxChars.ThinTopRight);
-
-        //     Console.CursorLeft = 0;
-        //     Console.CursorTop = Console.CursorTop+1;
-        //     Console.Write(BoxChars.ThinVertical);
-
-        //     Console.Write(text);
-
-        //     Console.CursorLeft = width-1;
-        //     Console.Write(BoxChars.ThinVertical);
-        // }
-        
-
-        private static volatile bool cancelMd5 = false;        
-
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             Utils.RequireSupportedOS();
             SysInfo.InitPlatform();
@@ -66,21 +41,6 @@ namespace Archiver
                 Terminal.InitStatusBar();
                 Terminal.RootPoint.MoveTo();
 
-                // var kvtDiscName = new KeyValueText("Disc Name", OpticalDriveUtils.GetDriveLabel("sr0"), 14);
-                // Terminal.NextLine();
-
-                // var kvtVerified = new KeyValueText("Verified", Formatting.GetFriendlySize(0), 14);
-                // Terminal.NextLine();
-
-                // var kvtCurrentRate = new KeyValueText("Current Rate", Formatting.GetFriendlyTransferRate(0), 14);
-                // Terminal.NextLine();
-
-                // var kvtAvgRate = new KeyValueText("Average Rate", Formatting.GetFriendlyTransferRate(0), 14);
-                // Terminal.NextLine();
-                // Terminal.NextLine();
-
-                // var progressBar = new ProgressBar();
-                // Terminal.NextLine(); 
 
                 //% slax bootloader, known good MD5: 3c78799690d95bd975e352020fc2acb8 linux dd OK, linux archiver OK, windows dd ??, windows archiver ??
                 //% archive 0001   , known good MD5: d8f3a48ab0205c2debe1aa55bc0bb6ea linux dd OK, linux archiver OK, windows dd ??, windows archiver ??
@@ -110,90 +70,13 @@ namespace Archiver
 
                 // KeyInput.ListenForKeys();
                 
-                // Terminal.InitStatusBar(
-                //     new StatusBarItem(
-                //         "Cancel",
-                //         (key) => cancelMd5 = true,
-                //         Key.MakeKey(ConsoleKey.C, ConsoleModifiers.Control)
-                //     )
-                // );
 
-                // for (int i = 0; i < 1000; i += 27)
-                // {
-                //     Thread.Sleep(150);
-                //     progressBar.UpdateProgress((double)i / 1000.0);
-                //     kvtVerified.UpdateValue(i.ToString());
 
-                //     if (cancelMd5)
-                //         break;
-                // }
-
-                // Terminal.Clear();
-                // Terminal.InitHeader("Main Menu", "Meow");
-                // Terminal.InitStatusBar(
-                //     new StatusBarItem(
-                //         "Quit",
-                //         (key) => {
-                //             // Console.Clear();
-                //             Terminal.NextLine();
-                //             Terminal.WriteLine("MEOW!");
-                //             // Console.ReadKey();
-                //             Environment.Exit(0);
-                //         },
-                //         Key.MakeKey(ConsoleKey.Q)
-                //     ),
-                //     new StatusBarItem(
-                //         "Navigate",
-                //         (key) => { },
-                //         Key.MakeKey(ConsoleKey.UpArrow),
-                //         Key.MakeKey(ConsoleKey.DownArrow)
-                //     )
-                // );
-
-                // Terminal.WriteLineColor(ConsoleColor.Black, "Black");
-                // Terminal.WriteLineColor(ConsoleColor.Blue, "Blue");
-                // Terminal.WriteLineColor(ConsoleColor.DarkBlue, "DarkBlue");
-                // Terminal.WriteLineColor(ConsoleColor.Green, "Green");
-                // Terminal.WriteLineColor(ConsoleColor.DarkGreen, "DarkGreen");
-                // Terminal.WriteLineColor(ConsoleColor.Cyan, "Cyan");
-                // Terminal.WriteLineColor(ConsoleColor.DarkCyan, "DarkCyan");
-                // Terminal.WriteLineColor(ConsoleColor.Red, "Red");
-                // Terminal.WriteLineColor(ConsoleColor.DarkRed, "DarkRed");
-                // Terminal.WriteLineColor(ConsoleColor.Magenta, "Magenta");
-                // Terminal.WriteLineColor(ConsoleColor.DarkMagenta, "DarkMagenta");
-                // Terminal.WriteLineColor(ConsoleColor.Yellow, "Yellow");
-                // Terminal.WriteLineColor(ConsoleColor.DarkYellow, "DarkYellow");
-                // Terminal.WriteLineColor(ConsoleColor.Gray, "Gray");
-                // Terminal.WriteLineColor(ConsoleColor.DarkGray, "DarkGray");
-                // Terminal.WriteLineColor(ConsoleColor.White, "White");
-
-                // Terminal.Clear();
-
-                // Terminal.WriteLine("Black");
-                // Terminal.WriteLine("Blue");
-                // Terminal.WriteLine("DarkBlue");
-                // Terminal.WriteLine("Green");
-                // Terminal.WriteLine("DarkGreen");
-                // Terminal.WriteLine("Cyan");
-                // Terminal.WriteLine("DarkCyan");
-                // Terminal.WriteLine("Red");
-                // Terminal.WriteLine("DarkRed");
-                // Terminal.WriteLine("Magenta");
-                // Terminal.WriteLine("DarkMagenta");
-                // Terminal.WriteLine("Yellow");
-                // Terminal.WriteLine("DarkYellow");
-                // Terminal.WriteLine("Gray");
-                // Terminal.WriteLine("DarkGray");
-                // Terminal.WriteLine("White");
-
-                // ShortcutKeyHelper.StopListening();
-
-                // KeyInput.StartLoop();
-                // Terminal.WriteDebugLine("meow!");
-
-                Task.Run(() => MainMenu.StartOperation());
+                Task.Run(() => MainMenu.StartOperationAsync());
                 Terminal.Start();
                 // KeyInput.StopListening();
+
+                // await RunTestAsync();
             }
             catch (Exception e)
             {
@@ -222,6 +105,24 @@ namespace Archiver
             }
 
             //Console.ReadLine();
+        }
+
+        private static async Task RunTestAsync()
+        {
+            List<DiscDetail> allDiscs = await Helpers.ReadDiscIndexAsync();
+
+            allDiscs.Sort((x, y) => x.DiscName.CompareTo(y.DiscName));
+
+            Terminal.Clear();
+            Terminal.RootPoint.AddY(3).MoveTo();
+            NotificationBox box = new NotificationBox(10);
+            box.SetTextJustify(0, TextJustify.Center);
+            box.SetLineColor(0, ConsoleColor.Green);
+
+            box.Show();
+
+
+            Terminal.RootPoint.AddY(20).MoveTo();
         }
 
         public static void ClearLine()

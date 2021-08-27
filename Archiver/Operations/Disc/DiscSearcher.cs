@@ -16,7 +16,7 @@ namespace Archiver.Operations.Disc
     {
         public async static Task StartOperationAsync()
         {
-            List<DiscDetail> discs = Helpers.ReadDiscIndex();
+            List<DiscDetail> discs = await Helpers.ReadDiscIndexAsync();
 
             var cts = new CancellationTokenSource();
 

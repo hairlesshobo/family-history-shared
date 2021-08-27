@@ -16,13 +16,10 @@ namespace Archiver.Operations
         private static bool _initialized = false;
         private static CliMenu<bool> _menu; 
 
-        public async static Task StartOperation()
-        {
-            await ShowMenuOld();
-            // ShowMenuNew();
-        }
+        public async static Task StartOperationAsync()
+            => await ShowMenuAsync();
 
-        private async static Task ShowMenuOld()
+        private async static Task ShowMenuAsync()
         {
             Initialize();
 
@@ -31,7 +28,7 @@ namespace Archiver.Operations
                 Terminal.Clear();
                 Terminal.InitHeader("Main Menu", "Archiver");
 
-                var results = await _menu.Show();
+                var results = await _menu.ShowAsync();
 
                 if (results == null)
                     return;

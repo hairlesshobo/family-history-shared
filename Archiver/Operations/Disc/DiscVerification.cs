@@ -18,17 +18,12 @@ namespace Archiver.Operations.Disc
     {
         public static async Task StartOperationAsync()
         {
-            Terminal.Header.UpdateLeft("Verify Discs");
+            Terminal.Header.UpdateLeft("Verify Discs > Initializing...");
             Terminal.Clear();
 
-            CancellationTokenSource cts = new CancellationTokenSource();
+            List<DiscDetail> allDiscs = await Helpers.ReadDiscIndexAsync();
 
-            DiscGlobals._destinationDiscs = Helpers.ReadDiscIndex();
-
-            Terminal.Clear();
-            Terminal.WriteLine("Disc verification process beginning...");
-
-            Terminal.Header.UpdateLeft("Verify Discs > Select Drive");
+            Terminal.Header.UpdateLeft("Select Drive");
             string selectedDrive = await Helpers.SelectCdromDriveAsync();
 
             if (selectedDrive == null)
@@ -40,29 +35,27 @@ namespace Archiver.Operations.Disc
             if (verifyAll == null)
                 return;
 
-            DiscVerifier verifier;
+            List<DiscDetail> discsToVerify = null;
             
             if (verifyAll.Value == true)
-                verifier = new DiscVerifier(selectedDrive);
+                discsToVerify = allDiscs;
             else
-            {
-                List<DiscDetail> discsToVerify = await AskDiskToVerifyAsync();
+                discsToVerify = await AskDiskToVerifyAsync(allDiscs);
 
-                if (discsToVerify == null)
-                    return;
+            if (discsToVerify == null)
+                return;
 
-                verifier = new DiscVerifier(selectedDrive, discsToVerify);
-            }
+            discsToVerify.Sort((x, y) => x.DiscName.CompareTo(y.DiscName));
 
-            // verifier.StartVerification();
+            DiscVerifier verifier = new DiscVerifier(selectedDrive, discsToVerify);
 
-            await Task.Delay(0);
-
-            DiscGlobals._destinationDiscs.Clear();
+            Terminal.Clear();
+            await verifier.StartVerificationAsync();
         }
         
         private static async Task<Nullable<bool>> AskVerifyAllDiscsAsync()
         {
+            Terminal.Clear();
             CliMenu<bool> menu = new CliMenu<bool>(new List<CliMenuEntry<bool>>()
             {
                 new CliMenuEntry<bool>() {
@@ -76,7 +69,6 @@ namespace Archiver.Operations.Disc
             });
 
             menu.EnableCancel = true;
-            menu.MenuLabel = "What do you want to verify?";
             List<bool> result = await menu.ShowAsync(true);
 
             if (result == null)
@@ -85,24 +77,24 @@ namespace Archiver.Operations.Disc
             return result[0];
         }
 
-        public static async Task<List<DiscDetail>> AskDiskToVerifyAsync()
+        public static async Task<List<DiscDetail>> AskDiskToVerifyAsync(List<DiscDetail> allDiscs)
         {
             List<CliMenuEntry<DiscDetail>> entries = new List<CliMenuEntry<DiscDetail>>();
 
-            // TODO: Remove 10 limit
-            foreach (DiscDetail disc in DiscGlobals._destinationDiscs.Where(x => x.NewDisc == false).OrderBy(x => x.DiscNumber).Take(10))
+            foreach (DiscDetail disc in allDiscs.Where(x => x.NewDisc == false).OrderBy(x => x.DiscNumber))
             {
                 entries.Add(new CliMenuEntry<DiscDetail>()
                 {
-                    Name = $"{DiscFormatting.GetDiscName(disc)} `R|`N `BDate Archived:`N {disc.ArchiveDTM.ToString("MM-dd-yyyy")} `R|`N `BData Size:`N {Formatting.GetFriendlySize(disc.DataSize).PadLeft(10)}",
+                    // Name = $"{DiscFormatting.GetDiscName(disc)} `R|`N `BDate Archived:`N {disc.ArchiveDTM.ToString("MM-dd-yyyy")} `R|`N `BData Size:`N {Formatting.GetFriendlySize(disc.DataSize).PadLeft(10)}",
+                    Name = $"{DiscFormatting.GetDiscName(disc)} | Date Archived: {disc.ArchiveDTM.ToString("MM-dd-yyyy")} | Data Size: {Formatting.GetFriendlySize(disc.DataSize).PadLeft(10)}",
                     SelectedValue = disc
                 });
             }
 
             CliMenu<DiscDetail> menu = new CliMenu<DiscDetail>(entries, true);
-            menu.MenuLabel = "Select disc(s) to verify...";
+            menu.LeftPad = 0;
             menu.EnableCancel = true;
-
+            Terminal.Clear();
             List<DiscDetail> discsToVerify = await menu.ShowAsync(true);
 
             return discsToVerify;

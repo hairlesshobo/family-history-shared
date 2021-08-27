@@ -79,28 +79,28 @@ namespace Archiver.TestCLI
 
         }
 
-        private static void MakeMD5()
-        {
-            //% slax bootloader, known good MD5: 3c78799690d95bd975e352020fc2acb8 linux dd OK, linux archiver OK, windows dd ??, windows archiver ??
-            //% archive 0001   , known good MD5: d8f3a48ab0205c2debe1aa55bc0bb6ea linux dd OK, linux archiver OK, windows dd ??, windows archiver ??
+        // private static void MakeMD5()
+        // {
+        //     //% slax bootloader, known good MD5: 3c78799690d95bd975e352020fc2acb8 linux dd OK, linux archiver OK, windows dd ??, windows archiver ??
+        //     //% archive 0001   , known good MD5: d8f3a48ab0205c2debe1aa55bc0bb6ea linux dd OK, linux archiver OK, windows dd ??, windows archiver ??
 
-            using (LinuxNativeStreamReader reader = new LinuxNativeStreamReader(LinuxNativeStreamReader.StreamSourceType.Disk, "/dev/sr0"))
-            {
-                Md5StreamGenerator generator = new Md5StreamGenerator(reader);
-                generator.OnProgressChanged += (progress) =>
-                {
-                    Console.WriteLine($"{progress.PercentCopied}%");
-                };
+        //     using (LinuxNativeStreamReader reader = new LinuxNativeStreamReader(LinuxNativeStreamReader.StreamSourceType.Disk, "/dev/sr0"))
+        //     {
+        //         Md5StreamGenerator generator = new Md5StreamGenerator(reader);
+        //         generator.OnProgressChanged += (progress) =>
+        //         {
+        //             Console.WriteLine($"{progress.PercentCopied}%");
+        //         };
 
-                generator.OnComplete += (hash) =>
-                {
-                    Console.WriteLine(hash);
-                };
+        //         generator.OnComplete += (hash) =>
+        //         {
+        //             Console.WriteLine(hash);
+        //         };
 
-                generator.Generate();
+        //         generator.GenerateAsync();
 
-                // Console.WriteLine(md5hash);
-            }
+        //         // Console.WriteLine(md5hash);
+        //     }
 
         }
 

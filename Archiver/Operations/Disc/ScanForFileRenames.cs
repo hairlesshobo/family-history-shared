@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Archiver.Classes.Disc;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities;
@@ -11,9 +12,9 @@ namespace Archiver.Operations.Disc
 {
     public static class ScanForFileRenames
     {
-        public static void StartOperation()
+        public static async Task StartOperationAsync()
         {
-            DiscGlobals._destinationDiscs = Helpers.ReadDiscIndex();
+            DiscGlobals._destinationDiscs = await Helpers.ReadDiscIndexAsync();
             Console.Clear();
 
             Formatting.WriteLineC(ConsoleColor.Magenta, "Preparing...");
