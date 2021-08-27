@@ -8,6 +8,10 @@ namespace Archiver.Shared.Native
     {
         // TODO: Add file existence checking for open, etc.
 
+
+        [DllImport("libc.so.6", EntryPoint = "open", SetLastError = true)]
+        public static extern int Open(string fileName, uint mode);
+
         [DllImport("libc.so.6", EntryPoint = "open", SetLastError = true)]
         private static extern int Open(string fileName, int mode);
         public static int Open(string fileName, OpenType openType)
@@ -25,6 +29,8 @@ namespace Archiver.Shared.Native
         [DllImport("libc.so.6", EntryPoint = "write", SetLastError = true)]
         public static extern int Write(int handle, byte[] data, int length);
 
+        [DllImport("libc.so.6", EntryPoint = "ioctl", SetLastError = true)]
+        public extern static int Ioctl(int fd, ulong request, uint param);
 
         [DllImport("libc.so.6", EntryPoint = "ioctl", SetLastError = true)]
         public extern static int Ioctl(int fd, ulong request, int param);
