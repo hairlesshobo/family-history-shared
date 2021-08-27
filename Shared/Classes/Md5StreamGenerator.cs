@@ -1,6 +1,8 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using Archiver.Shared.Models;
 
 namespace Archiver.Shared.Classes
@@ -31,7 +33,12 @@ namespace Archiver.Shared.Classes
             _blockSize = blockSize;
         }
 
-        public string Generate()
+        public async Task<string> GenerateAsync(CancellationToken cToken)
+        {
+            return await Task.Run(() => Generate(cToken));
+        }
+
+        private string Generate(CancellationToken cToken)
         {
             byte[] buffer = new byte[_blockSize]; 
 
@@ -51,6 +58,9 @@ namespace Archiver.Shared.Classes
 
                 while ((currentBlockSize = _stream.Read(buffer, 0, buffer.Length)) > 0)
                 {
+                    if (cToken.IsCancellationRequested)
+                        return null;
+
                     progress.TotalCopiedBytes += currentBlockSize;
                     progress.PercentCopied = ((double)progress.TotalCopiedBytes / (double)progress.TotalBytes) * 100.0;
 
