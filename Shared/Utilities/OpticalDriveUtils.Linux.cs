@@ -82,51 +82,25 @@ namespace Archiver.Shared.Utilities
             {
                 string drivePath = PathUtils.LinuxGetDrivePath(driveName);
 
-                int handle = Native.Linux.Open(drivePath, Native.Linux.O_RDONLY | Native.Linux.O_NONBLOCK);
+                int handle = Native.Linux.Open(drivePath, Native.Linux.O_RDWR | Native.Linux.O_NONBLOCK);
 
                 if (handle < 0)
                     throw new NativeMethodException("Open");
 
                 try
                 {
-                    int result = Native.Linux.Ioctl(handle, Native.Linux.CDROMEJECT);
+                    bool method1Success = false;
 
-                    if (result < 0)
-                        throw new NativeMethodException("Ioctl");
+                    int ret = Native.Linux.Ioctl(handle, Native.Linux.CDROM_LOCKDOOR, 0);
 
-                    return;
-                }
-                finally
-                {
-                    if (handle >= 0)
-                        Native.Linux.Close(handle);
-                }
-            }
+                    if (ret >= 0 && Native.Linux.Ioctl(handle, Native.Linux.CDROMEJECT, 0) >= 0)
+                        method1Success = true;
 
-            private static void ConfigureDrive(string driveName)
-            {
-                string drivePath = PathUtils.LinuxGetDrivePath(driveName);
-
-                int handle = Native.Linux.Open(drivePath, Native.Linux.OpenType.ReadOnly);
-
-                if (handle < 0)
-                {
-                    int errno = Marshal.GetLastWin32Error();
-
-                    if (errno == Native.Linux.ENOMEDIUM)
-                        return;
-                        
-                    throw new NativeMethodException("Open");
-                }
-
-                try
-                {
-                    int result = Native.Linux.Ioctl(handle, Native.Linux.CDROM_SET_OPTIONS, Native.Linux.CDO_AUTO_CLOSE);
-
-                    if (result < 0)
-                        throw new NativeMethodException("Ioctl");
-
-                    return;
+                    if (!method1Success)
+                    {
+                        if (Native.Linux.EjectScsi(handle) < 0)
+                            throw new NativeMethodException("EjectScsi");
+                    }
                 }
                 finally
                 {
@@ -153,6 +127,10 @@ namespace Archiver.Shared.Utilities
 
                 try
                 {
+                    // disable auto-close
+                    if (Native.Linux.Ioctl(handle, Native.Linux.CDROM_CLEAR_OPTIONS, Native.Linux.CDO_AUTO_CLOSE) < 0)
+                        throw new NativeMethodException("Ioctl");
+
                     int result = Native.Linux.Ioctl(handle, Native.Linux.CDROM_DRIVE_STATUS);
 
                     if (result < 0)

@@ -8,6 +8,8 @@ namespace Archiver.Shared.Native
     {
         // TODO: Add file existence checking for open, etc.
 
+        [DllImport("linux.so", EntryPoint = "eject_scsi", SetLastError = true)]
+        public static extern int EjectScsi(int handle);
 
         [DllImport("libc.so.6", EntryPoint = "open", SetLastError = true)]
         public static extern int Open(string fileName, uint mode);

@@ -13,9 +13,9 @@ namespace Archiver.Shared.Native
             ReadWrite = 2
         }
 
-        public const uint O_RDONLY = 0x00000001;
-        public const uint O_WRONLY = 0x00000002;
-        public const uint O_RDWR = 0x00000003;
+        public const uint O_RDONLY = 0x00000000;
+        public const uint O_WRONLY = 0x00000001;
+        public const uint O_RDWR = 0x00000002;
         public const uint O_NONBLOCK = 0x00000800; // non blocking open
 
 
@@ -29,8 +29,10 @@ namespace Archiver.Shared.Native
         public const uint BLKGETSIZE64 = 0x80081272; // get the byte size of a device
         public const uint CDROMREADTOCHDR = 0x00005305; // Read TOC header (struct cdrom_tochdr)
         public const uint CDROM_SET_OPTIONS = 0x00005320; // set CDROM Options
+        public const uint CDROM_CLEAR_OPTIONS = 0x00005321; // clear CDROM Options
         public const uint CDROMSTART = 0x00005308;
         public const uint CDROMEJECT = 0x00005309;
+        public const uint CDROM_LOCKDOOR = 0x00005329;
         public const uint CDROM_DRIVE_STATUS = 0x00005326; // Check drive status
 
         public const int CDS_NO_INFO = 0;	/* if not implemented */

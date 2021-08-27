@@ -66,6 +66,8 @@ namespace Archiver.Shared.Utilities
 
                 // byte[] buffer = new byte[256 * 1024]; // 256KB buffer
 
+                // TODO: Need to find out if i need a native close after finishing with the filestream here or not
+
 
                 FileStream stream = new FileStream(handle, FileAccess.Read);
                 

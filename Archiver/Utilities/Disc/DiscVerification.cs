@@ -223,8 +223,6 @@ namespace Archiver.Utilities.Disc
 
                         this.HideProgress();
 
-                        OpticalDriveUtils.EjectDrive(_drive);
-
                         if (discValid)
                             await ShowVerifySuccessAsync(disc);
                         else
@@ -233,6 +231,10 @@ namespace Archiver.Utilities.Disc
 
                     await generator.GenerateAsync(cts.Token);
                 }
+
+                SetStatus($"Ejecting disc `{disc.DiscName}`...");
+                // await Task.Delay(2000);
+                OpticalDriveUtils.EjectDrive(_drive);
 
                 dataTable.DataStore = this._pendingDiscs;
                 dataTable.Redraw();
