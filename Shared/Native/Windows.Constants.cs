@@ -4,7 +4,7 @@ namespace Archiver.Shared.Native
 {
     public static partial class Windows
     {
-        public const short FILE_ATTRIBUTE_NORMAL = 0x80;
+        public const short FILE_READ_ATTRIBUTES = 0x0080;
         public const short INVALID_HANDLE_VALUE = -1;
         public const uint GENERIC_READ = 0x80000000;
         public const uint GENERIC_WRITE = 0x40000000;
@@ -13,6 +13,7 @@ namespace Archiver.Shared.Native
         public const uint OPEN_EXISTING = 3;
         public const uint FILE_ATTRIBUTE_ARCHIVE = 0x00000020;
         public const uint FILE_FLAG_BACKUP_SEMANTICS = 0x02000000;
+        
 
         public const uint FILE_SHARE_NONE = 0;
         public const uint FILE_SHARE_READ = 1;
@@ -48,5 +49,24 @@ namespace Archiver.Shared.Native
 
         public const int MEDIA_PARAMS = 0;
         public const int DRIVE_PARAMS = 1;
+        
+
+        public const uint IOCTL_STORAGE_READ_CAPACITY = 0x2d5140;
+        public const uint IOCTL_STORAGE_EJECT_MEDIA = 0x2d4808;
+        public const uint IOCTL_CDROM_RAW_READ = 0x2403e;
+        public const uint IOCTL_CDROM_CURRENT_POSITION = 0x1;
+        public const uint IOCTL_CDROM_GET_DRIVE_GEOMETRY_EX = 0x24050;
+        public const uint IOCTL_SCSI_PASS_THROUGH_DIRECT = 0x4d014;
+        public const uint IOCTL_DISK_GET_LENGTH_INFO = 0x7405c;
+        public const uint FSCTL_ALLOW_EXTENDED_DASD_IO = 0x90083;
+        public static readonly byte[] SCSI_RAW_READ = new byte[] { 0xBE, 0, 0, 0, 0, 1, 0, 0, 1, 0x10, 0, 0 };
+        
+        public const byte SCSI_IOCTL_DATA_OUT = 0;
+        public const byte SCSI_IOCTL_DATA_IN = 1;
+        public const byte SCSI_IOCTL_DATA_UNSPECIFIED = 2;
+
+        public const int SPTD_SENSE_SIZE = 128;
+
+        public const int ERROR_SECTOR_NOT_FOUND = 0x1B; // 27
     }
 }

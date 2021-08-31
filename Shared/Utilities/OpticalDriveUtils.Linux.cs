@@ -34,7 +34,7 @@ namespace Archiver.Shared.Utilities
                 if (labels.Length == 0)
                     return null;
 
-                ulong driveInode = Native.Linux.GetFileInode(PathUtils.LinuxGetDrivePath(driveName));
+                ulong driveInode = Native.Linux.GetFileInode(PathUtils.GetDrivePath(driveName));
 
                 foreach (string deviceLabel in labels)
                 {
@@ -52,8 +52,8 @@ namespace Archiver.Shared.Utilities
                 return null;
             }
 
-            internal static Stream GetDriveRawStream(string driveName)
-                => new LinuxNativeStreamReader(LinuxNativeStreamReader.StreamSourceType.Disk, driveName);
+            internal static Stream GetDriveRawStream(OpticalDrive drive)
+                => new LinuxNativeStreamReader(drive);
 
             internal static List<OpticalDrive> GetDrives()
             {
@@ -68,7 +68,7 @@ namespace Archiver.Shared.Utilities
                         Name = x,
                         IsDiscLoaded = discLoaded,
                         IsReady = discLoaded,
-                        FullPath = PathUtils.LinuxGetDrivePath(x),
+                        FullPath = PathUtils.GetDrivePath(x),
                         VolumeLabel = (discLoaded ? GetDriveLabel(x) : null),
                         MountPoint = (discLoaded ? GetMountPoint(x) : null),
                         VolumeFormat = (discLoaded ? GetMountFormat(x)?.ToUpper() : null)
@@ -78,11 +78,9 @@ namespace Archiver.Shared.Utilities
                 return allDrives;
             }
 
-            internal static void EjectDrive(string driveName)
+            internal static void EjectDrive(OpticalDrive drive)
             {
-                string drivePath = PathUtils.LinuxGetDrivePath(driveName);
-
-                int handle = Native.Linux.Open(drivePath, Native.Linux.O_RDWR | Native.Linux.O_NONBLOCK);
+                int handle = Native.Linux.Open(drive.FullPath, Native.Linux.O_RDWR | Native.Linux.O_NONBLOCK);
 
                 if (handle < 0)
                     throw new NativeMethodException("Open");
@@ -111,7 +109,7 @@ namespace Archiver.Shared.Utilities
 
             private static bool IsDiscLoaded(string driveName)
             {
-                string drivePath = PathUtils.LinuxGetDrivePath(driveName);
+                string drivePath = PathUtils.GetDrivePath(driveName);
 
                 int handle = Native.Linux.Open(drivePath, Native.Linux.O_RDONLY | Native.Linux.O_NONBLOCK);
 
@@ -152,7 +150,7 @@ namespace Archiver.Shared.Utilities
                     See GetMountPoint for info about the /proc/self/mountinfo file
                 */
 
-                string drivePath = PathUtils.LinuxGetDrivePath(driveName);
+                string drivePath = PathUtils.GetDrivePath(driveName);
 
                 string mountLine = File.ReadAllLines("/proc/self/mountinfo").FirstOrDefault(x => x.Split(" - ")[1].Trim().Split(' ')[1].ToLower() == drivePath);
 
@@ -189,7 +187,7 @@ namespace Archiver.Shared.Utilities
                     (11) super options:  per super block options
                 */
 
-                string drivePath = PathUtils.LinuxGetDrivePath(driveName);
+                string drivePath = PathUtils.GetDrivePath(driveName);
 
                 string mountLine = File.ReadAllLines("/proc/self/mountinfo").FirstOrDefault(x => x.Split(" - ")[1].Trim().Split(' ')[1].ToLower() == drivePath);
 
@@ -206,7 +204,7 @@ namespace Archiver.Shared.Utilities
 
             internal static string GenerateDiscMD5(string driveName)
             {
-                string drivePath = PathUtils.LinuxGetDrivePath(driveName);
+                string drivePath = PathUtils.GetDrivePath(driveName);
                 string md5Hash = String.Empty;
 
                 int handle = Native.Linux.Open(drivePath, Native.Linux.OpenType.ReadOnly);
@@ -216,7 +214,7 @@ namespace Archiver.Shared.Utilities
 
                 try 
                 {
-                    ulong discTotalBytes = DiskUtils.LinuxGetDiskSize(handle);
+                    ulong discTotalBytes = DiskUtils.Linux.GetDiskSize(handle);
                     
                     byte[] buffer = new byte[256 * 1024]; // 256KB buffer
 

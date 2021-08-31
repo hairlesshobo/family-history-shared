@@ -19,9 +19,6 @@ namespace Archiver.TestCLI
 {
     class Program
     {
-        [DllImport("libc.so.6", EntryPoint = "getpid")]
-        private static extern int GetPid();
-
         static void Main()
         {
             Utils.RequireSupportedOS();
@@ -76,8 +73,6 @@ namespace Archiver.TestCLI
                 Console.WriteLine("Press any key to close the window...");
                 Console.ReadKey();
             }
-
-        }
 
         // private static void MakeMD5()
         // {

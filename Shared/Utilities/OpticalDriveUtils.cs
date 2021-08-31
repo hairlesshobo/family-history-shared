@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Archiver.Shared.Exceptions;
 using Archiver.Shared.Models;
 
@@ -8,14 +9,28 @@ namespace Archiver.Shared.Utilities
 {
     public static partial class OpticalDriveUtils
     {
+        public static List<OpticalDrive> GetDrives()
+        {
+            if (SysInfo.OSType == OSType.Windows)
+                return Windows.GetDrives();
+            else if (SysInfo.OSType == OSType.Linux)
+                return Linux.GetDrives();
+            
+            throw new UnsupportedOperatingSystemException();
+        }
+
+
+        public static OpticalDrive GetDriveByName(string driveName)
+            => GetDrives().FirstOrDefault(x => x.Name.ToLower() == driveName.ToLower());
+
         public static string[] GetDriveNames()
         {
             if (SysInfo.OSType == OSType.Windows)
                 return Windows.GetOpticalDriveNames();
             else if (SysInfo.OSType == OSType.Linux)
                 return Linux.GetOpticalDriveNames();
-            else
-                throw new UnsupportedOperatingSystemException();
+            
+            throw new UnsupportedOperatingSystemException();
         }
 
         public static string GetDriveLabel(string drive)
@@ -25,42 +40,20 @@ namespace Archiver.Shared.Utilities
             else if (SysInfo.OSType == OSType.Linux)
                 return Linux.GetDriveLabel(drive);
 
-            return null;
+            throw new UnsupportedOperatingSystemException();
         }
 
-        public static Stream GetDriveRawStream(string drive)
+        public static Stream GetDriveRawStream(OpticalDrive drive)
         {
             if (SysInfo.OSType == OSType.Windows)
                 return Windows.GetDriveRawStream(drive);
             else if (SysInfo.OSType == OSType.Linux)
                 return Linux.GetDriveRawStream(drive);
 
-            return null;
+            throw new UnsupportedOperatingSystemException();
         }
 
-        [Obsolete]
-        public static string GenerateDiscMD5(string drive)
-        {
-            if (SysInfo.OSType == OSType.Windows)
-                return Windows.GenerateDiscMD5(drive);
-            else if (SysInfo.OSType == OSType.Linux)
-                return Linux.GenerateDiscMD5(drive);
-            else
-                throw new UnsupportedOperatingSystemException();
-        }
-
-        public static List<OpticalDrive> GetDrives()
-        {
-            if (SysInfo.OSType == OSType.Windows)
-                return Windows.GetDrives();
-            else if (SysInfo.OSType == OSType.Linux)
-                return Linux.GetDrives();
-            else
-                throw new UnsupportedOperatingSystemException();
-        }
-
-
-        public static void EjectDrive(string drive)
+        public static void EjectDrive(OpticalDrive drive)
         {
             if (SysInfo.OSType == OSType.Windows)
                 Windows.EjectDrive(drive);

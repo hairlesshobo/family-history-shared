@@ -22,7 +22,18 @@ namespace Archiver.Shared.Native
             IntPtr hTemplateFile
             );
 
-        [DllImport("kernel32", SetLastError = true)]
+        [DllImport("kernel32.dll", SetLastError=true, CharSet=CharSet.Auto)]
+        public static extern SafeFileHandle CreateFile(
+            string lpFileName,
+            EFileAccess dwDesiredAccess,
+            EFileShare dwShareMode,
+            IntPtr lpSecurityAttributes,
+            ECreationDisposition dwCreationDisposition,
+            EFileAttributes dwFlagsAndAttributes,
+            IntPtr hTemplateFile
+            );
+
+        [DllImport("kernel32.dll", SetLastError = true)]
         public static extern int PrepareTape(
             SafeFileHandle handle,
             int prepareType,
@@ -30,7 +41,7 @@ namespace Archiver.Shared.Native
             );
 
 
-        [DllImport("kernel32", SetLastError = true)]
+        [DllImport("kernel32.dll", SetLastError = true)]
         public static extern int SetTapePosition(
             SafeFileHandle handle,
             int positionType,
@@ -40,7 +51,7 @@ namespace Archiver.Shared.Native
             BOOL isImmediate
             );
 
-        [DllImport("kernel32", SetLastError = true)]
+        [DllImport("kernel32.dll", SetLastError = true)]
         public static extern int GetTapePosition(
             SafeFileHandle handle,
             int positionType,
@@ -49,7 +60,7 @@ namespace Archiver.Shared.Native
             out int offsetHigh
             );
 
-        [DllImport("kernel32", SetLastError = true)]
+        [DllImport("kernel32.dll", SetLastError = true)]
         public static extern int WriteTapemark(
             SafeFileHandle handle,
             int tapemarkType,
@@ -57,7 +68,7 @@ namespace Archiver.Shared.Native
             BOOL isImmediate
             );
 
-        [DllImport("kernel32", SetLastError = true)]
+        [DllImport("kernel32.dll", SetLastError = true)]
         public static extern int GetTapeParameters(
            SafeFileHandle handle,
            int operationType,
@@ -65,14 +76,46 @@ namespace Archiver.Shared.Native
            IntPtr mediaInfo
            );
 
-        [DllImport("kernel32", SetLastError = true)]
+        [DllImport("kernel32.dll", SetLastError = true)]
         public static extern int SetTapeParameters(
            SafeFileHandle handle,
            int operationType,
            TapeSetDriveParameters parameters
            );
 
-        [DllImport("kernel32", SetLastError = true)]
+        [DllImport("kernel32.dll", SetLastError = true)]
         public static extern int GetLastError();
+
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        // static extern int CloseHandle(IntPtr driveHandle);
+        public static extern int CloseHandle(SafeFileHandle handle);
+
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern bool DeviceIoControl(
+            // IntPtr driveHandle,
+            SafeFileHandle handle,
+            uint IoControlCode,
+            IntPtr lpInBuffer,
+            uint inBufferSize,
+            IntPtr lpOutBuffer,
+            uint outBufferSize,
+            ref uint lpBytesReturned,
+            IntPtr lpOverlapped
+            );
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern bool ReadFile(
+            SafeFileHandle hFile,
+            IntPtr lpBuffer,
+            uint nNumberOfBytesToRead,
+            ref uint lpNumberOfBytesRead,
+            IntPtr lpOverlapped
+            );
+
+
+        [DllImport("kernel32.dll")]
+        public static extern bool GetFileSizeEx(SafeFileHandle handle, out long lpFileSize);
     }
 }

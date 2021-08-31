@@ -110,9 +110,6 @@ namespace Archiver.Utilities.CSD
 
             DriveLetter = DriveLetter.ToUpper();
 
-            //var query = new WqlObjectQuery($"SELECT Id,SCSILogicalUnit,Size,Name,MediaLoaded,VolumeName FROM Win32_CDROMDrive WHERE Id='A:'");
-            // var query = new WqlObjectQuery($"SELECT SCSILogicalUnit FROM Win32_CDROMDrive WHERE Id='{DriveLetter}'");
-            // var query = new WqlObjectQuery($"SELECT Id, Blocksize FROM Win32_Volume WHERE FileSystem='NTFS'");
             var query = new WqlObjectQuery($"SELECT Name, Label, BlockSize FROM Win32_Volume WHERE FileSystem='NTFS' AND Name='{DriveLetter}'");
             using (var searcher = new ManagementObjectSearcher(query))
             {

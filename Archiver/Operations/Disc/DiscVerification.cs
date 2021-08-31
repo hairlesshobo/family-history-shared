@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Archiver.Classes;
 using Archiver.Classes.Disc;
+using Archiver.Shared.Models;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities;
 using Archiver.Utilities.Disc;
@@ -24,7 +25,7 @@ namespace Archiver.Operations.Disc
             List<DiscDetail> allDiscs = await Helpers.ReadDiscIndexAsync();
 
             Terminal.Header.UpdateLeft("Select Drive");
-            string selectedDrive = await Helpers.SelectCdromDriveAsync();
+            OpticalDrive selectedDrive = await Helpers.SelectCdromDriveAsync();
 
             if (selectedDrive == null)
                 return;

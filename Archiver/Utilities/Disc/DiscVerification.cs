@@ -28,8 +28,7 @@ namespace Archiver.Utilities.Disc
         private List<int> _pendingDiscIds;
         private List<int> _completedDiscIds;
 
-        private string _drive;
-        private volatile bool _cancel = false;
+        private OpticalDrive _drive;
 
         #region GUI Objects
         private KeyValueText kvtStatus;
@@ -45,10 +44,10 @@ namespace Archiver.Utilities.Disc
         private NotificationBox box;
         #endregion
 
-        public DiscVerifier(string DriveLetter, List<DiscDetail> discsToVerify)
+        public DiscVerifier(OpticalDrive drive, List<DiscDetail> discsToVerify)
         {
             _discsToVerify = discsToVerify;
-            _drive = DriveLetter;
+            _drive = drive;
             _discCount = _discsToVerify.Count();
 
             _pendingDiscIds = _pendingDiscs.Select(x => x.DiscNumber).ToList();
@@ -186,7 +185,7 @@ namespace Archiver.Utilities.Disc
                 if (disc == null)
                     break;
 
-                kvtDiscName.UpdateValue(OpticalDriveUtils.GetDriveLabel(_drive));
+                kvtDiscName.UpdateValue(_drive.VolumeLabel);
                 kvtDiscName.Show();
                 kvtElapsedTime.Show();
                 kvtVerified.Show();
@@ -265,7 +264,8 @@ namespace Archiver.Utilities.Disc
         {
             DiscDetail insertedDisc = default(DiscDetail);
 
-            OpticalDrive driveInfo = OpticalDriveUtils.GetDrives().FirstOrDefault(x => x.Name == _drive);
+            // TODO: Make this async by adding a method to OpticalDrive called "WaitForDiscAsync"
+            OpticalDrive driveInfo = OpticalDriveUtils.GetDrives().FirstOrDefault(x => x.Name == _drive.Name);
 
             // DriveInfo driveInfo = DriveInfo.GetDrives().Where(x => x.Name.TrimEnd('\\').ToUpper() == _drive.ToUpper()).FirstOrDefault();
 
@@ -278,7 +278,7 @@ namespace Archiver.Utilities.Disc
 
                 while (!cToken.IsCancellationRequested)
                 {
-                    driveInfo = OpticalDriveUtils.GetDrives().FirstOrDefault(x => x.Name == _drive);
+                    driveInfo = OpticalDriveUtils.GetDrives().FirstOrDefault(x => x.Name == _drive.Name);
 
                     if (driveInfo.IsReady == false)
                         SetStatus($"Please insert archive disc{append}...");

@@ -1,11 +1,23 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Archiver.Shared.Exceptions;
+using Archiver.Shared.Models;
 
 namespace Archiver.Shared.Utilities
 {
-    public static class PathUtils
+    public static partial class PathUtils
     {
+        public static string GetDrivePath(string driveName)
+        {
+            if (SysInfo.OSType == OSType.Windows)
+                return Windows.GetDrivePath(driveName);
+            else if (SysInfo.OSType == OSType.Linux)
+                return Linux.GetDrivePath(driveName);
+
+            throw new UnsupportedOperatingSystemException();
+        }
+        
         public static string CleanPath(string inPath)
             => inPath.Replace(@"\", "/").TrimEnd('/');
 
@@ -62,9 +74,5 @@ namespace Archiver.Shared.Utilities
 
             return validatedPaths.ToArray();
         }
-
-
-        public static string LinuxGetDrivePath(string driveName)
-            => (driveName.IndexOf('/') >= 0 ? driveName : $"/dev/{driveName}");
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Archiver.Shared.Exceptions;
+using Archiver.Shared.Models;
 using Archiver.Shared.Native;
 using Archiver.Shared.Utilities;
 
@@ -37,20 +38,23 @@ namespace Archiver.Shared.Classes
         private StreamSourceType _type;
         private long _length = -1;
 
-        public LinuxNativeStreamReader(StreamSourceType type, string deviceName)
+        public LinuxNativeStreamReader(OpticalDrive drive)
         {
-            _type = type;
-            _devicePath = PathUtils.LinuxGetDrivePath(deviceName);
+            _type = StreamSourceType.Disk;
+            _devicePath = drive.FullPath;
+        }
 
+        private void Init()
+        {
             if (!File.Exists(_devicePath))
                 throw new DriveNotFoundException();
 
             _handle = Linux.Open(_devicePath, Linux.OpenType.ReadOnly);
 
-            if (type == StreamSourceType.Disk)
-                _length = (long)DiskUtils.LinuxGetDiskSize(_handle);
-            else if (type == StreamSourceType.File)
-                _length = DiskUtils.LinuxGetFileSize(deviceName);
+            if (_type == StreamSourceType.Disk)
+                _length = (long)DiskUtils.Linux.GetDiskSize(_handle);
+            else if (_type == StreamSourceType.File)
+                _length = DiskUtils.Linux.GetFileSize(_devicePath);
         }
 
         public override void Flush()

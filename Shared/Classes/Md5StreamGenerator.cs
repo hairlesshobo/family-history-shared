@@ -9,7 +9,12 @@ namespace Archiver.Shared.Classes
 {
     public class Md5StreamGenerator
     {
-        private int _blockSize = 1024 * 1024; // default 1MB block size;
+        //! Warning: For some crazy ass, unknown reason.. on windows, if this is set higher than
+        //! 131,072 the generated MD5 has will NOT be correct. I have no idea why. I've spent days 
+        //! trying to hunt down the reason without any success. You've been warned
+        private int _blockSize = 2048 * 512; // 1MB block size
+        // private int _blockSize = 2048 * 64; // default 128KB block size;
+
         private Stream _stream;
 
 

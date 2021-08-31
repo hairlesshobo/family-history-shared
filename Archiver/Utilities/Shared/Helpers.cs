@@ -19,33 +19,7 @@ namespace Archiver.Utilities.Shared
 {
     public class Helpers
     {
-        public static int GetCdromId(string DriveLetter)
-        {
-            DriveLetter = DriveLetter.Trim('/');
-            DriveLetter = DriveLetter.Trim('\\');
-            
-            if (!DriveLetter.EndsWith(':'))
-                DriveLetter += ':';
-
-            DriveLetter = DriveLetter.ToUpper();
-
-            //var query = new WqlObjectQuery($"SELECT Id,SCSILogicalUnit,Size,Name,MediaLoaded,VolumeName FROM Win32_CDROMDrive WHERE Id='A:'");
-            var query = new WqlObjectQuery($"SELECT SCSILogicalUnit FROM Win32_CDROMDrive WHERE Id='{DriveLetter}'");
-            using (var searcher = new ManagementObjectSearcher(query))
-            {
-                var objects = searcher.Get().OfType<ManagementObject>();
-
-                string resultStr = objects.Select(o => o.Properties["SCSILogicalUnit"].Value.ToString())
-                                    .FirstOrDefault();
-
-                if (resultStr != null)
-                    return Int32.Parse(resultStr);
-            }
-
-            throw new DriveNotFoundException($"Could not find drive {DriveLetter}");
-        }
-
-        public static async Task<string> SelectCdromDriveAsync()
+        public static async Task<OpticalDrive> SelectCdromDriveAsync()
         {
             List<OpticalDrive> drives = OpticalDriveUtils.GetDrives();
 
@@ -53,19 +27,19 @@ namespace Archiver.Utilities.Shared
                 throw new DriveNotFoundException("No optical drives were detected on this system!");
         
             if (drives.Count() == 1)
-                return drives[0].Name;
+                return drives[0];
 
             Terminal.Clear();
-            CliMenu<string> menu = new CliMenu<string>();
+            CliMenu<OpticalDrive> menu = new CliMenu<OpticalDrive>();
             menu.EnableCancel = true;
 
-            List<CliMenuEntry<string>> entries = new List<CliMenuEntry<string>>();
+            List<CliMenuEntry<OpticalDrive>> entries = new List<CliMenuEntry<OpticalDrive>>();
 
             foreach (OpticalDrive drive in drives)
             {
-                CliMenuEntry<string> newEntry = new CliMenuEntry<string>();
+                CliMenuEntry<OpticalDrive> newEntry = new CliMenuEntry<OpticalDrive>();
                 newEntry.Name = drive.Name + " (Disc Loaded: ";
-                newEntry.SelectedValue = drive.Name;
+                newEntry.SelectedValue = drive;
 
                 if (drive.IsReady)
                     newEntry.Name += $"YES | Volume name: {drive.VolumeLabel} | Format: {drive.VolumeFormat})";
@@ -77,7 +51,7 @@ namespace Archiver.Utilities.Shared
 
             menu.SetMenuItems(entries);
 
-            List<string> selectedDrives = await menu.ShowAsync(true);
+            List<OpticalDrive> selectedDrives = await menu.ShowAsync(true);
 
             if (selectedDrives == null)
                 return null;
