@@ -20,13 +20,6 @@ namespace Archiver.Shared.Models.Config
         /// </Summary>
         public string CdbxpPath { get; set; } 
         
-        /// <Summary>
-        /// Path to the dd.exe tool used to validate discs Windows
-        ///
-        /// Note: ONLY needed on windows
-        /// </Summary>
-        public string DdPath { get; set; }
-
         public List<ValidationError> Validate(string prefix = null)
         {
             // TODO: 
@@ -48,14 +41,8 @@ namespace Archiver.Shared.Models.Config
                 if (String.IsNullOrWhiteSpace(this.CdbxpPath))
                     results.AddValidationError(prefix, nameof(this.CdbxpPath), "Path to utility not provided");
 
-                if (String.IsNullOrWhiteSpace(this.DdPath))
-                    results.AddValidationError(prefix, nameof(this.DdPath), "Path to utility not provided");
-
                 if (!File.Exists(this.CdbxpPath))
                     results.AddValidationError(prefix, nameof(this.CdbxpPath), $"The path does not exist: {this.CdbxpPath}");
-
-                if (!File.Exists(this.DdPath))
-                    results.AddValidationError(prefix, nameof(this.DdPath), $"The path does not exist: {this.DdPath}");
             }
 
             return results;

@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using Archiver.Shared.Exceptions;
 using Archiver.Shared.Models;
 using Archiver.Shared.Native;
@@ -37,7 +39,7 @@ namespace Archiver.Shared.Classes
         public WindowsRawDiscStreamReader(OpticalDrive drive)
         {
             _drive = drive ?? throw new ArgumentNullException(nameof(drive));
-            
+
             _handle = Windows.CreateFile(
                 _drive.FullPath,
                 Native.Windows.EFileAccess.GenericRead,
@@ -135,10 +137,15 @@ namespace Archiver.Shared.Classes
             base.Close();
 
             if (_handle != null)
-            {
-                Native.Windows.CloseHandle(_handle);
-                _handle = null;
-            }
+                _handle.Close();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (_handle != null)
+                _handle.Dispose();
+            
+            base.Dispose(disposing);
         }
     }
 }

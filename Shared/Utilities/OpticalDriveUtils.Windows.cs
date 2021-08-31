@@ -48,12 +48,7 @@ namespace Archiver.Shared.Utilities
 
             public static void EjectDrive(OpticalDrive drive)
             {
-                SafeFileHandle fileHandle = null;
-
-                try
-                {
-                    // Create an handle to the drive
-                    fileHandle = Native.Windows.CreateFile(
+                using (SafeFileHandle fileHandle = Native.Windows.CreateFile(
                         drive.FullPath,
                         Native.Windows.GENERIC_READ,
                         Native.Windows.FILE_SHARE_READ | Native.Windows.FILE_SHARE_WRITE, 
@@ -61,7 +56,8 @@ namespace Archiver.Shared.Utilities
                         Native.Windows.OPEN_EXISTING,
                         0,
                         IntPtr.Zero
-                    );
+                    ))
+                {
 
                     if (fileHandle.IsInvalid)
                         throw new NativeMethodException("CreateFile");
@@ -77,15 +73,6 @@ namespace Archiver.Shared.Utilities
                         ref returnedBytes,
                         IntPtr.Zero
                         );
-                }
-                finally
-                {
-                    // Close Drive Handle
-                    if (fileHandle != null && !fileHandle.IsClosed)
-                    {
-                        Native.Windows.CloseHandle(fileHandle);
-                        // fileHandle = null;
-                    }
                 }
             }
         }

@@ -19,40 +19,29 @@ namespace Archiver.Shared.Utilities
             {
                 string drivePath = PathUtils.GetDrivePath(driveName);
 
-                SafeFileHandle fileHandle = null;
                 IntPtr ptr = IntPtr.Zero;
 
                 try
                 {
                     // Create an handle to the drive
-                    fileHandle = Native.Windows.CreateFile(
+                    using (SafeFileHandle fileHandle = Native.Windows.CreateFile(
                         drivePath,
                         Native.Windows.GENERIC_READ,
                         Native.Windows.FILE_SHARE_READ | Native.Windows.FILE_SHARE_WRITE, //0,
                         IntPtr.Zero,
                         Native.Windows.OPEN_EXISTING,
                         0,
-                        IntPtr.Zero
-                    );
+                        IntPtr.Zero))
+                    {
 
-                    if (fileHandle.IsInvalid)
-                        throw new NativeMethodException("CreateFile");
+                        if (fileHandle.IsInvalid)
+                            throw new NativeMethodException("CreateFile");
 
-                    return ReadDiskCapacity(fileHandle);
-                }
-                catch
-                {
-                    throw new Exception(Marshal.GetLastWin32Error().ToString());
+                        return ReadDiskCapacity(fileHandle);
+                    }
                 }
                 finally
                 {
-                    // Close Drive Handle
-                    if (fileHandle != null)
-                    {
-                        Native.Windows.CloseHandle(fileHandle);
-                        fileHandle = null;
-                    }
-
                     if (ptr != IntPtr.Zero)
                         Marshal.FreeHGlobal(ptr);
                 }

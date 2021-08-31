@@ -84,15 +84,6 @@ namespace Archiver.Shared.Native
            );
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern int GetLastError();
-
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        // static extern int CloseHandle(IntPtr driveHandle);
-        public static extern int CloseHandle(SafeFileHandle handle);
-
-
-        [DllImport("kernel32.dll", SetLastError = true)]
         public static extern bool DeviceIoControl(
             // IntPtr driveHandle,
             SafeFileHandle handle,
@@ -113,9 +104,5 @@ namespace Archiver.Shared.Native
             ref uint lpNumberOfBytesRead,
             IntPtr lpOverlapped
             );
-
-
-        [DllImport("kernel32.dll")]
-        public static extern bool GetFileSizeEx(SafeFileHandle handle, out long lpFileSize);
     }
 }

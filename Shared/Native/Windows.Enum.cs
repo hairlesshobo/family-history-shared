@@ -13,16 +13,6 @@ namespace Archiver.Shared.Native
             ErrorWriteProtect = 19
         }
 
-        public enum TRACK_MODE_TYPE
-        {
-            YellowMode2,
-            XAForm2,
-            CDDA,
-            RawWithC2AndSubCode,
-            RawWithC2,
-            RawWithSubCode
-        }
-
         public enum MEDIA_TYPE 
         { 
             Unknown         = 0,

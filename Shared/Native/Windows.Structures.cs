@@ -61,14 +61,6 @@ namespace Archiver.Shared.Native
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct RAW_READ_INFO
-        {
-            public long DiskOffset;
-            public uint SectorCount;
-            public TRACK_MODE_TYPE TrackMode;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
         public struct DISK_GEOMETRY 
         {
             public long Cylinders;
@@ -83,35 +75,6 @@ namespace Archiver.Shared.Native
             public DISK_GEOMETRY Geometry;
             public uint DiskSize;
             public byte Data;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct SCSI_PASS_THROUGH_DIRECT 
-        {
-            public ushort Length;
-            public byte ScsiStatus;
-            public byte PathId;
-            public byte TargetId;
-            public byte Lun;
-            public byte CdbLength;
-            public byte SenseInfoLength;
-            public byte DataIn;
-            public uint DataTransferLength;
-            public uint TimeOutValue;
-            public IntPtr DataBuffer;
-            public uint SenseInfoOffset;
-
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
-            public byte[] Cdb16;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct sptd_with_sense
-        {
-            public SCSI_PASS_THROUGH_DIRECT s;
-
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = Native.Windows.SPTD_SENSE_SIZE)]
-            public byte[] sense;
         }
 
         [StructLayout(LayoutKind.Sequential)]
