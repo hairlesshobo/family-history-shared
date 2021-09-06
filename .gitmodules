@@ -1,3 +1,6 @@
 [submodule "TerminalUI"]
 	path = TerminalUI
 	url = ssh://git@git.foxhollow.cc:4022/hairlesshobo/Archiver.git
+[submodule "LibSMB2Sharp"]
+	path = LibSMB2Sharp
+	url = ssh://git@git.foxhollow.cc:4022/hairlesshobo/LibSMB2Sharp.git
