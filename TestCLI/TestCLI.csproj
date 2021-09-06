@@ -2,6 +2,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Shared\Shared.csproj" />
+    <ProjectReference Include="..\..\..\..\code\libsmb2sharp\LibSMB2Sharp\LibSMB2Sharp.csproj" />
+    <ProjectReference Include="..\TerminalUI\src\TerminalUI.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
