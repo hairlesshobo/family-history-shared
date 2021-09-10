@@ -1,0 +1,21 @@
+This file is to outline the licenses for the resources in this directory and provide 
+attribution for them as necessary.
+
+iconfinder_safe_87462.ico
+======================================================================================
+    Downloaded from https://www.iconfinder.com/icons/87462/safe_icon
+
+    This work is licensed under the Creative Commons Attribution 3.0 Unported License. 
+    To view a copy of this license, visit  http://creativecommons.org/licenses/by/3.0/
+    or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+    
+    
+iconfinder_kfm_1322.ico
+=====================================================================================
+    Created by David Vignoni. Copyright (C) David Vignoni
+
+    Downloaded from https://www.iconfinder.com/icons/1322/safe_icon
+
+    This work is said to be licensed under the LGPL (no version specified)
+    
+

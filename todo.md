@@ -1,4 +1,4 @@
-Linux support:
+## Linux support:
 ----------------------------------------------------------------
 * Finish tape driver
 * Add mappings for unc paths to other network paths
@@ -12,7 +12,7 @@ Linux support:
 * Add disc verification support
 * Explore the idea of bundling archiver into an `appimage` file
 
-Windows support:
+## Windows support:
 ----------------------------------------------------------------
 * Natively determine disc size
 * Add WindowsNativeStreamReader
@@ -20,7 +20,7 @@ Windows support:
 * Add disc burning support
 
 
-Global Functionality:
+## Global Functionality:
 ----------------------------------------------------------------
 * Add ability to detect if drive is BD capable (both read and write)
 * keep track of copy speed performance per tape and csd, use that in future calculations
@@ -34,9 +34,9 @@ Global Functionality:
 * Eliminate `CsdGlobals.cs`
 * Eliminate `Globals.cs`
 * Rename `GuiGlobals` to `GuiStatic`
+* Improve documentation in config files
 
-
-CSD Functionality:
+## CSD Functionality:
 ----------------------------------------------------------------
 * Show drive summary
 * Show archive summary
@@ -48,7 +48,7 @@ CSD Functionality:
 * Add handling for modified files (size or date change)
 
 
-Tape Functionality:
+## Tape Functionality:
 ----------------------------------------------------------------
 * Restore entire tape
 * Add scan rate to `file scanner`
@@ -58,7 +58,7 @@ Tape Functionality:
 * Add "last run" to tape selection list
 
 
-Disc Functionality
+## Disc Functionality
 ----------------------------------------------------------------
 * Restore entire disc
 * Add ability to restore entire tape, requiring to specify new restore directory
@@ -71,8 +71,8 @@ Disc Functionality
 
 
 
-Useful links
-----------
+## Useful links
+----------------------------------------------------------------
 * https://www.commandlinefu.com/commands/view/13582/backup-to-lto-tape-with-progress-checksums-and-buffering
 * https://www.codeproject.com/Articles/15487/Magnetic-Tape-Data-Storage-Part-Tape-Drive-IO-Co
 * https://github.com/icsharpcode/SharpZipLib/blob/master/src/ICSharpCode.SharpZipLib/Tar/TarBuffer.cs
@@ -80,7 +80,7 @@ Useful links
 
 
 
-Future ideas
+## Future ideas
 ----------------------------------------------------------------
 * Add handling for inline color:
     * `r_` (red)
@@ -102,7 +102,7 @@ Future ideas
     * `n_` (normal / default / reset)
 
 
-Linux Notes
+## Linux Notes
 ----------------------------------------------------------------
 * Get optical drive details from /proc/sys/dev/cdrom/info
 * may be able to inspect cd-drive source code to see how it pulls cd drive list:
