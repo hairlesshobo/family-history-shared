@@ -25,6 +25,10 @@ My overall goals for this application (in no particular order) are as follows:
 * Ability to search entire archive for specific files or by metadata
 * Think up a better name than "archiver" ;)
 
+## To-Do List
+For a more detailed list of outstanding items that I plan to work on,
+see the [complete todo list](todo.md)
+
 ## History
 In 2020, I got very serious about protecting my data. I do not like the 
 idea of storing my data on a cloud provider, and I also do not feel 
