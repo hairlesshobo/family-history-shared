@@ -22,63 +22,70 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using Archiver.Classes.Disc;
 using Archiver.Shared.Classes.Tape;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
+using TerminalUI;
 using TerminalUI.Elements;
 
 namespace Archiver.Operations.Tape 
 {
     public static class TapeSearcher
     {
-        public static void StartOperation()
+        public static async Task StartOperationAsync()
         {
-            List<TapeDetail> tapes = Helpers.ReadTapeIndex();
+            List<TapeDetail> tapes = await Helpers.ReadTapeIndexAsync();
             List<TapeSourceFile> allFiles = tapes.SelectMany(x => x.FlattenFiles()).ToList();
 
-            Console.Clear();
+            var cts = new CancellationTokenSource();
+
+            Terminal.InitHeader("Search Disc Archive", "Archiver");
+            Terminal.InitStatusBar(
+                new StatusBarItem(
+                    "Cancel",
+                    (key) => 
+                    {
+                        cts.Cancel();
+                        return Task.CompletedTask;
+                    },
+                    Key.MakeKey(ConsoleKey.C, ConsoleModifiers.Control)
+                )
+            );
+
+            Terminal.Clear();
             
-            while (true)
+            Terminal.Write("Term to search for in file/directory: ");
+
+            string searchString = await KeyInput.ReadStringAsync(cts.Token);
+            
+            searchString = searchString?.Trim()?.ToLower();
+
+            if (String.IsNullOrWhiteSpace(searchString))
+                return;
+            
+            Terminal.Clear();
+
+            List<TapeSourceFile> files = allFiles.Where(x => x.RelativePath.ToLower().Contains(searchString)).ToList();
+            Console.WriteLine("Matching files: " + files.Count().ToString("N0"));
+
+            int tapeNameWidth = tapes.Max(x => x.Name.Length);
+
+            using (Pager pager = new Pager())
             {
-                Console.SetCursorPosition(0, 2);
-                Console.Write("Press ");
-                Formatting.WriteC(ConsoleColor.DarkYellow, "<ctrl>+C");
-                Console.Write(" to cancel");
+                pager.ShowHeader = true;
+                pager.HeaderText = $"{"Tape Name".PadRight(tapeNameWidth)}   {"Update Date/Time".PadRight(22)}   {"File"}";
+                pager.HighlightText = searchString;
+                pager.Highlight = true;
+                pager.HighlightColor = ConsoleColor.DarkYellow;
 
-                Console.SetCursorPosition(0, 0);
-                Console.Write("Term to search for in file/directory: ");
-                Console.TreatControlCAsInput = false;
-                string searchString = Console.ReadLine();
-                Console.TreatControlCAsInput = true;
-
-                Console.Clear();
-
-                if (String.IsNullOrWhiteSpace(searchString))
-                    break;
-
-                searchString = searchString.Trim().ToLower();
-
-                List<TapeSourceFile> files = allFiles.Where(x => x.RelativePath.ToLower().Contains(searchString)).ToList();
-                Console.WriteLine("Matching files: " + files.Count().ToString("N0"));
-
-                int tapeNameWidth = tapes.Max(x => x.Name.Length);
-
-                using (Pager pager = new Pager())
-                {
-                    pager.StartLine = 1;
-                    pager.ShowHeader = true;
-                    pager.HeaderText = $"{"Tape Name".PadRight(tapeNameWidth)}   {"Update Date/Time".PadRight(22)}   {"File"}";
-                    pager.HighlightText = searchString;
-                    pager.Highlight = true;
-                    pager.HighlightColor = ConsoleColor.DarkYellow;
-
-                    foreach (TapeSourceFile file in files)
+                foreach (TapeSourceFile file in files)
                         pager.AppendLine($"{file.Tape.Name.PadRight(tapeNameWidth)}   {file.LastWriteTimeUtc.ToLocalTime().ToString().PadRight(22)}   {file.RelativePath}");
 
-                    pager.Start();
-                    pager.WaitForExit();
-                }
+                pager.Start();
+                pager.WaitForExit();
             }
         }
     }

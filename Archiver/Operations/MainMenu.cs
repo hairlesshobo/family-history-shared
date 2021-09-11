@@ -86,8 +86,8 @@ namespace Archiver.Operations
                 List<CliMenuEntry<bool>> entries = new List<CliMenuEntry<bool>>();
 
                 entries.AddRange(BuildDiscMenu());
-                // entries.Add(new CliMenuEntry<bool>() { Header = true });
-                // entries.AddRange(BuildTapeMenu());
+                entries.Add(new CliMenuEntry<bool>() { Header = true });
+                entries.AddRange(BuildTapeMenu());
                 // entries.Add(new CliMenuEntry<bool>() { Header = true });
                 // entries.AddRange(BuildCsdMenu());
                 // entries.Add(new CliMenuEntry<bool>() { Header = true });
@@ -162,67 +162,67 @@ namespace Archiver.Operations
             };
         }
 
-        // private static List<CliMenuEntry<bool>> BuildTapeMenu()
-        // {
-        //     string tapeMenuAppend = String.Empty;
+        private static List<CliMenuEntry<bool>> BuildTapeMenu()
+        {
+            string tapeMenuAppend = String.Empty;
 
-        //     if (SysInfo.IsTapeDrivePresent == false)
-        //         tapeMenuAppend += " (drive not detected)";
+            if (SysInfo.IsTapeDrivePresent == false)
+                tapeMenuAppend += " (drive not detected)";
                 
-        //     return new List<CliMenuEntry<bool>>()
-        //     {
-        //         new CliMenuEntry<bool>() {
-        //             Name = "Tape Operations" + tapeMenuAppend,
-        //             Header = true,
-        //             ShortcutKey = ConsoleKey.T
-        //         },
-        //         new CliMenuEntry<bool>() {
-        //             Name = "Search Tape Archive",
-        //             Task = Tape.TapeSearcher.StartOperation,
-        //             ForegroundColor = ConsoleColor.Green,
-        //             SelectedValue = true, // do not show the "press enter to return to main menu" message
-        //         },
-        //         //! not implemented
-        //         new CliMenuEntry<bool>() {
-        //             Name = "Restore entire tape (to tar file)",
-        //             Task = Tape.RestoreTapeToTar.StartOperation,
-        //             Disabled = !SysInfo.IsTapeDrivePresent || true, // remove once implemented
-        //             ForegroundColor = ConsoleColor.Green
-        //         },
-        //         //! not implemented
-        //         new CliMenuEntry<bool>() {
-        //             Name = "Restore entire tape (to original file structure)",
-        //             Task = NotImplemented,
-        //             Disabled = !SysInfo.IsTapeDrivePresent || true, // remove once implemented
-        //             ForegroundColor = ConsoleColor.Green
-        //         },
-        //         new CliMenuEntry<bool>() {
-        //             Name = "Read Tape Summary",
-        //             Task = Tape.ShowTapeSummary.StartOperation,
-        //             Disabled = !SysInfo.IsTapeDrivePresent,
-        //             // SelectedValue = true, // do not show the "press enter to return to main menu" message
-        //             ForegroundColor = ConsoleColor.Blue
-        //         },
-        //         new CliMenuEntry<bool>() {
-        //             Name = "View Archive Summary",
-        //             Task = Tape.TapeArchiveSummary.StartOperation,
-        //             SelectedValue = true, // do not show the "press enter to return to main menu" message
-        //             ForegroundColor = ConsoleColor.Blue
-        //         },
-        //         new CliMenuEntry<bool>() {
-        //             Name = "Verify Tape",
-        //             Task = Tape.TapeVerification.StartOperation,
-        //             Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsTapeDrivePresent,
-        //             ForegroundColor = ConsoleColor.DarkYellow
-        //         },
-        //         new CliMenuEntry<bool>() {
-        //             Name = "Run tape archive",
-        //             Task = Tape.TapeArchiver.StartOperation,
-        //             Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsTapeDrivePresent,
-        //             ForegroundColor = ConsoleColor.Red
-        //         }
-        //     };
-        // }
+            return new List<CliMenuEntry<bool>>()
+            {
+                new CliMenuEntry<bool>() {
+                    Name = "Tape Operations" + tapeMenuAppend,
+                    Header = true,
+                    ShortcutKey = ConsoleKey.T
+                },
+                new CliMenuEntry<bool>() {
+                    Name = "Search Tape Archive",
+                    Task = Tape.TapeSearcher.StartOperationAsync,
+                    ForegroundColor = ConsoleColor.Green,
+                    SelectedValue = true, // do not show the "press enter to return to main menu" message
+                },
+                //! not implemented
+                new CliMenuEntry<bool>() {
+                    Name = "Restore entire tape (to tar file)",
+                    Task = Tape.RestoreTapeToTar.StartOperationAsync,
+                    Disabled = !SysInfo.IsTapeDrivePresent || true, // remove once implemented
+                    ForegroundColor = ConsoleColor.Green
+                },
+                //! not implemented
+                new CliMenuEntry<bool>() {
+                    Name = "Restore entire tape (to original file structure)",
+                    Task = NotImplementedAsync,
+                    Disabled = !SysInfo.IsTapeDrivePresent || true, // remove once implemented
+                    ForegroundColor = ConsoleColor.Green
+                },
+                // new CliMenuEntry<bool>() {
+                //     Name = "Read Tape Summary",
+                //     Task = Tape.ShowTapeSummary.StartOperation,
+                //     Disabled = !SysInfo.IsTapeDrivePresent,
+                //     // SelectedValue = true, // do not show the "press enter to return to main menu" message
+                //     ForegroundColor = ConsoleColor.Blue
+                // },
+                new CliMenuEntry<bool>() {
+                    Name = "View Archive Summary",
+                    Task = Tape.TapeArchiveSummary.StartOperationAsync,
+                    SelectedValue = true, // do not show the "press enter to return to main menu" message
+                    ForegroundColor = ConsoleColor.Blue
+                },
+                // new CliMenuEntry<bool>() {
+                //     Name = "Verify Tape",
+                //     Task = Tape.TapeVerification.StartOperation,
+                //     Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsTapeDrivePresent,
+                //     ForegroundColor = ConsoleColor.DarkYellow
+                // },
+                // new CliMenuEntry<bool>() {
+                //     Name = "Run tape archive",
+                //     Task = Tape.TapeArchiver.StartOperation,
+                //     Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsTapeDrivePresent,
+                //     ForegroundColor = ConsoleColor.Red
+                // }
+            };
+        }
 
         // private static List<CliMenuEntry<bool>> BuildCsdMenu()
         // {

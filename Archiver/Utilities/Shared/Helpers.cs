@@ -87,6 +87,7 @@ namespace Archiver.Utilities.Shared
         {
             bool cancel = false;
             
+            Terminal.Clear();
             Terminal.Header.UpdateLeft("Read Disc Index...");
             Terminal.StatusBar.ShowItems(
                 new StatusBarItem(
@@ -144,42 +145,67 @@ namespace Archiver.Utilities.Shared
             return discs;
         }
 
-        public static List<TapeDetail> ReadTapeIndex()
+        public static async Task<List<TapeDetail>> ReadTapeIndexAsync()
         {
+            bool cancel = false;
+            
+            Terminal.Clear();
+            Terminal.Header.UpdateLeft("Read Tape Index...");
+            Terminal.StatusBar.ShowItems(
+                new StatusBarItem(
+                    "Cancel",
+                    (key) => {
+                        cancel = true;
+                        return Task.Delay(0);
+                    },
+                    Key.MakeKey(ConsoleKey.C, ConsoleModifiers.Control)
+                )
+            );
+
+            if (!Directory.Exists(SysInfo.Directories.JSON))
+                return null;
+
             List<TapeDetail> tapes = new List<TapeDetail>();
 
-            if (Directory.Exists(SysInfo.Directories.JSON))
+            string[] jsonFiles = Directory.GetFiles(SysInfo.Directories.JSON, "tape_*.json");
+            int totalFiles = jsonFiles.Length;
+            
+            if (totalFiles == 0)
+                return null;
+
+            Text text = new Text();
+            text.Show();
+            Terminal.NextLine();
+            ProgressBar progress = new ProgressBar();
+            progress.Show();
+
+            int currentFile = 0;
+
+            foreach (string jsonFile in jsonFiles)
             {
-                string[] jsonFiles = Directory.GetFiles(SysInfo.Directories.JSON, "tape_*.json");
-                int totalFiles = jsonFiles.Length;
-                
-                if (totalFiles > 0)
-                {
-                    int currentFile = 0;
+                if (cancel)
+                    return null;
 
-                    foreach (string jsonFile in jsonFiles)
-                    {
-                        currentFile++;
+                currentFile++;
 
-                        string line = "Reading tape index files... ";
-                        line += $"{currentFile.ToString().PadLeft(totalFiles.ToString().Length)}/{totalFiles}";
+                double currentPct = (double)currentFile / (double)totalFiles;
 
-                        Console.CursorLeft = 0;
-                        Console.Write(line);
+                progress.UpdateProgress(currentPct);
 
-                        TapeDetail tapeDetail = Newtonsoft.Json.JsonConvert.DeserializeObject<TapeDetail>(File.ReadAllText(jsonFile));
-                        tapeDetail.FlattenFiles().ToList().ForEach(x => x.Tape = tapeDetail);
-                        
-                        tapes.Add(tapeDetail);
-                    }
+                text.UpdateValue($"Reading tape index files... {currentFile.ToString().PadLeft(totalFiles.ToString().Length)}/{totalFiles}");
 
-                    Console.WriteLine();
-                }
+                TapeDetail tapeDetail = Newtonsoft.Json.JsonConvert.DeserializeObject<TapeDetail>(File.ReadAllText(jsonFile));
+                tapeDetail.FlattenFiles().ToList().ForEach(x => x.Tape = tapeDetail);
+
+                tapes.Add(tapeDetail);
             }
+
+            Terminal.WriteLine();
+
+            await Task.Delay(0);
 
             return tapes;
         }
-
 
         public static DiscDetail GetDestinationDisc(long FileSize)
         {

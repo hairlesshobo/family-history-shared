@@ -21,10 +21,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Archiver.Classes.Disc;
 using Archiver.Shared.Classes.Tape;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
+using TerminalUI;
 using TerminalUI.Elements;
 
 namespace Archiver.Operations.Tape
@@ -43,12 +45,14 @@ namespace Archiver.Operations.Tape
             Console.WriteLine();
         }
         
-        public static void StartOperation()
+        public static async Task StartOperationAsync()
         {
-            List<TapeDetail> existingTapes = Helpers.ReadTapeIndex();
-            Console.Clear();
+            List<TapeDetail> existingTapes = await Helpers.ReadTapeIndexAsync();
+            
+            Terminal.Clear();
+            Terminal.Header.UpdateLeft("Tape Archive Summary");
 
-            IEnumerable<TapeSourceFile> allFiles = existingTapes.SelectMany(x => x.FlattenFiles());
+            List<TapeSourceFile> allFiles = existingTapes.SelectMany(x => x.FlattenFiles()).ToList();
 
             using (Pager pager = new Pager())
             {
@@ -135,11 +139,8 @@ namespace Archiver.Operations.Tape
                     pager.AppendLine($"{extension.PadLeft(columnWidth)}: {type.Count.ToString().PadLeft(maxCountWidth+2)}");
                 }
 
-                pager.WaitForExit();
+                await Task.Run(() => pager.WaitForExit());
             }
-
-            existingTapes.Clear();
-            allFiles = null;
         }
     }
 }

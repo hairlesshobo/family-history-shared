@@ -21,6 +21,7 @@
 using System;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Archiver.Shared.Classes.Tape;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
@@ -30,9 +31,9 @@ namespace Archiver.Operations.Tape
 {
     public static class RestoreTapeToTar
     {
-        public static void StartOperation()
+        public static Task StartOperationAsync()
         {
-            return;
+            return Task.CompletedTask;
             // Console.WriteLine("Reading tape information...");
             // Console.WriteLine();
 
