@@ -21,11 +21,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Archiver.Shared.Classes.Disc;
-using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 using TerminalUI;
 using TerminalUI.Elements;
@@ -47,7 +45,7 @@ namespace Archiver.Operations.Disc
                     (key) => 
                     {
                         cts.Cancel();
-                        return Task.Delay(0);
+                        return Task.CompletedTask;
                     },
                     Key.MakeKey(ConsoleKey.C, ConsoleModifiers.Control)
                 )
@@ -80,8 +78,7 @@ namespace Archiver.Operations.Disc
                 foreach (DiscSourceFile file in files)
                     pager.AppendLine($"{file.DestinationDisc.DiscNumber.ToString("0000")}   {file.LastWriteTimeUtc.ToLocalTime().ToString().PadRight(22)}   {file.RelativePath}");
 
-                pager.Start();
-                pager.WaitForExit();
+                await pager.RunAsync();
             }
         }
     }

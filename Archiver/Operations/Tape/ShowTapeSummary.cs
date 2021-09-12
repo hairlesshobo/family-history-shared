@@ -19,6 +19,7 @@
  */
 
 using System;
+using System.Threading.Tasks;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 using Archiver.Utilities.Tape;
@@ -28,7 +29,7 @@ namespace Archiver.Operations.Tape
 {
     public static class ShowTapeSummary
     {
-        public static void StartOperation()
+        public static async Task StartOperationAsync()
         {
             if (TapeUtils.IsTapeLoaded() == false)
             {
@@ -41,17 +42,13 @@ namespace Archiver.Operations.Tape
 
                 using (Pager pager = new Pager())
                 {
-                    pager.Start();
-                    
                     pager.AutoScroll = false;
                     pager.ShowLineNumbers = true;
 
                     foreach (string line in text.Split("\n"))
-                    {
                         pager.AppendLine(line);
-                    }
 
-                    pager.WaitForExit();
+                    await pager.RunAsync();
                 }
             }
         }

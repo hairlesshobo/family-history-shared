@@ -309,17 +309,17 @@ namespace Archiver.Operations
         //     };
         // }
 
-        private async static Task NotImplementedAsync()
+        private static async Task NotImplementedAsync()
         {
-            bool proceed = false;
+            TaskCompletionSource tcs = new TaskCompletionSource();
 
             Terminal.InitHeader("Not Implemented", "Archiver");
             Terminal.InitStatusBar(
                 new StatusBarItem(
                     "Main Menu",
                     (key) => { 
-                        proceed = true;
-                        return Task.Delay(0);
+                        tcs.TrySetResult();
+                        return Task.CompletedTask;
                     },
                     Key.MakeKey(ConsoleKey.Q)
                 )
@@ -328,10 +328,7 @@ namespace Archiver.Operations
             Terminal.Clear();
             Formatting.WriteLineC(ConsoleColor.Red, "This operation has not yet been implemented.");
 
-            await Task.Run(async () => {
-                while (!proceed)
-                    await Task.Delay(10);
-            });
+            await tcs.Task;
         }
     }
 }

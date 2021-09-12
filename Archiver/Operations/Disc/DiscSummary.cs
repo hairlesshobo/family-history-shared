@@ -54,8 +54,6 @@ namespace Archiver.Operations.Disc
 
             using (Pager pager = new Pager())
             {
-                pager.Start();
-                
                 pager.AppendLine("Current Disc Archive Statistics");
                 pager.AppendLine("==============================================================");
 
@@ -89,7 +87,7 @@ namespace Archiver.Operations.Disc
                     pager.AppendLine($"{extension.PadLeft(columnWidth)}: {type.Count.ToString().PadLeft(maxCountWidth+2)}");
                 }
 
-                await Task.Run(() => pager.WaitForExit());
+                await pager.RunAsync();
             }
         }
     }

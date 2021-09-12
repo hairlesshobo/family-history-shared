@@ -190,7 +190,7 @@ namespace Archiver.Utilities.Disc
                     "Cancel",
                     (key) => {
                         cts.Cancel();
-                        return Task.Delay(0);
+                        return Task.CompletedTask;
                     },
                     Key.MakeKey(ConsoleKey.C, ConsoleModifiers.Control)
                 )
@@ -264,6 +264,7 @@ namespace Archiver.Utilities.Disc
             else
                 SetStatus("All Discs have been verified");
                 
+            // TODO: I think the line below can just be removed...
             await Task.Delay(0);
         }
 

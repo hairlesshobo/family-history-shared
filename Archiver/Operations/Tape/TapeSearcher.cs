@@ -84,8 +84,7 @@ namespace Archiver.Operations.Tape
                 foreach (TapeSourceFile file in files)
                         pager.AppendLine($"{file.Tape.Name.PadRight(tapeNameWidth)}   {file.LastWriteTimeUtc.ToLocalTime().ToString().PadRight(22)}   {file.RelativePath}");
 
-                pager.Start();
-                pager.WaitForExit();
+                await pager.RunAsync();
             }
         }
     }

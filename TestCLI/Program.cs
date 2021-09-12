@@ -91,7 +91,8 @@ namespace Archiver.TestCLI
                         (key) => {
                             cts.Cancel();
                             Terminal.Stop();
-                            return Task.Delay(0);
+
+                            return Task.CompletedTask;
                         },
                         Key.MakeKey(ConsoleKey.C, ConsoleModifiers.Control)
                     )

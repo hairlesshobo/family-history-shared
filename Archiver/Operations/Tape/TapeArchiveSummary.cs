@@ -56,8 +56,6 @@ namespace Archiver.Operations.Tape
 
             using (Pager pager = new Pager())
             {
-                pager.Start();
-                
                 pager.AppendLine("Overall Tape Archive Statistics");
                 pager.AppendLine("==============================================================");
 
@@ -139,7 +137,7 @@ namespace Archiver.Operations.Tape
                     pager.AppendLine($"{extension.PadLeft(columnWidth)}: {type.Count.ToString().PadLeft(maxCountWidth+2)}");
                 }
 
-                await Task.Run(() => pager.WaitForExit());
+                await pager.RunAsync();
             }
         }
     }
