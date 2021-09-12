@@ -64,6 +64,7 @@ namespace Archiver.Utilities.CSD
             CsdGlobals._jsonReadSourceFiles.Clear();
         }
 
+        [Obsolete]
         public static List<CsdDetail> ReadIndex()
         {
             List<CsdDetail> csds = new List<CsdDetail>();

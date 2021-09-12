@@ -42,6 +42,7 @@ namespace Archiver.Operations.CSD
             Terminal.Clear();
             Terminal.Header.UpdateLeft("Register New CSD");
 
+            // TODO: Continue here
             string driveLetter = null; //CsdUtils.SelectDrive(CsdUtils.CsdDriveType.Uninitialized);
 
             if (driveLetter == null)

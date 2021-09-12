@@ -254,12 +254,12 @@ namespace Archiver.Operations
         //             SelectedValue = true, // do not show the "press enter to return to main menu" message
         //             ForegroundColor = ConsoleColor.Blue
         //         },
-        //         new CliMenuEntry<bool>() {
-        //             Name = "View CSD Archive Summary",
-        //             Task = CSD.ArchiveSummary.StartOperation,
-        //             SelectedValue = true, // do not show the "press enter to return to main menu" message
-        //             ForegroundColor = ConsoleColor.Blue
-        //         },
+                new CliMenuEntry<bool>() {
+                    Name = "View CSD Archive Summary",
+                    Task = CSD.ArchiveSummary.StartOperationAsync,
+                    SelectedValue = true, // do not show the "press enter to return to main menu" message
+                    ForegroundColor = ConsoleColor.Blue
+                },
         //         //! not implemented
         //         new CliMenuEntry<bool>() {
         //             Name = "Verify CSD Drive",

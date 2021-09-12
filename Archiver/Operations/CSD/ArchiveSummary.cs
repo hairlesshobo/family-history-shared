@@ -21,11 +21,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Archiver.Classes.CSD;
 using Archiver.Shared;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.CSD;
 using Archiver.Utilities.Shared;
+using TerminalUI;
 using TerminalUI.Elements;
 
 namespace Archiver.Operations.CSD
@@ -44,10 +46,11 @@ namespace Archiver.Operations.CSD
             Console.WriteLine();
         }
          
-        public static void StartOperation()
+        public static async Task StartOperationAsync()
         {
-            List<CsdDetail> existingCsdDrives = CsdUtils.ReadIndex();
-            Console.Clear();
+            List<CsdDetail> existingCsdDrives = await Helpers.ReadCsdIndexAsync();
+            Terminal.Clear();
+            Terminal.Header.UpdateLeft("CSD Archive Summary");
 
             // IEnumerable<CsdSourceFile> allFiles = existingTapes.SelectMany(x => x.FlattenFiles());
 
@@ -137,10 +140,9 @@ namespace Archiver.Operations.CSD
                 //     pager.AppendLine($"{extension.PadLeft(columnWidth)}: {type.Count.ToString().PadLeft(maxCountWidth+2)}");
                 // }
 
-                pager.WaitForExit();
+                await Task.Run(() => pager.WaitForExit());
             }
 
-            existingCsdDrives.Clear();
             // allFiles = null;
         }
     }

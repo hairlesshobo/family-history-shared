@@ -204,15 +204,19 @@ namespace Archiver.Utilities.Shared
             List<CsdDetail> csds = new List<CsdDetail>();
 
             string[] jsonFiles = Directory.GetFiles(SysInfo.Directories.JSON, "csd_*.json");
+            Array.Sort(jsonFiles);
             int totalFiles = jsonFiles.Length;
             
             if (totalFiles == 0)
                 return null;
 
             Text text = new Text();
-            text.Show();
             Terminal.NextLine();
+
             ProgressBar progress = new ProgressBar();
+            Terminal.NextLine();
+
+            text.Show();
             progress.Show();
 
             int currentFile = 0;
@@ -232,13 +236,13 @@ namespace Archiver.Utilities.Shared
 
                 CsdDetail csdDetail = Newtonsoft.Json.JsonConvert.DeserializeObject<CsdDetail>(File.ReadAllText(jsonFile));
 
+                csdDetail.SyncStats();
+
                 foreach (CsdSourceFile file in csdDetail.Files)
                     file.DestinationCsd = csdDetail;
 
                 csds.Add(csdDetail);
             }
-
-            Terminal.WriteLine();
 
             await Task.Delay(0);
 
