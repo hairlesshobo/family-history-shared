@@ -32,8 +32,6 @@ namespace Archiver.Classes.CSD
 
                 foreach (CsdDetail csd in this.DestinationCsds)
                 {
-                    // this.DestinationCsds.Add(this);
-
                     foreach (CsdSourceFile file in csd.Files)
                     {
                         this.SourceFileDict.Add(file.RelativePath, file);
