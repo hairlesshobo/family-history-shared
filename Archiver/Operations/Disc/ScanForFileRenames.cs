@@ -32,97 +32,99 @@ namespace Archiver.Operations.Disc
 {
     public static class ScanForFileRenames
     {
-        public static async Task StartOperationAsync()
+        public static Task StartOperationAsync()
         {
-            DiscGlobals._destinationDiscs = await Helpers.ReadDiscIndexAsync();
-            Console.Clear();
+            return Task.CompletedTask;
 
-            Formatting.WriteLineC(ConsoleColor.Magenta, "Preparing...");
-            Status.Initialize();
+            // DiscGlobals._destinationDiscs = await Helpers.ReadDiscIndexAsync();
+            // Console.Clear();
 
-            DiscProcessing.IndexAndCountFiles();
+            // Formatting.WriteLineC(ConsoleColor.Magenta, "Preparing...");
+            // Status.Initialize();
 
-            if (DiscGlobals._newlyFoundFiles > 0)
-            {
-                DiscProcessing.SizeFiles();
+            // DiscProcessing.IndexAndCountFiles();
+
+            // if (_stats.NewlyFoundFiles > 0)
+            // {
+            //     DiscProcessing.SizeFiles();
                 
-                List<DiscSourceFile> newFiles = DiscGlobals._newFileEntries;
-                Dictionary<DiscSourceFile, DiscSourceFile> potentialRenames = new Dictionary<DiscSourceFile, DiscSourceFile>();
+            //     List<DiscSourceFile> newFiles = DiscGlobals._newFileEntries;
+            //     Dictionary<DiscSourceFile, DiscSourceFile> potentialRenames = new Dictionary<DiscSourceFile, DiscSourceFile>();
 
-                long totalFileCount = newFiles.Count;
-                long currentFileCount = 0;
+            //     long totalFileCount = newFiles.Count;
+            //     long currentFileCount = 0;
 
-                foreach (DiscSourceFile newFile in newFiles)
-                {
-                    currentFileCount += 1;
+            //     foreach (DiscSourceFile newFile in newFiles)
+            //     {
+            //         currentFileCount += 1;
 
-                    var existingFile = DiscGlobals._discSourceFiles.Where(x => x.Size == newFile.Size
-                                                                            && x.Extension == newFile.Extension
-                                                                            && x.CreationTimeUtc == newFile.CreationTimeUtc
-                                                                            && x.FullPath != newFile.FullPath)
-                                                                   .FirstOrDefault();
+            //         var existingFile = DiscGlobals._discSourceFiles.Where(x => x.Size == newFile.Size
+            //                                                                 && x.Extension == newFile.Extension
+            //                                                                 && x.CreationTimeUtc == newFile.CreationTimeUtc
+            //                                                                 && x.FullPath != newFile.FullPath)
+            //                                                        .FirstOrDefault();
 
-                    if (existingFile != null)
-                        potentialRenames.Add(existingFile, newFile);
+            //         if (existingFile != null)
+            //             potentialRenames.Add(existingFile, newFile);
 
-                    Status.RenameScanned(currentFileCount, totalFileCount, potentialRenames.Count);
-                }
+            //         Status.RenameScanned(currentFileCount, totalFileCount, potentialRenames.Count);
+            //     }
 
-                long totalPotentialRenames = potentialRenames.Count;
-                Status.RenameScanned(currentFileCount, totalFileCount, totalPotentialRenames, true);
-                Console.WriteLine();
-                Console.WriteLine();
+            //     long totalPotentialRenames = potentialRenames.Count;
+            //     Status.RenameScanned(currentFileCount, totalFileCount, totalPotentialRenames, true);
+            //     Console.WriteLine();
+            //     Console.WriteLine();
 
-                if (potentialRenames.Count > 0)
-                {
-                    currentFileCount = 0;
-                    int renamedFiles = 0;
+            //     if (potentialRenames.Count > 0)
+            //     {
+            //         currentFileCount = 0;
+            //         int renamedFiles = 0;
 
-                    foreach (DiscSourceFile existingFile in potentialRenames.Keys)
-                    {
-                        currentFileCount += 1;
+            //         foreach (DiscSourceFile existingFile in potentialRenames.Keys)
+            //         {
+            //             currentFileCount += 1;
 
-                        DiscSourceFile newFile = potentialRenames[existingFile];
+            //             DiscSourceFile newFile = potentialRenames[existingFile];
 
-                        if (ConfirmFileRename(currentFileCount, totalPotentialRenames, existingFile, newFile))
-                        {
-                            renamedFiles += 1;
+            //             if (ConfirmFileRename(currentFileCount, totalPotentialRenames, existingFile, newFile))
+            //             {
+            //                 renamedFiles += 1;
 
-                            if (existingFile.OriginalFile == null)
-                                existingFile.OriginalFile = existingFile.CloneDiscPaths();
+            //                 if (existingFile.OriginalFile == null)
+            //                     existingFile.OriginalFile = existingFile.CloneDiscPaths();
 
-                            existingFile.Name = newFile.Name;
-                            existingFile.FullPath = newFile.FullPath;
-                            existingFile.RelativeDirectory = newFile.RelativeDirectory;
-                            existingFile.RelativePath = newFile.RelativePath;
+            //                 existingFile.Name = newFile.Name;
+            //                 existingFile.FullPath = newFile.FullPath;
+            //                 existingFile.RelativeDirectory = newFile.RelativeDirectory;
+            //                 existingFile.RelativePath = newFile.RelativePath;
 
-                            if (existingFile.OriginalFile.Name == existingFile.Name
-                             && existingFile.OriginalFile.FullPath == existingFile.FullPath
-                             && existingFile.RelativePath == existingFile.RelativePath
-                             && existingFile.RelativeDirectory == existingFile.RelativeDirectory)
-                                existingFile.OriginalFile = null;
+            //                 if (existingFile.OriginalFile.Name == existingFile.Name
+            //                  && existingFile.OriginalFile.FullPath == existingFile.FullPath
+            //                  && existingFile.RelativePath == existingFile.RelativePath
+            //                  && existingFile.RelativeDirectory == existingFile.RelativeDirectory)
+            //                     existingFile.OriginalFile = null;
 
-                            Console.Write($"Saving {DiscFormatting.GetDiscName(existingFile.DestinationDisc)} ...");
-                            existingFile.DestinationDisc.SaveToJson();
-                            StatusHelpers.ClearLine();
-                        }
-                    }
-                }
-                else
-                {
-                    Status.ProcessComplete();
+            //                 Console.Write($"Saving {DiscFormatting.GetDiscName(existingFile.DestinationDisc)} ...");
+            //                 existingFile.DestinationDisc.SaveToJson();
+            //                 StatusHelpers.ClearLine();
+            //             }
+            //         }
+            //     }
+            //     else
+            //     {
+            //         Status.ProcessComplete();
 
-                    Console.WriteLine("No renamed files found. Nothing to do.");
-                }
-            }
-            else
-            {
-                Status.ProcessComplete();
+            //         Console.WriteLine("No renamed files found. Nothing to do.");
+            //     }
+            // }
+            // else
+            // {
+            //     Status.ProcessComplete();
 
-                Console.WriteLine("No new files found. Nothing to do.");
-            }
+            //     Console.WriteLine("No new files found. Nothing to do.");
+            // }
 
-            DiscGlobals.Reset();
+            // DiscGlobals.Reset();
         }
 
         private static int _confirmStartLine = -1;

@@ -249,19 +249,19 @@ namespace Archiver.Utilities.Shared
             return csds;
         }
 
-        public static DiscDetail GetDestinationDisc(long FileSize)
+        public static DiscDetail GetDestinationDisc(DiscScanStats stats, long FileSize)
         {
-            DiscDetail matchingDisc = DiscGlobals._destinationDiscs.FirstOrDefault(x => x.NewDisc == true && (x.DataSize + FileSize) < SysInfo.Config.Disc.CapacityLimit);
+            DiscDetail matchingDisc = stats.DestinationDiscs.FirstOrDefault(x => x.NewDisc == true && (x.DataSize + FileSize) < SysInfo.Config.Disc.CapacityLimit);
 
             if (matchingDisc == null)
             {
                 int nextDiscNumber = 1;
 
-                if (DiscGlobals._destinationDiscs.Count() > 0)
-                    nextDiscNumber = DiscGlobals._destinationDiscs.Max(x => x.DiscNumber) + 1;
+                if (stats.DestinationDiscs.Count() > 0)
+                    nextDiscNumber = stats.DestinationDiscs.Max(x => x.DiscNumber) + 1;
 
                 DiscDetail newDisc = new DiscDetail(nextDiscNumber);
-                DiscGlobals._destinationDiscs.Add(newDisc);
+                stats.DestinationDiscs.Add(newDisc);
                 return newDisc;
             }
             else

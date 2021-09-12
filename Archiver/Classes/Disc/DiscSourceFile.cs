@@ -39,23 +39,16 @@ namespace Archiver.Classes.Disc
         public DateTime LastWriteTimeUtc { get; set; }
         public DateTime CreationTimeUtc { get; set; }
         public FileAttributes Attributes { get; set; }
+        
         [JsonIgnore]
         public DiscDetail DestinationDisc { get; set; } = null;
+        
         [JsonIgnore]
-        public string SourceRootPath
-        {
-            get
-            {
-                return this.FullPath.Substring(0, this.FullPath.Length - this.Name.Length - this.RelativeDirectory.Length - 1);
-            }
-        }
+        public string SourceRootPath => this.FullPath.Substring(0, this.FullPath.Length - this.Name.Length - this.RelativeDirectory.Length - 1);
 
-        public DiscSourceFile()
-        {
-            DiscGlobals._discSourceFiles.Add(this);
-        }
+        public DiscSourceFile() { }
 
-        public DiscSourceFile(string sourcePath, bool scanForRenames = false)
+        public DiscSourceFile(DiscScanStats stats, string sourcePath, bool scanForRenames = false)
         {
             this.FullPath = sourcePath;
 
@@ -63,9 +56,9 @@ namespace Archiver.Classes.Disc
                 throw new DirectoryNotFoundException($"Source file does not exist: {sourcePath}");
 
             // we found a file on the filesystem, but it is already in the archive
-            if (DiscGlobals._discSourceFiles.Any(x => x.Archived == true && x.RelativePath == this.RelativePath))
+            if (stats.DiscSourceFiles.Any(x => x.Archived == true && x.RelativePath == this.RelativePath))
             {
-                DiscGlobals._existingFilesArchived += 1;
+                stats.ExistingFilesArchived += 1;
             }
 
             // we only add the file to the index if it hasn't yet been archived
@@ -77,18 +70,18 @@ namespace Archiver.Classes.Disc
                 if (scanForRenames == true)
                 {
                     // we scan for renames by checking for files with the same extension and size
-                    this.ReadSizeAndAttribs();
+                    this.ReadSizeAndAttribs(stats);
                 }
 
                 if (isNewFile)
                 {
-                    DiscGlobals._newlyFoundFiles += 1;
-                    DiscGlobals._discSourceFiles.Add(this);
+                    stats.NewlyFoundFiles += 1;
+                    stats.DiscSourceFiles.Add(this);
                 }
             }
         }
 
-        public void ReadSizeAndAttribs()
+        public void ReadSizeAndAttribs(DiscScanStats stats)
         {
             FileInfo fileInfo = new FileInfo(this.FullPath);
 
@@ -98,14 +91,14 @@ namespace Archiver.Classes.Disc
             this.CreationTimeUtc = fileInfo.CreationTimeUtc;
             this.Attributes = fileInfo.Attributes;
 
-            DiscGlobals._totalSize += this.Size;
+            stats.TotalSize += this.Size;
         }
 
-        public void AssignDisc()
+        public void AssignDisc(DiscScanStats stats)
         {
             if (this.Size >= 0)
             {
-                this.DestinationDisc = Helpers.GetDestinationDisc(this.Size);
+                this.DestinationDisc = Helpers.GetDestinationDisc(stats, this.Size);
                 this.DestinationDisc.Files.Add(this);
             }
         }

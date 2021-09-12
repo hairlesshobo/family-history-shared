@@ -40,9 +40,11 @@ namespace Archiver.Utilities.Disc
         private const int _sampleDurationMs = 100;
         private Stopwatch _sw;
         private long _lastSample;
+        private DiscScanStats _stats;
 
-        public FileScanner()
+        public FileScanner(DiscScanStats stats)
         {
+            _stats = stats ?? throw new System.ArgumentNullException(nameof(stats));
             _sw = new Stopwatch();
 
             this.OnComplete += delegate { };
@@ -82,17 +84,17 @@ namespace Archiver.Utilities.Disc
                 string cleanFile = PathUtils.CleanPath(file);
 
                 if (SysInfo.Config.Disc.ExcludePaths.Any(x => cleanFile.ToLower().StartsWith(x.ToLower())))
-                    DiscGlobals._excludedFileCount++;
+                    _stats.ExcludedFileCount++;
 
                 else if (SysInfo.Config.Disc.ExcludeFiles.Any(x => PathUtils.GetFileName(cleanFile).ToLower().EndsWith(x.ToLower())))
-                    DiscGlobals._excludedFileCount++;
+                    _stats.ExcludedFileCount++;
 
                 else
-                    new DiscSourceFile(cleanFile);
+                    new DiscSourceFile(_stats, cleanFile);
 
                 if (_sw.ElapsedMilliseconds - _lastSample > _sampleDurationMs)
                 {
-                    OnProgressChanged(DiscGlobals._newlyFoundFiles, DiscGlobals._existingFilesArchived, DiscGlobals._excludedFileCount);
+                    OnProgressChanged(_stats.NewlyFoundFiles, _stats.ExistingFilesArchived, _stats.ExcludedFileCount);
                     _lastSample = _sw.ElapsedMilliseconds;
                 }
             }

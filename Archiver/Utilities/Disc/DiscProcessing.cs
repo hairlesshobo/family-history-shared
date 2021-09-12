@@ -37,18 +37,18 @@ namespace Archiver.Utilities.Disc
     {
         private static int _updateFrequencyMs = 1000;
         
-        public static void IndexAndCountFiles()
+        public static void IndexAndCountFiles(DiscScanStats stats)
         {
             Console.WriteLine();
 
-            FileScanner scanner = new FileScanner();
+            FileScanner scanner = new FileScanner(stats);
 
             scanner.OnProgressChanged += (newFiles, existingFiles, excludedFiles) => {
                 Status.FileScanned(newFiles, existingFiles, excludedFiles);
             };
 
             scanner.OnComplete += () => {
-                Status.FileScanned(DiscGlobals._newlyFoundFiles, DiscGlobals._existingFilesArchived, DiscGlobals._excludedFileCount, true);
+                Status.FileScanned(stats.NewlyFoundFiles, stats.ExistingFilesArchived, stats.ExcludedFileCount, true);
             };
 
             Thread scanThread = new Thread(scanner.ScanFiles);
@@ -56,18 +56,18 @@ namespace Archiver.Utilities.Disc
             scanThread.Join();
         }
 
-        public static void SizeFiles()
+        public static void SizeFiles(DiscScanStats stats)
         {
             Console.WriteLine();
 
-            FileSizer sizer = new FileSizer();
+            FileSizer sizer = new FileSizer(stats);
 
             sizer.OnProgressChanged += (currentFile, totalSize) => {
                 Status.FileSized(currentFile, totalSize);
             };
 
             sizer.OnComplete += () => {
-                Status.FileSized(DiscGlobals._newlyFoundFiles, DiscGlobals._totalSize, true);
+                Status.FileSized(stats.NewlyFoundFiles, stats.TotalSize, true);
             };
 
             Thread sizeThread = new Thread(sizer.SizeFiles);
@@ -75,17 +75,17 @@ namespace Archiver.Utilities.Disc
             sizeThread.Join();
         }
 
-        public static void DistributeFiles()
+        public static void DistributeFiles(DiscScanStats stats)
         {
-            FileDistributor distributor = new FileDistributor();
+            FileDistributor distributor = new FileDistributor(stats);
 
             distributor.OnProgressChanged += (currentFile, discCount) => {
                 Status.FileDistributed(currentFile, discCount);
             };
 
             distributor.OnComplete += () => {
-                int discCount = DiscGlobals._destinationDiscs.Where(x => x.Finalized == false).Count();
-                Status.FileDistributed(DiscGlobals._newlyFoundFiles, discCount, true);
+                int discCount = stats.DestinationDiscs.Where(x => x.Finalized == false).Count();
+                Status.FileDistributed(stats.NewlyFoundFiles, discCount, true);
             };
 
             Thread distributeThread = new Thread(distributor.DistributeFiles);
@@ -329,11 +329,11 @@ namespace Archiver.Utilities.Disc
             Status.WriteDiscIsoHash(disc, masterSw.Elapsed, 100.0);
         }
 
-        public static void ProcessDiscs ()
+        public static void ProcessDiscs (DiscScanStats stats)
         {
             Status.InitDiscLines();
 
-            foreach (DiscDetail disc in DiscGlobals._destinationDiscs.Where(x => x.NewDisc == true).OrderBy(x => x.DiscNumber))
+            foreach (DiscDetail disc in stats.DestinationDiscs.Where(x => x.NewDisc == true).OrderBy(x => x.DiscNumber))
             {
                 Stopwatch masterSw = new Stopwatch();
                 masterSw.Start();

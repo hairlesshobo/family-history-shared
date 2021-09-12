@@ -36,9 +36,11 @@ namespace Archiver.Utilities.Disc
         private const int _sampleDurationMs = 100;
         private Stopwatch _sw;
         private long _lastSample;
+        private DiscScanStats _stats;
 
-        public FileSizer()
+        public FileSizer(DiscScanStats stats)
         {
+            _stats = stats ?? throw new System.ArgumentNullException(nameof(stats));
             _sw = new Stopwatch();
 
             this.OnComplete += delegate { };
@@ -51,13 +53,13 @@ namespace Archiver.Utilities.Disc
 
             long fileCount = 0;
 
-            foreach (DiscSourceFile sourceFile in DiscGlobals._discSourceFiles.Where(x => x.Archived == false))
+            foreach (DiscSourceFile sourceFile in _stats.DiscSourceFiles.Where(x => x.Archived == false))
             {
-                sourceFile.ReadSizeAndAttribs();
+                sourceFile.ReadSizeAndAttribs(_stats);
 
                 if (_sw.ElapsedMilliseconds - _lastSample > _sampleDurationMs)
                 {
-                    OnProgressChanged(fileCount, DiscGlobals._totalSize);
+                    OnProgressChanged(fileCount, _stats.TotalSize);
                     _lastSample = _sw.ElapsedMilliseconds;
                 }
 

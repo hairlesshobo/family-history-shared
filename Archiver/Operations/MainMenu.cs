@@ -142,12 +142,12 @@ namespace Archiver.Operations
                     Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsOpticalDrivePresent,
                     ForegroundColor = ConsoleColor.DarkYellow
                 }
-                //,
-                // new CliMenuEntry<bool>() {
-                //     Name = "Scan For Changes",
-                //     Task = Disc.DiscArchiver.StartScanOnly,
-                //     ForegroundColor = ConsoleColor.DarkYellow
-                // },
+                ,
+                new CliMenuEntry<bool>() {
+                    Name = "Scan For Changes",
+                    Task = Disc.DiscArchiver.StartScanOnly,
+                    ForegroundColor = ConsoleColor.DarkYellow
+                },
                 // new CliMenuEntry<bool>() {
                 //     Name = "Scan For Renamed/Moved Files",
                 //     Task = Disc.ScanForFileRenames.StartOperation,
