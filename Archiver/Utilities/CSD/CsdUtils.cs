@@ -25,8 +25,8 @@ using System.Linq;
 using System.Management;
 using System.Text;
 using System.Threading;
-using Archiver.Classes.CSD;
 using Archiver.Shared;
+using Archiver.Shared.Classes.CSD;
 using Archiver.Shared.Exceptions;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
@@ -54,18 +54,6 @@ namespace Archiver.Utilities.CSD
             return Newtonsoft.Json.JsonConvert.DeserializeObject<CsdDetail>(jsonContent);
         }
 
-
-        public static CsdDetail GetDestinationCsd(CsdScanStats stats, long FileSize)
-        {
-            CsdDetail matchingCsd = stats.DestinationCsds
-                                         .FirstOrDefault(x => x.DiskFull == false &&
-                                                              x.UsableFreeSpace > HelpersNew.RoundToNextMultiple(FileSize, x.BlockSize));
-
-            if (matchingCsd == null)
-                throw new CsdInsufficientCapacityException($"No CSD Drive with sufficient capacity to store a {FileSize} byte ({Formatting.GetFriendlySize(FileSize)}) file");
-            else
-                return matchingCsd;
-        }
 
         public static int GetBlockSize(string DriveLetter)
         {

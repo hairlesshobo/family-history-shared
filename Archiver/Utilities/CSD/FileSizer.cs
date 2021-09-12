@@ -20,8 +20,7 @@
 
 using System.Diagnostics;
 using System.Linq;
-using Archiver.Classes;
-using Archiver.Classes.CSD;
+using Archiver.Shared.Classes.CSD;
 
 namespace Archiver.Utilities.CSD
 {

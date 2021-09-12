@@ -20,12 +20,12 @@
 
 using System;
 using System.IO;
+using System.Linq;
+using Archiver.Shared.Exceptions;
 using Archiver.Shared.Interfaces;
-using Archiver.Utilities.CSD;
-using Archiver.Utilities.Shared;
-using Newtonsoft.Json;
+using Archiver.Shared.Utilities;
 
-namespace Archiver.Classes.CSD
+namespace Archiver.Shared.Classes.CSD
 {
     public class CsdSourceFile : CsdSourceFilePathDetail, ISourceFile
     {
@@ -54,11 +54,13 @@ namespace Archiver.Classes.CSD
         public DateTime CreationTimeUtc { get; set; }
         public FileAttributes Attributes { get; set; }
 
-        [JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public CsdDetail DestinationCsd { get; set; } = null;
 
-        [JsonIgnore]
-        public string SourceRootPath    => this.FullPath.Substring(0, this.FullPath.Length - this.Name.Length - this.RelativeDirectory.Length - 1);
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
+        public string SourceRootPath => this.FullPath.Substring(0, this.FullPath.Length - this.Name.Length - this.RelativeDirectory.Length - 1);
 
         public CsdSourceFile() { }
 
@@ -114,7 +116,7 @@ namespace Archiver.Classes.CSD
         {
             if (this.Size >= 0)
             {
-                this.DestinationCsd = CsdUtils.GetDestinationCsd(stats, this.Size);
+                this.DestinationCsd = GetDestinationCsd(stats, this.Size);
                 this.DestinationCsd.AddFile(this);
             }
         }
@@ -128,6 +130,18 @@ namespace Archiver.Classes.CSD
             copier.Preserve = true;
 
             return copier;
+        }
+
+        private static CsdDetail GetDestinationCsd(CsdScanStats stats, long FileSize)
+        {
+            CsdDetail matchingCsd = stats.DestinationCsds
+                                         .FirstOrDefault(x => x.DiskFull == false &&
+                                                              x.UsableFreeSpace > HelpersNew.RoundToNextMultiple(FileSize, x.BlockSize));
+
+            if (matchingCsd == null)
+                throw new CsdInsufficientCapacityException($"No CSD Drive with sufficient capacity to store a {FileSize} byte ({Formatting.GetFriendlySize(FileSize)}) file");
+            else
+                return matchingCsd;
         }
     }
 }

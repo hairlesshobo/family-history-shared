@@ -19,7 +19,7 @@
  */
 
 using System;
-using Archiver.Classes.CSD;
+using Archiver.Shared.Classes.CSD;
 using Archiver.Utilities.CSD;
 using Archiver.Utilities.Shared;
 

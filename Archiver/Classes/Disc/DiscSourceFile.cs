@@ -21,6 +21,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using Archiver.Shared.Classes;
 using Archiver.Shared.Interfaces;
 using Archiver.Utilities.Shared;
 using Newtonsoft.Json;

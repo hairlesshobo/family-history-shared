@@ -21,7 +21,7 @@
 using System;
 using Archiver.Shared.Utilities;
 
-namespace Archiver.Classes.CSD
+namespace Archiver.Shared.Classes.CSD
 {
     public class CsdSourceFilePathDetail
     {

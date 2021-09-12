@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Archiver.Classes.CSD
+namespace Archiver.Shared.Classes.CSD
 {
     public class CsdScanStats
     {

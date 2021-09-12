@@ -19,16 +19,14 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using Archiver.Classes.CSD;
 using Archiver.Shared;
+using Archiver.Shared.Classes;
+using Archiver.Shared.Classes.CSD;
 using Archiver.Shared.Utilities;
-using Archiver.Utilities.Shared;
 
 namespace Archiver.Utilities.CSD
 {

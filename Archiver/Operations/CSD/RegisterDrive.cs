@@ -23,12 +23,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Archiver.Classes.CSD;
-using Archiver.Classes.Disc;
+using Archiver.Shared.Classes.CSD;
 using Archiver.Shared.Utilities;
-using Archiver.Utilities;
 using Archiver.Utilities.CSD;
-using Archiver.Utilities.Disc;
 using Archiver.Utilities.Shared;
 using TerminalUI;
 

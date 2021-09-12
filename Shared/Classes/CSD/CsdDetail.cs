@@ -23,11 +23,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Archiver.Shared;
 using Archiver.Shared.Utilities;
-using Archiver.Utilities.CSD;
-using Archiver.Utilities.Shared;
 using Newtonsoft.Json;
 
-namespace Archiver.Classes.CSD
+namespace Archiver.Shared.Classes.CSD
 {
 
 

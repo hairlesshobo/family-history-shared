@@ -21,11 +21,9 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Archiver.Classes;
-using Archiver.Classes.CSD;
 using Archiver.Shared;
+using Archiver.Shared.Classes.CSD;
 using Archiver.Shared.Utilities;
-using Archiver.Utilities.Shared;
 
 namespace Archiver.Utilities.CSD
 {

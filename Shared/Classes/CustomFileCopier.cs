@@ -26,7 +26,7 @@ using System.Text;
 using Archiver.Shared.Interfaces;
 using Archiver.Shared.Utilities;
 
-namespace Archiver.Utilities.Shared
+namespace Archiver.Shared.Classes
 {
 
     public delegate void ProgressChangedDelegate(FileCopyProgress progress);

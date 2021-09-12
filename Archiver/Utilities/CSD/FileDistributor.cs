@@ -20,10 +20,8 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using Archiver.Classes;
-using Archiver.Classes.CSD;
+using Archiver.Shared.Classes.CSD;
 
 namespace Archiver.Utilities.CSD
 {

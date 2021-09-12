@@ -20,11 +20,16 @@
 
 using System;
 
-namespace Archiver.Classes.CSD
+namespace Archiver.Shared.Classes.CSD
 {
-    public class CsdVerificationResult
+    public class CsdDriveInfo
     {
-        public DateTime VerificationDTM { get; set; }
-        public bool CsdValid { get; set; }
+        public string Brand { get; set; }
+        public string Line { get; set; }
+        public string Model { get; set; }
+        public string Serial { get; set; }
+        public string FormFactor { get; set; }
+        public bool? SolidState { get; set; }
+        public DateTime? ManufactureDate { get; set; }
     }
 }
