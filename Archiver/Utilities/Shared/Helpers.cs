@@ -25,9 +25,9 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Archiver.Classes.Disc;
 using Archiver.Shared;
 using Archiver.Shared.Classes.CSD;
+using Archiver.Shared.Classes.Disc;
 using Archiver.Shared.Classes.Tape;
 using Archiver.Shared.Models;
 using Archiver.Shared.Utilities;
@@ -248,26 +248,6 @@ namespace Archiver.Utilities.Shared
             return csds;
         }
 
-        public static DiscDetail GetDestinationDisc(DiscScanStats stats, long FileSize)
-        {
-            DiscDetail matchingDisc = stats.DestinationDiscs.FirstOrDefault(x => x.NewDisc == true && (x.DataSize + FileSize) < SysInfo.Config.Disc.CapacityLimit);
-
-            if (matchingDisc == null)
-            {
-                int nextDiscNumber = 1;
-
-                if (stats.DestinationDiscs.Count() > 0)
-                    nextDiscNumber = stats.DestinationDiscs.Max(x => x.DiscNumber) + 1;
-
-                DiscDetail newDisc = new DiscDetail(nextDiscNumber);
-                stats.DestinationDiscs.Add(newDisc);
-                return newDisc;
-            }
-            else
-                return matchingDisc;
-        }
-
-        
 
         public static void CreateIndexIso()
         {
@@ -300,30 +280,6 @@ namespace Archiver.Utilities.Shared
             Console.CursorTop = Console.CursorTop+2;
         }
 
-        
-
-        public static void SaveDestinationDisc(DiscDetail disc, string destinationDir = null, string fileName = null)
-        {
-            if (destinationDir == null)
-                destinationDir = SysInfo.Directories.JSON;
-
-            if (fileName == null)
-                fileName = $"disc_{disc.DiscNumber.ToString("0000")}.json";
-
-            if (!Directory.Exists(destinationDir))
-                Directory.CreateDirectory(destinationDir);
-
-            string jsonFilePath = destinationDir + "/" + fileName;
-
-            string json = Newtonsoft.Json.JsonConvert.SerializeObject(disc, new Newtonsoft.Json.JsonSerializerSettings() {
-                ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
-                Formatting = Newtonsoft.Json.Formatting.Indented,
-                NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore
-            });
-
-            // Write the json data needed for future runs of this app
-            File.WriteAllText(jsonFilePath, json, Encoding.UTF8);
-        }
 
         public static void SaveTape(TapeDetail tape)
         {

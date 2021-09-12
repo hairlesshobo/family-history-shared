@@ -21,7 +21,7 @@
 using System;
 using Archiver.Shared.Utilities;
 
-namespace Archiver.Classes.Disc
+namespace Archiver.Shared.Classes.Disc
 {
     public class DiscSourceFilePathDetail
     {

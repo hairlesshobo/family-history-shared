@@ -21,13 +21,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using Archiver.Classes;
-using Archiver.Classes.Disc;
+using Archiver.Shared.Classes.Disc;
 using Archiver.Shared.Models;
 using Archiver.Shared.Utilities;
-using Archiver.Utilities;
 using Archiver.Utilities.Disc;
 using Archiver.Utilities.Shared;
 using TerminalUI;

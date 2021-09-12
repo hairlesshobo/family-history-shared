@@ -25,7 +25,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using Archiver.Classes.Disc;
+using Archiver.Shared.Classes.Disc;
 using Newtonsoft.Json;
 using Archiver.Utilities.Shared;
 using Archiver.Shared;
@@ -201,7 +201,7 @@ namespace Archiver.Utilities.Disc
         {
             Status.WriteDiscJsonLine(disc, masterSw.Elapsed);
 
-            Helpers.SaveDestinationDisc(disc);
+            DiskUtils.SaveDestinationDisc(disc);
         }
 
         public static void GenerateIndexFiles(DiscDetail disc, Stopwatch masterSw)

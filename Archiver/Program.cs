@@ -20,26 +20,15 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
-using Archiver.Classes.Disc;
 using Archiver.Operations;
 using Archiver.Shared;
-using Archiver.Shared.Classes;
-using Archiver.Shared.Exceptions;
-using Archiver.Shared.Native;
+using Archiver.Shared.Classes.Disc;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
-using Microsoft.Win32.SafeHandles;
 using TerminalUI;
 using TerminalUI.Elements;
-using Native = Archiver.Shared.Native;
 
 namespace Archiver
 {

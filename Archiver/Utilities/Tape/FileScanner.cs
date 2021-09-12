@@ -23,10 +23,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Archiver.Classes;
 using Archiver.Shared.Classes.Tape;
 using Archiver.Shared.Utilities;
-using Archiver.Utilities.Shared;
 
 namespace Archiver.Utilities.Tape
 {

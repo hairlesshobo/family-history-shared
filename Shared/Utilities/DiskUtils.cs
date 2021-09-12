@@ -19,6 +19,9 @@
  */
 
 using System;
+using System.IO;
+using System.Text;
+using Archiver.Shared.Classes.Disc;
 using Archiver.Shared.Exceptions;
 using Archiver.Shared.Models;
 
@@ -34,6 +37,29 @@ namespace Archiver.Shared.Utilities
                 return Windows.GetDiskSize(driveName);
 
             throw new UnsupportedOperatingSystemException();
+        }
+
+        public static void SaveDestinationDisc(DiscDetail disc, string destinationDir = null, string fileName = null)
+        {
+            if (destinationDir == null)
+                destinationDir = SysInfo.Directories.JSON;
+
+            if (fileName == null)
+                fileName = $"disc_{disc.DiscNumber.ToString("0000")}.json";
+
+            if (!Directory.Exists(destinationDir))
+                Directory.CreateDirectory(destinationDir);
+
+            string jsonFilePath = destinationDir + "/" + fileName;
+
+            string json = Newtonsoft.Json.JsonConvert.SerializeObject(disc, new Newtonsoft.Json.JsonSerializerSettings() {
+                ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
+                Formatting = Newtonsoft.Json.Formatting.Indented,
+                NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore
+            });
+
+            // Write the json data needed for future runs of this app
+            File.WriteAllText(jsonFilePath, json, Encoding.UTF8);
         }
     }
 }

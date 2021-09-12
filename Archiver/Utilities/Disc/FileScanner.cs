@@ -21,11 +21,9 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Archiver.Classes;
-using Archiver.Classes.Disc;
+using Archiver.Shared.Classes.Disc;
 using Archiver.Shared;
 using Archiver.Shared.Utilities;
-using Archiver.Utilities.Shared;
 
 namespace Archiver.Utilities.Disc
 {

@@ -20,8 +20,7 @@
 
 using System;
 using System.Linq;
-using Archiver.Classes;
-using Archiver.Classes.Disc;
+using Archiver.Shared.Classes.Disc;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 

@@ -21,12 +21,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Archiver.Shared;
 using Archiver.Shared.Utilities;
-using Archiver.Utilities.Shared;
 using Newtonsoft.Json;
 
-namespace Archiver.Classes.Disc
+namespace Archiver.Shared.Classes.Disc
 {
     public class DiscVerificationResult
     {
@@ -117,6 +115,6 @@ namespace Archiver.Classes.Disc
         }
 
         public void SaveToJson()
-            => Helpers.SaveDestinationDisc(this);
+            => DiskUtils.SaveDestinationDisc(this);
     }
 }

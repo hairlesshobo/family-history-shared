@@ -25,7 +25,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Archiver.Classes.Disc;
+using Archiver.Shared.Classes.Disc;
 using Archiver.Shared.Classes;
 using Archiver.Shared.Models;
 using Archiver.Shared.Utilities;
@@ -235,7 +235,7 @@ namespace Archiver.Utilities.Disc
                         bool discValid = (disc.Hash.ToLower() == hash.ToLower());
 
                         disc.RecordVerification(DateTime.UtcNow, discValid);
-                        Helpers.SaveDestinationDisc(disc);
+                        DiskUtils.SaveDestinationDisc(disc);
 
                         _pendingDiscIds.Remove(disc.DiscNumber);
                         _completedDiscIds.Add(disc.DiscNumber);

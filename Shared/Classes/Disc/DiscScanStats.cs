@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Archiver.Classes.Disc
+namespace Archiver.Shared.Classes.Disc
 {
     public class DiscScanStats
     {

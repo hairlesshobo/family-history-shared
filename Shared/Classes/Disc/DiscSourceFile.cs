@@ -21,12 +21,10 @@
 using System;
 using System.IO;
 using System.Linq;
-using Archiver.Shared.Classes;
 using Archiver.Shared.Interfaces;
-using Archiver.Utilities.Shared;
 using Newtonsoft.Json;
 
-namespace Archiver.Classes.Disc
+namespace Archiver.Shared.Classes.Disc
 {
     public class DiscSourceFile : DiscSourceFilePathDetail, ISourceFile
     {
@@ -99,7 +97,7 @@ namespace Archiver.Classes.Disc
         {
             if (this.Size >= 0)
             {
-                this.DestinationDisc = Helpers.GetDestinationDisc(stats, this.Size);
+                this.DestinationDisc = GetDestinationDisc(stats, this.Size);
                 this.DestinationDisc.Files.Add(this);
             }
         }
@@ -113,6 +111,25 @@ namespace Archiver.Classes.Disc
             copier.Preserve = true;
 
             return copier;
+        }
+
+        private static DiscDetail GetDestinationDisc(DiscScanStats stats, long FileSize)
+        {
+            DiscDetail matchingDisc = stats.DestinationDiscs.FirstOrDefault(x => x.NewDisc == true && (x.DataSize + FileSize) < SysInfo.Config.Disc.CapacityLimit);
+
+            if (matchingDisc == null)
+            {
+                int nextDiscNumber = 1;
+
+                if (stats.DestinationDiscs.Count() > 0)
+                    nextDiscNumber = stats.DestinationDiscs.Max(x => x.DiscNumber) + 1;
+
+                DiscDetail newDisc = new DiscDetail(nextDiscNumber);
+                stats.DestinationDiscs.Add(newDisc);
+                return newDisc;
+            }
+            else
+                return matchingDisc;
         }
     }
 }
