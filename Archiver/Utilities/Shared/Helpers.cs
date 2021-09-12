@@ -26,6 +26,7 @@ using System.Management;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Archiver.Classes.CSD;
 using Archiver.Classes.Disc;
 using Archiver.Shared;
 using Archiver.Shared.Classes.Tape;
@@ -145,12 +146,47 @@ namespace Archiver.Utilities.Shared
             return discs;
         }
 
-        public static async Task<List<TapeDetail>> ReadTapeIndexAsync()
+        public static Task<List<TapeDetail>> ReadTapeIndexAsync()
+        {
+            CancellationTokenSource cts = new CancellationTokenSource();
+            
+            Terminal.Clear();
+            Terminal.Header.UpdateLeft("Read Tape Index...");
+            Terminal.StatusBar.ShowItems(
+                new StatusBarItem(
+                    "Cancel",
+                    (key) => {
+                        cts.Cancel();
+                        return Task.CompletedTask;
+                    },
+                    Key.MakeKey(ConsoleKey.C, ConsoleModifiers.Control)
+                )
+            );
+
+            Text text = new Text();
+            Terminal.NextLine();
+            ProgressBar progress = new ProgressBar();
+            Terminal.NextLine();
+
+            progress.Show();
+            text.Show();
+
+            return TapeUtilsNew.ReadIndexAsync(cts.Token, (currentFile, totalFiles) => 
+            {
+                double currentPct = (double)currentFile / (double)totalFiles;
+
+                progress.UpdateProgress(currentPct);
+
+                text.UpdateValue($"Reading tape index files... {currentFile.ToString().PadLeft(totalFiles.ToString().Length)}/{totalFiles}");
+            });
+        }
+
+        public static async Task<List<CsdDetail>> ReadCsdIndexAsync()
         {
             bool cancel = false;
             
             Terminal.Clear();
-            Terminal.Header.UpdateLeft("Read Tape Index...");
+            Terminal.Header.UpdateLeft("Read CSD Index...");
             Terminal.StatusBar.ShowItems(
                 new StatusBarItem(
                     "Cancel",
@@ -165,9 +201,9 @@ namespace Archiver.Utilities.Shared
             if (!Directory.Exists(SysInfo.Directories.JSON))
                 return null;
 
-            List<TapeDetail> tapes = new List<TapeDetail>();
+            List<CsdDetail> csds = new List<CsdDetail>();
 
-            string[] jsonFiles = Directory.GetFiles(SysInfo.Directories.JSON, "tape_*.json");
+            string[] jsonFiles = Directory.GetFiles(SysInfo.Directories.JSON, "csd_*.json");
             int totalFiles = jsonFiles.Length;
             
             if (totalFiles == 0)
@@ -192,19 +228,21 @@ namespace Archiver.Utilities.Shared
 
                 progress.UpdateProgress(currentPct);
 
-                text.UpdateValue($"Reading tape index files... {currentFile.ToString().PadLeft(totalFiles.ToString().Length)}/{totalFiles}");
+                text.UpdateValue($"Reading CSD index files... {currentFile.ToString().PadLeft(totalFiles.ToString().Length)}/{totalFiles}");
 
-                TapeDetail tapeDetail = Newtonsoft.Json.JsonConvert.DeserializeObject<TapeDetail>(File.ReadAllText(jsonFile));
-                tapeDetail.FlattenFiles().ToList().ForEach(x => x.Tape = tapeDetail);
+                CsdDetail csdDetail = Newtonsoft.Json.JsonConvert.DeserializeObject<CsdDetail>(File.ReadAllText(jsonFile));
 
-                tapes.Add(tapeDetail);
+                foreach (CsdSourceFile file in csdDetail.Files)
+                    file.DestinationCsd = csdDetail;
+
+                csds.Add(csdDetail);
             }
 
             Terminal.WriteLine();
 
             await Task.Delay(0);
 
-            return tapes;
+            return csds;
         }
 
         public static DiscDetail GetDestinationDisc(long FileSize)

@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Archiver.Classes.CSD;
 using Archiver.Classes.Disc;
 using Archiver.Shared.Utilities;
@@ -29,26 +30,28 @@ using Archiver.Utilities;
 using Archiver.Utilities.CSD;
 using Archiver.Utilities.Disc;
 using Archiver.Utilities.Shared;
+using TerminalUI;
 
 namespace Archiver.Operations.CSD
 {
     public static class RegisterDrive
     {
-        public static void StartOperation()
+        public static async Task StartOperationAsync()
         {
-            CsdGlobals._destinationCsds = CsdUtils.ReadIndex();
-            Console.Clear();
+            List<CsdDetail> allCsds = await Helpers.ReadCsdIndexAsync();
+            Terminal.Clear();
+            Terminal.Header.UpdateLeft("Register New CSD");
 
-            string driveLetter = CsdUtils.SelectDrive(CsdUtils.CsdDriveType.Uninitialized);
+            string driveLetter = null; //CsdUtils.SelectDrive(CsdUtils.CsdDriveType.Uninitialized);
 
             if (driveLetter == null)
             {
-                Console.WriteLine();
-                Console.WriteLine("In order to register a drive as a CSD drive, it must first be prepared manually as follows:");
-                Console.WriteLine("  * Initialize the drive as GPT");
-                Console.WriteLine("  * Create a single partition that fills the disk");
-                Console.WriteLine("  * Format the partition with NTFS, all default settings");
-                Console.WriteLine("  * Rename the Drive to CSD___ (the ___ will automatically be replaced with the next available CSD number)");
+                Terminal.WriteLine();
+                Terminal.WriteLine("In order to register a new drive as a CSD, it must first be prepared manually as follows:");
+                Terminal.WriteLine("  * Initialize the drive as GPT");
+                Terminal.WriteLine("  * Create a single partition that fills the disk");
+                Terminal.WriteLine("  * Format the partition with NTFS, all default settings");
+                Terminal.WriteLine("  * Rename the Drive to CSD___ (the ___ will automatically be replaced with the next available CSD number)");
 
                 return;
             }
@@ -59,8 +62,8 @@ namespace Archiver.Operations.CSD
 
             int nextCsdNumber = 1;
 
-            if (CsdGlobals._destinationCsds.Count() > 0)
-                nextCsdNumber = CsdGlobals._destinationCsds.Max(x => x.CsdNumber) + 1;
+            if (allCsds.Count() > 0)
+                nextCsdNumber = allCsds.Max(x => x.CsdNumber) + 1;
 
             CsdDetail newCsd = new CsdDetail(nextCsdNumber, blockSize, di.TotalFreeSpace);
 
@@ -70,8 +73,6 @@ namespace Archiver.Operations.CSD
             CsdUtils.SaveDetailToIndex(newCsd);
 
             Formatting.WriteLineC(ConsoleColor.Green, $"Drive {driveLetter} was successfully initialized as {newCsd.CsdName}");
-
-            CsdGlobals.Reset();
         }
     }
 }

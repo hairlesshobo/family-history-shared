@@ -19,6 +19,11 @@
  */
 
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using Archiver.Shared.Classes.Tape;
 
 namespace Archiver.Shared.Utilities
 {

@@ -88,8 +88,8 @@ namespace Archiver.Operations
                 entries.AddRange(BuildDiscMenu());
                 entries.Add(new CliMenuEntry<bool>() { Header = true });
                 entries.AddRange(BuildTapeMenu());
-                // entries.Add(new CliMenuEntry<bool>() { Header = true });
-                // entries.AddRange(BuildCsdMenu());
+                entries.Add(new CliMenuEntry<bool>() { Header = true });
+                entries.AddRange(BuildCsdMenu());
                 // entries.Add(new CliMenuEntry<bool>() { Header = true });
                 // entries.AddRange(BuildUniversalMenu());
 
@@ -224,20 +224,20 @@ namespace Archiver.Operations
             };
         }
 
-        // private static List<CliMenuEntry<bool>> BuildCsdMenu()
-        // {
-        //     return new List<CliMenuEntry<bool>>()
-        //     {
-        //         new CliMenuEntry<bool>() {
-        //             Name = "Cold Storage Disk (HDD) Operations",
-        //             Header = true,
-        //             ShortcutKey = ConsoleKey.C
-        //         },
-        //         new CliMenuEntry<bool>() {
-        //             Name = "Register CSD Drive",
-        //             Task = CSD.RegisterDrive.StartOperation,
-        //             ForegroundColor = ConsoleColor.Green
-        //         },
+        private static List<CliMenuEntry<bool>> BuildCsdMenu()
+        {
+            return new List<CliMenuEntry<bool>>()
+            {
+                new CliMenuEntry<bool>() {
+                    Name = "Cold Storage Disk (HDD) Operations",
+                    Header = true,
+                    ShortcutKey = ConsoleKey.C
+                },
+                new CliMenuEntry<bool>() {
+                    Name = "Register CSD Drive",
+                    Task = CSD.RegisterDrive.StartOperationAsync,
+                    ForegroundColor = ConsoleColor.Green
+                },
         //         //! not implemented
         //         new CliMenuEntry<bool>() {
         //             Name = "Restore entire CSD Drive",
@@ -281,8 +281,8 @@ namespace Archiver.Operations
         //             Disabled = SysInfo.IsReadonlyFilesystem,
         //             ForegroundColor = ConsoleColor.Red
         //         }
-        //     };
-        // }
+            };
+        }
 
         // private static List<CliMenuEntry<bool>> BuildUniversalMenu()
         // {
