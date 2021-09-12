@@ -19,24 +19,13 @@
  */
 
 using System;
-using System.IO;
-using System.Text;
-using Archiver.Shared.Classes.Disc;
-using Archiver.Shared.Exceptions;
-using Archiver.Shared.Models;
 
-namespace Archiver.Shared.Utilities
+namespace Archiver.Shared.Interfaces
 {
-    public static partial class DiskUtils
+    public interface IMediaDetail
     {
-        public static ulong GetDiskSize(string driveName)
-        {
-            if (SysInfo.OSType == OSType.Windows)
-                return Windows.GetDiskSize(driveName);
-            else if (SysInfo.OSType == OSType.Linux)
-                return Windows.GetDiskSize(driveName);
+        void SaveToIndex();
 
-            throw new UnsupportedOperatingSystemException();
-        }
+        void SaveToJson(string destinationDir = null, string fileName = null);
     }
 }

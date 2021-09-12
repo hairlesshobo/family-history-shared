@@ -165,31 +165,5 @@ namespace Archiver.Utilities.CSD
 
             return selectedDrive;
         }
-
-        private static void SaveCsdDetailToJson(string jsonFilePath, CsdDetail csd)
-        {
-            Newtonsoft.Json.JsonSerializerSettings settings = new Newtonsoft.Json.JsonSerializerSettings() {
-                ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
-                Formatting = Newtonsoft.Json.Formatting.Indented
-            };
-
-            string json = Newtonsoft.Json.JsonConvert.SerializeObject(csd.TakeSnapshot(), settings);
-            File.WriteAllText(jsonFilePath, json, Encoding.UTF8);
-
-        }
-
-        public static void SaveSummaryToCsd(string driveLetter, CsdDetail csd)
-            => SaveCsdDetailToJson(PathUtils.CleanPathCombine(driveLetter, "info.json"), csd);
-
-        public static void SaveDetailToIndex(CsdDetail csd)
-        {
-            string destDir = SysInfo.Directories.JSON;
-            string jsonFilePath = PathUtils.CleanPathCombine(destDir, $"csd_{csd.CsdNumber.ToString("000")}.json");
-
-            if (!Directory.Exists(destDir))
-                Directory.CreateDirectory(destDir);
-
-            SaveCsdDetailToJson(jsonFilePath, csd);
-        }
     }
 }

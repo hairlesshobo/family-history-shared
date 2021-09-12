@@ -29,6 +29,7 @@ using Archiver.Shared;
 using Archiver.Shared.Classes.CSD;
 using Archiver.Shared.Classes.Disc;
 using Archiver.Shared.Classes.Tape;
+using Archiver.Shared.Interfaces;
 using Archiver.Shared.Models;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Disc;
@@ -79,78 +80,36 @@ namespace Archiver.Utilities.Shared
             return selectedDrives[0];
         }
 
+        internal static Task<List<TapeDetail>> ReadTapeIndexAsync()
+            => ReadMediaIndexAsync<TapeDetail>("tape");
+
+        internal static Task<List<DiscDetail>> ReadDiscIndexAsync()
+            => ReadMediaIndexAsync<DiscDetail>("disc");
+
+        internal static Task<List<CsdDetail>> ReadCsdIndexAsync()
+            => ReadMediaIndexAsync<CsdDetail>("csd");
 
 
-        
-
-        public static async Task<List<DiscDetail>> ReadDiscIndexAsync()
+        private static Task<List<TMedia>> ReadMediaIndexAsync<TMedia>(string mediaType)
+            where TMedia : IMediaDetail, new()
         {
-            bool cancel = false;
-            
-            Terminal.Clear();
-            Terminal.Header.UpdateLeft("Read Disc Index...");
-            Terminal.StatusBar.ShowItems(
-                new StatusBarItem(
-                    "Cancel",
-                    (key) => {
-                        cancel = true;
-                        return Task.Delay(0);
-                    },
-                    Key.MakeKey(ConsoleKey.C, ConsoleModifiers.Control)
-                )
-            );
+            string[] validMediaTypes = new string[] { "disc", "tape", "csd" };
 
-            if (!Directory.Exists(SysInfo.Directories.JSON))
-                return null;
+            if (string.IsNullOrWhiteSpace(mediaType))
+                throw new ArgumentException($"'{nameof(mediaType)}' cannot be null or whitespace.", nameof(mediaType));
 
-            List<DiscDetail> discs = new List<DiscDetail>();
+            mediaType = mediaType.ToLower();
 
-            string[] jsonFiles = Directory.GetFiles(SysInfo.Directories.JSON, "disc_*.json");
-            int totalFiles = jsonFiles.Length;
-            
-            if (totalFiles == 0)
-                return null;
+            if (!validMediaTypes.Contains(mediaType))
+                throw new ArgumentException($"Invalid media type specified: {mediaType}. Valid Options: {String.Join(", ", validMediaTypes)}", nameof(mediaType));
 
-            Text text = new Text();
-            text.Show();
-            Terminal.NextLine();
-            ProgressBar progress = new ProgressBar();
-            progress.Show();
+            string mediaTypeTc = mediaType.Substring(0, 1).ToUpper() + mediaType.Substring(1);
 
-            int currentFile = 0;
-
-            foreach (string jsonFile in jsonFiles)
-            {
-                if (cancel)
-                    return null;
-
-                currentFile++;
-
-                double currentPct = (double)currentFile / (double)totalFiles;
-
-                progress.UpdateProgress(currentPct);
-
-                text.UpdateValue($"Reading disc index files... {currentFile.ToString().PadLeft(totalFiles.ToString().Length)}/{totalFiles}");
-
-                DiscDetail discDetail = Newtonsoft.Json.JsonConvert.DeserializeObject<DiscDetail>(File.ReadAllText(jsonFile));
-                discDetail.Files.ForEach(x => x.DestinationDisc = discDetail);
-
-                discs.Add(discDetail);
-            }
-
-            Terminal.WriteLine();
-
-            await Task.Delay(0);
-
-            return discs;
-        }
-
-        public static Task<List<TapeDetail>> ReadTapeIndexAsync()
-        {
             CancellationTokenSource cts = new CancellationTokenSource();
+
             
             Terminal.Clear();
-            Terminal.Header.UpdateLeft("Read Tape Index...");
+            Terminal.Header.UpdateLeft($"Read {mediaTypeTc} Index...");
             Terminal.StatusBar.ShowItems(
                 new StatusBarItem(
                     "Cancel",
@@ -170,84 +129,16 @@ namespace Archiver.Utilities.Shared
             progress.Show();
             text.Show();
 
-            return TapeUtilsNew.ReadIndexAsync(cts.Token, (currentFile, totalFiles) => 
+            return HelpersNew.ReadMediaIndexAsync<TMedia>(mediaType, cts.Token, (currentFile, totalFiles) => 
             {
                 double currentPct = (double)currentFile / (double)totalFiles;
 
                 progress.UpdateProgress(currentPct);
 
-                text.UpdateValue($"Reading tape index files... {currentFile.ToString().PadLeft(totalFiles.ToString().Length)}/{totalFiles}");
+                text.UpdateValue($"Reading {mediaType} index files... {currentFile.ToString().PadLeft(totalFiles.ToString().Length)}/{totalFiles}");
             });
         }
-
-        public static async Task<List<CsdDetail>> ReadCsdIndexAsync()
-        {
-            bool cancel = false;
-            
-            Terminal.Clear();
-            Terminal.Header.UpdateLeft("Read CSD Index...");
-            Terminal.StatusBar.ShowItems(
-                new StatusBarItem(
-                    "Cancel",
-                    (key) => {
-                        cancel = true;
-                        return Task.Delay(0);
-                    },
-                    Key.MakeKey(ConsoleKey.C, ConsoleModifiers.Control)
-                )
-            );
-
-            if (!Directory.Exists(SysInfo.Directories.JSON))
-                return null;
-
-            List<CsdDetail> csds = new List<CsdDetail>();
-
-            string[] jsonFiles = Directory.GetFiles(SysInfo.Directories.JSON, "csd_*.json");
-            Array.Sort(jsonFiles);
-            int totalFiles = jsonFiles.Length;
-            
-            if (totalFiles == 0)
-                return null;
-
-            Text text = new Text();
-            Terminal.NextLine();
-
-            ProgressBar progress = new ProgressBar();
-            Terminal.NextLine();
-
-            text.Show();
-            progress.Show();
-
-            int currentFile = 0;
-
-            foreach (string jsonFile in jsonFiles)
-            {
-                if (cancel)
-                    return null;
-
-                currentFile++;
-
-                double currentPct = (double)currentFile / (double)totalFiles;
-
-                progress.UpdateProgress(currentPct);
-
-                text.UpdateValue($"Reading CSD index files... {currentFile.ToString().PadLeft(totalFiles.ToString().Length)}/{totalFiles}");
-
-                CsdDetail csdDetail = Newtonsoft.Json.JsonConvert.DeserializeObject<CsdDetail>(File.ReadAllText(jsonFile));
-
-                csdDetail.SyncStats();
-
-                foreach (CsdSourceFile file in csdDetail.Files)
-                    file.DestinationCsd = csdDetail;
-
-                csds.Add(csdDetail);
-            }
-
-            await Task.Delay(0);
-
-            return csds;
-        }
-
+        
 
         public static void CreateIndexIso()
         {
@@ -278,25 +169,6 @@ namespace Archiver.Utilities.Shared
 
             Console.CursorLeft = 0;
             Console.CursorTop = Console.CursorTop+2;
-        }
-
-
-        public static void SaveTape(TapeDetail tape)
-        {
-            string fileName = $"tape_{tape.ID.ToString("000")}.json";
-
-            if (!Directory.Exists(SysInfo.Directories.JSON))
-                Directory.CreateDirectory(SysInfo.Directories.JSON);
-
-            string jsonFilePath = PathUtils.CleanPathCombine(SysInfo.Directories.JSON, fileName);
-
-            string json = Newtonsoft.Json.JsonConvert.SerializeObject(tape, new Newtonsoft.Json.JsonSerializerSettings() {
-                ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
-                Formatting = Newtonsoft.Json.Formatting.Indented
-            });
-
-            // Write the json data needed for future runs of this app
-            File.WriteAllText(jsonFilePath, json, Encoding.UTF8);
         }
     }
 }

@@ -19,24 +19,12 @@
  */
 
 using System;
-using System.IO;
-using System.Text;
-using Archiver.Shared.Classes.Disc;
-using Archiver.Shared.Exceptions;
-using Archiver.Shared.Models;
 
-namespace Archiver.Shared.Utilities
+namespace Archiver.Shared.Classes.Tape
 {
-    public static partial class DiskUtils
+    public class TapeVerificationResult
     {
-        public static ulong GetDiskSize(string driveName)
-        {
-            if (SysInfo.OSType == OSType.Windows)
-                return Windows.GetDiskSize(driveName);
-            else if (SysInfo.OSType == OSType.Linux)
-                return Windows.GetDiskSize(driveName);
-
-            throw new UnsupportedOperatingSystemException();
-        }
+        public DateTime VerificationDTM { get; set; }
+        public bool TapeValid { get; set; }
     }
 }

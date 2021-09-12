@@ -67,8 +67,8 @@ namespace Archiver.Operations.CSD
 
             di.VolumeLabel = newCsd.CsdName;
 
-            CsdUtils.SaveSummaryToCsd(driveLetter, newCsd);
-            CsdUtils.SaveDetailToIndex(newCsd);
+            newCsd.SavetoCsd(driveLetter);
+            newCsd.SaveToIndex();
 
             Formatting.WriteLineC(ConsoleColor.Green, $"Drive {driveLetter} was successfully initialized as {newCsd.CsdName}");
         }

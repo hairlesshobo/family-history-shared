@@ -108,7 +108,7 @@ namespace Archiver.Operations.Tape
                     Console.WriteLine();
                     Console.Write("Saving tape to index... ");
                     tapeDetail.Verifications.Add(result);
-                    Helpers.SaveTape(tapeDetail);
+                    tapeDetail.SaveToIndex();
                     Console.WriteLine("done");
 
                     Console.Write("Rewinding tape... ");

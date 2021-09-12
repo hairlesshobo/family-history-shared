@@ -20,7 +20,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
+using Archiver.Shared.Interfaces;
 using Archiver.Shared.Utilities;
 using Newtonsoft.Json;
 
@@ -31,12 +34,14 @@ namespace Archiver.Shared.Classes.Disc
         public DateTime VerificationDTM { get; set; }
         public bool DiscValid { get; set; }
     }
-    public class DiscDetail : DiscSummary
+    public class DiscDetail : DiscSummary, IMediaDetail
     {
         public long BytesCopied { get; set; }
         public string Hash { get; set; }
+
         [JsonIgnore]
         public bool NewDisc { get; set; } = true;
+
         [JsonIgnore]
         public bool IsoCreated { get; set; } = false;
         
@@ -114,7 +119,30 @@ namespace Archiver.Shared.Classes.Disc
             });
         }
 
-        public void SaveToJson()
-            => DiskUtils.SaveDestinationDisc(this);
+        public void SaveToIndex()
+            => this.SaveToJson();
+
+        public void SaveToJson(string destinationDir = null, string fileName = null)
+        {
+            if (destinationDir == null)
+                destinationDir = SysInfo.Directories.JSON;
+
+            if (fileName == null)
+                fileName = $"disc_{this.DiscNumber.ToString("0000")}.json";
+
+            if (!Directory.Exists(destinationDir))
+                Directory.CreateDirectory(destinationDir);
+
+            string jsonFilePath = Path.Combine(destinationDir, fileName);
+
+            string json = Newtonsoft.Json.JsonConvert.SerializeObject(this, new Newtonsoft.Json.JsonSerializerSettings() {
+                ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
+                Formatting = Newtonsoft.Json.Formatting.Indented,
+                NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore
+            });
+
+            // Write the json data needed for future runs of this app
+            File.WriteAllText(jsonFilePath, json, Encoding.UTF8);
+        }
     }
 }

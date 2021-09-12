@@ -299,7 +299,7 @@ namespace Archiver.Utilities.Tape
                 _status.WriteStatus("Saving tape details to index");
             }
 
-            Helpers.SaveTape(_tapeDetail);
+            _tapeDetail.SaveToIndex();
         }
     }
 }

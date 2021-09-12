@@ -35,49 +35,6 @@ namespace Archiver.Shared.Utilities
 {
     public static partial class TapeUtilsNew
     {
-        public static Task<List<TapeDetail>> ReadIndexAsync(CancellationToken cToken, Action<int, int> progressUpdated = null)
-        {
-            return Task.Run(async () => 
-            {
-                if (!Directory.Exists(SysInfo.Directories.JSON))
-                    return null;
-
-                List<TapeDetail> tapes = new List<TapeDetail>();
-
-                string[] jsonFiles = Directory.GetFiles(SysInfo.Directories.JSON, "tape_*.json");
-                int totalFiles = jsonFiles.Length;
-                
-                if (totalFiles == 0)
-                    return null;
-
-                int currentFile = 0;
-
-                foreach (string jsonFile in jsonFiles)
-                {
-                    if (cToken.IsCancellationRequested)
-                        return null;
-
-                    currentFile++;
-
-                    double currentPct = (double)currentFile / (double)totalFiles;
-
-                    if (progressUpdated != null)
-                        progressUpdated(currentFile, totalFiles);
-
-                    using (FileStream openStream = File.OpenRead(jsonFile))
-                    {
-                        TapeDetail tapeDetail = await JsonSerializer.DeserializeAsync<TapeDetail>(openStream);
-
-                        tapeDetail.FlattenFiles().ToList().ForEach(x => x.Tape = tapeDetail);
-
-                        tapes.Add(tapeDetail);
-                    }
-                }
-
-                return tapes;
-            });
-        }
-
         public static string CleanTapeDrivePath(string path)
         {
             // Clean up windows path name

@@ -201,7 +201,7 @@ namespace Archiver.Utilities.Disc
         {
             Status.WriteDiscJsonLine(disc, masterSw.Elapsed);
 
-            DiskUtils.SaveDestinationDisc(disc);
+            disc.SaveToIndex();
         }
 
         public static void GenerateIndexFiles(DiscDetail disc, Stopwatch masterSw)

@@ -235,7 +235,7 @@ namespace Archiver.Utilities.Disc
                         bool discValid = (disc.Hash.ToLower() == hash.ToLower());
 
                         disc.RecordVerification(DateTime.UtcNow, discValid);
-                        DiskUtils.SaveDestinationDisc(disc);
+                        disc.SaveToIndex();
 
                         _pendingDiscIds.Remove(disc.DiscNumber);
                         _completedDiscIds.Add(disc.DiscNumber);

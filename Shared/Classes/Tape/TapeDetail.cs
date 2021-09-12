@@ -20,18 +20,16 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
+using Archiver.Shared.Interfaces;
+using Archiver.Shared.Utilities;
 using Newtonsoft.Json;
 
 namespace Archiver.Shared.Classes.Tape
 {
-    public class TapeVerificationResult
-    {
-        public DateTime VerificationDTM { get; set; }
-        public bool TapeValid { get; set; }
-    }
-
-    public class TapeDetail : TapeSummary
+        public class TapeDetail : TapeSummary, IMediaDetail
     {
         public List<TapeVerificationResult> Verifications { get; set; }
         public string Hash { get; set; } = null;
@@ -93,8 +91,32 @@ namespace Archiver.Shared.Classes.Tape
         }
 
         public TapeSummary GetSummary()
+            => (TapeSummary)this;
+
+        public void SaveToIndex()
+            => SaveToJson();
+
+        public void SaveToJson(string destinationDir = null, string fileName = null)
         {
-            return (TapeSummary)this;
+            if (destinationDir == null)
+                destinationDir = SysInfo.Directories.JSON;
+
+            if (fileName == null)
+                fileName = $"tape_{this.ID.ToString("000")}.json";
+
+            
+            if (!Directory.Exists(destinationDir))
+                Directory.CreateDirectory(destinationDir);
+
+            string jsonFilePath = Path.Combine(destinationDir, fileName);
+
+            string json = Newtonsoft.Json.JsonConvert.SerializeObject(this, new Newtonsoft.Json.JsonSerializerSettings() {
+                ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
+                Formatting = Newtonsoft.Json.Formatting.Indented
+            });
+
+            // Write the json data needed for future runs of this app
+            File.WriteAllText(jsonFilePath, json, Encoding.UTF8);
         }
     }
 }

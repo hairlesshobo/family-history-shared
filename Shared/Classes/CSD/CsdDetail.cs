@@ -20,8 +20,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using Archiver.Shared;
+using Archiver.Shared.Interfaces;
 using Archiver.Shared.Utilities;
 using Newtonsoft.Json;
 
@@ -29,7 +32,7 @@ namespace Archiver.Shared.Classes.CSD
 {
 
 
-    public class CsdDetail
+    public class CsdDetail : IMediaDetail
     {
         #region Private members
 
@@ -242,6 +245,47 @@ namespace Archiver.Shared.Classes.CSD
             newCopy.SyncStats(includePending);
              
             return newCopy;
+        }
+
+        private static void SaveCsdDetailToJson(string jsonFilePath, CsdDetail csd)
+        {
+            
+
+        }
+
+        public static void SaveDetailToIndex(CsdDetail csd)
+        {
+            string destDir = SysInfo.Directories.JSON;
+            string jsonFilePath = PathUtils.CleanPathCombine(destDir, $"csd_{csd.CsdNumber.ToString("000")}.json");
+
+            if (!Directory.Exists(destDir))
+                Directory.CreateDirectory(destDir);
+
+            SaveCsdDetailToJson(jsonFilePath, csd);
+        }
+
+        public void SavetoCsd(string driveLetter)
+            => this.SaveToJson(driveLetter, "info.json");
+
+        public void SaveToIndex()
+            => this.SaveToJson();
+
+        public void SaveToJson(string destinationDir = null, string fileName = null)
+        {
+            if (String.IsNullOrWhiteSpace(destinationDir))
+                destinationDir = SysInfo.Directories.JSON;
+
+            if (String.IsNullOrWhiteSpace(fileName))
+                fileName = $"csd_{this.CsdNumber.ToString("000")}.json";
+
+            string jsonFilePath = Path.Combine(destinationDir, fileName);
+
+            string json = Newtonsoft.Json.JsonConvert.SerializeObject(this.TakeSnapshot(), new Newtonsoft.Json.JsonSerializerSettings() {
+                ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
+                Formatting = Newtonsoft.Json.Formatting.Indented
+            });
+            
+            File.WriteAllText(jsonFilePath, json, Encoding.UTF8);
         }
     }
 }

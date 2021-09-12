@@ -230,7 +230,7 @@ namespace Archiver.Utilities.CSD
         {
             Status.WriteJsonLine(csd, masterSw.Elapsed);
 
-            CsdUtils.SaveDetailToIndex(csd);
+            csd.SaveToIndex();
         }
 
         public static void GenerateIndexFiles(string driveLetter, CsdDetail csd, Stopwatch masterSw)
@@ -306,7 +306,7 @@ namespace Archiver.Utilities.CSD
         {
             Status.WriteJsonLine(csd, masterSw.Elapsed);
 
-            CsdUtils.SaveSummaryToCsd(driveLetter, csd);
+            csd.SavetoCsd(driveLetter);
 
             Status.WriteJsonLine(csd, masterSw.Elapsed);
         }
