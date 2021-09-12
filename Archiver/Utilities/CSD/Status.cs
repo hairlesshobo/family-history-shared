@@ -35,6 +35,7 @@ namespace Archiver.Utilities.CSD
         private static int _fileCountLine = -1;
         private static int _sizeLine = -1;
         private static int _distributeLine = -1;
+
         private static int _verifySpaceLine = -1;
         private static int _renameScanLine = -1;
         private static int _pendingCsdCount = 0;
@@ -48,6 +49,11 @@ namespace Archiver.Utilities.CSD
         private const string _verifySpaceLabel = "Verify Space";
 
         private static Dictionary<int, int> _driveLineIndex;
+
+        private static CsdScanStats _stats;
+
+        internal static void SetStats(CsdScanStats stats)
+            => _stats = stats;
 
         public static void Initialize()
         {
@@ -69,19 +75,19 @@ namespace Archiver.Utilities.CSD
         {
             if (_csdLine == -1)
             {
-                _pendingCsdCount = CsdGlobals._destinationCsds.Where(x => x.HasPendingWrites == true).Count();
+                _pendingCsdCount = _stats.DestinationCsds.Where(x => x.HasPendingWrites == true).Count();
 
                 _nextLine++;
                 _csdLine = _nextLine++;
 
-                _copyWidth = CsdGlobals._destinationCsds.Where(x => x.HasPendingWrites == true).Max(x => x.PendingFileCount).ToString().Length;
+                _copyWidth = _stats.DestinationCsds.Where(x => x.HasPendingWrites == true).Max(x => x.PendingFileCount).ToString().Length;
    
                 Console.CursorTop = _csdLine;
                 Console.CursorLeft = 0;
                 Formatting.WriteC(ConsoleColor.Magenta, "Preparing CSD drives ...");
 
                 int currLine = _csdLine+1;
-                foreach (CsdDetail csd in CsdGlobals._destinationCsds.Where(x => x.HasPendingWrites == true).OrderBy(x => x.CsdNumber))
+                foreach (CsdDetail csd in _stats.DestinationCsds.Where(x => x.HasPendingWrites == true).OrderBy(x => x.CsdNumber))
                 {
                     _driveLineIndex.Add(csd.CsdNumber, currLine);
                     WriteCsdPendingLine(csd, default(TimeSpan));
@@ -268,9 +274,9 @@ namespace Archiver.Utilities.CSD
             if (_sizeLine == -1)
                 _sizeLine = _nextLine++;
 
-            string currentSizeFriendly = Formatting.GetFriendlySize(CsdGlobals._totalSizePending);
+            string currentSizeFriendly = Formatting.GetFriendlySize(_stats.TotalSizePending);
             
-            string line = StatusHelpers.FileCountPosition(fileCount, CsdGlobals._newFileCount);
+            string line = StatusHelpers.FileCountPosition(fileCount, _stats.NewFileCount);
             
             if (!complete)
             {
@@ -283,7 +289,7 @@ namespace Archiver.Utilities.CSD
             line += $" [{currentSizeFriendly.PadLeft(12)}]";
             line += " ";
 
-            double currentPercent = ((double)fileCount / (double)CsdGlobals._newFileCount) * 100.0;
+            double currentPercent = ((double)fileCount / (double)_stats.NewFileCount) * 100.0;
 
             Console.SetCursorPosition(0, _sizeLine);
             StatusHelpers.WriteStatusLineWithPct(_sizingLabel, line, currentPercent, complete);
@@ -308,7 +314,7 @@ namespace Archiver.Utilities.CSD
             if (_distributeLine == -1)
                 _distributeLine = _nextLine++;            
 
-            string line = StatusHelpers.FileCountPosition(fileCount, CsdGlobals._newFileCount);
+            string line = StatusHelpers.FileCountPosition(fileCount, _stats.NewFileCount);
             
             if (!complete)
             {
@@ -321,7 +327,7 @@ namespace Archiver.Utilities.CSD
             line += $" [ {csdCount.ToString().PadLeft(4)} CSD(s)]";
             line += " ";
 
-            double currentPercent = ((double)fileCount / (double)CsdGlobals._newFileCount) * 100.0;
+            double currentPercent = ((double)fileCount / (double)_stats.NewFileCount) * 100.0;
 
             Console.SetCursorPosition(0, _distributeLine);
             StatusHelpers.WriteStatusLineWithPct(_distrubuteLabel, line, currentPercent, complete);

@@ -54,64 +54,12 @@ namespace Archiver.Utilities.CSD
             return Newtonsoft.Json.JsonConvert.DeserializeObject<CsdDetail>(jsonContent);
         }
 
-        public static void ReadIndexToGlobal()
+
+        public static CsdDetail GetDestinationCsd(CsdScanStats stats, long FileSize)
         {
-            CsdGlobals._destinationCsds = ReadIndex();
-
-            foreach (CsdSourceFile file in CsdGlobals._jsonReadSourceFiles)
-                CsdGlobals._sourceFileDict.Add(file.RelativePath, file);
-
-            CsdGlobals._jsonReadSourceFiles.Clear();
-        }
-
-        [Obsolete]
-        public static List<CsdDetail> ReadIndex()
-        {
-            List<CsdDetail> csds = new List<CsdDetail>();
-
-            string jsonDir = SysInfo.Directories.JSON;
-
-            if (Directory.Exists(jsonDir))
-            {
-                string[] jsonFiles = Directory.GetFiles(jsonDir, "csd_*.json");
-                int totalFiles = jsonFiles.Length;
-                
-                if (totalFiles > 0)
-                {
-                    int currentFile = 0;
-
-                    foreach (string jsonFile in jsonFiles)
-                    {
-                        currentFile++;
-
-                        string line = "Reading CSD index files... ";
-                        line += $"{currentFile.ToString().PadLeft(totalFiles.ToString().Length)}/{totalFiles}";
-
-                        Console.CursorLeft = 0;
-                        Console.Write(line);
-
-                        CsdDetail csdDetail = Newtonsoft.Json.JsonConvert.DeserializeObject<CsdDetail>(File.ReadAllText(jsonFile));
-                        
-                        foreach (CsdSourceFile file in csdDetail.Files)
-                            file.DestinationCsd = csdDetail;
-
-                        csds.Add(csdDetail);
-                    }
-
-                    Console.WriteLine();
-                }
-            }
-
-            csds.ForEach(x => x.SyncStats());
-
-            return csds;
-        }
-
-        public static CsdDetail GetDestinationCsd(long FileSize)
-        {
-            CsdDetail matchingCsd = CsdGlobals._destinationCsds
-                                              .FirstOrDefault(x => x.DiskFull == false &&
-                                                                   x.UsableFreeSpace > HelpersNew.RoundToNextMultiple(FileSize, x.BlockSize));
+            CsdDetail matchingCsd = stats.DestinationCsds
+                                         .FirstOrDefault(x => x.DiskFull == false &&
+                                                              x.UsableFreeSpace > HelpersNew.RoundToNextMultiple(FileSize, x.BlockSize));
 
             if (matchingCsd == null)
                 throw new CsdInsufficientCapacityException($"No CSD Drive with sufficient capacity to store a {FileSize} byte ({Formatting.GetFriendlySize(FileSize)}) file");

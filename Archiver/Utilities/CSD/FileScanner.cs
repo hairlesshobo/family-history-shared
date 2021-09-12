@@ -42,9 +42,11 @@ namespace Archiver.Utilities.CSD
         private long _lastSampleFileCount = 0;
         private Stopwatch _sw;
         private long _lastSample;
+        private CsdScanStats _stats;
 
-        public FileScanner()
+        public FileScanner(CsdScanStats stats)
         {
+            _stats = stats ?? throw new System.ArgumentNullException(nameof(stats));
             _sw = new Stopwatch();
 
             this.OnComplete += delegate { };
@@ -93,13 +95,13 @@ namespace Archiver.Utilities.CSD
                 string fileName = PathUtils.GetFileName(cleanFile);
 
                 if (SysInfo.Config.CSD.ExcludePaths.Any(x => cleanFile.ToLower().StartsWith(x.ToLower())))
-                    CsdGlobals._excludedFileCount++;
+                    _stats.ExcludedFileCount++;
 
                 else if (SysInfo.Config.CSD.ExcludeFiles.Any(x => fileName.ToLower().EndsWith(x.ToLower())))
-                    CsdGlobals._excludedFileCount++;
+                    _stats.ExcludedFileCount++;
 
                 else
-                    new CsdSourceFile(cleanFile);
+                    new CsdSourceFile(_stats, cleanFile);
 
                 if (_sw.ElapsedMilliseconds - _lastSample > _sampleDurationMs)
                 {
@@ -108,7 +110,7 @@ namespace Archiver.Utilities.CSD
 
                     double filesPerSecond = (double)filesSinceLastSample / ((double)elapsedSinceLastSample / 1000.0);
 
-                    OnProgressChanged(CsdGlobals._newFileCount, CsdGlobals._existingFileCount, CsdGlobals._excludedFileCount, filesPerSecond);
+                    OnProgressChanged(_stats.NewFileCount, _stats.ExistingFileCount, _stats.ExcludedFileCount, filesPerSecond);
 
                     _lastSample = _sw.ElapsedMilliseconds;
                     _lastSampleFileCount = _totalFileCount;

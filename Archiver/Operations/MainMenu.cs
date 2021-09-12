@@ -275,12 +275,12 @@ namespace Archiver.Operations
         //             Disabled = SysInfo.IsReadonlyFilesystem, // remove once implemented
         //             ForegroundColor = ConsoleColor.DarkYellow
         //         },
-        //         new CliMenuEntry<bool>() {
-        //             Name = "Run CSD Archive Process",
-        //             Task = CSD.Archiver.StartOperation,
-        //             Disabled = SysInfo.IsReadonlyFilesystem,
-        //             ForegroundColor = ConsoleColor.Red
-        //         }
+                new CliMenuEntry<bool>() {
+                    Name = "Run CSD Archive Process",
+                    Task = CSD.Archiver.StartOperationAsync,
+                    Disabled = SysInfo.IsReadonlyFilesystem,
+                    ForegroundColor = ConsoleColor.Red
+                }
             };
         }
 

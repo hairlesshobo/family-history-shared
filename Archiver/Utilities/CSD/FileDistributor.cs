@@ -37,9 +37,11 @@ namespace Archiver.Utilities.CSD
 
         private const int _sampleDurationMs = 1000;
         private Stopwatch _sw;
+        private CsdScanStats _stats;
 
-        public FileDistributor()
+        public FileDistributor(CsdScanStats stats)
         {
+            _stats = stats ?? throw new System.ArgumentNullException(nameof(stats));
             _sw = new Stopwatch();
 
             this.OnComplete += delegate { };
@@ -54,15 +56,15 @@ namespace Archiver.Utilities.CSD
             long lastSample = _sw.ElapsedMilliseconds;
             long lastSampleFileCount = 0;
 
-            List<CsdSourceFile> files = CsdGlobals._sourceFileDict
-                                                  .Select(x => x.Value)
-                                                  .Where(x => x.Copied == false)
-                                                  .OrderByDescending(x => x.Size)
-                                                  .ToList();
+            List<CsdSourceFile> files = _stats.SourceFileDict
+                                              .Select(x => x.Value)
+                                              .Where(x => x.Copied == false)
+                                              .OrderByDescending(x => x.Size)
+                                              .ToList();
 
             foreach (CsdSourceFile sourceFile in files)
             {
-                sourceFile.AssignCsd();
+                sourceFile.AssignCsd(_stats);
 
                 if (_sw.ElapsedMilliseconds - lastSample > _sampleDurationMs)
                 {
@@ -72,7 +74,7 @@ namespace Archiver.Utilities.CSD
 
                     double filesPerSecond = (double)filesSinceLastSample / ((double)elapsedSinceLastSample / 1000.0);
 
-                    int csdCount = CsdGlobals._destinationCsds.Where(x => x.HasPendingWrites == true).Count();
+                    int csdCount = _stats.DestinationCsds.Where(x => x.HasPendingWrites == true).Count();
                     OnProgressChanged(fileCount, csdCount, filesPerSecond);
 
                     lastSampleFileCount = fileCount;

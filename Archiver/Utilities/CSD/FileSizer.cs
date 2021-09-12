@@ -35,9 +35,11 @@ namespace Archiver.Utilities.CSD
 
         private const int _sampleDurationMs = 1000;
         private Stopwatch _sw;
+        private CsdScanStats _stats;
 
-        public FileSizer()
+        public FileSizer(CsdScanStats stats)
         {
+            _stats = stats ?? throw new System.ArgumentNullException(nameof(stats));
             _sw = new Stopwatch();
 
             this.OnComplete += delegate { };
@@ -52,9 +54,9 @@ namespace Archiver.Utilities.CSD
             long lastSampleFileCount = 0;
             long lastSample = _sw.ElapsedMilliseconds;
 
-            foreach (CsdSourceFile sourceFile in CsdGlobals._sourceFileDict.Select(x => x.Value).Where(x => x.Copied == false))
+            foreach (CsdSourceFile sourceFile in _stats.SourceFileDict.Select(x => x.Value).Where(x => x.Copied == false))
             {
-                sourceFile.ReadSizeAndAttribs();
+                sourceFile.ReadSizeAndAttribs(_stats);
 
                 if (_sw.ElapsedMilliseconds - lastSample > _sampleDurationMs)
                 {
@@ -64,7 +66,7 @@ namespace Archiver.Utilities.CSD
 
                     double filesPerSecond = (double)filesSinceLastSample / ((double)elapsedSinceLastSample / 1000.0);
 
-                    OnProgressChanged(fileCount, CsdGlobals._totalSizePending, filesPerSecond);
+                    OnProgressChanged(fileCount, _stats.TotalSizePending, filesPerSecond);
                     
                     lastSampleFileCount = fileCount;
                 }

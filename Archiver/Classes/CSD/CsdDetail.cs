@@ -139,7 +139,8 @@ namespace Archiver.Classes.CSD
             this.RegisterDtmUtc = DateTime.UtcNow;
             this.CsdNumber = csdNumber;
 
-            CsdGlobals._destinationCsds.Add(this);
+            // TODO: pretty sure this isn't needed
+            // CsdGlobals._destinationCsds.Add(this);
         }
 
         public void AddFile(CsdSourceFile file)

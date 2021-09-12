@@ -36,11 +36,11 @@ namespace Archiver.Utilities.CSD
     {
         private static int _updateFrequencyMs = 1000;
 
-        public static void IndexAndCountFiles()
+        public static void IndexAndCountFiles(CsdScanStats stats)
         {
             Console.WriteLine();
 
-            FileScanner scanner = new FileScanner();
+            FileScanner scanner = new FileScanner(stats);
 
             scanner.OnProgressChanged += (newFiles, existingFiles, excludedFiles, filesPerSecond) => {
                 // TODO: Add deleted count here
@@ -49,11 +49,11 @@ namespace Archiver.Utilities.CSD
 
             scanner.OnComplete += () => {
                 Status.FileScanned(
-                    CsdGlobals._newFileCount, 
-                    CsdGlobals._existingFileCount, 
-                    CsdGlobals._excludedFileCount, 
-                    CsdGlobals._deletedFileCount, 
-                    CsdGlobals._modifiedFileCount,
+                    stats.NewFileCount, 
+                    stats.ExistingFileCount, 
+                    stats.ExcludedFileCount, 
+                    stats.DeletedFileCount, 
+                    stats.ModifiedFileCount,
                     0, 
                     true
                 );
@@ -64,18 +64,18 @@ namespace Archiver.Utilities.CSD
             scanThread.Join();
         }
 
-        public static void SizeFiles()
+        public static void SizeFiles(CsdScanStats stats)
         {
             Console.WriteLine();
 
-            FileSizer sizer = new FileSizer();
+            FileSizer sizer = new FileSizer(stats);
 
             sizer.OnProgressChanged += (currentFile, totalSize, filesPerSecond) => {
                 Status.FileSized(currentFile, totalSize, filesPerSecond);
             };
 
             sizer.OnComplete += () => {
-                Status.FileSized(CsdGlobals._newFileCount, CsdGlobals._totalSizePending, 0, true);
+                Status.FileSized(stats.NewFileCount, stats.TotalSizePending, 0, true);
             };
 
             Thread sizeThread = new Thread(sizer.SizeFiles);
@@ -83,10 +83,10 @@ namespace Archiver.Utilities.CSD
             sizeThread.Join();
         }
 
-        public static bool VerifyFreeSpace()
+        public static bool VerifyFreeSpace(CsdScanStats stats)
         {
-            long requiredBytes = CsdGlobals._newFileEntries.Sum(x => x.Size);
-            long freeSpace = CsdGlobals._destinationCsds.Sum(x => x.FreeSpace);
+            long requiredBytes = stats.NewFileEntries.Sum(x => x.Size);
+            long freeSpace = stats.DestinationCsds.Sum(x => x.FreeSpace);
             bool sufficientSpace = false;
 
             if (freeSpace > requiredBytes)
@@ -97,17 +97,17 @@ namespace Archiver.Utilities.CSD
             return sufficientSpace;
         }
 
-        public static void DistributeFiles()
+        public static void DistributeFiles(CsdScanStats stats)
         {
-            FileDistributor distributor = new FileDistributor();
+            FileDistributor distributor = new FileDistributor(stats);
 
             distributor.OnProgressChanged += (currentFile, csdCount, filesPerSecond) => {
                 Status.FileDistributed(currentFile, csdCount, filesPerSecond);
             };
 
             distributor.OnComplete += () => {
-                int csdCount = CsdGlobals._destinationCsds.Where(x => x.HasPendingWrites == true).Count();
-                Status.FileDistributed(CsdGlobals._newFileCount, csdCount, 0, true);
+                int csdCount = stats.DestinationCsds.Where(x => x.HasPendingWrites == true).Count();
+                Status.FileDistributed(stats.NewFileCount, csdCount, 0, true);
             };
 
             Thread distributeThread = new Thread(distributor.DistributeFiles);
@@ -328,11 +328,11 @@ namespace Archiver.Utilities.CSD
             }
         }
 
-        public static void ProcessCsdDrives()
+        public static void ProcessCsdDrives(CsdScanStats stats)
         {
             Status.InitCsdDriveLines();
 
-            foreach (CsdDetail csd in CsdGlobals._destinationCsds.Where(x => x.HasPendingWrites == true).OrderBy(x => x.CsdNumber))
+            foreach (CsdDetail csd in stats.DestinationCsds.Where(x => x.HasPendingWrites == true).OrderBy(x => x.CsdNumber))
             {
                 long totalFiles = csd.PendingFileCount;
                 long totalBytes = csd.PendingBytes;
