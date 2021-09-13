@@ -84,48 +84,15 @@ namespace Archiver.Operations.Disc
                 }
                 
 
-            //     bool doProcess = true;
-
-            //     List<DiscDetail> newDiscs = stats.DestinationDiscs
-            //                                      .Where(x => x.NewDisc == true)
-            //                                      .ToList();
-
-            //     Console.WriteLine();
-            //     Console.WriteLine();
-            //     Console.WriteLine($"    New files found: {stats.NewlyFoundFiles.ToString("N0")}");
-            //     Console.WriteLine($"New Discs to Create: {newDiscs.Count}");
-            //     Console.WriteLine();
-
-                // if (askBeforeArchive)
-                // {
-                //     Console.Write("Do you want to run the archive process now? (yes/");
-                //     Formatting.WriteC(ConsoleColor.Blue, "NO");
-                //     Console.Write(") ");
-
-                //     Console.CursorVisible = true;
-                //     string response = Console.ReadLine();
-                //     Console.CursorVisible = false;
-
-                //     int endLine = Console.CursorTop;
-
-                //     doProcess = response.ToLower().StartsWith("yes");
-                //     Console.WriteLine();
-                //     Console.WriteLine();
-                // }
-
-                // if (doProcess)
-                // {
+                if (doProcess)
+                {
                 //     DiscProcessing.ProcessDiscs(stats);
 
-                //     Formatting.WriteLineC(ConsoleColor.Green, "Process complete... don't forget to burn the ISOs to disc!");
-                // }
+                    Terminal.WriteLineColor(ConsoleColor.Green, "Process complete... don't forget to burn the ISOs to disc!");
+                }
             }
             else
-            {
-                // Status.ProcessComplete();
-
-                // Console.WriteLine("No new files found to archive. Nothing to do.");
-            }
+                Terminal.WriteLine("No new files found to archive. Nothing to do.");
 
             _sw.Stop();
         }
