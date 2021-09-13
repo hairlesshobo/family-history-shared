@@ -84,19 +84,18 @@ namespace Archiver.Utilities.Shared
 
             Text text = new Text();
             Terminal.NextLine();
-            ProgressBar progress = new ProgressBar();
+            Terminal.NextLine();
+            
+            ProgressBar progress = new ProgressBar(ProgressMode.ExplicitCountLeft);
             Terminal.NextLine();
 
-            progress.Show();
             text.Show();
 
             return HelpersNew.ReadMediaIndexAsync<TMedia>(mediaType, cts.Token, (currentFile, totalFiles) => 
             {
-                double currentPct = (double)currentFile / (double)totalFiles;
+                progress.UpdateProgress(currentFile, totalFiles, true);
 
-                progress.UpdateProgress(currentPct);
-
-                text.UpdateValue($"Reading {mediaType} index files... {currentFile.ToString().PadLeft(totalFiles.ToString().Length)}/{totalFiles}");
+                text.UpdateValue($"Reading {mediaType} index files...");
             });
         }
         
