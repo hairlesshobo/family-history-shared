@@ -18,21 +18,22 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Archiver.Shared.Classes.Disc;
 
 namespace Archiver.Utilities.Disc
 {
-    public delegate void Sizer_ProgressChangedDelegate(long currentFile, long totalSize);
-    public delegate void Sizer_CompleteDelegate();
-
     public class FileSizer
     {
-        public event Sizer_ProgressChangedDelegate OnProgressChanged;
-        public event Sizer_CompleteDelegate OnComplete;
+        public delegate void ProgressChangedDelegate(DiscScanStats stats, long currentFile, long totalSize);
 
-        private const int _sampleDurationMs = 100;
+        public event ProgressChangedDelegate OnProgressChanged;
+
+        private const int _sampleDurationMs = 250;
         private Stopwatch _sw;
         private long _lastSample;
         private DiscScanStats _stats;
@@ -42,11 +43,13 @@ namespace Archiver.Utilities.Disc
             _stats = stats ?? throw new System.ArgumentNullException(nameof(stats));
             _sw = new Stopwatch();
 
-            this.OnComplete += delegate { };
             this.OnProgressChanged += delegate { };
         }
 
-        public void SizeFiles()
+        public Task SizeFilesAsync(CancellationToken cToken)
+            => Task.Run(() => SizeFiles(cToken));
+
+        public void SizeFiles(CancellationToken cToken = default)
         {
             _sw.Start();
 
@@ -54,11 +57,14 @@ namespace Archiver.Utilities.Disc
 
             foreach (DiscSourceFile sourceFile in _stats.DiscSourceFiles.Where(x => x.Archived == false))
             {
+                if (cToken.IsCancellationRequested)
+                    return;
+
                 sourceFile.ReadSizeAndAttribs(_stats);
 
                 if (_sw.ElapsedMilliseconds - _lastSample > _sampleDurationMs)
                 {
-                    OnProgressChanged(fileCount, _stats.TotalSize);
+                    OnProgressChanged(_stats, fileCount, _stats.TotalSize);
                     _lastSample = _sw.ElapsedMilliseconds;
                 }
 
@@ -66,7 +72,6 @@ namespace Archiver.Utilities.Disc
             }
 
             _sw.Stop();
-            OnComplete();
         }
     }
 }

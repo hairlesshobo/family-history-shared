@@ -145,7 +145,7 @@ namespace Archiver.Operations
                 ,
                 new CliMenuEntry<bool>() {
                     Name = "Scan For Changes",
-                    Task = Disc.DiscArchiver.StartScanOnly,
+                    Task = Disc.DiscArchiver.StartScanOnlyAsync,
                     ForegroundColor = ConsoleColor.DarkYellow
                 },
                 // new CliMenuEntry<bool>() {

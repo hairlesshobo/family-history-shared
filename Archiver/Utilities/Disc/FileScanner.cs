@@ -24,18 +24,18 @@ using System.Linq;
 using Archiver.Shared.Classes.Disc;
 using Archiver.Shared;
 using Archiver.Shared.Utilities;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace Archiver.Utilities.Disc
 {
-    public delegate void Scanner_ProgressChangedDelegate(long newFiles, long existingFiles, long excludedFiles);
-    public delegate void Scanner_CompleteDelegate();
-
     public class FileScanner
     {
-        public event Scanner_CompleteDelegate OnComplete;
-        public event Scanner_ProgressChangedDelegate OnProgressChanged;
+        public delegate void ProgressChangedDelegate(long newFiles, long existingFiles, long excludedFiles);
 
-        private const int _sampleDurationMs = 100;
+        public event ProgressChangedDelegate OnProgressChanged;
+
+        private const int _sampleDurationMs = 250;
         private Stopwatch _sw;
         private long _lastSample;
         private DiscScanStats _stats;
@@ -45,11 +45,13 @@ namespace Archiver.Utilities.Disc
             _stats = stats ?? throw new System.ArgumentNullException(nameof(stats));
             _sw = new Stopwatch();
 
-            this.OnComplete += delegate { };
             this.OnProgressChanged += delegate { };
         }
 
-        public void ScanFiles()
+        public Task ScanFilesAsync(CancellationToken cToken)
+            => Task.Run(() => ScanFiles(cToken));
+
+        public void ScanFiles(CancellationToken cToken = default)
         {
             _sw.Start();
 
@@ -57,28 +59,36 @@ namespace Archiver.Utilities.Disc
             {
                 string sourcePath = PathUtils.CleanPath(dirtySourcePath);
 
-                ScanDirectory(dirtySourcePath);
+                ScanDirectory(dirtySourcePath, cToken);
+
+                if (cToken.IsCancellationRequested)
+                    break;
             }
 
             _sw.Stop();
-            OnComplete();
         }
 
-        private void ScanDirectory(string sourcePath)
+        private void ScanDirectory(string sourcePath, CancellationToken cToken = default)
         {
             if (!Directory.Exists(sourcePath))
                 throw new DirectoryNotFoundException($"Source directory does not exist: {sourcePath}");
 
             foreach (string dir in Directory.GetDirectories(sourcePath))
             {
+                if (cToken.IsCancellationRequested)
+                    return;
+
                 string cleanDir = PathUtils.CleanPath(dir);
 
                 if (!(SysInfo.Config.Disc.ExcludePaths.Any(x => cleanDir.ToLower().StartsWith(x.ToLower()))))
-                    ScanDirectory(dir);
+                    ScanDirectory(dir, cToken);
             }
 
             foreach (string file in Directory.GetFiles(sourcePath))
             {
+                if (cToken.IsCancellationRequested)
+                    return;
+
                 string cleanFile = PathUtils.CleanPath(file);
 
                 if (SysInfo.Config.Disc.ExcludePaths.Any(x => cleanFile.ToLower().StartsWith(x.ToLower())))

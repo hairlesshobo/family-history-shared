@@ -9,6 +9,7 @@ namespace Archiver.Shared.Classes.Disc
         public IReadOnlyList<DiscSourceFile> NewFileEntries => (IReadOnlyList<DiscSourceFile>)DiscSourceFiles.Where(x => x.Copied == false);
         public List<DiscSourceFile> DiscSourceFiles = new List<DiscSourceFile>();
         public List<DiscDetail> DestinationDiscs = new List<DiscDetail>();
+        public int NewDiscCount => DestinationDiscs.Where(x => x.NewDisc == true).Count();
 
 
         public long NewlyFoundFiles { get; set; } = 0;

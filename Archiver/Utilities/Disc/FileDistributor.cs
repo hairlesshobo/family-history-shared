@@ -20,19 +20,19 @@
 
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Archiver.Shared.Classes.Disc;
 
 namespace Archiver.Utilities.Disc
 {
-    public delegate void Distributor_ProgressChangedDelegate(long currentFile, int discCount);
-    public delegate void Distributor_CompleteDelegate();
-
     public class FileDistributor
     {
-        public event Distributor_ProgressChangedDelegate OnProgressChanged;
-        public event Distributor_CompleteDelegate OnComplete;
+        public delegate void ProgressChangedDelegate(DiscScanStats stats, long currentFile, int discCount);
 
-        private const int _sampleDurationMs = 150;
+        public event ProgressChangedDelegate OnProgressChanged;
+
+        private const int _sampleDurationMs = 250;
         private Stopwatch _sw;
         private long _lastSample;
         private DiscScanStats _stats;
@@ -42,11 +42,13 @@ namespace Archiver.Utilities.Disc
             _stats = stats ?? throw new System.ArgumentNullException(nameof(stats));
             _sw = new Stopwatch();
 
-            this.OnComplete += delegate { };
             this.OnProgressChanged += delegate { };
         }
 
-        public void DistributeFiles()
+        public Task DistributeFilesAsync(CancellationToken ctoken)
+            => Task.Run(() => this.DistributeFiles(ctoken));
+
+        public void DistributeFiles(CancellationToken cToken = default)
         {
             _sw.Start();
 
@@ -54,12 +56,15 @@ namespace Archiver.Utilities.Disc
 
             foreach (DiscSourceFile sourceFile in _stats.DiscSourceFiles.Where(x => x.Archived == false).OrderByDescending(x => x.Size))
             {
+                if (cToken.IsCancellationRequested)
+                    return;
+
                 sourceFile.AssignDisc(_stats);
 
                 if (_sw.ElapsedMilliseconds - _lastSample > _sampleDurationMs)
                 {
                     int discCount = _stats.DestinationDiscs.Where(x => x.Finalized == false).Count();
-                    OnProgressChanged(fileCount, discCount);
+                    OnProgressChanged(_stats, fileCount, discCount);
                     _lastSample = _sw.ElapsedMilliseconds;
                 }
 
@@ -67,7 +72,6 @@ namespace Archiver.Utilities.Disc
             }
 
             _sw.Stop();
-            OnComplete();
         }
     }
 }

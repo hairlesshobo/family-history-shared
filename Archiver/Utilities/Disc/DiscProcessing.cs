@@ -37,62 +37,6 @@ namespace Archiver.Utilities.Disc
     {
         private static int _updateFrequencyMs = 1000;
         
-        public static void IndexAndCountFiles(DiscScanStats stats)
-        {
-            Console.WriteLine();
-
-            FileScanner scanner = new FileScanner(stats);
-
-            scanner.OnProgressChanged += (newFiles, existingFiles, excludedFiles) => {
-                Status.FileScanned(newFiles, existingFiles, excludedFiles);
-            };
-
-            scanner.OnComplete += () => {
-                Status.FileScanned(stats.NewlyFoundFiles, stats.ExistingFilesArchived, stats.ExcludedFileCount, true);
-            };
-
-            Thread scanThread = new Thread(scanner.ScanFiles);
-            scanThread.Start();
-            scanThread.Join();
-        }
-
-        public static void SizeFiles(DiscScanStats stats)
-        {
-            Console.WriteLine();
-
-            FileSizer sizer = new FileSizer(stats);
-
-            sizer.OnProgressChanged += (currentFile, totalSize) => {
-                Status.FileSized(currentFile, totalSize);
-            };
-
-            sizer.OnComplete += () => {
-                Status.FileSized(stats.NewlyFoundFiles, stats.TotalSize, true);
-            };
-
-            Thread sizeThread = new Thread(sizer.SizeFiles);
-            sizeThread.Start();
-            sizeThread.Join();
-        }
-
-        public static void DistributeFiles(DiscScanStats stats)
-        {
-            FileDistributor distributor = new FileDistributor(stats);
-
-            distributor.OnProgressChanged += (currentFile, discCount) => {
-                Status.FileDistributed(currentFile, discCount);
-            };
-
-            distributor.OnComplete += () => {
-                int discCount = stats.DestinationDiscs.Where(x => x.Finalized == false).Count();
-                Status.FileDistributed(stats.NewlyFoundFiles, discCount, true);
-            };
-
-            Thread distributeThread = new Thread(distributor.DistributeFiles);
-            distributeThread.Start();
-            distributeThread.Join();
-        }
-
         public static void CopyFiles(DiscDetail disc, Stopwatch masterSw)
         {
             // if the stage dir already exists, we need to remove it so we don't accidentally end up with data
