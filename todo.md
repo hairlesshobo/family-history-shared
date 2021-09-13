@@ -1,3 +1,26 @@
+## Async conversion
+The following tasks need to have their UI and task code split and updated to be fully async compatible:
+
+(items in **bold** have been completed)
+
+* **Tasks.Disc.DiscSearcherTask.StartTaskAsync**
+* **Tasks.Disc.DiscArchiveSummaryTask.StartTaskAsync**
+* Disc.DiscVerification.StartOperationAsync
+* Disc.DiscArchiver.StartScanOnly
+* Disc.ScanForFileRenames.StartOperation
+* Disc.DiscArchiver.StartOperation
+* Tape.TapeSearcher.StartOperationAsync
+* Tape.RestoreTapeToTar.StartOperationAsync
+* Tape.ShowTapeSummary.StartOperation
+* Tape.TapeArchiveSummary.StartOperationAsync
+* Tape.TapeVerification.StartOperation
+* Tape.TapeArchiver.StartOperation
+* CSD.RegisterDrive.StartOperationAsync
+* ShowTapeSummary.StartOperation
+* CSD.ArchiveSummary.StartOperationAsync
+* CSD.Archiver.StartOperationAsync
+* Helpers.CreateIndexIso
+
 ## Linux support:
 
 * Finish tape driver
