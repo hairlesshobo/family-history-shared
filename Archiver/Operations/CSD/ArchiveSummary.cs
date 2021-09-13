@@ -33,18 +33,6 @@ namespace Archiver.Operations.CSD
 {
     public static class ArchiveSummary
     {
-        public class FileType
-        {
-            public string Extension { get; set; }
-            public long Count { get; set; }
-        }
-
-        private static void WriteHeader(string header)
-        {
-            Formatting.WriteLineC(ConsoleColor.Magenta, header);
-            Console.WriteLine();
-        }
-         
         public static async Task StartOperationAsync()
         {
             List<CsdDetail> existingCsdDrives = await Helpers.ReadCsdIndexAsync();

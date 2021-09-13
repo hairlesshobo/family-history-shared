@@ -24,6 +24,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Archiver.Shared.Classes.Disc;
 using Archiver.Shared.Classes.Tape;
+using Archiver.Shared.Models;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 using TerminalUI;
@@ -33,18 +34,6 @@ namespace Archiver.Operations.Tape
 {
     public static class TapeArchiveSummary
     {
-        public class FileType
-        {
-            public string Extension { get; set; }
-            public long Count { get; set; }
-        }
-
-        private static void WriteHeader(string header)
-        {
-            Formatting.WriteLineC(ConsoleColor.Magenta, header);
-            Console.WriteLine();
-        }
-        
         public static async Task StartOperationAsync()
         {
             List<TapeDetail> existingTapes = await Helpers.ReadTapeIndexAsync();

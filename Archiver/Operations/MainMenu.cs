@@ -132,7 +132,7 @@ namespace Archiver.Operations
                 },
                 new CliMenuEntry<bool>() {
                     Name = "View Archive Summary",
-                    Task = Disc.DiscSummary.StartOperation,
+                    Task = Disc.DiscArchiveSummaryTask.StartTaskAsync,
                     SelectedValue = true, // do not show the "press enter to return to main menu" message
                     ForegroundColor = ConsoleColor.Blue
                 },
