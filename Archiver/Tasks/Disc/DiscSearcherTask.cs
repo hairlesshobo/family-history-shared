@@ -24,15 +24,16 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Archiver.Shared.Classes.Disc;
+using Archiver.Shared.Operations.Disc;
 using Archiver.Utilities.Shared;
 using TerminalUI;
 using TerminalUI.Elements;
 
-namespace Archiver.Operations.Disc
+namespace Archiver.Tasks.Disc
 {
-    public static class DiscSearcher
+    internal static class DiscSearcherTask
     {
-        public async static Task StartOperationAsync()
+        public async static Task StartTaskAsync()
         {
             List<DiscDetail> discs = await Helpers.ReadDiscIndexAsync();
 
@@ -52,7 +53,6 @@ namespace Archiver.Operations.Disc
             );
 
             Terminal.Clear();
-            
             Terminal.Write("Term to search for in file/directory: ");
 
             string searchString = await KeyInput.ReadStringAsync(cts.Token);
@@ -64,21 +64,18 @@ namespace Archiver.Operations.Disc
             
             Terminal.Clear();
 
-            List<DiscSourceFile> files = discs.SelectMany(x => x.Files).Where(x => x.RelativePath.ToLower().Contains(searchString)).ToList();
-            Console.WriteLine("Matching files: " + files.Count().ToString("N0"));
+            DiscSearcher searcher = new DiscSearcher(discs);
 
             using (Pager pager = new Pager())
             {
-                pager.ShowHeader = true;
                 pager.HeaderText = $"{"Disc".PadRight(4)}   {"Update Date/Time".PadRight(22)}   {"File"}";
                 pager.HighlightText = searchString;
-                pager.Highlight = true;
-                pager.HighlightColor = ConsoleColor.DarkYellow;
+                pager.Start();
 
-                foreach (DiscSourceFile file in files)
+                await foreach (DiscSourceFile file in searcher.FindFilesAsync(searchString).WithCancellation(pager.CancellationToken))
                     pager.AppendLine($"{file.DestinationDisc.DiscNumber.ToString("0000")}   {file.LastWriteTimeUtc.ToLocalTime().ToString().PadRight(22)}   {file.RelativePath}");
 
-                await pager.RunAsync();
+                await pager.WaitForQuitAsync();
             }
         }
     }

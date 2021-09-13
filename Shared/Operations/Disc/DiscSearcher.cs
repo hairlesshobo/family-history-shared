@@ -18,33 +18,42 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Archiver.Shared.Classes.Disc;
-using Archiver.Shared.Operations.Disc;
-using Archiver.Utilities.Shared;
-using TerminalUI;
-using TerminalUI.Elements;
 
-namespace Archiver.Tasks.Disc
+namespace Archiver.Shared.Operations.Disc
 {
-    internal static class DiscArchiveSummaryTask
+    public class DiscSearcher
     {
-        internal static async Task StartTaskAsync()
+        private IEnumerable<DiscSourceFile> _allFiles;
+
+        public DiscSearcher(List<DiscDetail> discs)
         {
-            List<DiscDetail> allDiscs = await Helpers.ReadDiscIndexAsync();
-            
-            Terminal.Clear();
-            Terminal.Header.UpdateLeft("Disc Archive Summary");
+            if (discs is null)
+                throw new ArgumentNullException(nameof(discs));
 
-            DiscArchiveSummary summary = new DiscArchiveSummary();
+            _allFiles = discs.SelectMany(x => x.Files);
+        }
 
-            using (Pager pager = Pager.StartNew())
+        public async IAsyncEnumerable<DiscSourceFile> FindFilesAsync(
+            string searchString, 
+            [EnumeratorCancellation] CancellationToken cancellationToken = default
+            ) 
+        {
+            foreach (DiscSourceFile file in _allFiles)
             {
-                summary.OnLineGenerated += pager.AppendLine;
-                summary.GenerateSummary(allDiscs);
+                if (cancellationToken.IsCancellationRequested)
+                    break;
 
-                await pager.WaitForQuitAsync();
+                if (file.RelativePath.ToLower().Contains(searchString))
+                    yield return file;
+
+                await Task.CompletedTask;
             }
         }
     }

@@ -118,7 +118,7 @@ namespace Archiver.Operations
                 },
                 new CliMenuEntry<bool>() {
                     Name = "Search Disc Archive",
-                    Task = Disc.DiscSearcher.StartOperationAsync,
+                    Task = Tasks.Disc.DiscSearcherTask.StartTaskAsync,
                     ForegroundColor = ConsoleColor.Green,
                     SelectedValue = true, // do not show the "press enter to return to main menu" message
                 },
@@ -132,7 +132,7 @@ namespace Archiver.Operations
                 },
                 new CliMenuEntry<bool>() {
                     Name = "View Archive Summary",
-                    Task = Disc.DiscArchiveSummaryTask.StartTaskAsync,
+                    Task = Tasks.Disc.DiscArchiveSummaryTask.StartTaskAsync,
                     SelectedValue = true, // do not show the "press enter to return to main menu" message
                     ForegroundColor = ConsoleColor.Blue
                 },
