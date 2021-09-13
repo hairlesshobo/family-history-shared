@@ -20,7 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Shared\Shared.csproj" />
-    <!-- <ProjectReference Include="..\Terminal.GUI\Terminal.Gui\Terminal.Gui.csproj" /> -->
+    <ProjectReference Include="..\TerminalUI\src\TerminalUI.csproj" />
   </ItemGroup>
 
 </Project>

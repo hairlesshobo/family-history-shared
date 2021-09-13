@@ -88,6 +88,7 @@ namespace Archiver.Shared.TapeDrivers
                 IntPtr.Zero
                 );
 
+            // TODO: Add a way to check for tape drive that doesn't require throwing/catching an exception
             if (m_handleValue.IsInvalid)
                 throw new TapeOperatorWin32Exception("CreateFile", Marshal.GetLastWin32Error());
 

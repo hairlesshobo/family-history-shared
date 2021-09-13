@@ -138,7 +138,7 @@ namespace Archiver.Operations
                 },
                 new CliMenuEntry<bool>() {
                     Name = "Verify Discs",
-                    Task = Disc.DiscVerification.StartOperationAsync,
+                    Task = Tasks.Disc.DiscVerificationTask.StartTaskAsync,
                     Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsOpticalDrivePresent,
                     ForegroundColor = ConsoleColor.DarkYellow
                 }
