@@ -27,11 +27,11 @@ using Archiver.Shared.Utilities;
 
 namespace Archiver.Shared.Operations.Disc
 {
-    public delegate void DiscArchiveSummary_ProgressChangedDelegate(string newLine);
-
     public class DiscArchiveSummary
     {
-        public event DiscArchiveSummary_ProgressChangedDelegate OnLineGenerated;
+        public delegate void ProgressChangedDelegate(string newLine);
+
+        public event ProgressChangedDelegate OnLineGenerated;
 
         public IReadOnlyList<string> Lines => (IReadOnlyList<string>)_lines;
 

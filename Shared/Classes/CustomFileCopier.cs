@@ -94,6 +94,7 @@ namespace Archiver.Shared.Classes
                 if (this.OverwriteDestination && File.Exists(this.DestinationFilePath))
                     File.Delete(this.DestinationFilePath);
 
+                // TODO: what is this for?
                 File.Create(this.DestinationFilePath).Dispose();
 
                 FileInfo sourceFileInfo = new FileInfo(this.SourceFile.FullPath);
@@ -156,6 +157,7 @@ namespace Archiver.Shared.Classes
 
         private void PreserveDirectoryTimes()
         {
+            // TODO: likely only need to update the modify dtm on the parent dir when a file is added, that is all
             string[] dirParts = this.SourceFile.RelativeDirectory.Trim('/').Split("/");
 
             StringBuilder dirRecursion = new StringBuilder();

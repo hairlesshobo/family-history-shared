@@ -145,20 +145,20 @@ namespace Archiver.Operations
                 ,
                 new CliMenuEntry<bool>() {
                     Name = "Scan For Changes",
-                    Task = Disc.DiscArchiver.StartScanOnlyAsync,
+                    Task = Tasks.Disc.DiscArchiverTask.StartScanOnlyAsync,
                     ForegroundColor = ConsoleColor.DarkYellow
                 },
                 // new CliMenuEntry<bool>() {
                 //     Name = "Scan For Renamed/Moved Files",
-                //     Task = Disc.ScanForFileRenames.StartOperation,
+                //     Task = Disc.ScanForFileRenames.StartOperationAsync,
                 //     ForegroundColor = ConsoleColor.DarkYellow
                 // },
-                // new CliMenuEntry<bool>() {
-                //     Name = "Run Archive process",
-                //     Task = Disc.DiscArchiver.StartOperation,
-                //     Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsOpticalDrivePresent,
-                //     ForegroundColor = ConsoleColor.Red
-                // }
+                new CliMenuEntry<bool>() {
+                    Name = "Run Archive process",
+                    Task = Tasks.Disc.DiscArchiverTask.StartOperationAsync,
+                    Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsOpticalDrivePresent,
+                    ForegroundColor = ConsoleColor.Red
+                }
             };
         }
 

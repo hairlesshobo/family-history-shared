@@ -25,19 +25,18 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Archiver.Shared.Classes.Disc;
+using Archiver.Shared.Operations.Disc;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Disc;
 using Archiver.Utilities.Shared;
 using TerminalUI;
 using TerminalUI.Elements;
 
-namespace Archiver.Operations.Disc
+namespace Archiver.Tasks.Disc
 {
-    internal static class DiscArchiver
+    internal static class DiscArchiverTask
     {
         private static CancellationTokenSource _cts;
-
-        private static Stopwatch _sw;
 
         internal static async Task RunArchiveAsync(bool askBeforeArchive = false)
         {
@@ -47,54 +46,75 @@ namespace Archiver.Operations.Disc
             if (discs == null)
                 return;
 
-            DiscScanStats stats = new DiscScanStats(discs);
-            Status.SetStats(stats);
-
-            _sw = Stopwatch.StartNew();
-
             SetupUI();
+
+            DiscArchiver archiver = new DiscArchiver(discs);
+
+            archiver.OnUpdateStats += (stats) => {
+                _kvtElapsed.UpdateValue(Formatting.FormatElapsedTime(stats.ProcessSw.Elapsed));
+                _kvtNewFileCount.UpdateValue(stats.NewlyFoundFiles.ToString());
+                _kvtExistingFileCount.UpdateValue(stats.ExistingFilesArchived.ToString());
+                _kvtExcludedFileCount.UpdateValue(stats.ExcludedFileCount.ToString());
+            };
+
+            archiver.OnStepStart += (stats, step) => {
+                if (step == DiscArchiver.ProcessStep.ScanFiles)
+                {
+                    _kvtNewFileCount.Show();
+                    _kvtExistingFileCount.Show();
+                    _kvtExcludedFileCount.Show();
+
+                    SetStatus("Scanning for files");
+                }
+                else if (step == DiscArchiver.ProcessStep.SizeFiles)
+                {
+                    _kvtSize.Show();
+                    _progress.UpdateProgress(0, stats.NewlyFoundFiles, true);
+
+                    SetStatus("Sizing files");
+                }
+                else if (step == DiscArchiver.ProcessStep.DistributeFiles)
+                {
+                    _kvtDistribute.Show();
+                    _progress.UpdateProgress(0, stats.NewlyFoundFiles, true);
+
+                    SetStatus("Distributing files");
+                }
+            };
+
+            archiver.OnStepComplete += (stats, step) => {
+                if (step == DiscArchiver.ProcessStep.SizeFiles)
+                    _progress.Hide();
+                else if (step == DiscArchiver.ProcessStep.DistributeFiles)
+                    _progress.Hide();
+            };
+
+            archiver.OnUpdateSizing += (stats, currentFile) => {
+                _kvtSize.UpdateValue(Formatting.GetFriendlySize(stats.TotalSize));
+                _progress.UpdateProgress(currentFile, stats.NewlyFoundFiles);
+            };
+
+            archiver.OnUpdateDistribute += (stats, currentFile) => {
+                _kvtDistribute.UpdateValue($"{stats.NewDiscCount} discs");
+                _progress.UpdateProgress(currentFile, stats.NewlyFoundFiles);
+            };
+
+            archiver.AskToArchiveCallback = async (stats) => {
+                bool? result = await _ynqRunArchive.QueryAsync(_cts.Token);
+
+                _ynqRunArchive.Hide();
+
+                return result;
+            };
+
+            await archiver.RunArchiveAsync(askBeforeArchive, _cts.Token);
 
             // ShowAll();
 
-            await IndexAndCountFilesAsync(stats);
-
-            if (_cts.Token.IsCancellationRequested) return;
-
-            if (stats.NewlyFoundFiles > 0)
-            {
-                await SizeFilesAsync(stats);
-
-                if (_cts.Token.IsCancellationRequested) return;
-
-                await DistributeFilesAsync(stats);
-
-                if (_cts.Token.IsCancellationRequested) return;
-
-                bool doProcess = true;
-
-                if (askBeforeArchive)
-                {
-                    bool? result = await _ynqRunArchive.QueryAsync(_cts.Token);
-
-                    if (result == null) return;
-
-                    doProcess = result.Value;
-
-                    _ynqRunArchive.Hide();
-                }
-                
-
-                if (doProcess)
-                {
-                //     DiscProcessing.ProcessDiscs(stats);
-
-                    Terminal.WriteLineColor(ConsoleColor.Green, "Process complete... don't forget to burn the ISOs to disc!");
-                }
-            }
-            else
+            if (archiver.ResultStatus == DiscArchiver.Status.Completed)
+                Terminal.WriteLineColor(ConsoleColor.Green, "Process complete... don't forget to burn the ISOs to disc!");
+            else if (archiver.ResultStatus == DiscArchiver.Status.NothingToDo)
                 Terminal.WriteLine("No new files found to archive. Nothing to do.");
-
-            _sw.Stop();
         }
 
         internal static Task StartScanOnlyAsync()
@@ -111,8 +131,7 @@ namespace Archiver.Operations.Disc
         private static KeyValueText _kvtExcludedFileCount;
         private static KeyValueText _kvtSize;
         private static KeyValueText _kvtDistribute;
-        private static ProgressBar _progressSize;
-        private static ProgressBar _progressDistribute;
+        private static ProgressBar _progress;
         private static QueryYesNo _ynqRunArchive;
         private const int leftWidth = -15;
 
@@ -155,12 +174,9 @@ namespace Archiver.Operations.Disc
             Terminal.NextLine();
             _kvtDistribute = new KeyValueText("New Disc Count", "0", leftWidth);
             Terminal.NextLine();
-
-            _progressSize = new ProgressBar(mode: ProgressMode.ExplicitCountLeft);
-            Terminal.NextLine();
-            _progressDistribute = new ProgressBar(mode: ProgressMode.ExplicitCountLeft);
             Terminal.NextLine();
 
+            _progress = new ProgressBar(mode: ProgressMode.ExplicitCountLeft);
             _ynqRunArchive = new QueryYesNo("Do you want to run the archive process now?");
             Terminal.NextLine();
 
@@ -176,80 +192,12 @@ namespace Archiver.Operations.Disc
             _kvtExistingFileCount.Show();
             _kvtExcludedFileCount.Show();
             _kvtSize.Show();
-            _progressSize.Show();
-        }
-
-        private static void UpdateStats(DiscScanStats stats) 
-        {
-            _kvtElapsed.UpdateValue(Formatting.FormatElapsedTime(_sw.Elapsed));
-            _kvtNewFileCount.UpdateValue(stats.NewlyFoundFiles.ToString());
-            _kvtExistingFileCount.UpdateValue(stats.ExistingFilesArchived.ToString());
-            _kvtExcludedFileCount.UpdateValue(stats.ExcludedFileCount.ToString());
+            _kvtDistribute.Show();
+            _progress.Show();
         }
 
         private static void SetStatus(string text)
             => _kvtStatus.UpdateValue(text);
 
-        private static async Task IndexAndCountFilesAsync(DiscScanStats stats)
-        {
-            _kvtNewFileCount.Show();
-            _kvtExistingFileCount.Show();
-            _kvtExcludedFileCount.Show();
-
-            SetStatus("Scanning for files");
-
-            FileScanner scanner = new FileScanner(stats);
-
-            scanner.OnProgressChanged += (newFiles, existingFiles, excludedFiles) => UpdateStats(stats);
-
-            await scanner.ScanFilesAsync(_cts.Token);
-            UpdateStats(stats);
-        }
-
-        public static async Task SizeFilesAsync(DiscScanStats stats)
-        {
-            _kvtSize.Show();
-            _progressSize.UpdateProgress(0, stats.NewlyFoundFiles, true);
-
-            SetStatus("Sizing files");
-
-            FileSizer sizer = new FileSizer(stats);
-
-            FileSizer.ProgressChangedDelegate updateSize = (stats, currentFile, totalSize) => {
-                _kvtSize.UpdateValue(Formatting.GetFriendlySize(totalSize));
-                _progressSize.UpdateProgress(currentFile, stats.NewlyFoundFiles);
-            };
-
-            sizer.OnProgressChanged += updateSize;
-
-            await sizer.SizeFilesAsync(_cts.Token);
-
-            updateSize(stats, stats.NewlyFoundFiles, stats.TotalSize);
-
-            _progressSize.Hide();
-        }
-
-        public static async Task DistributeFilesAsync(DiscScanStats stats)
-        {
-            _kvtDistribute.Show();
-            _progressDistribute.UpdateProgress(0, stats.NewlyFoundFiles, true);
-
-            SetStatus("Sizing files");
-
-            FileDistributor distributor = new FileDistributor(stats);
-
-            FileDistributor.ProgressChangedDelegate updateDistribute = (stats, currentFile, discCount) => {
-                _kvtDistribute.UpdateValue($"{discCount} discs");
-                _progressDistribute.UpdateProgress(currentFile, stats.NewlyFoundFiles);
-            };
-
-            distributor.OnProgressChanged += updateDistribute;
-
-            await distributor.DistributeFilesAsync(_cts.Token);
-
-            updateDistribute(stats, stats.NewlyFoundFiles, stats.DestinationDiscs.Where(x => x.Finalized == false).Count());
-
-            _progressDistribute.Hide();
-        }
     }
 }

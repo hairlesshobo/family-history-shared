@@ -7,7 +7,6 @@ namespace Archiver.Shared.Classes.CSD
     public class CsdScanStats
     {
 
-        public List<CsdSourceFile> JsonReadSourceFiles = new List<CsdSourceFile>();
         public IReadOnlyList<CsdSourceFile> NewFileEntries => (IReadOnlyList<CsdSourceFile>)SourceFileDict.Select(x => x.Value).Where(x => x.Copied == false);
         
         public List<CsdSourceFile> DeletedFiles = new List<CsdSourceFile>();

@@ -55,10 +55,9 @@ namespace Archiver.Shared.Classes.Disc
                 throw new DirectoryNotFoundException($"Source file does not exist: {sourcePath}");
 
             // we found a file on the filesystem, but it is already in the archive
-            if (stats.DiscSourceFiles.Any(x => x.Archived == true && x.RelativePath == this.RelativePath))
-            {
+            // if (stats.DiscSourceFiles.Any(x => x.Archived == true && x.RelativePath == this.RelativePath))
+            if (stats.SourceFileDict.ContainsKey(this.RelativePath))
                 stats.ExistingFilesArchived += 1;
-            }
 
             // we only add the file to the index if it hasn't yet been archived
             else
@@ -75,7 +74,7 @@ namespace Archiver.Shared.Classes.Disc
                 if (isNewFile)
                 {
                     stats.NewlyFoundFiles += 1;
-                    stats.DiscSourceFiles.Add(this);
+                    stats.SourceFileDict.Add(this.RelativePath, this);
                 }
             }
         }

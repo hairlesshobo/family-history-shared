@@ -27,11 +27,11 @@ using Archiver.Shared.Utilities;
 using System.Threading.Tasks;
 using System.Threading;
 
-namespace Archiver.Utilities.Disc
+namespace Archiver.Shared.Utilities.Disc
 {
     public class FileScanner
     {
-        public delegate void ProgressChangedDelegate(long newFiles, long existingFiles, long excludedFiles);
+        public delegate void ProgressChangedDelegate(DiscScanStats stats);
 
         public event ProgressChangedDelegate OnProgressChanged;
 
@@ -64,6 +64,8 @@ namespace Archiver.Utilities.Disc
                 if (cToken.IsCancellationRequested)
                     break;
             }
+
+            this.OnProgressChanged(_stats);
 
             _sw.Stop();
         }
@@ -102,7 +104,7 @@ namespace Archiver.Utilities.Disc
 
                 if (_sw.ElapsedMilliseconds - _lastSample > _sampleDurationMs)
                 {
-                    OnProgressChanged(_stats.NewlyFoundFiles, _stats.ExistingFilesArchived, _stats.ExcludedFileCount);
+                    this.OnProgressChanged(_stats);
                     _lastSample = _sw.ElapsedMilliseconds;
                 }
             }

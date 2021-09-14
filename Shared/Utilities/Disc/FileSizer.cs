@@ -19,17 +19,18 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Archiver.Shared.Classes.Disc;
 
-namespace Archiver.Utilities.Disc
+namespace Archiver.Shared.Utilities.Disc
 {
     public class FileSizer
     {
-        public delegate void ProgressChangedDelegate(DiscScanStats stats, long currentFile, long totalSize);
+        public delegate void ProgressChangedDelegate(DiscScanStats stats, long currentFile);
 
         public event ProgressChangedDelegate OnProgressChanged;
 
@@ -55,7 +56,11 @@ namespace Archiver.Utilities.Disc
 
             long fileCount = 0;
 
-            foreach (DiscSourceFile sourceFile in _stats.DiscSourceFiles.Where(x => x.Archived == false))
+            IEnumerable<DiscSourceFile> files = _stats.SourceFileDict
+                                                      .Select(x => x.Value)
+                                                      .Where(x => x.Archived == false);
+
+            foreach (DiscSourceFile sourceFile in files)
             {
                 if (cToken.IsCancellationRequested)
                     return;
@@ -64,12 +69,14 @@ namespace Archiver.Utilities.Disc
 
                 if (_sw.ElapsedMilliseconds - _lastSample > _sampleDurationMs)
                 {
-                    OnProgressChanged(_stats, fileCount, _stats.TotalSize);
+                    OnProgressChanged(_stats, fileCount);
                     _lastSample = _sw.ElapsedMilliseconds;
                 }
 
                 fileCount++;
             }
+
+            OnProgressChanged(_stats, fileCount);
 
             _sw.Stop();
         }
