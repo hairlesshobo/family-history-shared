@@ -23,6 +23,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Archiver.Shared.Interfaces;
 using Archiver.Shared.Utilities;
 
@@ -47,12 +49,7 @@ namespace Archiver.Shared.Classes
         public event CompleteDelegate OnComplete;
         public event ProgressChangedDelegate OnProgressChanged;
 
-        public CustomFileCopier(ISourceFile sourceFile, string destinationRoot)
-        {
-            Initialize(sourceFile, destinationRoot);
-        }
-
-        private void Initialize(ISourceFile sourceFile, string destinationRoot, string newFileName = null)
+        public CustomFileCopier(ISourceFile sourceFile, string destinationRoot, string newFileName = null)
         {
             this.SourceFile = sourceFile;
             this.DestinationRoot = PathUtils.CleanPath(destinationRoot);
@@ -78,11 +75,16 @@ namespace Archiver.Shared.Classes
             this.OnProgressChanged += delegate { };
         }
 
-        public void Copy()
+        public Task CopyAsync(CancellationToken cToken)
+            => Task.Run(() => Copy(cToken));
+
+        public void Copy(CancellationToken cToken = default)
         {
             FileCopyProgress progress = new FileCopyProgress();
 
             byte[] buffer = new byte[1024 * 1024 * 2]; // 2MB buffer
+
+            bool isAbort = false;
             // bool cancelFlag = false;
 
             using (FileStream source = new FileStream(this.SourceFile.FullPath, FileMode.Open, FileAccess.Read))
@@ -114,6 +116,12 @@ namespace Archiver.Shared.Classes
 
                     while ((currentBlockSize = source.Read(buffer, 0, buffer.Length)) > 0)
                     {
+                        if (cToken.IsCancellationRequested)
+                        {
+                            isAbort = true;
+                            break;
+                        }
+
                         bool lastBlock = currentBlockSize < buffer.Length;
                         progress.TotalCopiedBytes += currentBlockSize;
 
@@ -140,7 +148,7 @@ namespace Archiver.Shared.Classes
                     }
                 }
 
-                if (this.Preserve)
+                if (this.Preserve && !isAbort)
                 {
                     FileInfo destinationFileInfo = new FileInfo(this.DestinationFilePath);
 
@@ -151,8 +159,13 @@ namespace Archiver.Shared.Classes
                     PreserveDirectoryTimes();
                 }
             }
+            
+            // here I can optionally clean up the partially copied file 
+            // if (isAbort)
+            //     File.Delete(this.DestinationFilePath);
 
-            OnComplete(progress);
+            if (!isAbort)
+                OnComplete(progress);
         }
 
         private void PreserveDirectoryTimes()

@@ -82,7 +82,7 @@ namespace Archiver.Utilities.Shared
                 )
             );
 
-            Text text = new Text();
+            Text text = new Text($"Reading {mediaType} index files...");
             Terminal.NextLine();
             Terminal.NextLine();
             
@@ -94,8 +94,6 @@ namespace Archiver.Utilities.Shared
             return HelpersNew.ReadMediaIndexAsync<TMedia>(mediaType, cts.Token, (currentFile, totalFiles) => 
             {
                 progress.UpdateProgress(currentFile, totalFiles, true);
-
-                text.UpdateValue($"Reading {mediaType} index files...");
             });
         }
         

@@ -48,6 +48,10 @@ namespace Archiver.Tasks.Disc
 
             SetupUI();
 
+            // ShowAll();
+
+            // return;
+
             DiscArchiver archiver = new DiscArchiver(discs);
 
             archiver.OnUpdateStats += (stats) => {
@@ -57,7 +61,7 @@ namespace Archiver.Tasks.Disc
                 _kvtExcludedFileCount.UpdateValue(stats.ExcludedFileCount.ToString());
             };
 
-            archiver.OnStepStart += (stats, step) => {
+            archiver.OnStepStart += (disc, stats, step) => {
                 if (step == DiscArchiver.ProcessStep.ScanFiles)
                 {
                     _kvtNewFileCount.Show();
@@ -80,13 +84,44 @@ namespace Archiver.Tasks.Disc
 
                     SetStatus("Distributing files");
                 }
+                else if (step == DiscArchiver.ProcessStep.CopyFiles)
+                {
+                    _textDiscProcessHeader.Show();
+                    _lineProcessingHeader.Show();
+
+                    _progress.UpdateProgress(0, disc.TotalFiles, true);
+                    _kvtDiscName.UpdateValue(disc.DiscName);
+                    _kvtDiscName.Show();
+                    _kvtElapsedTime.Show();
+                    _kvtDataCopied.Show();
+                    _kvtCurrentRate.Show();
+                    _kvtAvgRate.Show();
+
+                    SetStatus("Copying files to staging");
+                }
             };
 
-            archiver.OnStepComplete += (stats, step) => {
+            archiver.OnStepComplete += (disc, stats, step) => {
                 if (step == DiscArchiver.ProcessStep.SizeFiles)
                     _progress.Hide();
                 else if (step == DiscArchiver.ProcessStep.DistributeFiles)
                     _progress.Hide();
+                else if (step == DiscArchiver.ProcessStep.CopyFiles)
+                {
+                    _kvtDiscName.Hide();
+                    _kvtElapsedTime.Hide();
+                    _kvtDataCopied.Hide();
+                    _kvtCurrentRate.Hide();
+                    _kvtAvgRate.Hide();
+                }
+            };
+
+            archiver.OnFileCopyProgress += (disc, stats, progress) => {
+                _progress.UpdateProgress(progress.CurrentFile, disc.TotalFiles, progress.CurrentPercent);
+                _kvtElapsedTime.UpdateValue(Formatting.FormatElapsedTime(progress.Elapsed));
+                _kvtDataCopied.UpdateValue(Formatting.GetFriendlySize(disc.BytesCopied));
+                _kvtCurrentRate.UpdateValue(Formatting.GetFriendlyTransferRate(progress.InstantTransferRate));
+                _kvtAvgRate.UpdateValue(Formatting.GetFriendlyTransferRate(progress.AverageTransferRate));
             };
 
             archiver.OnUpdateSizing += (stats, currentFile) => {
@@ -109,12 +144,12 @@ namespace Archiver.Tasks.Disc
 
             await archiver.RunArchiveAsync(askBeforeArchive, _cts.Token);
 
-            // ShowAll();
-
             if (archiver.ResultStatus == DiscArchiver.Status.Completed)
                 Terminal.WriteLineColor(ConsoleColor.Green, "Process complete... don't forget to burn the ISOs to disc!");
             else if (archiver.ResultStatus == DiscArchiver.Status.NothingToDo)
                 Terminal.WriteLine("No new files found to archive. Nothing to do.");
+            else if (archiver.ResultStatus == DiscArchiver.Status.Canceled)
+                Terminal.WriteLineColor(ConsoleColor.Red, "Process canceled! Not all data has been archived!");
         }
 
         internal static Task StartScanOnlyAsync()
@@ -124,6 +159,10 @@ namespace Archiver.Tasks.Disc
             => RunArchiveAsync(false);
 
 
+        private static Text _textFileStatsHeader;
+        private static Text _textDiscProcessHeader;
+        private static HorizontalLine _lineStatsHeader;
+        private static HorizontalLine _lineProcessingHeader;
         private static KeyValueText _kvtStatus;
         private static KeyValueText _kvtElapsed;
         private static KeyValueText _kvtNewFileCount;
@@ -133,7 +172,15 @@ namespace Archiver.Tasks.Disc
         private static KeyValueText _kvtDistribute;
         private static ProgressBar _progress;
         private static QueryYesNo _ynqRunArchive;
+        private static KeyValueText _kvtDiscName;
+        private static KeyValueText _kvtElapsedTime;
+        private static KeyValueText _kvtDataCopied;
+        private static KeyValueText _kvtCurrentRate;
+        private static KeyValueText _kvtAvgRate;
         private const int leftWidth = -15;
+        private const int rightWidth = -12;
+
+        private const int rightColumnOffset = 40;
 
 
         private static void SetupUI()
@@ -154,38 +201,69 @@ namespace Archiver.Tasks.Disc
             Terminal.Clear();
             Terminal.Header.UpdateLeft("Disc Archiver");
 
-            _kvtStatus = new KeyValueText("Status", "Starting...", leftWidth);
-            Terminal.NextLine();
-            _kvtElapsed = new KeyValueText("Elapsed", null, leftWidth);
-            Terminal.NextLine();
-            Terminal.NextLine();
-
-            _kvtNewFileCount = new KeyValueText("New Files", "0", leftWidth);
-            Terminal.NextLine();
-
-            _kvtExistingFileCount = new KeyValueText("Existing Files", "0", leftWidth);
-            Terminal.NextLine();
-
-            _kvtExcludedFileCount = new KeyValueText("Excluded Files", "0", leftWidth);
+            _kvtStatus = new KeyValueText("Status", "Starting...", area: Area.LeftHalf);
+            _kvtElapsed = new KeyValueText("Total Time", area: Area.RightHalf);
             Terminal.NextLine();
             Terminal.NextLine();
 
-            _kvtSize = new KeyValueText("New Data Size", "0", leftWidth);
+
+            // line 1
+            _textFileStatsHeader = new Text(ConsoleColor.Cyan, "Statistics", area: Area.LeftHalf); //left
+            _textDiscProcessHeader = new Text(ConsoleColor.Cyan, "Processing", area: Area.RightHalf); //right
             Terminal.NextLine();
-            _kvtDistribute = new KeyValueText("New Disc Count", "0", leftWidth);
+
+            // line 2
+            _lineStatsHeader = new HorizontalLine(width: -5, area: Area.LeftHalf);
+            _lineProcessingHeader = new HorizontalLine(width: -5, area: Area.RightHalf);
+            Terminal.NextLine();
+
+            // line 3
+            _kvtNewFileCount = new KeyValueText("New Files", "0", leftWidth, area: Area.LeftHalf);
+            _kvtDiscName = new KeyValueText("Disc Name", null, rightWidth, area: Area.RightHalf);
+            Terminal.NextLine();
+
+            // line 4
+            _kvtExistingFileCount = new KeyValueText("Existing Files", "0", leftWidth, area: Area.LeftHalf);
+            _kvtElapsedTime = new KeyValueText("Elapsed Time", null, rightWidth, area: Area.RightHalf);
+            Terminal.NextLine();
+
+            // line 5
+            _kvtExcludedFileCount = new KeyValueText("Excluded Files", "0", leftWidth, area: Area.LeftHalf);
+            Terminal.NextLine();
+
+            // line 6
+            _kvtDataCopied = new KeyValueText("Data Copied", Formatting.GetFriendlySize(0), rightWidth, area: Area.RightHalf);
+            Terminal.NextLine();
+
+            // line 7
+            _kvtSize = new KeyValueText("New Data Size", "0", leftWidth, area: Area.LeftHalf);
+            _kvtCurrentRate = new KeyValueText("Current Rate", Formatting.GetFriendlyTransferRate(0), rightWidth, area: Area.RightHalf);
+            Terminal.NextLine();
+
+            // line 8
+            _kvtDistribute = new KeyValueText("New Disc Count", "0", leftWidth, area: Area.LeftHalf);
+            _kvtAvgRate = new KeyValueText("Average Rate", Formatting.GetFriendlyTransferRate(0), rightWidth, area: Area.RightHalf);
             Terminal.NextLine();
             Terminal.NextLine();
 
             _progress = new ProgressBar(mode: ProgressMode.ExplicitCountLeft);
             _ynqRunArchive = new QueryYesNo("Do you want to run the archive process now?");
             Terminal.NextLine();
+            Terminal.NextLine();
 
+            _textFileStatsHeader.Show();
             _kvtStatus.Show();
             _kvtElapsed.Show();
+            _lineStatsHeader.Show();
         }
 
         private static void ShowAll()
         {
+            _textFileStatsHeader.Show();
+            _textDiscProcessHeader.Show();
+            _lineStatsHeader.Show();
+            _lineProcessingHeader.Show();
+
             _kvtStatus.Show();
             _kvtElapsed.Show();
             _kvtNewFileCount.Show();
@@ -194,6 +272,12 @@ namespace Archiver.Tasks.Disc
             _kvtSize.Show();
             _kvtDistribute.Show();
             _progress.Show();
+
+            _kvtDiscName.Show();
+            _kvtElapsedTime.Show();
+            _kvtDataCopied.Show();
+            _kvtCurrentRate.Show();
+            _kvtAvgRate.Show();
         }
 
         private static void SetStatus(string text)

@@ -39,7 +39,8 @@ namespace Archiver.Shared.Operations.Disc
             FirstStart = 0,
             ScanFiles = 1,
             SizeFiles = 2,
-            DistributeFiles = 3
+            DistributeFiles = 3,
+            CopyFiles = 4
         }
 
         public enum Status
@@ -49,11 +50,20 @@ namespace Archiver.Shared.Operations.Disc
             Canceled = 2
         }
 
-        public delegate void StepStateDelegate(DiscScanStats stats, ProcessStep step);
+        public struct FileCopyProgress
+        {
+            public TimeSpan Elapsed;
+            public int CurrentFile;
+            public double InstantTransferRate;
+            public double AverageTransferRate;
+            public double CurrentPercent;
+        }
+
+        public delegate void StepStateDelegate(DiscDetail disc, DiscScanStats stats, ProcessStep step);
         public delegate void UpdateStatsDelegate(DiscScanStats stats);
         public delegate void UpdateSizingDelegate(DiscScanStats stats, long currentFile);
         public delegate void UpdateDistributeDelegate(DiscScanStats stats, long currentFile);
-        public delegate void FileCopyProgressDelegate(DiscDetail disc, TimeSpan elapsed, int currentFile, double instantTransferRate, double averageTransferRate);
+        public delegate void FileCopyProgressDelegate(DiscDetail disc, DiscScanStats stats, FileCopyProgress progress);
         // public delegate void StatusUpdateDelegate(string statusText);
 
         public event StepStateDelegate OnStepStart;
@@ -100,27 +110,21 @@ namespace Archiver.Shared.Operations.Disc
             
             
             await this.IndexAndCountFilesAsync();
-            if (_cToken.IsCancellationRequested) return;
+            if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
 
-            if (_stats.NewlyFoundFiles == 0)
-            {
-                this.ResultStatus = Status.NothingToDo;
-                return;   
-            }
+            if (_stats.NewlyFoundFiles == 0) { this.ResultStatus = Status.NothingToDo; return; }
 
             await this.SizeFilesAsync();
-            if (_cToken.IsCancellationRequested) return;
+            if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
 
             await this.DistributeFilesAsync();
-            if (_cToken.IsCancellationRequested) return;
+            if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
 
             if (askBeforeArchive && AskToArchiveCallback != null && await AskToArchiveCallback(_stats) != true)
-            {
-                this.ResultStatus = Status.Canceled;
-                return;
-            }
+            { this.ResultStatus = Status.Canceled; return; }
 
             await this.ProcessDiscsAsync();
+            if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
 
             this.ResultStatus = Status.Completed;
 
@@ -129,31 +133,31 @@ namespace Archiver.Shared.Operations.Disc
 
         private async Task IndexAndCountFilesAsync()
         {
-            this.OnStepStart(_stats, ProcessStep.ScanFiles);
+            this.OnStepStart(null, _stats, ProcessStep.ScanFiles);
             // this.OnStatusUpdate("Scanning for files");
 
             FileScanner scanner = new FileScanner(_stats);
             scanner.OnProgressChanged += (stats) => this.OnUpdateStats(stats);
             await scanner.ScanFilesAsync(_cToken);
 
-            this.OnStepComplete(_stats, ProcessStep.ScanFiles);
+            this.OnStepComplete(null, _stats, ProcessStep.ScanFiles);
         }
 
         private async Task SizeFilesAsync()
         {
-            this.OnStepStart(_stats, ProcessStep.SizeFiles);
+            this.OnStepStart(null, _stats, ProcessStep.SizeFiles);
             // this.OnStatusUpdate("Sizing files");
 
             FileSizer sizer = new FileSizer(_stats);
             sizer.OnProgressChanged += (stats, currentFile) => this.OnUpdateSizing(stats, currentFile);
             await sizer.SizeFilesAsync(_cToken);
 
-            this.OnStepComplete(_stats, ProcessStep.SizeFiles);
+            this.OnStepComplete(null, _stats, ProcessStep.SizeFiles);
         }
 
         private async Task DistributeFilesAsync()
         {
-            this.OnStepStart(_stats, ProcessStep.DistributeFiles);
+            this.OnStepStart(null, _stats, ProcessStep.DistributeFiles);
 
             FileDistributor distributor = new FileDistributor(_stats);
 
@@ -161,7 +165,7 @@ namespace Archiver.Shared.Operations.Disc
 
             await distributor.DistributeFilesAsync(_cToken);
 
-            this.OnStepComplete(_stats, ProcessStep.DistributeFiles);
+            this.OnStepComplete(null, _stats, ProcessStep.DistributeFiles);
         }
 
         private async Task ProcessDiscsAsync()
@@ -175,25 +179,25 @@ namespace Archiver.Shared.Operations.Disc
                 Stopwatch discSw = Stopwatch.StartNew();
 
                 await CopyFilesAsync(disc, discSw);
-                if (_cToken.IsCancellationRequested) return;
+                if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
                 
                 // GenerateIndexFiles(disc, masterSw);
-                // if (_cToken.IsCancellationRequested) return;
+                // if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
                 
                 // GenerateHashFile(disc, masterSw);
-                // if (_cToken.IsCancellationRequested) return;
+                // if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
                 
                 // WriteDiscInfo(disc, masterSw);
-                // if (_cToken.IsCancellationRequested) return;
+                // if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
                 
                 // CreateISOFile(disc, masterSw);
-                // if (_cToken.IsCancellationRequested) return;
+                // if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
                 
                 // ReadIsoHash(disc, masterSw);
-                // if (_cToken.IsCancellationRequested) return;
+                // if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
 
                 // SaveJsonData(disc, masterSw);
-                // if (_cToken.IsCancellationRequested) return;
+                // if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
 
                 discSw.Stop();
                 // Status.WriteDiscComplete(disc, masterSw.Elapsed);
@@ -202,8 +206,10 @@ namespace Archiver.Shared.Operations.Disc
             // Status.ProcessComplete();
         }
 
-        private Task CopyFilesAsync(DiscDetail disc, Stopwatch discSw)
+        private async Task CopyFilesAsync(DiscDetail disc, Stopwatch discSw)
         {
+            this.OnStepStart(disc, _stats, ProcessStep.CopyFiles);
+            
             // TODO: implement cToken
 
             // if the stage dir already exists, we need to remove it so we don't accidentally end up with data
@@ -230,6 +236,9 @@ namespace Archiver.Shared.Operations.Disc
 
             foreach (DiscSourceFile file in sourceFiles)
             {
+                if (_cToken.IsCancellationRequested == true)
+                    return;
+
                 // if we moved to another disc, we reset the disc counter
                 if (file.DestinationDisc.DiscNumber > currentDisc)
                 {
@@ -256,8 +265,14 @@ namespace Archiver.Shared.Operations.Disc
                         else
                             averageTransferRate = averageTransferRate + (instantTransferRate - averageTransferRate) / sampleCount;
 
-                        // TODO: convert to (disc, progress)
-                        this.OnFileCopyProgress(disc, discSw.Elapsed, currentFile, instantTransferRate, averageTransferRate);
+                        this.OnFileCopyProgress(disc, _stats, new FileCopyProgress()
+                        {
+                            Elapsed = discSw.Elapsed,
+                            CurrentFile = currentFile, 
+                            InstantTransferRate = instantTransferRate,
+                            AverageTransferRate = averageTransferRate,
+                            CurrentPercent = ((double)disc.BytesCopied / (double)disc.DataSize)
+                        });
 
                         bytesCopiedSinceLastupdate = 0;
                         lastSample = sw.ElapsedMilliseconds;
@@ -269,9 +284,7 @@ namespace Archiver.Shared.Operations.Disc
                 };
 
                 // TODO: port to task instead of thread
-                Thread copyThread = new Thread(copier.Copy);
-                copyThread.Start();
-                copyThread.Join();
+                await copier.CopyAsync(_cToken);
 
                 file.Copied = true;
                 file.Archived = true;
@@ -282,7 +295,7 @@ namespace Archiver.Shared.Operations.Disc
 
             sw.Stop();
 
-            return Task.CompletedTask;
+            this.OnStepComplete(disc, _stats, ProcessStep.CopyFiles);
         }
     }
 }

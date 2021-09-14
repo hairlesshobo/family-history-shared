@@ -23,6 +23,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Archiver.Shared;
 using Archiver.Shared.Classes;
 using Archiver.Shared.Classes.CSD;
@@ -173,7 +174,7 @@ namespace Archiver.Utilities.CSD
                     file.Hash = copier.MD5_Hash;
                 };
 
-                Thread copyThread = new Thread(copier.Copy);
+                Thread copyThread = new Thread(() => copier.Copy());
                 copyThread.Start();
                 copyThread.Join();
 

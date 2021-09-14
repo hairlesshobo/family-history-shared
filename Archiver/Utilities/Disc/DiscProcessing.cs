@@ -99,7 +99,7 @@ namespace Archiver.Utilities.Disc
                     file.Hash = copier.MD5_Hash;
                 };
 
-                Thread copyThread = new Thread(copier.Copy);
+                Thread copyThread = new Thread(() => copier.Copy());
                 copyThread.Start();
                 copyThread.Join();
 
