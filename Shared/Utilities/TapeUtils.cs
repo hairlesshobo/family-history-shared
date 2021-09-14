@@ -80,7 +80,6 @@ namespace Archiver.Shared.Utilities
                     return LinuxIsTapeDrivePresent();
             }
 
-            // TODO: finish implementing tape drive detection
             return false;
         }
     }

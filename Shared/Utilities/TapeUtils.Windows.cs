@@ -19,12 +19,9 @@
  */
 
 using System;
-using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
-using Archiver.Shared.Exceptions;
-using Archiver.Shared.Models;
-using Archiver.Shared.TapeDrivers;
+using Archiver.Shared.Native;
+using Microsoft.Win32.SafeHandles;
+using static Archiver.Shared.Native.Windows;
 
 namespace Archiver.Shared.Utilities
 {
@@ -32,16 +29,18 @@ namespace Archiver.Shared.Utilities
     {
         private static bool WindowsIsTapeDrivePresent()
         {
-            try
-            {
-                using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(SysInfo.TapeDrive, false))
-                {}
-            }
-            catch (TapeOperatorWin32Exception exception)
-            {
-                if (exception.HResult == -2146232832)
-                    return false;
-            }
+            SafeFileHandle handle = Windows.CreateFile(
+                SysInfo.TapeDrive,
+                GENERIC_READ | GENERIC_WRITE,
+                0,
+                IntPtr.Zero,
+                OPEN_EXISTING,
+                0,
+                IntPtr.Zero
+                );
+
+            if (handle.IsInvalid)
+                return false;
 
             return true;
         }
