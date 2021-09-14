@@ -210,8 +210,6 @@ namespace Archiver.Shared.Operations.Disc
         {
             this.OnStepStart(disc, _stats, ProcessStep.CopyFiles);
             
-            // TODO: implement cToken
-
             // if the stage dir already exists, we need to remove it so we don't accidentally end up with data
             // on the final disc that doesn't belong there
             // TODO: find some way to make sure this doesn't delete stuff it shouldn't..
@@ -283,7 +281,6 @@ namespace Archiver.Shared.Operations.Disc
                     file.Hash = copier.MD5_Hash;
                 };
 
-                // TODO: port to task instead of thread
                 await copier.CopyAsync(_cToken);
 
                 file.Copied = true;

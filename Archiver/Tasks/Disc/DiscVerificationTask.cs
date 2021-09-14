@@ -173,7 +173,6 @@ namespace Archiver.Tasks.Disc
 
             verifier.OnStatusChanged += (status, text) => kvtStatus.UpdateValue(text); 
             verifier.OnDiscVerificationStarted += (disc) => {
-                // TODO: does this need to be _disc.VolumeLabel instead?
                 kvtDiscName.UpdateValue(disc.DiscName);
                 kvtDiscName.Show();
                 kvtElapsedTime.Show();

@@ -37,82 +37,6 @@ namespace Archiver.Utilities.Disc
     {
         private static int _updateFrequencyMs = 1000;
         
-        public static void CopyFiles(DiscDetail disc, Stopwatch masterSw)
-        {
-            // if the stage dir already exists, we need to remove it so we don't accidentally end up with data
-            // on the final disc that doesn't belong there
-            if (Directory.Exists(disc.RootStagingPath))
-                Directory.Delete(disc.RootStagingPath, true);
-
-            disc.ArchiveDTM = DateTime.UtcNow;
-
-            IEnumerable<DiscSourceFile> sourceFiles = disc.Files.Where(x => x.Archived == false).OrderBy(x => x.RelativePath);
-
-            long bytesCopied = 0;
-            long bytesCopiedSinceLastupdate = 0;
-            int currentFile = 1;
-            int currentDisc = 0;
-            double averageTransferRate = 0;
-            long sampleCount = 0;
-            
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-
-            long lastSample = sw.ElapsedMilliseconds;
-
-            foreach (DiscSourceFile file in sourceFiles)
-            {
-                // if we moved to another disc, we reset the disc counter
-                if (file.DestinationDisc.DiscNumber > currentDisc)
-                {
-                    currentDisc = file.DestinationDisc.DiscNumber;
-                    currentFile = 1;
-                }
-
-                var copier = file.ActivateCopy();
-
-                copier.OnProgressChanged += (progress) => {
-                    bytesCopied += progress.BytesCopiedSinceLastupdate;
-                    bytesCopiedSinceLastupdate += progress.BytesCopiedSinceLastupdate;
-                    file.DestinationDisc.BytesCopied += progress.BytesCopiedSinceLastupdate;
-
-                    if ((sw.ElapsedMilliseconds - lastSample) > _updateFrequencyMs)
-                    {
-                        sampleCount++;
-
-                        double timeSinceLastUpdate = (double)(sw.ElapsedMilliseconds - lastSample) / 1000.0;
-                        double instantTransferRate = (double)bytesCopiedSinceLastupdate / timeSinceLastUpdate;
-
-                        if (sampleCount == 1)
-                            averageTransferRate = instantTransferRate;
-                        else
-                            averageTransferRate = averageTransferRate + (instantTransferRate - averageTransferRate) / sampleCount;
-
-                        Status.WriteDiscCopyLine(disc, masterSw.Elapsed, currentFile, instantTransferRate, averageTransferRate);
-
-                        bytesCopiedSinceLastupdate = 0;
-                        lastSample = sw.ElapsedMilliseconds;
-                    }
-                };
-
-                copier.OnComplete += (progress) => {
-                    file.Hash = copier.MD5_Hash;
-                };
-
-                Thread copyThread = new Thread(() => copier.Copy());
-                copyThread.Start();
-                copyThread.Join();
-
-                file.Copied = true;
-                file.Archived = true;
-                file.ArchiveTimeUtc = DateTime.UtcNow;
-
-                currentFile++;
-            }
-
-            sw.Stop();
-        }
-
         public static void GenerateHashFile(DiscDetail disc, Stopwatch masterSw)
         {
             Status.WriteDiscHashListFile(disc, masterSw.Elapsed, 0.0);
@@ -273,7 +197,7 @@ namespace Archiver.Utilities.Disc
             Status.WriteDiscIsoHash(disc, masterSw.Elapsed, 100.0);
         }
 
-        public static void ProcessDiscs (DiscScanStats stats)
+        private static void ProcessDiscs (DiscScanStats stats)
         {
             Status.InitDiscLines();
 
@@ -282,7 +206,6 @@ namespace Archiver.Utilities.Disc
                 Stopwatch masterSw = new Stopwatch();
                 masterSw.Start();
 
-                CopyFiles(disc, masterSw);
                 GenerateIndexFiles(disc, masterSw);
                 GenerateHashFile(disc, masterSw);
                 WriteDiscInfo(disc, masterSw);

@@ -134,9 +134,6 @@ namespace Archiver.Shared.Operations.Disc
                 this.OnStatusChanged(Status.Canceled, "Process canceled");
             else
                 this.OnStatusChanged(Status.Complete,"All Discs have been verified");
-                
-            // TODO: I think the line below can just be removed...
-            // await Task.Delay(0);
         }
 
         private async Task<DiscDetail> WaitForDiscAsync(CancellationToken cToken)

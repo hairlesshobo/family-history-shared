@@ -42,9 +42,7 @@ namespace Archiver.Shared.Models.Config
         
         public List<ValidationError> Validate(string prefix = null)
         {
-            // TODO: 
-            // In the future, find a way to specify whether loading config for archiver or
-            // tape server, this way not all field will actually be required
+            // TODO: In the future, find a way to specify whether loading config for archiver or tape server, this way not all field will actually be required
             
             List<ValidationError> results = new List<ValidationError>();
 
@@ -55,9 +53,7 @@ namespace Archiver.Shared.Models.Config
 
             if (SysInfo.OSType == OSType.Windows)
             {
-                // TODO: 
-                // in the future, make this a warning. Still allow the app to run, don't allow the relevant
-                // functionality to work on windows
+                // TODO: in the future, make this a warning. Still allow the app to run, don't allow the relevant functionality to work on windows
                 if (String.IsNullOrWhiteSpace(this.CdbxpPath))
                     results.AddValidationError(prefix, nameof(this.CdbxpPath), "Path to utility not provided");
 
