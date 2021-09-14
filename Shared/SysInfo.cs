@@ -92,10 +92,15 @@ namespace Archiver.Shared
                 _config = ConfigUtils.ReadConfig(out _configErrors);
 
                 _directories = new SystemDirectories();
-                _directories.Index = PathUtils.ResolveRelativePath(Path.Join(Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location), "../"));
+                _directories.Bin = PathUtils.CleanPath(AppContext.BaseDirectory);
+                _directories.Index = PathUtils.ResolveRelativePath(Path.Combine(_directories.Bin, "../"));
                 _directories.JSON = PathUtils.CleanPathCombine(_directories.Index, "json");
-                _directories.DiscStaging = (Config.Disc.StagingDir != null ? PathUtils.ResolveRelativePath(Config.Disc.StagingDir) : PathUtils.CleanPath(Path.GetTempPath()));
                 _directories.ISO = PathUtils.CleanPathCombine(_directories.Index, "../iso");
+                _directories.DiscStaging = (
+                      !String.IsNullOrWhiteSpace(Config.Disc.StagingDir) 
+                    ? PathUtils.ResolveRelativePath(Path.Combine(_directories.Index, Config.Disc.StagingDir)) 
+                    : PathUtils.CleanPath(Path.Combine(Path.GetTempPath(), Path.GetTempFileName()))
+                );
 
                 _isOpticalDrivePresent = OpticalDriveUtils.GetDriveNames().Any();
                 _isReadonlyFilesystem = TestForReadonlyFs();
@@ -199,6 +204,7 @@ namespace Archiver.Shared
 
         public class SystemDirectories
         {
+            public string Bin { get; internal protected set; }
             public string Index { get; internal protected set; }
             public string JSON { get; internal protected set; }
             public string DiscStaging { get; internal protected set; }
