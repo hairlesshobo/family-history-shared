@@ -175,7 +175,7 @@ namespace Archiver
 
                 //! Main entry point:
                 Task mainTask = Task.Run(() => MainMenu.StartOperationAsync());
-                Task terminalTask = Terminal.Start();
+                Task terminalTask = Terminal.StartAsync();
 
                 Task.WaitAll(mainTask, terminalTask);
             }

@@ -129,7 +129,7 @@ namespace Archiver.TestCLI
 
                 Stopwatch sw = Stopwatch.StartNew();
 
-                Task terminalTask = Terminal.Start();
+                Task terminalTask = Terminal.StartAsync();
 
                 Task mainTask = Task.Run(async () => 
                 {
