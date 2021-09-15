@@ -40,7 +40,8 @@ namespace Archiver.Shared.Operations.Disc
             ScanFiles = 1,
             SizeFiles = 2,
             DistributeFiles = 3,
-            CopyFiles = 4
+            CopyFiles = 4,
+            CreateDiscIndex = 5
         }
 
         public enum Status
@@ -53,9 +54,17 @@ namespace Archiver.Shared.Operations.Disc
         public struct FileCopyProgress
         {
             public TimeSpan Elapsed;
-            public int CurrentFile;
+            public long CurrentFile;
             public double InstantTransferRate;
             public double AverageTransferRate;
+            public double CurrentPercent;
+        }
+
+        public struct DiscIndexProgress
+        {
+            public TimeSpan Elapsed;
+            public long CurrentFile;
+            public long TotalFiles;
             public double CurrentPercent;
         }
 
@@ -64,6 +73,7 @@ namespace Archiver.Shared.Operations.Disc
         public delegate void UpdateSizingDelegate(DiscScanStats stats, long currentFile);
         public delegate void UpdateDistributeDelegate(DiscScanStats stats, long currentFile);
         public delegate void FileCopyProgressDelegate(DiscDetail disc, DiscScanStats stats, FileCopyProgress progress);
+        public delegate void DiscIndexProgressDelegate(DiscDetail disc, DiscScanStats stats, DiscIndexProgress progress);
         // public delegate void StatusUpdateDelegate(string statusText);
 
         public event StepStateDelegate OnStepStart;
@@ -72,7 +82,9 @@ namespace Archiver.Shared.Operations.Disc
         public event UpdateStatsDelegate OnUpdateStats;
         public event UpdateSizingDelegate OnUpdateSizing;
         public event UpdateDistributeDelegate OnUpdateDistribute;
+        
         public event FileCopyProgressDelegate OnFileCopyProgress;
+        public event DiscIndexProgressDelegate OnDiscIndexProgress;
 
         public Func<DiscScanStats, Task<Nullable<bool>>> AskToArchiveCallback = null;
 
@@ -97,6 +109,7 @@ namespace Archiver.Shared.Operations.Disc
             this.OnUpdateSizing += delegate { };
             this.OnUpdateDistribute += delegate { };
             this.OnFileCopyProgress += delegate { };
+            this.OnDiscIndexProgress += delegate { };
         }
 
         public async Task RunArchiveAsync(bool askBeforeArchive = false, CancellationToken cToken = default)
@@ -174,33 +187,34 @@ namespace Archiver.Shared.Operations.Disc
                                                                      .OrderBy(x => x.DiscNumber)
                                                                      .ToList();
 
+            Stopwatch discSw = Stopwatch.StartNew();
+
             foreach (DiscDetail disc in discsToProcess)
             {
-                Stopwatch discSw = Stopwatch.StartNew();
+                discSw.Restart();
 
                 await CopyFilesAsync(disc, discSw);
                 if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
                 
-                // GenerateIndexFiles(disc, masterSw);
+                await GenerateIndexFiles(disc, discSw);
+                if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
+                
+                // await GenerateHashFile(disc, discSw);
                 // if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
                 
-                // GenerateHashFile(disc, masterSw);
+                // await WriteDiscInfo(disc, discSw);
                 // if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
                 
-                // WriteDiscInfo(disc, masterSw);
+                // await CreateISOFile(disc, discSw);
                 // if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
                 
-                // CreateISOFile(disc, masterSw);
-                // if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
-                
-                // ReadIsoHash(disc, masterSw);
+                // await ReadIsoHash(disc, discSw);
                 // if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
 
-                // SaveJsonData(disc, masterSw);
+                // await SaveJsonData(disc, discSw);
                 // if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
 
                 discSw.Stop();
-                // Status.WriteDiscComplete(disc, masterSw.Elapsed);
             }
 
             // Status.ProcessComplete();
@@ -293,6 +307,88 @@ namespace Archiver.Shared.Operations.Disc
             sw.Stop();
 
             this.OnStepComplete(disc, _stats, ProcessStep.CopyFiles);
+        }
+
+        private async Task GenerateIndexFiles(DiscDetail disc, Stopwatch discSw)
+        {
+            this.OnStepStart(disc, _stats, ProcessStep.CreateDiscIndex);
+
+            DiscIndexProgress progress = new DiscIndexProgress()
+            {
+                Elapsed = discSw.Elapsed,
+                CurrentFile = 0,
+                TotalFiles = disc.TotalFiles,
+                CurrentPercent = 0.0
+            };
+
+            this.OnDiscIndexProgress(disc, _stats, progress);
+
+            if (!Directory.Exists(SysInfo.Directories.Index))
+                Directory.CreateDirectory(SysInfo.Directories.Index);
+
+            string txtIndexPath = PathUtils.CleanPathCombine(SysInfo.Directories.Index, "/index.txt");
+            string discIndexTxtPath = PathUtils.CleanPathCombine(disc.RootStagingPath, "/index.txt");
+ 
+            bool createMasterIndex = !File.Exists(txtIndexPath);      
+            string headerLine = $"Disc   {"Archive Date (UTC)".PadRight(19)}   {"Create Date (UTC)".PadRight(19)}   {"Modify Date (UTC)".PadRight(19)}   {"Size".PadLeft(12)}   Path";      
+
+            using (FileStream masterIndexFS = File.Open(txtIndexPath, FileMode.Append, FileAccess.Write))
+            using (StreamWriter masterIndex = new StreamWriter(masterIndexFS))
+            using (FileStream discIndexFS = File.Open(discIndexTxtPath, FileMode.Create, FileAccess.Write))
+            using (StreamWriter discIndex = new StreamWriter(discIndexFS))
+            {
+                // if we are creating the file for the firs time, write header line
+                if (createMasterIndex)
+                    await masterIndex.WriteLineAsync(headerLine);
+
+                await discIndex.WriteLineAsync(headerLine);
+
+                // mark this as finalized so it won't be touched again after this
+                disc.Finalized = true;
+
+                Stopwatch sw = Stopwatch.StartNew();
+
+                // Write the human readable index
+                foreach (DiscSourceFile file in disc.Files.OrderBy(x => x.RelativePath))
+                {
+                    if (_cToken.IsCancellationRequested)
+                        return;
+
+                    progress.CurrentFile++;
+
+                    string line = "";
+                    line += disc.DiscNumber.ToString("0000");
+                    line += "   ";
+                    line += file.ArchiveTimeUtc.ToString("yyyy-MM-dd HH:mm:ss");
+                    line += "   ";
+                    line += file.CreationTimeUtc.ToString("yyyy-MM-dd HH:mm:ss");
+                    line += "   ";
+                    line += file.LastWriteTimeUtc.ToString("yyyy-MM-dd HH:mm:ss");
+                    line += "   ";
+                    line += file.Size.ToString().PadLeft(12);
+                    line += "   ";
+                    line += file.RelativePath;
+
+                    Task writeLineTask1 = discIndex.WriteLineAsync(line);
+                    Task writeLineTask2 = masterIndex.WriteLineAsync(line);
+
+                    Task.WaitAll(writeLineTask1, writeLineTask2);
+
+                    if (sw.ElapsedMilliseconds > _updateFrequencyMs)
+                    {
+                        progress.CurrentPercent = (double)progress.CurrentFile / (double)disc.TotalFiles;
+                        this.OnDiscIndexProgress(disc, _stats, progress);
+
+                        sw.Restart();
+                    }
+                }
+
+                sw.Stop();
+            }
+
+            progress.CurrentPercent = 100.0;
+            this.OnDiscIndexProgress(disc, _stats, progress);
+            this.OnStepComplete(disc, _stats, ProcessStep.CreateDiscIndex);
         }
     }
 }

@@ -99,6 +99,18 @@ namespace Archiver.Tasks.Disc
 
                     SetStatus("Copying files to staging");
                 }
+                else if (step == DiscArchiver.ProcessStep.CreateDiscIndex)
+                {
+                    _textDiscProcessHeader.Show();
+                    _lineProcessingHeader.Show();
+
+                    _progress.UpdateProgress(0, disc.TotalFiles, true);
+                    _kvtDiscName.UpdateValue(disc.DiscName);
+                    _kvtDiscName.Show();
+                    _kvtElapsedTime.Show();
+
+                    SetStatus("Generating disc index");
+                }
             };
 
             archiver.OnStepComplete += (disc, stats, step) => {
@@ -108,11 +120,20 @@ namespace Archiver.Tasks.Disc
                     _progress.Hide();
                 else if (step == DiscArchiver.ProcessStep.CopyFiles)
                 {
+                    _progress.Hide();
+                    _kvtDiscName.Hide();
                     _kvtDiscName.Hide();
                     _kvtElapsedTime.Hide();
                     _kvtDataCopied.Hide();
                     _kvtCurrentRate.Hide();
                     _kvtAvgRate.Hide();
+                }
+                else if (step == DiscArchiver.ProcessStep.CreateDiscIndex)
+                {
+                    _progress.Hide();
+                    _kvtDiscName.Hide();
+                    _kvtDiscName.Hide();
+                    _kvtElapsedTime.Hide();
                 }
             };
 
@@ -197,6 +218,8 @@ namespace Archiver.Tasks.Disc
                     Key.MakeKey(ConsoleKey.C, ConsoleModifiers.Control)
                 )
             );
+
+            // TODO: add "discs x / x completed"
 
             Terminal.Clear();
             Terminal.Header.UpdateLeft("Disc Archiver");

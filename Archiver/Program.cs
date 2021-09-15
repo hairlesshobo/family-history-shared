@@ -173,7 +173,6 @@ namespace Archiver
 
                 // OpticalDriveUtils.EjectDrive(OpticalDriveUtils.GetDriveByName("A:"));
 
-
                 //! Main entry point:
                 Task mainTask = Task.Run(() => MainMenu.StartOperationAsync());
                 Task terminalTask = Terminal.Start();

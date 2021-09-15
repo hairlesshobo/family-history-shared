@@ -35,8 +35,6 @@ namespace Archiver.Utilities.Disc
 {
     public static class DiscProcessing
     {
-        private static int _updateFrequencyMs = 1000;
-        
         public static void GenerateHashFile(DiscDetail disc, Stopwatch masterSw)
         {
             Status.WriteDiscHashListFile(disc, masterSw.Elapsed, 0.0);
@@ -70,71 +68,6 @@ namespace Archiver.Utilities.Disc
             Status.WriteDiscJsonLine(disc, masterSw.Elapsed);
 
             disc.SaveToIndex();
-        }
-
-        public static void GenerateIndexFiles(DiscDetail disc, Stopwatch masterSw)
-        {
-            Status.WriteDiscIndex(disc, masterSw.Elapsed, 0.0);
-
-            if (!Directory.Exists(SysInfo.Directories.Index))
-                Directory.CreateDirectory(SysInfo.Directories.Index);
-
-            string txtIndexPath = PathUtils.CleanPathCombine(SysInfo.Directories.Index, "/index.txt");
-
-            bool createMasterIndex = !File.Exists(txtIndexPath);      
-            string headerLine = $"Disc   {"Archive Date (UTC)".PadRight(19)}   {"Create Date (UTC)".PadRight(19)}   {"Modify Date (UTC)".PadRight(19)}   {"Size".PadLeft(12)}   Path";      
-
-            using (FileStream masterIndexFS = File.Open(txtIndexPath, FileMode.Append, FileAccess.Write))
-            {
-                using (StreamWriter masterIndex = new StreamWriter(masterIndexFS))
-                {
-                    // if we are creating the file for the firs time, write header line
-                    if (createMasterIndex)
-                        masterIndex.WriteLine(headerLine);
-
-                    string discIndexTxtPath = PathUtils.CleanPathCombine(disc.RootStagingPath, "/index.txt");
-
-                    using (FileStream discIndexFS = File.Open(discIndexTxtPath, FileMode.Create, FileAccess.Write))
-                    {
-                        using (StreamWriter discIndex = new StreamWriter(discIndexFS))
-                        {
-                            discIndex.WriteLine(headerLine);
-
-                            // mark this as finalized so it won't be touched again after this
-                            disc.Finalized = true;
-
-                            int currentLine = 1;
-
-                            // Write the human readable index
-                            foreach (DiscSourceFile file in disc.Files.OrderBy(x => x.RelativePath))
-                            {
-                                string line = "";
-                                line += disc.DiscNumber.ToString("0000");
-                                line += "   ";
-                                line += file.ArchiveTimeUtc.ToString("yyyy-MM-dd HH:mm:ss");
-                                line += "   ";
-                                line += file.CreationTimeUtc.ToString("yyyy-MM-dd HH:mm:ss");
-                                line += "   ";
-                                line += file.LastWriteTimeUtc.ToString("yyyy-MM-dd HH:mm:ss");
-                                line += "   ";
-                                line += file.Size.ToString().PadLeft(12);
-                                line += "   ";
-                                line += file.RelativePath;
-
-                                discIndex.WriteLine(line);
-                                masterIndex.WriteLine(line);
-
-                                double currentPercent = ((double)currentLine / (double)disc.TotalFiles) * 100.0;
-                                Status.WriteDiscIndex(disc, masterSw.Elapsed, currentPercent);
-
-                                currentLine++;
-                            }
-                        }
-                    }
-                }
-            }
-
-            Status.WriteDiscIndex(disc, masterSw.Elapsed, 100.0);
         }
 
         private static void WriteDiscInfo(DiscDetail disc, Stopwatch masterSw)
@@ -199,14 +132,11 @@ namespace Archiver.Utilities.Disc
 
         private static void ProcessDiscs (DiscScanStats stats)
         {
-            Status.InitDiscLines();
-
             foreach (DiscDetail disc in stats.DestinationDiscs.Where(x => x.NewDisc == true).OrderBy(x => x.DiscNumber))
             {
                 Stopwatch masterSw = new Stopwatch();
                 masterSw.Start();
 
-                GenerateIndexFiles(disc, masterSw);
                 GenerateHashFile(disc, masterSw);
                 WriteDiscInfo(disc, masterSw);
                 CreateISOFile(disc, masterSw);
@@ -216,8 +146,6 @@ namespace Archiver.Utilities.Disc
                 masterSw.Stop();
                 Status.WriteDiscComplete(disc, masterSw.Elapsed);
             }
-
-            Status.ProcessComplete();
         }
     }
 }
