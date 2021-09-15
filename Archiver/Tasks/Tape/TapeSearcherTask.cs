@@ -21,28 +21,25 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Archiver.Shared.Classes.Disc;
 using Archiver.Shared.Classes.Tape;
-using Archiver.Shared.Utilities;
+using Archiver.Shared.Operations.Tape;
 using Archiver.Utilities.Shared;
 using TerminalUI;
 using TerminalUI.Elements;
 
-namespace Archiver.Operations.Tape 
+namespace Archiver.Tasks.Tape
 {
-    public static class TapeSearcher
+    internal static class TapeSearcherTask
     {
-        public static async Task StartOperationAsync()
+        public async static Task StartTaskAsync()
         {
             List<TapeDetail> tapes = await Helpers.ReadTapeIndexAsync();
-            List<TapeSourceFile> allFiles = tapes.SelectMany(x => x.FlattenFiles()).ToList();
 
             var cts = new CancellationTokenSource();
 
-            Terminal.InitHeader("Search Disc Archive", "Archiver");
+            Terminal.InitHeader("Search Tape Archive", "Archiver");
             Terminal.InitStatusBar(
                 new StatusBarItem(
                     "Cancel",
@@ -56,7 +53,6 @@ namespace Archiver.Operations.Tape
             );
 
             Terminal.Clear();
-            
             Terminal.Write("Term to search for in file/directory: ");
 
             string searchString = await KeyInput.ReadStringAsync(cts.Token);
@@ -68,23 +64,20 @@ namespace Archiver.Operations.Tape
             
             Terminal.Clear();
 
-            List<TapeSourceFile> files = allFiles.Where(x => x.RelativePath.ToLower().Contains(searchString)).ToList();
-            Console.WriteLine("Matching files: " + files.Count().ToString("N0"));
+            TapeSearcher searcher = new TapeSearcher(tapes);
 
             int tapeNameWidth = tapes.Max(x => x.Name.Length);
 
             using (Pager pager = new Pager())
             {
-                pager.ShowHeader = true;
-                pager.HeaderText = $"{"Tape Name".PadRight(tapeNameWidth)}   {"Update Date/Time".PadRight(22)}   {"File"}";
+                pager.HeaderText = $"{"Tape".PadRight(tapeNameWidth)}   {"Update Date/Time".PadRight(22)}   {"File"}";
                 pager.HighlightText = searchString;
-                pager.Highlight = true;
-                pager.HighlightColor = ConsoleColor.DarkYellow;
+                pager.Start();
 
-                foreach (TapeSourceFile file in files)
-                        pager.AppendLine($"{file.Tape.Name.PadRight(tapeNameWidth)}   {file.LastWriteTimeUtc.ToLocalTime().ToString().PadRight(22)}   {file.RelativePath}");
+                await foreach (TapeSourceFile file in searcher.FindFilesAsync(searchString).WithCancellation(pager.CancellationToken))
+                    pager.AppendLine($"{file.Tape.Name.PadRight(tapeNameWidth)}   {file.LastWriteTimeUtc.ToLocalTime().ToString().PadRight(22)}   {file.RelativePath}");
 
-                await pager.RunAsync();
+                await pager.WaitForQuitAsync();
             }
         }
     }

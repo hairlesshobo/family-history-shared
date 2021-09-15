@@ -178,7 +178,7 @@ namespace Archiver.Operations
                 },
                 new CliMenuEntry<bool>() {
                     Name = "Search Tape Archive",
-                    Task = Tape.TapeSearcher.StartOperationAsync,
+                    Task = Tasks.Tape.TapeSearcherTask.StartTaskAsync,
                     ForegroundColor = ConsoleColor.Green,
                     SelectedValue = true, // do not show the "press enter to return to main menu" message
                 },

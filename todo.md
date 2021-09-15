@@ -9,7 +9,7 @@ The following tasks need to have their UI and task code split and updated to be 
 * **Disc.DiscArchiver.StartScanOnly**
 * Disc.ScanForFileRenames.StartOperation
 * **Disc.DiscArchiver.StartOperation**
-* Tape.TapeSearcher.StartOperationAsync
+* **Tape.TapeSearcher.StartOperationAsync**
 * Tape.RestoreTapeToTar.StartOperationAsync
 * Tape.ShowTapeSummary.StartOperation
 * Tape.TapeArchiveSummary.StartOperationAsync
