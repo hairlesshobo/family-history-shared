@@ -42,47 +42,6 @@ namespace Archiver.Utilities.Disc
             disc.SaveToIndex();
         }
 
-        private static void WriteDiscInfo(DiscDetail disc, Stopwatch masterSw)
-        {
-            Status.WriteDiscJsonLine(disc, masterSw.Elapsed);
-
-            DiscSummary discInfo = disc.GetDiscInfo();
-
-            JsonSerializerSettings settings = new JsonSerializerSettings() {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                Formatting = Newtonsoft.Json.Formatting.Indented
-            };
-
-            string jsonFilePath = PathUtils.CleanPathCombine(disc.RootStagingPath, "/disc_info.json");
-            string json = JsonConvert.SerializeObject(discInfo, settings);
-            File.WriteAllText(jsonFilePath, json, Encoding.UTF8);
-
-            Status.WriteDiscJsonLine(disc, masterSw.Elapsed);
-        }
-
-        public static void CreateISOFile(DiscDetail disc, Stopwatch masterSw)
-        {
-            Status.WriteDiscIso(disc, masterSw.Elapsed, 0);
-
-            if (!Directory.Exists(SysInfo.Directories.ISO))
-                Directory.CreateDirectory(SysInfo.Directories.ISO);
-
-            ISO_Creator creator = new ISO_Creator(disc.DiscName, disc.RootStagingPath, disc.IsoPath);
-
-            creator.OnProgressChanged += (currentPercent) => {
-                Status.WriteDiscIso(disc, masterSw.Elapsed, currentPercent);
-            };
-
-            creator.OnComplete += () => {
-                disc.IsoCreated = true;
-                Directory.Delete(disc.RootStagingPath, true);
-            };
-
-            Thread isoThread = new Thread(creator.CreateISO);
-            isoThread.Start();
-            isoThread.Join();
-        }
-
         public static void ReadIsoHash(DiscDetail disc, Stopwatch masterSw)
         {
             Status.WriteDiscIsoHash(disc, masterSw.Elapsed, 0.0);
@@ -109,13 +68,10 @@ namespace Archiver.Utilities.Disc
                 Stopwatch masterSw = new Stopwatch();
                 masterSw.Start();
 
-                WriteDiscInfo(disc, masterSw);
-                CreateISOFile(disc, masterSw);
                 ReadIsoHash(disc, masterSw);
                 SaveJsonData(disc, masterSw);
 
                 masterSw.Stop();
-                Status.WriteDiscComplete(disc, masterSw.Elapsed);
             }
         }
     }

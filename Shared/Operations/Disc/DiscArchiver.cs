@@ -23,12 +23,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Archiver.Shared.Classes.Disc;
 using Archiver.Shared.Models;
 using Archiver.Shared.Utilities;
 using Archiver.Shared.Utilities.Disc;
+using Newtonsoft.Json;
 
 namespace Archiver.Shared.Operations.Disc
 {
@@ -42,7 +44,9 @@ namespace Archiver.Shared.Operations.Disc
             DistributeFiles = 3,
             CopyFiles = 4,
             CreateDiscIndex = 5,
-            GenerateHashFile = 6
+            GenerateHashFile = 6,
+            WriteDiscInfo = 7,
+            CreateISOFile = 8
         }
 
         public enum Status
@@ -77,6 +81,12 @@ namespace Archiver.Shared.Operations.Disc
             public double CurrentPercent;
         }
 
+        public struct CreateIsoProgress
+        {
+            public TimeSpan Elapsed;
+            public double CurrentPercent;
+        }
+
         public delegate void StepStateDelegate(DiscDetail disc, DiscScanStats stats, ProcessStep step);
         public delegate void UpdateStatsDelegate(DiscScanStats stats);
         public delegate void UpdateSizingDelegate(DiscScanStats stats, long currentFile);
@@ -84,6 +94,7 @@ namespace Archiver.Shared.Operations.Disc
         public delegate void FileCopyProgressDelegate(DiscDetail disc, DiscScanStats stats, FileCopyProgress progress);
         public delegate void DiscIndexProgressDelegate(DiscDetail disc, DiscScanStats stats, DiscIndexProgress progress);
         public delegate void GenerateHashProgressDelegate(DiscDetail disc, DiscScanStats stats, GenerateHashProgress progress);
+        public delegate void CreateIsoProgressDelegate(DiscDetail disc, DiscScanStats stats, CreateIsoProgress progress);
         // public delegate void StatusUpdateDelegate(string statusText);
 
         public event StepStateDelegate OnStepStart;
@@ -96,6 +107,7 @@ namespace Archiver.Shared.Operations.Disc
         public event FileCopyProgressDelegate OnFileCopyProgress;
         public event DiscIndexProgressDelegate OnDiscIndexProgress;
         public event GenerateHashProgressDelegate OnGenerateHashProgress;
+        public event CreateIsoProgressDelegate OnCreateIsoProgress;
 
         public Func<DiscScanStats, Task<Nullable<bool>>> AskToArchiveCallback = null;
 
@@ -122,6 +134,7 @@ namespace Archiver.Shared.Operations.Disc
             this.OnFileCopyProgress += delegate { };
             this.OnDiscIndexProgress += delegate { };
             this.OnGenerateHashProgress += delegate { };
+            this.OnCreateIsoProgress += delegate { };
         }
 
         public async Task RunArchiveAsync(bool askBeforeArchive = false, CancellationToken cToken = default)
@@ -214,11 +227,11 @@ namespace Archiver.Shared.Operations.Disc
                 await GenerateHashFile(disc, discSw);
                 if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
                 
-                // await WriteDiscInfo(disc, discSw);
-                // if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
+                await WriteDiscInfo(disc, discSw);
+                if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
                 
-                // await CreateISOFile(disc, discSw);
-                // if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
+                await CreateISOFile(disc, discSw);
+                if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
                 
                 // await ReadIsoHash(disc, discSw);
                 // if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
@@ -433,7 +446,7 @@ namespace Archiver.Shared.Operations.Disc
                 {
                     if (_cToken.IsCancellationRequested)
                         return;
-                        
+
                     progress.CurrentFile++;
                     await streamWriter.WriteLineAsync($"{file.Hash.PadRight(32)}   {file.RelativePath}");
 
@@ -455,6 +468,56 @@ namespace Archiver.Shared.Operations.Disc
             progress.CurrentPercent = 100.0;
             this.OnGenerateHashProgress(disc, _stats, progress);
             this.OnStepComplete(disc, _stats, ProcessStep.GenerateHashFile);
+        }
+
+        private async Task WriteDiscInfo(DiscDetail disc, Stopwatch masterSw)
+        {
+            this.OnStepStart(disc, _stats, ProcessStep.WriteDiscInfo);
+
+            DiscSummary discInfo = disc.GetDiscInfo();
+
+            JsonSerializerSettings settings = new JsonSerializerSettings() {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                Formatting = Newtonsoft.Json.Formatting.Indented
+            };
+
+            // TODO: is there any way to produce a progress?
+            string jsonFilePath = PathUtils.CleanPathCombine(disc.RootStagingPath, "disc_info.json");
+            string json = JsonConvert.SerializeObject(discInfo, settings);
+            await File.WriteAllTextAsync(jsonFilePath, json, Encoding.UTF8);
+
+            this.OnStepComplete(disc, _stats, ProcessStep.WriteDiscInfo);
+        }
+
+        private async Task CreateISOFile(DiscDetail disc, Stopwatch discSw)
+        {
+            this.OnStepStart(disc, _stats, ProcessStep.CreateISOFile);
+
+            CreateIsoProgress progress = new CreateIsoProgress()
+            {
+                Elapsed = discSw.Elapsed,
+                CurrentPercent = 0.0
+            };
+
+            this.OnCreateIsoProgress(disc, _stats, progress);
+
+            if (!Directory.Exists(SysInfo.Directories.ISO))
+                Directory.CreateDirectory(SysInfo.Directories.ISO);
+
+            ISO_Creator creator = new ISO_Creator(disc.DiscName, disc.RootStagingPath, disc.IsoPath);
+
+            creator.OnProgressChanged += (currentPercent) => {
+                progress.Elapsed = discSw.Elapsed;
+                progress.CurrentPercent = currentPercent;
+                this.OnCreateIsoProgress(disc, _stats, progress);
+            };
+
+            await creator.CreateIsoAsync(_cToken);
+
+            disc.IsoCreated = true;
+            Directory.Delete(disc.RootStagingPath, true);
+
+            this.OnStepComplete(disc, _stats, ProcessStep.CreateISOFile);
         }
     }
 }

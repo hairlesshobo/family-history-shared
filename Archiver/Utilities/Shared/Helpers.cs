@@ -32,6 +32,7 @@ using Archiver.Shared.Classes.Tape;
 using Archiver.Shared.Interfaces;
 using Archiver.Shared.Models;
 using Archiver.Shared.Utilities;
+using Archiver.Shared.Utilities.Disc;
 using Archiver.Utilities.Disc;
 using TerminalUI;
 using TerminalUI.Elements;
@@ -115,15 +116,13 @@ namespace Archiver.Utilities.Shared
                 Console.Write(line);
             };
 
-            creator.OnComplete += () => {
-                string line = StatusHelpers.GeneratePercentBar(Console.WindowWidth, 0, 0, 100, true);
-                Console.CursorLeft = 0;
-                Console.Write(line);
-            };
-
-            Thread isoThread = new Thread(creator.CreateISO);
+            Thread isoThread = new Thread(() => creator.CreateISO());
             isoThread.Start();
             isoThread.Join();
+
+            string line = StatusHelpers.GeneratePercentBar(Console.WindowWidth, 0, 0, 100, true);
+            Console.CursorLeft = 0;
+            Console.Write(line);
 
             Console.CursorLeft = 0;
             Console.CursorTop = Console.CursorTop+2;

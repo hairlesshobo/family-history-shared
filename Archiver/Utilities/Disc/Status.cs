@@ -35,19 +35,6 @@ namespace Archiver.Utilities.Disc
         private static int _discLine = -1;
 
         private const string _renameScanLabel = "Rename Scan";
-
-        public static void WriteDiscIso(DiscDetail disc, TimeSpan elapsed, int currentPercent)
-        {
-            bool complete = (currentPercent == 100);
-
-            string line = "";
-            line += Formatting.FormatElapsedTime(elapsed);
-            line += " ";
-            line += "Creating ISO:";
-
-            Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
-            StatusHelpers.WriteStatusLineWithPct(DiscFormatting.GetDiscName(disc), line, currentPercent, complete, ConsoleColor.DarkYellow);
-        }
         
         public static void WriteDiscIsoHash(DiscDetail disc, TimeSpan elapsed, double currentPercent = 0.0)
         {
@@ -70,18 +57,6 @@ namespace Archiver.Utilities.Disc
             Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
             StatusHelpers.WriteStatusLine(DiscFormatting.GetDiscName(disc), line, ConsoleColor.DarkYellow);
         }
-
-        public static void WriteDiscComplete(DiscDetail disc, TimeSpan elapsed)
-        {
-            string line = "";
-            line += Formatting.FormatElapsedTime(elapsed);
-            line += " ";
-            line += "Complete!";
-
-            Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
-            StatusHelpers.WriteStatusLine(DiscFormatting.GetDiscName(disc), line, ConsoleColor.DarkGreen);
-        }
-
 
 
 

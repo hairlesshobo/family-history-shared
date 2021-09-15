@@ -20,24 +20,21 @@
 
 using System;
 using System.Diagnostics;
-using Archiver.Shared;
-using Archiver.Shared.Utilities;
-using Archiver.Utilities.Shared;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace Archiver.Utilities.Disc
+namespace Archiver.Shared.Utilities.Disc
 {
-    public delegate void ISO_ProgressChangedDelegate(int currentPercent);
-    public delegate void ISO_CompleteDelegate();
 
     public class ISO_Creator
     {
-        public event ISO_CompleteDelegate OnComplete;
-        public event ISO_ProgressChangedDelegate OnProgressChanged;
+        public delegate void ProgressChangedDelegate(double currentPercent);
+
+        public event ProgressChangedDelegate OnProgressChanged;
 
         private string _discName;
         private string _sourceDirectory;
         private string _destinationPath;
-        private const int _sampleDurationMs = 100;
 
         public ISO_Creator(string discName, string sourceDirectory, string destinationPath)
         {
@@ -45,16 +42,19 @@ namespace Archiver.Utilities.Disc
             _sourceDirectory = sourceDirectory;
             _destinationPath = destinationPath;
 
-            this.OnComplete += delegate { };
             this.OnProgressChanged += delegate { };
         }
 
-        public void CreateISO()
+        public Task CreateIsoAsync(CancellationToken cToken)
+            => Task.Run(() => CreateISO(cToken));
+
+        public void CreateISO(CancellationToken cToken = default)
         {
             string procArgs = $" --burn-data -folder[\\]:\"{PathUtils.DirtyPath(_sourceDirectory)}\" -name:\"{_discName}\" -udf:2.5 -iso:\"{PathUtils.DirtyPath(_destinationPath)}\"";
+            string processPath = PathUtils.ResolveRelativePath(SysInfo.Config.CdbxpPath);
 
             Process process = new Process();
-            process.StartInfo.FileName = SysInfo.Config.CdbxpPath;
+            process.StartInfo.FileName = processPath;
             process.StartInfo.Arguments = procArgs;
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.CreateNoWindow = false;
@@ -63,23 +63,29 @@ namespace Archiver.Utilities.Disc
 
             while (process.HasExited == false)
             {
+                if (cToken.IsCancellationRequested)
+                {
+                    process.Kill();
+                    break;
+                }
+
                 string output = process.StandardOutput.ReadLine();
 
                 if (output != null && output.EndsWith("%"))
                 {
                     output = output.TrimEnd('%');
 
-                    int currentPercent = Int32.Parse(output);
-
-                    this.OnProgressChanged(currentPercent);
+                    this.OnProgressChanged((double)Int32.Parse(output) / 100.0);
                 }
             }
 
+            if (cToken.IsCancellationRequested)
+            {
+                // TODO: Cleanup partially generated iso file
+            }
+
             process.StandardOutput.ReadToEnd();
-
             process.WaitForExit();
-
-            this.OnComplete();
         }
     }
 }
