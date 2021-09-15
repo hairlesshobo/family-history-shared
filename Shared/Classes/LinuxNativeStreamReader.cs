@@ -27,28 +27,30 @@ using Archiver.Shared.Utilities;
 
 namespace Archiver.Shared.Classes
 {
-
+    /// <summary>
+    ///     Class that is used to read from a device in Linux using native system calls
+    /// </summary>
     public class LinuxNativeStreamReader : Stream
     {
+        /// <summary>
+        ///     Enum used to indicate which type of device is the source of this stream
+        /// </summary>
         public enum StreamSourceType
         {
+            /// <summary>
+            ///     This stream reader points to a file
+            /// </summary>
             File = 0,
+
+            /// <summary>
+            ///     This stream reader points to a disc
+            /// </summary>
             Disk = 1,
+
+            /// <summary>
+            ///     This stream reader points to a tape
+            /// </summary>
             Tape = 2
-        }
-        
-        public override bool CanRead => true;
-
-        public override bool CanSeek => (_type == StreamSourceType.Disk || _type == StreamSourceType.File);
-
-        public override bool CanWrite => false;
-
-        public override long Length => _length >= 0 ? _length : throw new NotSupportedException();
-
-        public override long Position 
-        { 
-            get => (long)_position;
-            set => throw new NotImplementedException(); 
         }
 
         private string _devicePath = null;
@@ -57,13 +59,49 @@ namespace Archiver.Shared.Classes
         private ulong _position = 0;
         private StreamSourceType _type;
         private long _length = -1;
+        
+        /// <summary>
+        ///     Flag indicating if this stream can be read
+        /// </summary>
+        public override bool CanRead => true;
 
+        /// <summary>
+        ///     Flag indicating if this stream can seek
+        /// </summary>
+        public override bool CanSeek => (_type == StreamSourceType.Disk || _type == StreamSourceType.File);
+
+        /// <summary>
+        ///     Flag indicating if this stream can be written to
+        /// </summary>
+        public override bool CanWrite => false;
+
+        /// <summary>
+        ///     Number of bytes of this stream
+        /// </summary>
+        public override long Length => _length >= 0 ? _length : throw new NotSupportedException();
+
+        /// <summary>
+        ///     Current position within this stream
+        /// </summary>
+        public override long Position 
+        { 
+            get => (long)_position;
+            set => throw new NotImplementedException(); 
+        }
+
+        /// <summary>
+        ///     Create a new instance of the stream reader that points to an optical drive device
+        /// </summary>
+        /// <param name="drive">Optical drive to open</param>
         public LinuxNativeStreamReader(OpticalDrive drive)
         {
             _type = StreamSourceType.Disk;
             _devicePath = drive.FullPath;
         }
 
+        /// <summary>
+        ///     Private method to initialize the stream
+        /// </summary>
         private void Init()
         {
             if (!File.Exists(_devicePath))
@@ -77,11 +115,13 @@ namespace Archiver.Shared.Classes
                 _length = DiskUtils.Linux.GetFileSize(_devicePath);
         }
 
-        public override void Flush()
-        {
-            throw new NotImplementedException();
-        }
-
+        /// <summary>
+        ///     Read bytes from the stream into the provided buffer
+        /// </summary>
+        /// <param name="buffer">Buffer to store data in</param>
+        /// <param name="offset">Offset to use when writing to the buffer</param>
+        /// <param name="count">Number of bytes to read</param>
+        /// <returns>Number of bytes that was read from the stream. 0 indicates the end of the stream was reached</returns>
         public override int Read(byte[] buffer, int offset, int count)
         {
             int result = Linux.Read(_handle, buffer, count);
@@ -97,19 +137,9 @@ namespace Archiver.Shared.Classes
             return result;
         }
 
-        public override long Seek(long offset, SeekOrigin origin)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void SetLength(long value)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void Write(byte[] buffer, int offset, int count)
-            => throw new NotSupportedException();
-
+        /// <summary>
+        ///     Close the stream and release any unmanaged resources associated with it
+        /// </summary>
         public override void Close()
         {
             base.Close();
@@ -117,5 +147,33 @@ namespace Archiver.Shared.Classes
             if (_handle >= 0)
                 Linux.Close(_handle);
         }
+
+        /// <summary>
+        ///     Seek to the specified position in the stream.
+        ///    !! not implemented !!
+        /// </summary>
+        /// <param name="offset"></param>
+        /// <param name="origin"></param>
+        /// <returns>new position</returns>
+        public override long Seek(long offset, SeekOrigin origin)
+            => throw new NotImplementedException();
+
+        /// <summary>
+        ///     Not supported
+        /// </summary>
+        public override void Flush()
+            => new NotSupportedException();
+
+        /// <summary>
+        ///     Not supported
+        /// </summary>
+        public override void SetLength(long value)
+            => throw new NotSupportedException();
+
+        /// <summary>
+        ///     Not supported
+        /// </summary>
+        public override void Write(byte[] buffer, int offset, int count)
+            => throw new NotSupportedException();
     }
 }

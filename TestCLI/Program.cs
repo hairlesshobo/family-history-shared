@@ -145,22 +145,19 @@ namespace Archiver.TestCLI
                             Md5StreamGenerator generator = new Md5StreamGenerator(reader, (int)smb2.MaxReadSize);
                             generator.OnProgressChanged += (progress) =>
                             {
-                                kvtVerified.UpdateValue($"{Formatting.GetFriendlySize(progress.TotalCopiedBytes)} / {Formatting.GetFriendlySize(progress.TotalBytes)}");
-                                kvtAvgRate.UpdateValue(Formatting.GetFriendlyTransferRate(progress.AverageTransferRate));
-                                kvtCurrentRate.UpdateValue(Formatting.GetFriendlyTransferRate(progress.InstantTransferRate));
+                                kvtVerified.UpdateValue($"{Formatting.GetFriendlySize(progress.TotalBytesProcessed)} / {Formatting.GetFriendlySize(progress.TotalBytes)}");
+                                kvtAvgRate.UpdateValue(Formatting.GetFriendlyTransferRate(progress.AverageRate));
+                                kvtCurrentRate.UpdateValue(Formatting.GetFriendlyTransferRate(progress.InstantRate));
 
-                                progressBar.UpdateProgress(progress.PercentCopied);
+                                progressBar.UpdateProgress(progress.PercentCompleted);
                                 kvtElapsedTime.UpdateValue(sw.Elapsed.ToString());
                             };
 
-                            generator.OnComplete += (hash) =>
-                            {
-                                sw.Stop();
+                            string hash = await generator.GenerateAsync(cts.Token);
 
-                                bool discValid = (knownHash.ToLower() == hash.ToLower());
-                            };
+                            sw.Stop();
 
-                            await generator.GenerateAsync(cts.Token);
+                            bool discValid = (knownHash.ToLower() == hash.ToLower());
                         }
                     }
                 });

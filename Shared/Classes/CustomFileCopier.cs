@@ -26,29 +26,87 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Archiver.Shared.Interfaces;
+using Archiver.Shared.Structures;
 using Archiver.Shared.Utilities;
 
 namespace Archiver.Shared.Classes
 {
-
-    public delegate void ProgressChangedDelegate(FileCopyProgress progress);
-    public delegate void CompleteDelegate(FileCopyProgress progress);
-
-
+    /// <summary>
+    ///     Asynchronous file copier that provides progress information and 
+    ///     generates a MD5 hash while copying the file
+    /// </summary>
     public class CustomFileCopier
     {
-        public ISourceFile SourceFile { get; set; }
-        public string DestinationRoot { get; set; }
-        public string DestinationDirectory { get; set; }
-        public string DestinationFilePath { get; set; }
-        public bool OverwriteDestination { get; set; } = false;
-        public bool Preserve { get; set; } = true;
-        public int SampleDurationMs { get; set; } = 200;
-        public string MD5_Hash { get; set; } = null;
+        public delegate void ProgressChangedDelegate(FileCopyProgress progress);
 
-        public event CompleteDelegate OnComplete;
+        /// <summary>
+        ///     Object that describes the source file being copied
+        /// </summary>
+        public ISourceFile SourceFile { get; set; }
+
+
+        /// <summary>
+        ///     The directory that is considered the root of the destination. Since the source relative path
+        ///     is preserved when the file is copied to the destination, this is the root that gets prepended
+        ///     to the <see cref="ISourceFile.RelativeDirectory" /> of the <see cref="ISourceFile" /> object
+        /// </summary>
+        public string DestinationRoot { get; set; }
+
+        /// <summary>
+        ///     Full directory path of the destination file
+        /// </summary>
+        public string DestinationDirectory { get; set; }
+
+        /// <summary>
+        ///     Full path to the new file
+        /// </summary>
+        public string DestinationFilePath { get; set; }
+
+        /// <summary>
+        ///     If true, the destination file will be overwritten if it already exists
+        /// </summary>
+        public bool OverwriteDestination { get; set; } = false;
+
+        /// <summary>
+        ///     If true, preserve the file and directory timestamps on the destination
+        /// </summary>
+        public bool Preserve { get; set; } = true;
+
+        /// <summary>
+        ///     How frequently the copier shall emit progress updates
+        /// 
+        ///     Default: 200
+        /// </summary>
+        public int SampleDurationMs { get; set; } = 200;
+
+        /// <summary>
+        ///     MD5 hash of the copied file. Note: this is only available after the copy has completed
+        /// </summary>
+        public string MD5_Hash { get; private set; } = null;
+
+        /// <summary>
+        ///     Event that is fired when the file copy is finished
+        /// </summary>
+        public event ProgressChangedDelegate OnComplete;
+
+        /// <summary>
+        ///     Event that is fireed periodically during the copy process to provide 
+        ///     progress updates
+        /// </summary>
         public event ProgressChangedDelegate OnProgressChanged;
 
+        /// <summary>
+        ///     Default constructor
+        /// </summary>
+        /// <param name="sourceFile">Source file that is being copied</param>
+        /// <param name="destinationRoot">
+        ///     The directory that is considered the root of the destination. Since the source relative path
+        ///     is preserved when the file is copied to the destination, this is the root that gets prepended
+        ///     to the <see cref="ISourceFile.RelativeDirectory" /> of the <see cref="ISourceFile" /> object
+        /// </param>
+        /// <param name="newFileName">
+        ///     If provided, this overwrites the file name name of the destination file
+        /// </param>
         public CustomFileCopier(ISourceFile sourceFile, string destinationRoot, string newFileName = null)
         {
             this.SourceFile = sourceFile;
@@ -75,12 +133,27 @@ namespace Archiver.Shared.Classes
             this.OnProgressChanged += delegate { };
         }
 
+        /// <summary>
+        ///     Asynchronously copy the file to the destination
+        /// </summary>
+        /// <param name="cToken">Token used to allow for cancellation of the process</param>
+        /// <returns>Task</returns>
         public Task CopyAsync(CancellationToken cToken)
             => Task.Run(() => Copy(cToken));
 
+        /// <summary>
+        ///     Copy the file to the destination
+        /// </summary>
+        /// <param name="cToken">Token used to allow for cancellation of the process</param>
         public void Copy(CancellationToken cToken = default)
         {
-            FileCopyProgress progress = new FileCopyProgress();
+            FileCopyProgress progress = new FileCopyProgress()
+            {
+                TotalCopiedBytes = 0,
+                BytesCopiedSinceLastupdate = 0,
+                TotalBytes = 0,
+                Complete = false
+            };
 
             byte[] buffer = new byte[1024 * 1024 * 2]; // 2MB buffer
 
@@ -100,8 +173,6 @@ namespace Archiver.Shared.Classes
                 File.Create(this.DestinationFilePath).Dispose();
 
                 FileInfo sourceFileInfo = new FileInfo(this.SourceFile.FullPath);
-
-                progress.FileName = sourceFileInfo.Name;
 
                 using (var md5 = MD5.Create())
                 using (FileStream dest = new FileStream(this.DestinationFilePath, FileMode.Truncate, FileAccess.Write))
@@ -169,6 +240,9 @@ namespace Archiver.Shared.Classes
                 OnComplete(progress);
         }
 
+        /// <summary>
+        ///     Used to preserve the directory times after a file has been written
+        /// </summary>
         private void PreserveDirectoryTimes()
         {
             // TODO: likely only need to update the modify dtm on the parent dir when a file is added, that is all
@@ -195,15 +269,5 @@ namespace Archiver.Shared.Classes
                 }
             }
         }
-    }
-
-    public class FileCopyProgress 
-    {
-        public long TotalCopiedBytes { get; set; } = 0;
-        public long BytesCopiedSinceLastupdate { get; set; } = 0;
-        public long TotalBytes { get; set; } = 0;
-        // public TimeSpan ElapsedTime { get; set; }
-        public bool Complete { get; set; } = false;
-        public string FileName { get; set; } = String.Empty;
     }
 }

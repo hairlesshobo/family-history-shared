@@ -76,13 +76,13 @@ namespace Archiver.Operations.Tape
                         Console.CursorLeft = 0;
 
                         string left = "           Verify: ";
-                        left += Formatting.GetFriendlySize(progress.TotalCopiedBytes).PadLeft(10);
+                        left += Formatting.GetFriendlySize(progress.TotalBytesProcessed).PadLeft(10);
                         left += " ";
-                        left += $"[{Formatting.GetFriendlyTransferRate(progress.InstantTransferRate).PadLeft(12)}]";
+                        left += $"[{Formatting.GetFriendlyTransferRate(progress.InstantRate).PadLeft(12)}]";
                         left += " ";
-                        left += $"[{Formatting.GetFriendlyTransferRate(progress.AverageTransferRate).PadLeft(12)}]";
+                        left += $"[{Formatting.GetFriendlyTransferRate(progress.AverageRate).PadLeft(12)}]";
 
-                        Console.Write(left + StatusHelpers.GeneratePercentBar(Console.BufferWidth, left.Length, 0, progress.PercentCopied * 100.0, (progress.PercentCopied == 1.0)));
+                        Console.Write(left + StatusHelpers.GeneratePercentBar(Console.BufferWidth, left.Length, 0, progress.PercentCompleted * 100.0, (progress.PercentCompleted == 1.0)));
                     };
 
                     Thread thread = new Thread(md5.GenerateHash);

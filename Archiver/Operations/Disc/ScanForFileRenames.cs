@@ -157,7 +157,7 @@ namespace Archiver.Operations.Disc
 
             StatusHelpers.ClearLine();
             Formatting.WriteC(ConsoleColor.Blue, "    Existing Disc: ");
-            Console.WriteLine(DiscFormatting.GetDiscName(sourceFile.DestinationDisc));
+            Console.WriteLine(sourceFile.DestinationDisc.DiscName);
             Console.WriteLine();
 
             StatusHelpers.ClearLine();

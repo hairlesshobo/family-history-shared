@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 using Archiver.Shared.Classes;
 using Archiver.Shared.Classes.Disc;
 using Archiver.Shared.Models;
+using Archiver.Shared.Structures;
 using Archiver.Shared.Utilities;
 using Archiver.Shared.Utilities.Disc;
 using Newtonsoft.Json;

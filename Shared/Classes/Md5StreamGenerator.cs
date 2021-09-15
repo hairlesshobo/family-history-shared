@@ -23,53 +23,131 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Archiver.Shared.Models;
+using Archiver.Shared.Structures;
 
 namespace Archiver.Shared.Classes
 {
+    /// <summary>
+    ///     Class used to generate a MD5 hash from a stream
+    /// </summary>
     public class Md5StreamGenerator
     {
-        public delegate void CompleteDelegate(string hash);
         public delegate void ProgressChangedDelegate(Md5Progress progress);
     
-        private int _blockSize = 2048 * 512; // 1MB block size
-        // private int _blockSize = 2048 * 64; // default 128KB block size;
-
+        private const int _defaultBlockSize = 1024 * 1024; // 1MB default block
+        private int _blockSize = _defaultBlockSize;
         private Stream _stream;
+        private string _hash = null;
 
+        /// <summary>
+        ///     Block size, in bytes, to use when reading from the source stream.
+        /// 
+        ///     Note: if the specified block size is 0 or less, the default block size will be used
+        /// 
+        ///     Default: 1 MB
+        /// </summary>
+        /// <value></value>
+        public int BlockSize
+        { 
+            get => _blockSize;
+            private set
+            {
+                if (value <= 0)
+                    _blockSize = _defaultBlockSize;
+                else
+                    _blockSize = value;
+            }
+        }
 
-        public event CompleteDelegate OnComplete;
+        /// <summary>
+        ///     Event that is fired periodically during the process with status updates.
+        /// </summary>
         public event ProgressChangedDelegate OnProgressChanged;
-        public string Md5Hash { get; private set; }
 
-        public int SampleDurationMs { get; set; } = 500;
+        /// <summary>
+        ///     Frequency, in milliseconds, with which to fire progress update events. 
+        ///     0 = update after every block.
+        /// 
+        ///     WARNING: If this is set too low, it can have a negative impact on
+        ///     generation performance. 
+        /// 
+        ///     Default: 500
+        /// </summary>
+        public int UpdateFrequencyMs { get; set; } = 500;
+
+        /// <summary>
+        ///     This is the generated md5 hash. If this field is attempted to be accessed before
+        ///     the md5 is generated, an exception will be thrown
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        ///     Will be thrown if an attempt is made to read the hash prior to generating it
+        /// <exception>
+        public string Md5Hash 
+        { 
+            get => (this.Complete ? throw new InvalidOperationException("The hash has not yet been generated") : _hash);
+            private set => _hash = value;
+        }
+
+        /// <summary>
+        ///     Flag indiciating whether the process has completed
+        /// </summary>
+        /// <value></value>
+        public bool Complete { get; private set; } = false;
         
 
+        /// <summary>
+        ///     Default constructor that builds a new generator from the provided stream
+        /// </summary>
+        /// <param name="stream">Stream to read from when generating hash</param>
         public Md5StreamGenerator(Stream stream)
         {
-            _stream = stream;
+            _stream = stream ?? throw new ArgumentNullException(nameof(stream));
 
-            this.OnComplete += delegate { };
             this.OnProgressChanged += delegate { };
         }
 
+        /// <summary>
+        ///     Default constructor that builds a new generator from the provided stream
+        /// </summary>
+        /// <param name="stream">Stream to read from when generating hash</param>
+        /// <param name="blockSize">Block size to use when reading from the stream</param>
         public Md5StreamGenerator(Stream stream, int blockSize) : this(stream)
         {
-            _blockSize = blockSize;
+            this.BlockSize = blockSize;
         }
 
+        /// <summary>
+        ///     Asynchronously generate the MD5 hash
+        /// </summary>
+        /// <param name="cToken">Token that allows to cancel the process</param>
+        /// <returns>Task that returns a generated MD5 hash</returns>
         public Task<string> GenerateAsync(CancellationToken cToken)
             => Task.Run(() => Generate(cToken));
 
-        private string Generate(CancellationToken cToken)
+        /// <summary>
+        ///     Generate the MD5 hash
+        /// </summary>
+        /// <param name="cToken">Token that allows to cancel the process</param>
+        /// <returns>The generated MD5 hash</returns>
+        private string Generate(CancellationToken cToken = default)
         {
-            byte[] buffer = new byte[_blockSize]; 
+            if (this.Complete)
+                return this.Md5Hash;
+
+            byte[] buffer = new byte[this.BlockSize]; 
 
             using (var md5 = System.Security.Cryptography.MD5.Create())
             {
-                Md5Progress progress = new Md5Progress();
-                progress.TotalBytes = _stream.Length;
-                progress.TotalCopiedBytes = 0;
+                Md5Progress progress = new Md5Progress()
+                {
+                    TotalBytesProcessed = 0,
+                    BytesProcessedSinceLastUpdate = 0,
+                    TotalBytes = _stream.Length,
+                    PercentCompleted = 0.0,
+                    InstantRate = 0.0,
+                    AverageRate = 0.0,
+                    Complete = false
+                };
 
                 int currentBlockSize = 0;
 
@@ -84,26 +162,26 @@ namespace Archiver.Shared.Classes
                     if (cToken.IsCancellationRequested)
                         return null;
 
-                    progress.TotalCopiedBytes += currentBlockSize;
-                    progress.PercentCopied = ((double)progress.TotalCopiedBytes / (double)progress.TotalBytes);
+                    progress.TotalBytesProcessed += currentBlockSize;
+                    progress.PercentCompleted = ((double)progress.TotalBytesProcessed / (double)progress.TotalBytes);
 
                     md5.TransformBlock(buffer, 0, currentBlockSize, buffer, 0);
 
                     // TODO: currentBlockSize can never be 0...
-                    if (sw.ElapsedMilliseconds - lastSample > this.SampleDurationMs || currentBlockSize == 0)
+                    if (sw.ElapsedMilliseconds - lastSample > this.UpdateFrequencyMs || currentBlockSize == 0)
                     {
                         sampleCount++;
 
-                        progress.BytesCopiedSinceLastupdate = progress.TotalCopiedBytes - lastSampleCopyTotal;
+                        progress.BytesProcessedSinceLastUpdate = progress.TotalBytesProcessed - lastSampleCopyTotal;
                         double timeSinceLastUpdate = (double)(sw.ElapsedMilliseconds - lastSample) / 1000.0;
-                        lastSampleCopyTotal = progress.TotalCopiedBytes;
+                        lastSampleCopyTotal = progress.TotalBytesProcessed;
 
-                        progress.InstantTransferRate = (double)progress.BytesCopiedSinceLastupdate / timeSinceLastUpdate;
+                        progress.InstantRate = (double)progress.BytesProcessedSinceLastUpdate / timeSinceLastUpdate;
 
                         if (sampleCount == 1)
-                            progress.AverageTransferRate = progress.InstantTransferRate;
+                            progress.AverageRate = progress.InstantRate;
                         else
-                            progress.AverageTransferRate = progress.AverageTransferRate + (progress.InstantTransferRate - progress.AverageTransferRate) / sampleCount;
+                            progress.AverageRate = progress.AverageRate + (progress.InstantRate - progress.AverageRate) / sampleCount;
 
                         progress.ElapsedTime = sw.Elapsed;
 
@@ -112,18 +190,17 @@ namespace Archiver.Shared.Classes
                     }
                 }
 
-                progress.PercentCopied = 1.0;
-
-                OnProgressChanged(progress);
-                lastSample = sw.ElapsedMilliseconds;
-
                 sw.Stop();
+
+                progress.PercentCompleted = 1.0;
+                progress.Complete = true;
+
+                this.OnProgressChanged(progress);
 
                 md5.TransformFinalBlock(new byte[] { }, 0, 0);
 
                 this.Md5Hash = BitConverter.ToString(md5.Hash).Replace("-","").ToLower();
-
-                OnComplete(this.Md5Hash);
+                this.Complete = true;
             }
 
             return this.Md5Hash;

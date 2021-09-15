@@ -185,11 +185,11 @@ namespace Archiver.Tasks.Disc
             };
 
             verifier.OnDiscVerificationProgressChanged += (disc, progress, sw) => {
-                kvtVerified.UpdateValue($"{Formatting.GetFriendlySize(progress.TotalCopiedBytes)} / {Formatting.GetFriendlySize(progress.TotalBytes)}");
-                kvtAvgRate.UpdateValue(Formatting.GetFriendlyTransferRate(progress.AverageTransferRate));
-                kvtCurrentRate.UpdateValue(Formatting.GetFriendlyTransferRate(progress.InstantTransferRate));
+                kvtVerified.UpdateValue($"{Formatting.GetFriendlySize(progress.TotalBytesProcessed)} / {Formatting.GetFriendlySize(progress.TotalBytes)}");
+                kvtAvgRate.UpdateValue(Formatting.GetFriendlyTransferRate(progress.AverageRate));
+                kvtCurrentRate.UpdateValue(Formatting.GetFriendlyTransferRate(progress.InstantRate));
 
-                progressBar.UpdateProgress(progress.PercentCopied);
+                progressBar.UpdateProgress(progress.PercentCompleted);
                 kvtElapsedTime.UpdateValue(sw.Elapsed.ToString());
             };
 
@@ -263,8 +263,8 @@ namespace Archiver.Tasks.Disc
             {
                 entries.Add(new CliMenuEntry<DiscDetail>()
                 {
-                    // Name = $"{DiscFormatting.GetDiscName(disc)} `R|`N `BDate Archived:`N {disc.ArchiveDTM.ToString("MM-dd-yyyy")} `R|`N `BData Size:`N {Formatting.GetFriendlySize(disc.DataSize).PadLeft(10)}",
-                    Name = $"{DiscFormatting.GetDiscName(disc)} | Date Archived: {disc.ArchiveDTM.ToString("MM-dd-yyyy")} | Data Size: {Formatting.GetFriendlySize(disc.DataSize).PadLeft(10)}",
+                    // Name = $"{disc.DiscName} `R|`N `BDate Archived:`N {disc.ArchiveDTM.ToString("MM-dd-yyyy")} `R|`N `BData Size:`N {Formatting.GetFriendlySize(disc.DataSize).PadLeft(10)}",
+                    Name = $"{disc.DiscName} | Date Archived: {disc.ArchiveDTM.ToString("MM-dd-yyyy")} | Data Size: {Formatting.GetFriendlySize(disc.DataSize).PadLeft(10)}",
                     SelectedValue = disc
                 });
             }

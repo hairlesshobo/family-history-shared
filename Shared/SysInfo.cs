@@ -31,14 +31,21 @@ using Archiver.Shared.Utilities;
 
 namespace Archiver.Shared
 {
+    /// <summary>
+    ///     Indicates the mode that the application is currently running in
+    /// </summary>
     public enum SysInfoMode
     {
-        Unknown = 0,
-        Archiver = 1,
-        TapeServer = 2,
-        TestCLI = 3
+        Unknown, 
+        ArchiverCLI, 
+        Reserved,  // reserved for ArchiverGUI 
+        TapeServer, 
+        TestCLI
     }
 
+    /// <summary>
+    ///     Global class for providing useful system-related and config information
+    /// </summary>
     public static class SysInfo
     {
         private static bool _didInit = false;
@@ -52,22 +59,74 @@ namespace Archiver.Shared
         private static List<ValidationError> _configErrors;
 
 
+        /// <summary>
+        ///     Config that was loaded and parsed from appsettings.json
+        /// </summary>
         public static ArchiverConfig Config => _config;
+        /// <summary>
+        ///     Configured directories for the application
+        /// </summary>
         public static SystemDirectories Directories => _directories;
+        /// <summary>
+        ///     A list containing any errors that were discovered during loading of the config
+        /// </summary>
         public static List<ValidationError> ConfigErrors => _configErrors;
 
+        /// <summary>
+        ///     Operating system type the application is currently running on
+        /// </summary>
         public static OSType OSType => _osType;
+
+        /// <summary>
+        ///     Mode that the application is currently runnning as
+        /// </summary>
         public static SysInfoMode Mode => _mode;
+
+        /// <summary>
+        ///     Flag indicating whether one or more optical drives were detected
+        /// </summary>
         public static bool IsOpticalDrivePresent => _isOpticalDrivePresent;
+
+        /// <summary>
+        ///     Flag indiciating whether the application is currently running from a readonly filesystem 
+        ///     (such as a cdrom)
+        /// </summary>
         public static bool IsReadonlyFilesystem => _isReadonlyFilesystem;
+        
+        /// <summary>
+        ///     Flag indicating whether one or more tape drives were detected on the local system
+        /// </summary>
         public static bool IsTapeDrivePresent => _isTapeDrivePresent;
-        public static string TapeDrive => _mode == SysInfoMode.Archiver ? Config.Tape.Drive : Config.TapeServer.Drive;
+
+        /// <summary>
+        ///     Path to the configured tape drive
+        /// </summary>
+        public static string TapeDrive => _mode == SysInfoMode.ArchiverCLI ? Config.Tape.Drive : Config.TapeServer.Drive;
+
+        /// <summary>
+        ///     CPU architecture of the currently running system
+        /// </summary>
         public static Architecture Architecture => System.Runtime.InteropServices.RuntimeInformation.OSArchitecture;
+
+        /// <summary>
+        ///     User-friendly description of the currently running system
+        /// </summary>
         public static string Description => System.Runtime.InteropServices.RuntimeInformation.OSDescription;
+
+        /// <summary>
+        ///     Identifier for the runtime
+        /// </summary>
         public static string Identifier => System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier;
-        public static int PID => Process.GetCurrentProcess().Id; //(SysInfo.OSType == OSType.Linux ? Linux.GetPid() : Process.GetCurrentProcess().Id);
+
+        /// <summary>
+        ///     Process ID of the currently running application
+        /// </summary>
+        public static int PID => Process.GetCurrentProcess().Id;
         
         
+        /// <summary>
+        ///     Static constructor
+        /// </summary>
         static SysInfo()
         {
             _mode = GetMode();
@@ -85,6 +144,11 @@ namespace Archiver.Shared
             //     _osType = OSType.OSX;
         }
 
+        /// <summary>
+        ///     Global initialization which must be called as one of the very first steps
+        ///     of the application startup. This is responsible for populating the system 
+        ///     directory list, detecting local drives, and reading the app config file
+        /// </summary>
         public static void InitPlatform()
         {
             if (!_didInit)
@@ -108,15 +172,8 @@ namespace Archiver.Shared
             }
         }
 
-        internal static void SetConfig(ArchiverConfig config)
-        {
-            if (_config == null)
-                _config = config;
-        }
-
         public static void WriteSystemInfo(bool writeConfig = false, bool color = false)
         {
-            // TODO: Add GUI window for system info
             PrintHeader(color, "System Information:");
             PrintField(color, 11, "OS Platform", $"{SysInfo.OSType.ToString()} ({SysInfo.Architecture.ToString()})");
             PrintField(color, 11, "Description", SysInfo.Description);
@@ -149,6 +206,10 @@ namespace Archiver.Shared
                 Console.WriteLine($"  {fieldName.PadLeft(width)}: {value}");
         }
 
+        /// <summary>
+        ///     Get the mode that the application is currently running as
+        /// </summary>
+        /// <returns>Currently running mode</returns>
         private static SysInfoMode GetMode()
         {
             string assemblyName = Assembly.GetEntryAssembly().GetName().Name;
@@ -156,7 +217,7 @@ namespace Archiver.Shared
             switch (assemblyName)
             {
                 case "Archiver":
-                    return SysInfoMode.Archiver;
+                    return SysInfoMode.ArchiverCLI;
 
                 case "TapeServer":
                     return SysInfoMode.TapeServer;
@@ -169,10 +230,13 @@ namespace Archiver.Shared
             }
         }
 
+        /// <summary>
+        ///     Test if the app is running on a readonly filesystem
+        /// </summary>
+        /// <returns>true if on readonly filesystem, false otherwise</returns>
         private static bool TestForReadonlyFs()
         {
-            string currentdir = Directory.GetCurrentDirectory();
-            string testFile = Path.Join(currentdir, "__accesstest.tmp");
+            string testFile = Path.Combine(Directories.Bin, "__accesstest.tmp");
             bool canWrite = true;
 
             if (File.Exists(testFile))
@@ -189,9 +253,7 @@ namespace Archiver.Shared
 
             try
             {
-                using (FileStream stream = File.Create(testFile))
-                { }
-
+                File.WriteAllText(testFile, String.Empty);
                 File.Delete(testFile);
             }
             catch
@@ -202,12 +264,34 @@ namespace Archiver.Shared
             return !canWrite;
         }
 
+        /// <summary>
+        ///     Class that describes the system directories
+        /// </summary>
         public class SystemDirectories
         {
+            /// <summary>
+            ///     Full path to the directory of the executable that is currently running
+            /// </summary>
             public string Bin { get; internal protected set; }
+
+            /// <summary>
+            ///     Full path to the archive index directory
+            /// </summary>
             public string Index { get; internal protected set; }
+
+            /// <summary>
+            ///     Full path to the archive json index directory
+            /// </summary>
             public string JSON { get; internal protected set; }
+
+            /// <summary>
+            ///     Full path to the staging directory to use when archiving to disc
+            /// </summary>
             public string DiscStaging { get; internal protected set; }
+
+            /// <summary>
+            ///     Full path to the directory where ISO files will be created
+            /// </summary>
             public string ISO { get; internal protected set; }
         }
     }

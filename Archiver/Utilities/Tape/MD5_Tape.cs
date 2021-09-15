@@ -24,6 +24,7 @@ using System.Security.Cryptography;
 using Archiver.Shared;
 using Archiver.Shared.Classes.Tape;
 using Archiver.Shared.Models;
+using Archiver.Shared.Structures;
 using Archiver.Shared.TapeDrivers;
 
 namespace Archiver.Utilities.Tape
@@ -75,9 +76,16 @@ namespace Archiver.Utilities.Tape
             using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(SysInfo.TapeDrive, blockSize))
             using (MD5 md5 = MD5.Create())
             {
-                Md5Progress progress = new Md5Progress();
-                progress.TotalBytes = _sourceSize;
-                progress.TotalCopiedBytes = 0;
+                Md5Progress progress = new Md5Progress()
+                {
+                    TotalBytesProcessed = 0,
+                    BytesProcessedSinceLastUpdate = 0,
+                    TotalBytes = _sourceSize,
+                    PercentCompleted = 0.0,
+                    InstantRate = 0.0,
+                    AverageRate = 0.0,
+                    Complete = false
+                };
                 
                 // seek the tape to the beginning of the file marker
                 tape.SetTapeFilePosition(hasJson ? 2 : 1);
@@ -98,8 +106,8 @@ namespace Archiver.Utilities.Tape
 
                     if (!endOfData)
                     {
-                        progress.TotalCopiedBytes += size;
-                        progress.PercentCopied = ((double)progress.TotalCopiedBytes / (double)progress.TotalBytes);
+                        progress.TotalBytesProcessed += size;
+                        progress.PercentCompleted = ((double)progress.TotalBytesProcessed / (double)progress.TotalBytes);
                     
                         md5.TransformBlock(buffer, 0, size, buffer, 0);
                     }
@@ -108,16 +116,16 @@ namespace Archiver.Utilities.Tape
                     {
                         sampleCount++;
 
-                        progress.BytesCopiedSinceLastupdate = progress.TotalCopiedBytes - lastSampleCopyTotal;
+                        progress.BytesProcessedSinceLastUpdate = progress.TotalBytesProcessed - lastSampleCopyTotal;
                         double timeSinceLastUpdate = (double)(sw.ElapsedMilliseconds - lastSample) / 1000.0;
-                        lastSampleCopyTotal = progress.TotalCopiedBytes;
+                        lastSampleCopyTotal = progress.TotalBytesProcessed;
 
-                        progress.InstantTransferRate = (double)progress.BytesCopiedSinceLastupdate / timeSinceLastUpdate;
+                        progress.InstantRate = (double)progress.BytesProcessedSinceLastUpdate / timeSinceLastUpdate;
 
                         if (sampleCount == 1)
-                            progress.AverageTransferRate = progress.InstantTransferRate;
+                            progress.AverageRate = progress.InstantRate;
                         else
-                            progress.AverageTransferRate = progress.AverageTransferRate + (progress.InstantTransferRate - progress.AverageTransferRate) / sampleCount;
+                            progress.AverageRate = progress.AverageRate + (progress.InstantRate - progress.AverageRate) / sampleCount;
 
                         progress.ElapsedTime = sw.Elapsed;
 
@@ -127,7 +135,7 @@ namespace Archiver.Utilities.Tape
                 }
                 while (!endOfData);
 
-                progress.PercentCopied = 1.0;
+                progress.PercentCompleted = 1.0;
 
                 OnProgressChanged(progress);
                 lastSample = sw.ElapsedMilliseconds;

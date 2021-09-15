@@ -18,13 +18,14 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-using Archiver.Shared.Classes.Disc;
-
-namespace Archiver.Utilities.Disc
+namespace Archiver.Shared.Structures
 {
-    public static class DiscFormatting
+    public struct FileCopyProgress 
     {
-        public static string GetDiscName(DiscDetail disc)
-            => $"Disc {disc.DiscNumber.ToString("0000")}";
+        // public TimeSpan ElapsedTime { get; set; }
+        public long TotalCopiedBytes { get; internal set; }
+        public long BytesCopiedSinceLastupdate { get; internal set; }
+        public long TotalBytes { get; internal set; }
+        public bool Complete { get; internal set; }
     }
 }

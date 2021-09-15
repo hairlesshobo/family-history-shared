@@ -29,6 +29,7 @@ using Archiver.Shared.Classes.Disc;
 using Archiver.Shared.Classes;
 using Archiver.Shared.Models;
 using Archiver.Shared.Utilities;
+using Archiver.Shared.Structures;
 
 namespace Archiver.Shared.Operations.Disc
 {
@@ -107,22 +108,22 @@ namespace Archiver.Shared.Operations.Disc
                     Md5StreamGenerator generator = new Md5StreamGenerator(reader);
                     generator.OnProgressChanged += (progress) => this.OnDiscVerificationProgressChanged(disc, progress, sw);
 
-                    generator.OnComplete += (hash) =>
-                    {
-                        sw.Stop();
+                    string hash = await generator.GenerateAsync(cToken);
 
-                        bool discValid = (disc.Hash.ToLower() == hash.ToLower());
+                    if (cToken.IsCancellationRequested)
+                        return;
 
-                        disc.RecordVerification(DateTime.UtcNow, discValid);
-                        disc.SaveToIndex();
+                    sw.Stop();
 
-                        _pendingDiscIds.Remove(disc.DiscNumber);
-                        _completedDiscIds.Add(disc.DiscNumber);
+                    bool discValid = (disc.Hash.ToLower() == hash.ToLower());
 
-                        this.OnDiscVerificationComplete(disc, discValid);
-                    };
+                    disc.RecordVerification(DateTime.UtcNow, discValid);
+                    disc.SaveToIndex();
 
-                    await generator.GenerateAsync(cToken);
+                    _pendingDiscIds.Remove(disc.DiscNumber);
+                    _completedDiscIds.Add(disc.DiscNumber);
+
+                    this.OnDiscVerificationComplete(disc, discValid);
                 }
 
                 this.OnStatusChanged(Status.Ejecting, $"Ejecting disc `{disc.DiscName}`...");

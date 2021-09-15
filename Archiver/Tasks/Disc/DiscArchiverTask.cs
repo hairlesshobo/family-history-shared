@@ -1,7 +1,7 @@
 /**
  *  Archiver - Cross platform, multi-destination backup and archiving utility
  * 
- *  Copyright (c) 2020leftWidth21 Steve Cross <flip@foxhollow.cc>
+ *  Copyright (c) 2020-2021 Steve Cross <flip@foxhollow.cc>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -309,11 +309,11 @@ namespace Archiver.Tasks.Disc
             archiver.OnReadIsoMd5Progress += (disc, stats, elapsed, progress) => {
                 UpdateElapsed(stats);
                 
-                _progress.UpdateProgress(progress.PercentCopied);
+                _progress.UpdateProgress(progress.PercentCompleted);
                 _kvtElapsedTime.UpdateValue(Formatting.FormatElapsedTime(elapsed));
-                _kvtDataCopied.UpdateValue(Formatting.GetFriendlySize(progress.TotalCopiedBytes));
-                _kvtCurrentRate.UpdateValue(Formatting.GetFriendlyTransferRate(progress.InstantTransferRate));
-                _kvtAvgRate.UpdateValue(Formatting.GetFriendlyTransferRate(progress.AverageTransferRate));
+                _kvtDataCopied.UpdateValue(Formatting.GetFriendlySize(progress.TotalBytesProcessed));
+                _kvtCurrentRate.UpdateValue(Formatting.GetFriendlyTransferRate(progress.InstantRate));
+                _kvtAvgRate.UpdateValue(Formatting.GetFriendlyTransferRate(progress.AverageRate));
             };
 
             await archiver.RunArchiveAsync(askBeforeArchive, _cts.Token);

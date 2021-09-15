@@ -28,9 +28,6 @@ namespace Archiver.Utilities.Shared
         public static void WriteStatusLineWithPct(string left, string right, double percent, bool complete)
             => WriteStatusLineWithPct(left, right, percent, complete, Console.ForegroundColor);
 
-        public static void WriteStatusLineWithPct(string left, string right, double percent, bool complete, bool increasing)
-            => WriteStatusLineWithPct(left, right, percent, complete, Console.ForegroundColor, increasing);
-
         public static void WriteStatusLineWithPct(string left, string right, double percent, bool complete, ConsoleColor color)
             => WriteStatusLineWithPct(left, right, percent, complete, color, true);
 
