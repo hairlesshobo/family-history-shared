@@ -47,7 +47,30 @@ namespace Archiver.Shared.Utilities
         /// <param name="paths">Parts of the path to combine</param>
         /// <returns>Clean, combined, and resolved path</returns>
         public static string CleanPathCombine(params string[] paths)
-            => PathUtils.ResolveRelativePath(Path.Combine(paths));
+            => PathUtils.ResolveRelativePath(CombinePaths(paths));
+
+        public static string CombinePaths(params string[] parts)
+        {
+            List<string> newParts = new List<string>();
+
+            for (int i = 0; i < parts.Length; i++)
+            {
+                string part = parts[i];
+
+                if (String.IsNullOrWhiteSpace(part))
+                    continue;
+
+                if (i > 0 && part.StartsWith('/'))
+                    part = part.TrimStart('/');
+
+                part = part.TrimEnd('/');
+
+                newParts.Add(part);
+            }
+
+            return String.Join("/", newParts);
+        }
+        
 
         /// <summary>
         ///     Clean that path (convert it to linux style paths with / )
