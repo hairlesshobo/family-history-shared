@@ -29,17 +29,17 @@ namespace Archiver.Shared.Classes
 {
     public class Md5StreamGenerator
     {
-        //! Warning: For some crazy ass, unknown reason.. on windows, if this is set higher than
-        //! 131,072 the generated MD5 has will NOT be correct. I have no idea why. I've spent days 
-        //! trying to hunt down the reason without any success. You've been warned
+        public delegate void CompleteDelegate(string hash);
+        public delegate void ProgressChangedDelegate(Md5Progress progress);
+    
         private int _blockSize = 2048 * 512; // 1MB block size
         // private int _blockSize = 2048 * 64; // default 128KB block size;
 
         private Stream _stream;
 
 
-        public event MD5_CompleteDelegate OnComplete;
-        public event MD5_ProgressChangedDelegate OnProgressChanged;
+        public event CompleteDelegate OnComplete;
+        public event ProgressChangedDelegate OnProgressChanged;
         public string Md5Hash { get; private set; }
 
         public int SampleDurationMs { get; set; } = 500;
@@ -58,10 +58,8 @@ namespace Archiver.Shared.Classes
             _blockSize = blockSize;
         }
 
-        public async Task<string> GenerateAsync(CancellationToken cToken)
-        {
-            return await Task.Run(() => Generate(cToken));
-        }
+        public Task<string> GenerateAsync(CancellationToken cToken)
+            => Task.Run(() => Generate(cToken));
 
         private string Generate(CancellationToken cToken)
         {
@@ -87,10 +85,11 @@ namespace Archiver.Shared.Classes
                         return null;
 
                     progress.TotalCopiedBytes += currentBlockSize;
-                    progress.PercentCopied = ((double)progress.TotalCopiedBytes / (double)progress.TotalBytes) * 100.0;
+                    progress.PercentCopied = ((double)progress.TotalCopiedBytes / (double)progress.TotalBytes);
 
                     md5.TransformBlock(buffer, 0, currentBlockSize, buffer, 0);
 
+                    // TODO: currentBlockSize can never be 0...
                     if (sw.ElapsedMilliseconds - lastSample > this.SampleDurationMs || currentBlockSize == 0)
                     {
                         sampleCount++;
@@ -113,7 +112,7 @@ namespace Archiver.Shared.Classes
                     }
                 }
 
-                progress.PercentCopied = 100.0;
+                progress.PercentCopied = 1.0;
 
                 OnProgressChanged(progress);
                 lastSample = sw.ElapsedMilliseconds;

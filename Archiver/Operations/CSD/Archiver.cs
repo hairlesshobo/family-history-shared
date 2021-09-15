@@ -73,7 +73,7 @@ namespace Archiver.Operations.CSD
                 {
                     Processing.DistributeFiles(stats);
 
-                    bool doProcess = true;
+                    // bool doProcess = true;
 
                     // if (askBeforeArchive)
                     // {

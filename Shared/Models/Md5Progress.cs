@@ -22,19 +22,25 @@ using System;
 
 namespace Archiver.Shared.Models
 {
-    public delegate void MD5_CompleteDelegate(string hash);
-    public delegate void MD5_ProgressChangedDelegate(Md5Progress progress);
-
     public class Md5Progress 
     {
+        // TODO: Rename to TotalBytesProcessed
         public long TotalCopiedBytes { get; set; } = 0;
+        // TODO: Rename to BytesProcessedSinceLastUpdate
         public long BytesCopiedSinceLastupdate { get; set; } = 0;
         public long TotalBytes { get; set; } = 0;
+        // TODO: rename to PercentCompleted
+        /// <summary>
+        ///     Current completion percent
+        /// </summary>
         public double PercentCopied { get; set; } = 0.0;
+        // TODO: rename to InstantRate
         public double InstantTransferRate { get; set; } = 0.0;
+        // TODO: rename to AverageRate
         public double AverageTransferRate { get; set; } = 0.0;
         public TimeSpan ElapsedTime { get; set; }
         public bool Complete { get; set; } = false;
+        // TODO: possible remove so that this can be turned into a struct?
         public string FileName { get; set; } = String.Empty;
     }
 }

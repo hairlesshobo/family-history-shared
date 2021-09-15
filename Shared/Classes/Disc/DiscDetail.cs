@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Archiver.Shared.Interfaces;
 using Archiver.Shared.Utilities;
 using Newtonsoft.Json;
@@ -123,6 +124,12 @@ namespace Archiver.Shared.Classes.Disc
             => this.SaveToJson();
 
         public void SaveToJson(string destinationDir = null, string fileName = null)
+            => SaveToJsonAsync(destinationDir, fileName).RunSynchronously();
+
+        public Task SaveToIndexAsync()
+            => this.SaveToJsonAsync();
+
+        public async Task SaveToJsonAsync(string destinationDir = null, string fileName = null)
         {
             if (destinationDir == null)
                 destinationDir = SysInfo.Directories.JSON;
@@ -142,7 +149,7 @@ namespace Archiver.Shared.Classes.Disc
             });
 
             // Write the json data needed for future runs of this app
-            File.WriteAllText(jsonFilePath, json, Encoding.UTF8);
+            await File.WriteAllTextAsync(jsonFilePath, json, Encoding.UTF8);
         }
     }
 }

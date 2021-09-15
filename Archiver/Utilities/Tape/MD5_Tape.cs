@@ -30,8 +30,11 @@ namespace Archiver.Utilities.Tape
 {
     public class MD5_Tape
     {
-        public event MD5_CompleteDelegate OnComplete;
-        public event MD5_ProgressChangedDelegate OnProgressChanged;
+        public delegate void CompleteDelegate(string hash);
+        public delegate void ProgressChangedDelegate(Md5Progress progress);
+
+        public event CompleteDelegate OnComplete;
+        public event ProgressChangedDelegate OnProgressChanged;
 
         private const int _sampleDurationMs = 500;
         public string MD5_Hash { get; set; }
@@ -96,7 +99,7 @@ namespace Archiver.Utilities.Tape
                     if (!endOfData)
                     {
                         progress.TotalCopiedBytes += size;
-                        progress.PercentCopied = ((double)progress.TotalCopiedBytes / (double)progress.TotalBytes) * 100.0;
+                        progress.PercentCopied = ((double)progress.TotalCopiedBytes / (double)progress.TotalBytes);
                     
                         md5.TransformBlock(buffer, 0, size, buffer, 0);
                     }
@@ -124,7 +127,7 @@ namespace Archiver.Utilities.Tape
                 }
                 while (!endOfData);
 
-                progress.PercentCopied = 100.0;
+                progress.PercentCopied = 1.0;
 
                 OnProgressChanged(progress);
                 lastSample = sw.ElapsedMilliseconds;

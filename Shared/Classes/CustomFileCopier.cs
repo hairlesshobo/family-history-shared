@@ -114,6 +114,7 @@ namespace Archiver.Shared.Classes
                     long lastSampleCopyTotal = 0;
                     int md5Offset = 0;
 
+                    // TODO: refactor this so that the lastBlock functionality runs outside of the loop
                     while ((currentBlockSize = source.Read(buffer, 0, buffer.Length)) > 0)
                     {
                         if (cToken.IsCancellationRequested)

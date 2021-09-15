@@ -98,7 +98,7 @@ namespace Archiver.Utilities.Tape
             }
 
             CliMenu<TapeSourceInfo> menu = new CliMenu<TapeSourceInfo>(entries);
-            menu.MenuLabel = "Select tape...";
+            // menu.MenuLabel = "Select tape...";
             // TODO: Fix
             // menu.OnCancel += Operations.MainMenu.StartOperation;
             

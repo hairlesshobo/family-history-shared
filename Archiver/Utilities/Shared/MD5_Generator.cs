@@ -25,13 +25,11 @@ using Archiver.Shared.Models;
 
 namespace Archiver.Utilities.Shared
 {
-    public delegate void MD5_ProgressChangedDelegateSimple(double currentPercent);
-    
-
     public class MD5_Generator
     {
-        public event MD5_CompleteDelegate OnComplete;
-        public event MD5_ProgressChangedDelegateSimple OnProgressChanged;
+        public delegate void ProgressChangedDelegateSimple(double currentPercent);
+
+        public event ProgressChangedDelegateSimple OnProgressChanged;
 
         private string _filePath;
         private const int _sampleDurationMs = 100;
@@ -41,7 +39,6 @@ namespace Archiver.Utilities.Shared
         {
             _filePath = filePath;
 
-            this.OnComplete += delegate { };
             this.OnProgressChanged += delegate { };
         }
 
@@ -84,8 +81,6 @@ namespace Archiver.Utilities.Shared
                     md5.TransformFinalBlock(new byte[] { }, 0, 0);
 
                     this.MD5_Hash = BitConverter.ToString(md5.Hash).Replace("-","").ToLower();
-
-                    OnComplete(this.MD5_Hash);
                 }
             }
         }

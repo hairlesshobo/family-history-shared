@@ -157,11 +157,11 @@ namespace Archiver.Utilities.CSD
             }
 
             CliMenu<string> menu = new CliMenu<string>(entries);
-            menu.MenuLabel = "Select drive...";
+            // menu.MenuLabel = "Select drive...";
             // TODO: fix
             // menu.OnCancel += Operations.MainMenu.StartOperation;
 
-            menu.ShowAsync(true);
+            menu.ShowAsync(true).RunSynchronously();
 
             return selectedDrive;
         }

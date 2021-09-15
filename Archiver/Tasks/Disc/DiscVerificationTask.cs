@@ -189,7 +189,7 @@ namespace Archiver.Tasks.Disc
                 kvtAvgRate.UpdateValue(Formatting.GetFriendlyTransferRate(progress.AverageTransferRate));
                 kvtCurrentRate.UpdateValue(Formatting.GetFriendlyTransferRate(progress.InstantTransferRate));
 
-                progressBar.UpdateProgress(progress.PercentCopied / 100.0);
+                progressBar.UpdateProgress(progress.PercentCopied);
                 kvtElapsedTime.UpdateValue(sw.Elapsed.ToString());
             };
 

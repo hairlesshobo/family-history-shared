@@ -82,7 +82,7 @@ namespace Archiver.Operations.Tape
                         left += " ";
                         left += $"[{Formatting.GetFriendlyTransferRate(progress.AverageTransferRate).PadLeft(12)}]";
 
-                        Console.Write(left + StatusHelpers.GeneratePercentBar(Console.BufferWidth, left.Length, 0, progress.PercentCopied, (progress.PercentCopied == 100.0)));
+                        Console.Write(left + StatusHelpers.GeneratePercentBar(Console.BufferWidth, left.Length, 0, progress.PercentCopied * 100.0, (progress.PercentCopied == 1.0)));
                     };
 
                     Thread thread = new Thread(md5.GenerateHash);

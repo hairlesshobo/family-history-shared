@@ -26,6 +26,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Archiver.Shared.Classes;
 using Archiver.Shared.Classes.Disc;
 using Archiver.Shared.Models;
 using Archiver.Shared.Utilities;
@@ -38,15 +39,18 @@ namespace Archiver.Shared.Operations.Disc
     {
         public enum ProcessStep
         {
-            FirstStart = 0,
-            ScanFiles = 1,
-            SizeFiles = 2,
-            DistributeFiles = 3,
-            CopyFiles = 4,
-            CreateDiscIndex = 5,
-            GenerateHashFile = 6,
-            WriteDiscInfo = 7,
-            CreateISOFile = 8
+            FirstStart,
+            ScanFiles,
+            SizeFiles,
+            DistributeFiles,
+            CopyFiles,
+            CreateDiscIndex,
+            GenerateHashFile,
+            WriteDiscInfo,
+            CreateISOFile,
+            ReadIsoHash,
+            SaveToIndex,
+            DiscComplete
         }
 
         public enum Status
@@ -62,6 +66,7 @@ namespace Archiver.Shared.Operations.Disc
             public long CurrentFile;
             public double InstantTransferRate;
             public double AverageTransferRate;
+            // TODO: rename to PercentCompleted
             public double CurrentPercent;
         }
 
@@ -70,6 +75,7 @@ namespace Archiver.Shared.Operations.Disc
             public TimeSpan Elapsed;
             public long CurrentFile;
             public long TotalFiles;
+            // TODO: rename to PercentCompleted
             public double CurrentPercent;
         }
 
@@ -78,12 +84,14 @@ namespace Archiver.Shared.Operations.Disc
             public TimeSpan Elapsed;
             public long CurrentFile;
             public long TotalFiles;
+            // TODO: rename to PercentCompleted
             public double CurrentPercent;
         }
 
         public struct CreateIsoProgress
         {
             public TimeSpan Elapsed;
+            // TODO: rename to PercentCompleted
             public double CurrentPercent;
         }
 
@@ -95,11 +103,10 @@ namespace Archiver.Shared.Operations.Disc
         public delegate void DiscIndexProgressDelegate(DiscDetail disc, DiscScanStats stats, DiscIndexProgress progress);
         public delegate void GenerateHashProgressDelegate(DiscDetail disc, DiscScanStats stats, GenerateHashProgress progress);
         public delegate void CreateIsoProgressDelegate(DiscDetail disc, DiscScanStats stats, CreateIsoProgress progress);
-        // public delegate void StatusUpdateDelegate(string statusText);
+        public delegate void ReadIsoMd5ProgressDelegate(DiscDetail disc, DiscScanStats stats, TimeSpan elapsed, Md5Progress progress);
 
         public event StepStateDelegate OnStepStart;
         public event StepStateDelegate OnStepComplete;
-        // public event StatusUpdateDelegate OnStatusUpdate;
         public event UpdateStatsDelegate OnUpdateStats;
         public event UpdateSizingDelegate OnUpdateSizing;
         public event UpdateDistributeDelegate OnUpdateDistribute;
@@ -108,10 +115,9 @@ namespace Archiver.Shared.Operations.Disc
         public event DiscIndexProgressDelegate OnDiscIndexProgress;
         public event GenerateHashProgressDelegate OnGenerateHashProgress;
         public event CreateIsoProgressDelegate OnCreateIsoProgress;
+        public event ReadIsoMd5ProgressDelegate OnReadIsoMd5Progress;
 
         public Func<DiscScanStats, Task<Nullable<bool>>> AskToArchiveCallback = null;
-
-        public bool Canceled => _cToken.IsCancellationRequested;
 
         public Status ResultStatus { get; private set; } = DiscArchiver.Status.NothingToDo;
 
@@ -127,7 +133,6 @@ namespace Archiver.Shared.Operations.Disc
 
             this.OnStepStart += delegate { };
             this.OnStepComplete += delegate { };
-            // this.OnStatusUpdate += delegate { };
             this.OnUpdateStats += delegate { };
             this.OnUpdateSizing += delegate { };
             this.OnUpdateDistribute += delegate { };
@@ -135,6 +140,7 @@ namespace Archiver.Shared.Operations.Disc
             this.OnDiscIndexProgress += delegate { };
             this.OnGenerateHashProgress += delegate { };
             this.OnCreateIsoProgress += delegate { };
+            this.OnReadIsoMd5Progress += delegate { };
         }
 
         public async Task RunArchiveAsync(bool askBeforeArchive = false, CancellationToken cToken = default)
@@ -172,7 +178,6 @@ namespace Archiver.Shared.Operations.Disc
         private async Task IndexAndCountFilesAsync()
         {
             this.OnStepStart(null, _stats, ProcessStep.ScanFiles);
-            // this.OnStatusUpdate("Scanning for files");
 
             FileScanner scanner = new FileScanner(_stats);
             scanner.OnProgressChanged += (stats) => this.OnUpdateStats(stats);
@@ -184,7 +189,6 @@ namespace Archiver.Shared.Operations.Disc
         private async Task SizeFilesAsync()
         {
             this.OnStepStart(null, _stats, ProcessStep.SizeFiles);
-            // this.OnStatusUpdate("Sizing files");
 
             FileSizer sizer = new FileSizer(_stats);
             sizer.OnProgressChanged += (stats, currentFile) => this.OnUpdateSizing(stats, currentFile);
@@ -218,7 +222,7 @@ namespace Archiver.Shared.Operations.Disc
             {
                 discSw.Restart();
 
-                // await CopyFilesAsync(disc, discSw);
+                await CopyFilesAsync(disc, discSw);
                 if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
                 
                 await GenerateIndexFiles(disc, discSw);
@@ -233,16 +237,17 @@ namespace Archiver.Shared.Operations.Disc
                 await CreateISOFile(disc, discSw);
                 if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
                 
-                // await ReadIsoHash(disc, discSw);
-                // if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
+                await ReadIsoHash(disc, discSw);
+                if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
 
-                // await SaveJsonData(disc, discSw);
-                // if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
+                await SaveJsonData(disc, discSw);
+                if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
+
+                this.OnStepStart(disc, _stats, ProcessStep.DiscComplete);
+                this.OnStepComplete(disc, _stats, ProcessStep.DiscComplete);
 
                 discSw.Stop();
             }
-
-            // Status.ProcessComplete();
         }
 
         private async Task CopyFilesAsync(DiscDetail disc, Stopwatch discSw)
@@ -414,7 +419,7 @@ namespace Archiver.Shared.Operations.Disc
             }
 
             progress.CurrentFile = progress.TotalFiles;
-            progress.CurrentPercent = 100.0;
+            progress.CurrentPercent = 1.0;
             this.OnDiscIndexProgress(disc, _stats, progress);
             this.OnStepComplete(disc, _stats, ProcessStep.CreateDiscIndex);
         }
@@ -465,7 +470,7 @@ namespace Archiver.Shared.Operations.Disc
             }
 
             progress.CurrentFile = progress.TotalFiles;
-            progress.CurrentPercent = 100.0;
+            progress.CurrentPercent = 1.0;
             this.OnGenerateHashProgress(disc, _stats, progress);
             this.OnStepComplete(disc, _stats, ProcessStep.GenerateHashFile);
         }
@@ -519,5 +524,31 @@ namespace Archiver.Shared.Operations.Disc
 
             this.OnStepComplete(disc, _stats, ProcessStep.CreateISOFile);
         }
+
+        private async Task ReadIsoHash(DiscDetail disc, Stopwatch discSw)
+        {
+            this.OnStepStart(disc, _stats, ProcessStep.ReadIsoHash);
+
+            using (FileStream fs = File.OpenRead(disc.IsoPath))
+            {
+                Md5StreamGenerator generator = new Md5StreamGenerator(fs);
+
+                generator.OnProgressChanged += (progress) => this.OnReadIsoMd5Progress(disc, _stats, discSw.Elapsed, progress);
+
+                disc.Hash = await generator.GenerateAsync(_cToken);
+            }
+
+            this.OnStepStart(disc, _stats, ProcessStep.ReadIsoHash);
+        }
+
+        private async Task SaveJsonData(DiscDetail disc, Stopwatch discSw)
+        {
+            this.OnStepStart(disc, _stats, ProcessStep.SaveToIndex);
+
+            await disc.SaveToIndexAsync();
+
+            this.OnStepComplete(disc, _stats, ProcessStep.SaveToIndex);
+        }
+
     }
 }

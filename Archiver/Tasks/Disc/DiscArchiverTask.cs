@@ -20,14 +20,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Archiver.Shared.Classes.Disc;
 using Archiver.Shared.Operations.Disc;
 using Archiver.Shared.Utilities;
-using Archiver.Utilities.Disc;
 using Archiver.Utilities.Shared;
 using TerminalUI;
 using TerminalUI.Elements;
@@ -37,6 +35,9 @@ namespace Archiver.Tasks.Disc
     internal static class DiscArchiverTask
     {
         private static CancellationTokenSource _cts;
+
+        private static void UpdateElapsed(DiscScanStats stats)
+            => _kvtElapsed.UpdateValue(Formatting.FormatElapsedTime(stats.ProcessSw.Elapsed));
 
         internal static async Task RunArchiveAsync(bool askBeforeArchive = false)
         {
@@ -48,20 +49,19 @@ namespace Archiver.Tasks.Disc
 
             SetupUI();
 
-            // ShowAll();
-
-            // return;
-
             DiscArchiver archiver = new DiscArchiver(discs);
 
             archiver.OnUpdateStats += (stats) => {
-                _kvtElapsed.UpdateValue(Formatting.FormatElapsedTime(stats.ProcessSw.Elapsed));
+                UpdateElapsed(stats);
+
                 _kvtNewFileCount.UpdateValue(stats.NewlyFoundFiles.ToString());
                 _kvtExistingFileCount.UpdateValue(stats.ExistingFilesArchived.ToString());
                 _kvtExcludedFileCount.UpdateValue(stats.ExcludedFileCount.ToString());
             };
 
             archiver.OnStepStart += (disc, stats, step) => {
+                UpdateElapsed(stats);
+                
                 if (step == DiscArchiver.ProcessStep.ScanFiles)
                 {
                     _kvtNewFileCount.Show();
@@ -89,6 +89,7 @@ namespace Archiver.Tasks.Disc
                     _textDiscProcessHeader.Show();
                     _lineProcessingHeader.Show();
 
+                    _progress.SetMode(ProgressMode.ExplicitCountLeft);
                     _progress.UpdateProgress(0, disc.TotalFiles, true);
                     _kvtDiscName.UpdateValue(disc.DiscName);
                     _kvtDiscName.Show();
@@ -104,6 +105,7 @@ namespace Archiver.Tasks.Disc
                     _textDiscProcessHeader.Show();
                     _lineProcessingHeader.Show();
 
+                    _progress.SetMode(ProgressMode.ExplicitCountLeft);
                     _progress.UpdateProgress(0, disc.TotalFiles, true);
                     _kvtDiscName.UpdateValue(disc.DiscName);
                     _kvtDiscName.Show();
@@ -116,6 +118,7 @@ namespace Archiver.Tasks.Disc
                     _textDiscProcessHeader.Show();
                     _lineProcessingHeader.Show();
 
+                    _progress.SetMode(ProgressMode.ExplicitCountLeft);
                     _progress.UpdateProgress(0, disc.TotalFiles, true);
                     _kvtDiscName.UpdateValue(disc.DiscName);
                     _kvtDiscName.Show();
@@ -128,6 +131,7 @@ namespace Archiver.Tasks.Disc
                     _textDiscProcessHeader.Show();
                     _lineProcessingHeader.Show();
 
+                    _progress.SetMode(ProgressMode.ExplicitCountLeft);
                     _progress.UpdateProgress(0, disc.TotalFiles, true);
                     _kvtDiscName.UpdateValue(disc.DiscName);
                     _kvtDiscName.Show();
@@ -140,20 +144,70 @@ namespace Archiver.Tasks.Disc
                     _textDiscProcessHeader.Show();
                     _lineProcessingHeader.Show();
 
-                    _progress.UpdateProgress(0, 100, true);
+                    _progress.SetMode(ProgressMode.Default);
+                    _progress.UpdateProgress(0);
                     _kvtDiscName.UpdateValue(disc.DiscName);
                     _kvtDiscName.Show();
                     _kvtElapsedTime.Show();
 
                     SetStatus("Creating ISO");
                 }
+                else if (step == DiscArchiver.ProcessStep.ReadIsoHash)
+                {
+                    _textDiscProcessHeader.Show();
+                    _lineProcessingHeader.Show();
+
+                    _progress.SetMode(ProgressMode.Default);
+                    _progress.UpdateProgress(0.0);
+                    _kvtDiscName.UpdateValue(disc.DiscName);
+                    
+                    _kvtDiscName.Show();
+                    _kvtElapsedTime.Show();
+                    _kvtDataCopied.Show();
+                    _kvtCurrentRate.Show();
+                    _kvtAvgRate.Show();
+
+                    SetStatus("Reading ISO MD5 Hash");
+                }
+                else if (step == DiscArchiver.ProcessStep.SaveToIndex)
+                {
+                    _textDiscProcessHeader.Show();
+                    _lineProcessingHeader.Show();
+
+                    SetStatus("Saving disc to index");
+                }
+                else if (step == DiscArchiver.ProcessStep.DiscComplete)
+                {
+                    _textDiscProcessHeader.Hide();
+                    _lineProcessingHeader.Hide();
+
+                    _progress.Hide();
+                    _kvtDiscName.Hide();
+                    _kvtElapsedTime.Hide();
+                    _kvtDataCopied.Hide();
+                    _kvtCurrentRate.Hide();
+                    _kvtAvgRate.Hide();
+
+                    SetStatus($"Disc {disc.DiscNumber} complete");
+
+                    UpdateDiscCount(stats);
+                }
             };
 
             archiver.OnStepComplete += (disc, stats, step) => {
-                if (step == DiscArchiver.ProcessStep.SizeFiles)
+                UpdateElapsed(stats);
+                
+                if (step == DiscArchiver.ProcessStep.ScanFiles)
+                {
+
+                }
+                else if (step == DiscArchiver.ProcessStep.SizeFiles)
                     _progress.Hide();
                 else if (step == DiscArchiver.ProcessStep.DistributeFiles)
+                {
                     _progress.Hide();
+                    UpdateDiscCount(stats);
+                }
                 else if (step == DiscArchiver.ProcessStep.CopyFiles)
                 {
                     _progress.Hide();
@@ -187,14 +241,27 @@ namespace Archiver.Tasks.Disc
                     _kvtDiscName.Hide();
                     _kvtElapsedTime.Hide();
                 }
+                else if (step == DiscArchiver.ProcessStep.ReadIsoHash)
+                {
+                    _progress.Hide();
+                    _kvtDiscName.Hide();
+                    _kvtElapsedTime.Hide();
+                    _kvtDataCopied.Hide();
+                    _kvtCurrentRate.Hide();
+                    _kvtAvgRate.Hide();
+                }
             };
 
             archiver.OnUpdateSizing += (stats, currentFile) => {
+                UpdateElapsed(stats);
+                
                 _kvtSize.UpdateValue(Formatting.GetFriendlySize(stats.TotalSize));
                 _progress.UpdateProgress(currentFile, stats.NewlyFoundFiles);
             };
 
             archiver.OnUpdateDistribute += (stats, currentFile) => {
+                UpdateElapsed(stats);
+                
                 _kvtDistribute.UpdateValue($"{stats.NewDiscCount} discs");
                 _progress.UpdateProgress(currentFile, stats.NewlyFoundFiles);
             };
@@ -208,6 +275,8 @@ namespace Archiver.Tasks.Disc
             };
 
             archiver.OnFileCopyProgress += (disc, stats, progress) => {
+                UpdateElapsed(stats);
+                
                 _progress.UpdateProgress(progress.CurrentFile, disc.TotalFiles, progress.CurrentPercent);
                 _kvtElapsedTime.UpdateValue(Formatting.FormatElapsedTime(progress.Elapsed));
                 _kvtDataCopied.UpdateValue(Formatting.GetFriendlySize(disc.BytesCopied));
@@ -216,19 +285,35 @@ namespace Archiver.Tasks.Disc
             };
 
             archiver.OnDiscIndexProgress += (disc, stats, progress) => {
+                UpdateElapsed(stats);
+                
                 _progress.UpdateProgress(progress.CurrentFile, disc.TotalFiles, progress.CurrentPercent);
                 _kvtElapsedTime.UpdateValue(Formatting.FormatElapsedTime(progress.Elapsed));
             };
 
             archiver.OnGenerateHashProgress += (disc, stats, progress) => {
+                UpdateElapsed(stats);
+                
                 _progress.UpdateProgress(progress.CurrentFile, disc.TotalFiles, progress.CurrentPercent);
                 _kvtElapsedTime.UpdateValue(Formatting.FormatElapsedTime(progress.Elapsed));
             };
 
             archiver.OnCreateIsoProgress += (disc, stats, progress) => {
+                UpdateElapsed(stats);
+                
                 int currentFile = (int)(progress.CurrentPercent * 100);
                 _progress.UpdateProgress(currentFile, 100, progress.CurrentPercent);
                 _kvtElapsedTime.UpdateValue(Formatting.FormatElapsedTime(progress.Elapsed));
+            };
+
+            archiver.OnReadIsoMd5Progress += (disc, stats, elapsed, progress) => {
+                UpdateElapsed(stats);
+                
+                _progress.UpdateProgress(progress.PercentCopied);
+                _kvtElapsedTime.UpdateValue(Formatting.FormatElapsedTime(elapsed));
+                _kvtDataCopied.UpdateValue(Formatting.GetFriendlySize(progress.TotalCopiedBytes));
+                _kvtCurrentRate.UpdateValue(Formatting.GetFriendlyTransferRate(progress.InstantTransferRate));
+                _kvtAvgRate.UpdateValue(Formatting.GetFriendlyTransferRate(progress.AverageTransferRate));
             };
 
             await archiver.RunArchiveAsync(askBeforeArchive, _cts.Token);
@@ -239,6 +324,15 @@ namespace Archiver.Tasks.Disc
                 Terminal.WriteLine("No new files found to archive. Nothing to do.");
             else if (archiver.ResultStatus == DiscArchiver.Status.Canceled)
                 Terminal.WriteLineColor(ConsoleColor.Red, "Process canceled! Not all data has been archived!");
+        }
+
+        private static void UpdateDiscCount(DiscScanStats stats)
+        {
+            int newDiscs = stats.NewDiscCount;
+            int completeDiscs = newDiscs - stats.DestinationDiscs.Count(x => x.Finalized == false);
+
+            _kvtDiscProgress.UpdateValue($"{completeDiscs} / {newDiscs}");
+            _kvtDiscProgress.Show();
         }
 
         internal static Task StartScanOnlyAsync()
@@ -266,10 +360,9 @@ namespace Archiver.Tasks.Disc
         private static KeyValueText _kvtDataCopied;
         private static KeyValueText _kvtCurrentRate;
         private static KeyValueText _kvtAvgRate;
+        private static KeyValueText _kvtDiscProgress;
         private const int leftWidth = -15;
         private const int rightWidth = -12;
-
-        private const int rightColumnOffset = 40;
 
 
         private static void SetupUI()
@@ -335,8 +428,18 @@ namespace Archiver.Tasks.Disc
             _kvtDistribute = new KeyValueText("New Disc Count", "0", leftWidth, area: Area.LeftHalf);
             _kvtAvgRate = new KeyValueText("Average Rate", Formatting.GetFriendlyTransferRate(0), rightWidth, area: Area.RightHalf);
             Terminal.NextLine();
+
+            // line 9
             Terminal.NextLine();
 
+            // line 10
+            _kvtDiscProgress = new KeyValueText("Disc Progress", "0 / 0", leftWidth, area: Area.LeftHalf);
+            Terminal.NextLine();
+
+            // line 11
+            Terminal.NextLine();
+
+            // line 12
             _progress = new ProgressBar(mode: ProgressMode.ExplicitCountLeft);
             _ynqRunArchive = new QueryYesNo("Do you want to run the archive process now?");
             Terminal.NextLine();
@@ -348,31 +451,7 @@ namespace Archiver.Tasks.Disc
             _lineStatsHeader.Show();
         }
 
-        private static void ShowAll()
-        {
-            _textFileStatsHeader.Show();
-            _textDiscProcessHeader.Show();
-            _lineStatsHeader.Show();
-            _lineProcessingHeader.Show();
-
-            _kvtStatus.Show();
-            _kvtElapsed.Show();
-            _kvtNewFileCount.Show();
-            _kvtExistingFileCount.Show();
-            _kvtExcludedFileCount.Show();
-            _kvtSize.Show();
-            _kvtDistribute.Show();
-            _progress.Show();
-
-            _kvtDiscName.Show();
-            _kvtElapsedTime.Show();
-            _kvtDataCopied.Show();
-            _kvtCurrentRate.Show();
-            _kvtAvgRate.Show();
-        }
-
         private static void SetStatus(string text)
             => _kvtStatus.UpdateValue(text);
-
     }
 }

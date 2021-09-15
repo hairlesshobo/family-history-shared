@@ -95,11 +95,6 @@ namespace Archiver.Utilities.Shared
             return GeneratePercentBar(AvailableSpace, 0, 0, CurrentPercent, Complete, Increasing, BarOnly);
         }
 
-        public static string GeneratePercentBar (int AvailableSpace, double CurrentPercent, bool Complete, bool Increasing)
-        {
-            return GeneratePercentBar(AvailableSpace, 0, 0, CurrentPercent, Complete, Increasing, false);
-        }
-
 
         public static string GeneratePercentBar (int AvailableSpace, int LeftLength, int RightLength, double CurrentPercent, bool Complete, bool Increasing, bool BarOnly)
         {

@@ -30,35 +30,9 @@ namespace Archiver.Utilities.Disc
     {
         private static int _nextLine = -1;
         private static int _renameScanLine = -1;
-        private static int _existingDiscCount = 0;
-
-        private static int _discLine = -1;
 
         private const string _renameScanLabel = "Rename Scan";
         
-        public static void WriteDiscIsoHash(DiscDetail disc, TimeSpan elapsed, double currentPercent = 0.0)
-        {
-            string line = "";
-            line += Formatting.FormatElapsedTime(elapsed);
-            line += " ";
-            line += "Reading ISO MD5:";
-
-            Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
-            StatusHelpers.WriteStatusLineWithPct(DiscFormatting.GetDiscName(disc), line, currentPercent, (currentPercent == 100.0), ConsoleColor.DarkYellow);
-        }
-
-        public static void WriteDiscJsonLine(DiscDetail disc, TimeSpan elapsed)
-        {
-            string line = "";
-            line += Formatting.FormatElapsedTime(elapsed);
-            line += " ";
-            line += "Saving disc details to json file ...";
-
-            Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
-            StatusHelpers.WriteStatusLine(DiscFormatting.GetDiscName(disc), line, ConsoleColor.DarkYellow);
-        }
-
-
 
 
 
