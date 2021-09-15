@@ -41,7 +41,8 @@ namespace Archiver.Shared.Operations.Disc
             SizeFiles = 2,
             DistributeFiles = 3,
             CopyFiles = 4,
-            CreateDiscIndex = 5
+            CreateDiscIndex = 5,
+            GenerateHashFile = 6
         }
 
         public enum Status
@@ -68,12 +69,21 @@ namespace Archiver.Shared.Operations.Disc
             public double CurrentPercent;
         }
 
+        public struct GenerateHashProgress
+        {
+            public TimeSpan Elapsed;
+            public long CurrentFile;
+            public long TotalFiles;
+            public double CurrentPercent;
+        }
+
         public delegate void StepStateDelegate(DiscDetail disc, DiscScanStats stats, ProcessStep step);
         public delegate void UpdateStatsDelegate(DiscScanStats stats);
         public delegate void UpdateSizingDelegate(DiscScanStats stats, long currentFile);
         public delegate void UpdateDistributeDelegate(DiscScanStats stats, long currentFile);
         public delegate void FileCopyProgressDelegate(DiscDetail disc, DiscScanStats stats, FileCopyProgress progress);
         public delegate void DiscIndexProgressDelegate(DiscDetail disc, DiscScanStats stats, DiscIndexProgress progress);
+        public delegate void GenerateHashProgressDelegate(DiscDetail disc, DiscScanStats stats, GenerateHashProgress progress);
         // public delegate void StatusUpdateDelegate(string statusText);
 
         public event StepStateDelegate OnStepStart;
@@ -85,6 +95,7 @@ namespace Archiver.Shared.Operations.Disc
         
         public event FileCopyProgressDelegate OnFileCopyProgress;
         public event DiscIndexProgressDelegate OnDiscIndexProgress;
+        public event GenerateHashProgressDelegate OnGenerateHashProgress;
 
         public Func<DiscScanStats, Task<Nullable<bool>>> AskToArchiveCallback = null;
 
@@ -110,6 +121,7 @@ namespace Archiver.Shared.Operations.Disc
             this.OnUpdateDistribute += delegate { };
             this.OnFileCopyProgress += delegate { };
             this.OnDiscIndexProgress += delegate { };
+            this.OnGenerateHashProgress += delegate { };
         }
 
         public async Task RunArchiveAsync(bool askBeforeArchive = false, CancellationToken cToken = default)
@@ -193,14 +205,14 @@ namespace Archiver.Shared.Operations.Disc
             {
                 discSw.Restart();
 
-                await CopyFilesAsync(disc, discSw);
+                // await CopyFilesAsync(disc, discSw);
                 if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
                 
                 await GenerateIndexFiles(disc, discSw);
                 if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
                 
-                // await GenerateHashFile(disc, discSw);
-                // if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
+                await GenerateHashFile(disc, discSw);
+                if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
                 
                 // await WriteDiscInfo(disc, discSw);
                 // if (_cToken.IsCancellationRequested) { this.ResultStatus = Status.Canceled; return; }
@@ -326,8 +338,8 @@ namespace Archiver.Shared.Operations.Disc
             if (!Directory.Exists(SysInfo.Directories.Index))
                 Directory.CreateDirectory(SysInfo.Directories.Index);
 
-            string txtIndexPath = PathUtils.CleanPathCombine(SysInfo.Directories.Index, "/index.txt");
-            string discIndexTxtPath = PathUtils.CleanPathCombine(disc.RootStagingPath, "/index.txt");
+            string txtIndexPath = PathUtils.CleanPathCombine(SysInfo.Directories.Index, "index.txt");
+            string discIndexTxtPath = PathUtils.CleanPathCombine(disc.RootStagingPath, "index.txt");
  
             bool createMasterIndex = !File.Exists(txtIndexPath);      
             string headerLine = $"Disc   {"Archive Date (UTC)".PadRight(19)}   {"Create Date (UTC)".PadRight(19)}   {"Modify Date (UTC)".PadRight(19)}   {"Size".PadLeft(12)}   Path";      
@@ -384,11 +396,65 @@ namespace Archiver.Shared.Operations.Disc
                 }
 
                 sw.Stop();
+                await masterIndex.FlushAsync();
+                await discIndex.FlushAsync();
             }
 
+            progress.CurrentFile = progress.TotalFiles;
             progress.CurrentPercent = 100.0;
             this.OnDiscIndexProgress(disc, _stats, progress);
             this.OnStepComplete(disc, _stats, ProcessStep.CreateDiscIndex);
+        }
+
+        private async Task GenerateHashFile(DiscDetail disc, Stopwatch discSw)
+        {
+            this.OnStepStart(disc, _stats, ProcessStep.GenerateHashFile);
+
+            GenerateHashProgress progress = new GenerateHashProgress()
+            {
+                Elapsed = discSw.Elapsed,
+                CurrentFile = 0,
+                TotalFiles = disc.TotalFiles,
+                CurrentPercent = 0.0
+            };
+
+            this.OnGenerateHashProgress(disc, _stats, progress);
+
+            string destinationFile = PathUtils.CleanPathCombine(disc.RootStagingPath, "hashlist.txt");
+
+            using (FileStream fileStream = File.Open(destinationFile, FileMode.OpenOrCreate, FileAccess.Write))
+            using (StreamWriter streamWriter = new StreamWriter(fileStream))
+            {
+                await streamWriter.WriteLineAsync($"{"MD5 Hash".PadRight(32)}   File");
+
+                Stopwatch sw = Stopwatch.StartNew();
+
+                foreach (DiscSourceFile file in disc.Files.Where(x => x.Size > 0 && x.Hash != null).OrderBy(x => x.RelativePath))
+                {
+                    if (_cToken.IsCancellationRequested)
+                        return;
+                        
+                    progress.CurrentFile++;
+                    await streamWriter.WriteLineAsync($"{file.Hash.PadRight(32)}   {file.RelativePath}");
+
+                    if (sw.ElapsedMilliseconds > _updateFrequencyMs)
+                    {
+                        progress.CurrentPercent = (double)progress.CurrentFile / (double)disc.TotalFiles;
+                        this.OnGenerateHashProgress(disc, _stats, progress);
+
+                        sw.Restart();
+                    }
+                }
+
+                sw.Stop();
+
+                streamWriter.Flush();
+            }
+
+            progress.CurrentFile = progress.TotalFiles;
+            progress.CurrentPercent = 100.0;
+            this.OnGenerateHashProgress(disc, _stats, progress);
+            this.OnStepComplete(disc, _stats, ProcessStep.GenerateHashFile);
         }
     }
 }

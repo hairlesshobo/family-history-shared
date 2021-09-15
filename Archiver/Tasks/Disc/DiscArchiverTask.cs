@@ -111,6 +111,18 @@ namespace Archiver.Tasks.Disc
 
                     SetStatus("Generating disc index");
                 }
+                else if (step == DiscArchiver.ProcessStep.GenerateHashFile)
+                {
+                    _textDiscProcessHeader.Show();
+                    _lineProcessingHeader.Show();
+
+                    _progress.UpdateProgress(0, disc.TotalFiles, true);
+                    _kvtDiscName.UpdateValue(disc.DiscName);
+                    _kvtDiscName.Show();
+                    _kvtElapsedTime.Show();
+
+                    SetStatus("Generating disc hashlist");
+                }
             };
 
             archiver.OnStepComplete += (disc, stats, step) => {
@@ -129,6 +141,13 @@ namespace Archiver.Tasks.Disc
                     _kvtAvgRate.Hide();
                 }
                 else if (step == DiscArchiver.ProcessStep.CreateDiscIndex)
+                {
+                    _progress.Hide();
+                    _kvtDiscName.Hide();
+                    _kvtDiscName.Hide();
+                    _kvtElapsedTime.Hide();
+                }
+                else if (step == DiscArchiver.ProcessStep.GenerateHashFile)
                 {
                     _progress.Hide();
                     _kvtDiscName.Hide();

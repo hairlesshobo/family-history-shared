@@ -36,28 +36,6 @@ namespace Archiver.Utilities.Disc
 
         private const string _renameScanLabel = "Rename Scan";
 
-        public static void WriteDiscIndex(DiscDetail disc, TimeSpan elapsed, double currentPercent)
-        {
-            string line = "";
-            line += Formatting.FormatElapsedTime(elapsed);
-            line += " ";
-            line += "Writing disc index:";
-
-            Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
-            StatusHelpers.WriteStatusLineWithPct(DiscFormatting.GetDiscName(disc), line, currentPercent, (currentPercent == 100.0), ConsoleColor.DarkYellow);
-        }
-
-        public static void WriteDiscHashListFile(DiscDetail disc, TimeSpan elapsed, double currentPercent)
-        {
-            string line = "";
-            line += Formatting.FormatElapsedTime(elapsed);
-            line += " ";
-            line += "Writing disc hash file:";
-
-            Console.SetCursorPosition(0, _discLine+disc.DiscNumber-_existingDiscCount);
-            StatusHelpers.WriteStatusLineWithPct(DiscFormatting.GetDiscName(disc), line, currentPercent, (currentPercent == 100.0), ConsoleColor.DarkYellow);
-        }
-
         public static void WriteDiscIso(DiscDetail disc, TimeSpan elapsed, int currentPercent)
         {
             bool complete = (currentPercent == 100);

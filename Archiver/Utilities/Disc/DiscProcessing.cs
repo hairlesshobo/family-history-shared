@@ -35,34 +35,6 @@ namespace Archiver.Utilities.Disc
 {
     public static class DiscProcessing
     {
-        public static void GenerateHashFile(DiscDetail disc, Stopwatch masterSw)
-        {
-            Status.WriteDiscHashListFile(disc, masterSw.Elapsed, 0.0);
-
-            string destinationFile = PathUtils.CleanPathCombine(disc.RootStagingPath, "/hashlist.txt");
-
-            using (FileStream fs = File.Open(destinationFile, FileMode.OpenOrCreate, FileAccess.Write))
-            {
-                using (StreamWriter sw = new StreamWriter(fs))
-                {
-                    sw.WriteLine($"{"MD5 Hash".PadRight(32)}   File");
-
-                    int currentLine = 1;
-                    foreach (DiscSourceFile file in disc.Files.Where(x => x.Size > 0 && x.Hash != null).OrderBy(x => x.RelativePath))
-                    {
-                        double currentPercent = ((double)currentLine / (double)disc.TotalFiles) * 100.0;
-                        sw.WriteLine($"{file.Hash.PadRight(32)}   {file.RelativePath}");
-                        Status.WriteDiscHashListFile(disc, masterSw.Elapsed, currentPercent);
-                        currentLine++;
-                    }
-
-                    sw.Flush();
-                }
-            }
-
-            Status.WriteDiscHashListFile(disc, masterSw.Elapsed, 100.0);
-        }
-
         public static void SaveJsonData(DiscDetail disc, Stopwatch masterSw)
         {
             Status.WriteDiscJsonLine(disc, masterSw.Elapsed);
@@ -137,7 +109,6 @@ namespace Archiver.Utilities.Disc
                 Stopwatch masterSw = new Stopwatch();
                 masterSw.Start();
 
-                GenerateHashFile(disc, masterSw);
                 WriteDiscInfo(disc, masterSw);
                 CreateISOFile(disc, masterSw);
                 ReadIsoHash(disc, masterSw);
