@@ -28,16 +28,17 @@ using Archiver.Shared.Operations.Disc;
 using Archiver.Utilities.Shared;
 using TerminalUI;
 using TerminalUI.Elements;
+using TerminalUI.Types;
 
 namespace Archiver.Tasks.Disc
 {
     internal static class DiscSearcherTask
     {
-        public async static Task StartTaskAsync()
+        public async static Task StartTaskAsync(CancellationToken cToken)
         {
-            List<DiscDetail> discs = await Helpers.ReadDiscIndexAsync();
+            var cts = CancellationTokenSource.CreateLinkedTokenSource(cToken);
 
-            var cts = new CancellationTokenSource();
+            List<DiscDetail> discs = await Helpers.ReadDiscIndexAsync(cts.Token);
 
             Terminal.InitHeader("Search Disc Archive", "Archiver");
             Terminal.InitStatusBar(

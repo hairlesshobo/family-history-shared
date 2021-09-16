@@ -21,12 +21,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Archiver.Shared;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 using TerminalUI;
 using TerminalUI.Elements;
+using TerminalUI.Types;
 using static Archiver.Shared.Utilities.Formatting;
 
 namespace Archiver.Operations
@@ -36,19 +38,23 @@ namespace Archiver.Operations
         private static bool _initialized = false;
         private static CliMenu<bool> _menu; 
 
-        public async static Task StartOperationAsync()
-            => await ShowMenuAsync();
+        public async static Task StartOperationAsync(CancellationTokenSource cts)
+            => await ShowMenuAsync(cts);
 
-        private async static Task ShowMenuAsync()
+        private async static Task ShowMenuAsync(CancellationTokenSource cts)
         {
-            Initialize();
+            BuildMenu();
+            _menu.QuitCallback = () => {
+                cts.Cancel();
+                return Task.CompletedTask;
+            };
 
-            while (1 == 1)
+            while (!cts.IsCancellationRequested)
             {
                 Terminal.Clear();
                 Terminal.InitHeader("Main Menu", "Archiver");
 
-                var results = await _menu.ShowAsync();
+                var results = await _menu.ShowAsync(false, cts.Token);
 
                 if (results == null)
                     return;
@@ -77,7 +83,7 @@ namespace Archiver.Operations
             }
         }
 
-        private static void Initialize()
+        private static void BuildMenu()
         {
             if (_initialized == false)
             {
@@ -90,8 +96,8 @@ namespace Archiver.Operations
                 entries.AddRange(BuildTapeMenu());
                 entries.Add(new CliMenuEntry<bool>() { Header = true });
                 entries.AddRange(BuildCsdMenu());
-                // entries.Add(new CliMenuEntry<bool>() { Header = true });
-                // entries.AddRange(BuildUniversalMenu());
+                entries.Add(new CliMenuEntry<bool>() { Header = true });
+                entries.AddRange(BuildUniversalMenu());
 
                 _menu = new CliMenu<bool>(entries);
                 //_menu.MenuLabel = "Archiver, main menu...";
@@ -284,33 +290,38 @@ namespace Archiver.Operations
             };
         }
 
-        // private static List<CliMenuEntry<bool>> BuildUniversalMenu()
-        // {
-        //     return new List<CliMenuEntry<bool>>()
-        //     {
-        //         new CliMenuEntry<bool>() {
-        //             Name = "Universal Operations",
-        //             Header = true
-        //         },
-        //         new CliMenuEntry<bool>() {
-        //             Name = "Copy Tools to Local Disk",
-        //             Task = NotImplemented,
-        //             Disabled = !SysInfo.IsReadonlyFilesystem
-        //         },
-        //         new CliMenuEntry<bool>() {
-        //             Name = "Create Index ISO",
-        //             Task = Helpers.CreateIndexIso,
-        //             Disabled = SysInfo.IsReadonlyFilesystem
-        //         },
-        //         new CliMenuEntry<bool>() {
-        //             Name = "Exit",
-        //             Task = () => Environment.Exit(0)
-        //         }
-        //     };
-        // }
-
-        private static async Task NotImplementedAsync()
+        private static List<CliMenuEntry<bool>> BuildUniversalMenu()
         {
+            return new List<CliMenuEntry<bool>>()
+            {
+                new CliMenuEntry<bool>() {
+                    Name = "Universal Operations",
+                    Header = true
+                },
+                // new CliMenuEntry<bool>() {
+                //     Name = "Copy Tools to Local Disk",
+                //     Task = NotImplemented,
+                //     Disabled = !SysInfo.IsReadonlyFilesystem
+                // },
+                // new CliMenuEntry<bool>() {
+                //     Name = "Create Index ISO",
+                //     Task = Helpers.CreateIndexIso,
+                //     Disabled = SysInfo.IsReadonlyFilesystem
+                // },
+                new CliMenuEntry<bool>() {
+                    Name = "Explode",
+                    Task = (cToken) => throw new InvalidOperationException("meow!!!!")
+                }//,
+                // new CliMenuEntry<bool>() {
+                //     Name = "Exit",
+                //     Task = () => Environment.Exit(0)
+                // }
+            };
+        }
+
+        private static async Task NotImplementedAsync(CancellationToken cToken = default)
+        {
+            // TODO: What to do with cToken here?
             TaskCompletionSource tcs = new TaskCompletionSource();
 
             Terminal.InitHeader("Not Implemented", "Archiver");

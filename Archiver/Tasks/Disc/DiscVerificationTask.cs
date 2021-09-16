@@ -32,17 +32,19 @@ using Archiver.Utilities.Disc;
 using Archiver.Utilities.Shared;
 using TerminalUI;
 using TerminalUI.Elements;
+using TerminalUI.Types;
 
 namespace Archiver.Tasks.Disc
 {
     internal static class DiscVerificationTask
     {
-        internal static async Task StartTaskAsync()
+        internal static async Task StartTaskAsync(CancellationToken cToken)
         {
+            // todo: use cToken here
             Terminal.Header.UpdateLeft("Verify Discs > Initializing...");
             Terminal.Clear();
 
-            List<DiscDetail> allDiscs = await Helpers.ReadDiscIndexAsync();
+            List<DiscDetail> allDiscs = await Helpers.ReadDiscIndexAsync(cToken);
 
             Terminal.Header.UpdateLeft("Select Drive");
             OpticalDrive selectedDrive = await DiscTasks.SelectCdromDriveAsync();

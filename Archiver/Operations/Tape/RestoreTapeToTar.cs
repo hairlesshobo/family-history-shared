@@ -31,7 +31,7 @@ namespace Archiver.Operations.Tape
 {
     public static class RestoreTapeToTar
     {
-        public static Task StartOperationAsync()
+        public static Task StartOperationAsync(CancellationToken cToken)
         {
             return Task.CompletedTask;
             // Console.WriteLine("Reading tape information...");

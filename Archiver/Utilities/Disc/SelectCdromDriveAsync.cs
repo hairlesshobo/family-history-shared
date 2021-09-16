@@ -6,6 +6,7 @@ using Archiver.Shared.Models;
 using Archiver.Shared.Utilities;
 using TerminalUI;
 using TerminalUI.Elements;
+using TerminalUI.Types;
 
 namespace Archiver.Utilities.Disc
 {

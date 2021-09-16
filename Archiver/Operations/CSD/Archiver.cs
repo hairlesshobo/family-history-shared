@@ -20,6 +20,7 @@
 
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Archiver.Shared.Classes.CSD;
 using Archiver.Shared.Utilities;
@@ -31,9 +32,10 @@ namespace Archiver.Operations.CSD
 {
     public static class Archiver
     {
-        public static async Task RunArchive(bool askBeforeArchive = false)
+        private static async Task RunArchive(bool askBeforeArchive, CancellationToken cToken)
         {
-            CsdScanStats stats = new CsdScanStats(await Helpers.ReadCsdIndexAsync());
+            // TODO: use cToken here
+            CsdScanStats stats = new CsdScanStats(await Helpers.ReadCsdIndexAsync(cToken));
             Status.SetStats(stats);
 
             Terminal.Clear();
@@ -115,10 +117,10 @@ namespace Archiver.Operations.CSD
             }
         }
 
-        public static Task StartScanOnlyAsync()
-            => RunArchive(true);
+        public static Task StartScanOnlyAsync(CancellationToken cToken)
+            => RunArchive(true, cToken);
 
-        public static Task StartOperationAsync()
-            => RunArchive(false);
+        public static Task StartOperationAsync(CancellationToken cToken)
+            => RunArchive(false, cToken);
     }
 }

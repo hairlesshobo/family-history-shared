@@ -39,6 +39,7 @@ using Archiver.Shared.Utilities;
 using LibSMB2Sharp;
 using TerminalUI;
 using TerminalUI.Elements;
+using TerminalUI.Types;
 
 namespace Archiver.TestCLI
 {

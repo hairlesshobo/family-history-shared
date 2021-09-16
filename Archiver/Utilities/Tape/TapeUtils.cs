@@ -25,12 +25,12 @@ using System.Linq;
 using System.Text;
 using Archiver.Shared.Classes.Tape;
 using Archiver.Shared;
-using Archiver.Utilities.Shared;
 using ICSharpCode.SharpZipLib.Tar;
 using Newtonsoft.Json;
 using Archiver.Shared.TapeDrivers;
 using Archiver.Shared.Native;
 using TerminalUI.Elements;
+using TerminalUI.Types;
 
 namespace Archiver.Utilities.Tape
 {

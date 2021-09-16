@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Archiver.Shared.Classes.CSD;
 using Archiver.Shared.Utilities;
@@ -33,9 +34,10 @@ namespace Archiver.Operations.CSD
 {
     public static class RegisterDrive
     {
-        public static async Task StartOperationAsync()
+        public static async Task StartOperationAsync(CancellationToken cToken)
         {
-            List<CsdDetail> allCsds = await Helpers.ReadCsdIndexAsync();
+            // TODO: use cToken here
+            List<CsdDetail> allCsds = await Helpers.ReadCsdIndexAsync(cToken);
             Terminal.Clear();
             Terminal.Header.UpdateLeft("Register New CSD");
 

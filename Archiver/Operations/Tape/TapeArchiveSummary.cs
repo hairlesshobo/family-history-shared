@@ -21,6 +21,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Archiver.Shared.Classes.Disc;
 using Archiver.Shared.Classes.Tape;
@@ -34,9 +35,10 @@ namespace Archiver.Operations.Tape
 {
     public static class TapeArchiveSummary
     {
-        public static async Task StartOperationAsync()
+        public static async Task StartOperationAsync(CancellationToken cToken)
         {
-            List<TapeDetail> existingTapes = await Helpers.ReadTapeIndexAsync();
+            // TODO: use cToken here
+            List<TapeDetail> existingTapes = await Helpers.ReadTapeIndexAsync(cToken);
             
             Terminal.Clear();
             Terminal.Header.UpdateLeft("Tape Archive Summary");

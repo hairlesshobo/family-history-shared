@@ -28,16 +28,17 @@ using Archiver.Shared.Operations.Tape;
 using Archiver.Utilities.Shared;
 using TerminalUI;
 using TerminalUI.Elements;
+using TerminalUI.Types;
 
 namespace Archiver.Tasks.Tape
 {
     internal static class TapeSearcherTask
     {
-        public async static Task StartTaskAsync()
+        public async static Task StartTaskAsync(CancellationToken cToken = default)
         {
-            List<TapeDetail> tapes = await Helpers.ReadTapeIndexAsync();
+            var cts = CancellationTokenSource.CreateLinkedTokenSource(cToken);
 
-            var cts = new CancellationTokenSource();
+            List<TapeDetail> tapes = await Helpers.ReadTapeIndexAsync(cToken);
 
             Terminal.InitHeader("Search Tape Archive", "Archiver");
             Terminal.InitStatusBar(

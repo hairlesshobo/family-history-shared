@@ -29,6 +29,7 @@ using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 using TerminalUI;
 using TerminalUI.Elements;
+using TerminalUI.Types;
 
 namespace Archiver.Tasks.Disc
 {
@@ -39,10 +40,12 @@ namespace Archiver.Tasks.Disc
         private static void UpdateElapsed(DiscScanStats stats)
             => _kvtElapsed.UpdateValue(Formatting.FormatElapsedTime(stats.ProcessSw.Elapsed));
 
-        internal static async Task RunArchiveAsync(bool askBeforeArchive = false)
+        private static async Task RunArchiveAsync(bool askBeforeArchive, CancellationToken cToken)
         {
+            _cts = CancellationTokenSource.CreateLinkedTokenSource(cToken);
+
             // TODO: handle cancel during disc index read in other tasks
-            List<DiscDetail> discs = await Helpers.ReadDiscIndexAsync();
+            List<DiscDetail> discs = await Helpers.ReadDiscIndexAsync(_cts.Token);
 
             if (discs == null)
                 return;
@@ -335,11 +338,11 @@ namespace Archiver.Tasks.Disc
             _kvtDiscProgress.Show();
         }
 
-        internal static Task StartScanOnlyAsync()
-            => RunArchiveAsync(true);
+        internal static Task StartScanOnlyAsync(CancellationToken cToken = default)
+            => RunArchiveAsync(true, cToken);
 
-        internal static Task StartOperationAsync()
-            => RunArchiveAsync(false);
+        internal static Task StartOperationAsync(CancellationToken cToken = default)
+            => RunArchiveAsync(false, cToken);
 
 
         private static Text _textFileStatsHeader;
@@ -367,8 +370,6 @@ namespace Archiver.Tasks.Disc
 
         private static void SetupUI()
         {
-            _cts = new CancellationTokenSource();
-
             Terminal.InitStatusBar(
                 new StatusBarItem(
                     "Cancel",
@@ -385,55 +386,55 @@ namespace Archiver.Tasks.Disc
             Terminal.Clear();
             Terminal.Header.UpdateLeft("Disc Archiver");
 
-            _kvtStatus = new KeyValueText("Status", "Starting...", area: Area.LeftHalf);
-            _kvtElapsed = new KeyValueText("Total Time", area: Area.RightHalf);
+            _kvtStatus = new KeyValueText("Status", "Starting...", area: TerminalArea.LeftHalf);
+            _kvtElapsed = new KeyValueText("Total Time", area: TerminalArea.RightHalf);
             Terminal.NextLine();
             Terminal.NextLine();
 
 
             // line 1
-            _textFileStatsHeader = new Text(ConsoleColor.Cyan, "Statistics", area: Area.LeftHalf); //left
-            _textDiscProcessHeader = new Text(ConsoleColor.Cyan, "Processing", area: Area.RightHalf); //right
+            _textFileStatsHeader = new Text(ConsoleColor.Cyan, "Statistics", area: TerminalArea.LeftHalf); //left
+            _textDiscProcessHeader = new Text(ConsoleColor.Cyan, "Processing", area: TerminalArea.RightHalf); //right
             Terminal.NextLine();
 
             // line 2
-            _lineStatsHeader = new HorizontalLine(width: -5, area: Area.LeftHalf);
-            _lineProcessingHeader = new HorizontalLine(width: -5, area: Area.RightHalf);
+            _lineStatsHeader = new HorizontalLine(width: -5, area: TerminalArea.LeftHalf);
+            _lineProcessingHeader = new HorizontalLine(width: -5, area: TerminalArea.RightHalf);
             Terminal.NextLine();
 
             // line 3
-            _kvtNewFileCount = new KeyValueText("New Files", "0", leftWidth, area: Area.LeftHalf);
-            _kvtDiscName = new KeyValueText("Disc Name", null, rightWidth, area: Area.RightHalf);
+            _kvtNewFileCount = new KeyValueText("New Files", "0", leftWidth, area: TerminalArea.LeftHalf);
+            _kvtDiscName = new KeyValueText("Disc Name", null, rightWidth, area: TerminalArea.RightHalf);
             Terminal.NextLine();
 
             // line 4
-            _kvtExistingFileCount = new KeyValueText("Existing Files", "0", leftWidth, area: Area.LeftHalf);
-            _kvtElapsedTime = new KeyValueText("Elapsed Time", null, rightWidth, area: Area.RightHalf);
+            _kvtExistingFileCount = new KeyValueText("Existing Files", "0", leftWidth, area: TerminalArea.LeftHalf);
+            _kvtElapsedTime = new KeyValueText("Elapsed Time", null, rightWidth, area: TerminalArea.RightHalf);
             Terminal.NextLine();
 
             // line 5
-            _kvtExcludedFileCount = new KeyValueText("Excluded Files", "0", leftWidth, area: Area.LeftHalf);
+            _kvtExcludedFileCount = new KeyValueText("Excluded Files", "0", leftWidth, area: TerminalArea.LeftHalf);
             Terminal.NextLine();
 
             // line 6
-            _kvtDataCopied = new KeyValueText("Data Copied", Formatting.GetFriendlySize(0), rightWidth, area: Area.RightHalf);
+            _kvtDataCopied = new KeyValueText("Data Copied", Formatting.GetFriendlySize(0), rightWidth, area: TerminalArea.RightHalf);
             Terminal.NextLine();
 
             // line 7
-            _kvtSize = new KeyValueText("New Data Size", "0", leftWidth, area: Area.LeftHalf);
-            _kvtCurrentRate = new KeyValueText("Current Rate", Formatting.GetFriendlyTransferRate(0), rightWidth, area: Area.RightHalf);
+            _kvtSize = new KeyValueText("New Data Size", "0", leftWidth, area: TerminalArea.LeftHalf);
+            _kvtCurrentRate = new KeyValueText("Current Rate", Formatting.GetFriendlyTransferRate(0), rightWidth, area: TerminalArea.RightHalf);
             Terminal.NextLine();
 
             // line 8
-            _kvtDistribute = new KeyValueText("New Disc Count", "0", leftWidth, area: Area.LeftHalf);
-            _kvtAvgRate = new KeyValueText("Average Rate", Formatting.GetFriendlyTransferRate(0), rightWidth, area: Area.RightHalf);
+            _kvtDistribute = new KeyValueText("New Disc Count", "0", leftWidth, area: TerminalArea.LeftHalf);
+            _kvtAvgRate = new KeyValueText("Average Rate", Formatting.GetFriendlyTransferRate(0), rightWidth, area: TerminalArea.RightHalf);
             Terminal.NextLine();
 
             // line 9
             Terminal.NextLine();
 
             // line 10
-            _kvtDiscProgress = new KeyValueText("Disc Progress", "0 / 0", leftWidth, area: Area.LeftHalf);
+            _kvtDiscProgress = new KeyValueText("Disc Progress", "0 / 0", leftWidth, area: TerminalArea.LeftHalf);
             Terminal.NextLine();
 
             // line 11

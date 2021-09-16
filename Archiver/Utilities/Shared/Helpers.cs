@@ -36,23 +36,24 @@ using Archiver.Shared.Utilities.Disc;
 using Archiver.Utilities.Disc;
 using TerminalUI;
 using TerminalUI.Elements;
+using TerminalUI.Types;
 
 namespace Archiver.Utilities.Shared
 {
     public class Helpers
     {
 
-        internal static Task<List<TapeDetail>> ReadTapeIndexAsync()
-            => ReadMediaIndexAsync<TapeDetail>("tape");
+        internal static Task<List<TapeDetail>> ReadTapeIndexAsync(CancellationToken cToken)
+            => ReadMediaIndexAsync<TapeDetail>("tape", cToken);
 
-        internal static Task<List<DiscDetail>> ReadDiscIndexAsync()
-            => ReadMediaIndexAsync<DiscDetail>("disc");
+        internal static Task<List<DiscDetail>> ReadDiscIndexAsync(CancellationToken cToken)
+            => ReadMediaIndexAsync<DiscDetail>("disc", cToken);
 
-        internal static Task<List<CsdDetail>> ReadCsdIndexAsync()
-            => ReadMediaIndexAsync<CsdDetail>("csd");
+        internal static Task<List<CsdDetail>> ReadCsdIndexAsync(CancellationToken cToken)
+            => ReadMediaIndexAsync<CsdDetail>("csd", cToken);
 
 
-        private static Task<List<TMedia>> ReadMediaIndexAsync<TMedia>(string mediaType)
+        private static Task<List<TMedia>> ReadMediaIndexAsync<TMedia>(string mediaType, CancellationToken cToken)
             where TMedia : IMediaDetail, new()
         {
             string[] validMediaTypes = new string[] { "disc", "tape", "csd" };
@@ -67,7 +68,7 @@ namespace Archiver.Utilities.Shared
 
             string mediaTypeTc = mediaType.Substring(0, 1).ToUpper() + mediaType.Substring(1);
 
-            CancellationTokenSource cts = new CancellationTokenSource();
+            CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cToken);
 
             
             Terminal.Clear();

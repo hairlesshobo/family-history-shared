@@ -19,6 +19,7 @@
  */
 
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Archiver.Shared.Classes.Disc;
 using Archiver.Shared.Operations.Disc;
@@ -30,9 +31,10 @@ namespace Archiver.Tasks.Disc
 {
     internal static class DiscArchiveSummaryTask
     {
-        internal static async Task StartTaskAsync()
+        internal static async Task StartTaskAsync(CancellationToken cToken)
         {
-            List<DiscDetail> allDiscs = await Helpers.ReadDiscIndexAsync();
+            // TODO: use cToken here
+            List<DiscDetail> allDiscs = await Helpers.ReadDiscIndexAsync(cToken);
             
             Terminal.Clear();
             Terminal.Header.UpdateLeft("Disc Archive Summary");

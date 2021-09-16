@@ -21,6 +21,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Archiver.Shared;
 using Archiver.Shared.Classes.CSD;
@@ -33,9 +34,10 @@ namespace Archiver.Operations.CSD
 {
     public static class ArchiveSummary
     {
-        public static async Task StartOperationAsync()
+        public static async Task StartOperationAsync(CancellationToken cToken)
         {
-            List<CsdDetail> existingCsdDrives = await Helpers.ReadCsdIndexAsync();
+            // TODO: use cToken here
+            List<CsdDetail> existingCsdDrives = await Helpers.ReadCsdIndexAsync(cToken);
             Terminal.Clear();
             Terminal.Header.UpdateLeft("CSD Archive Summary");
 

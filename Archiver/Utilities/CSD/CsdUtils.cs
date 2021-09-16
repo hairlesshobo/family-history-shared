@@ -31,6 +31,7 @@ using Archiver.Shared.Exceptions;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 using TerminalUI.Elements;
+using TerminalUI.Types;
 
 namespace Archiver.Utilities.CSD
 {
