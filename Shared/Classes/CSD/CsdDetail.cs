@@ -38,9 +38,7 @@ namespace Archiver.Shared.Classes.CSD
 
         private int _csdNumber = 0;
         private string _csdName = "CSD000";
-        private List<CsdSourceFile> _files = new List<CsdSourceFile>();
         private List<CsdSourceFile> _pendingFiles = new List<CsdSourceFile>();
-        private List<DateTime> _writeDtmUtc = new List<DateTime>();
         private long _pendingBytes = 0;
         private long _pendingBytesOnDisk = 0;
         private long _pendingFileCount = 0;
@@ -62,7 +60,7 @@ namespace Archiver.Shared.Classes.CSD
             }
         }
         public DateTime RegisterDtmUtc { get; set; }
-        public IReadOnlyList<DateTime> WriteDtmUtc => (IReadOnlyList<DateTime>)_writeDtmUtc;
+        public List<DateTime> WriteDtmUtc { get; set; } = new List<DateTime>();
         public string CsdName => _csdName;
         public int TotalFiles => _totalFiles;
         public int BlockSize { get; set; }
@@ -71,7 +69,9 @@ namespace Archiver.Shared.Classes.CSD
         public long DataSize => _dataSize;
 
         public long DataSizeOnDisc => _dataSizeOnDisk;
-        public IReadOnlyList<CsdSourceFile> Files => (IReadOnlyList<CsdSourceFile>)_files;
+        // public IReadOnlyList<CsdSourceFile> Files => (IReadOnlyList<CsdSourceFile>)_files;
+        public List<CsdSourceFile> Files { get; set; } = new List<CsdSourceFile>();
+
         public CsdDriveInfo DriveInfo { get; set; } = new CsdDriveInfo();
         public long BytesCopied { get; set; }
 
@@ -145,7 +145,7 @@ namespace Archiver.Shared.Classes.CSD
         {
             if (file.Copied)
             {
-                this._files.Add(file);
+                this.Files.Add(file);
 
                 _totalFiles++;
                 _dataSize += file.Size;
@@ -162,7 +162,7 @@ namespace Archiver.Shared.Classes.CSD
         }
 
         public void AddWriteDate()
-            => this._writeDtmUtc.Add(DateTime.UtcNow);
+            => this.WriteDtmUtc.Add(DateTime.UtcNow);
 
         public void SortPendingFiles()
         {
@@ -183,9 +183,9 @@ namespace Archiver.Shared.Classes.CSD
 
         public void SyncStats(bool includePending = false)
         {
-            this._totalFiles = this._files.Count();
-            this._dataSize = this._files.Sum(x => x.Size);
-            this._dataSizeOnDisk = this._files.Sum(x => HelpersNew.RoundToNextMultiple(x.Size, this.BlockSize));
+            this._totalFiles = this.Files.Count();
+            this._dataSize = this.Files.Sum(x => x.Size);
+            this._dataSizeOnDisk = this.Files.Sum(x => HelpersNew.RoundToNextMultiple(x.Size, this.BlockSize));
             this.BytesCopied = this.DataSize;
 
             if (includePending)
@@ -207,9 +207,9 @@ namespace Archiver.Shared.Classes.CSD
                 _pendingBytesOnDisk -= HelpersNew.RoundToNextMultiple(file.Size, this.BlockSize);
             }
 
-            if (!_files.Contains(file))
+            if (!this.Files.Contains(file))
             {
-                this._files.Add(file);
+                this.Files.Add(file);
 
                 _totalFiles++;
                 _dataSize += file.Size;
@@ -233,8 +233,8 @@ namespace Archiver.Shared.Classes.CSD
                 Verifications = this.Verifications
             };
 
-            newCopy._writeDtmUtc = _writeDtmUtc;
-            newCopy._files = this._files.ToList();
+            newCopy.WriteDtmUtc = this.WriteDtmUtc.ToList();
+            newCopy.Files = this.Files.ToList();
 
             if (includePending)
                 newCopy._pendingFiles = this._pendingFiles.ToList();
