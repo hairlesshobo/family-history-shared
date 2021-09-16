@@ -12,12 +12,11 @@ The following tasks need to have their UI and task code split and updated to be 
 * **Tape.TapeSearcher.StartOperationAsync**
 * Tape.RestoreTapeToTar.StartOperationAsync
 * Tape.ShowTapeSummary.StartOperation
-* Tape.TapeArchiveSummary.StartOperationAsync
+* **Tape.TapeArchiveSummary.StartOperationAsync**
 * Tape.TapeVerification.StartOperation
 * Tape.TapeArchiver.StartOperation
 * CSD.RegisterDrive.StartOperationAsync
-* ShowTapeSummary.StartOperation
-* CSD.ArchiveSummary.StartOperationAsync
+* **CSD.ArchiveSummary.StartOperationAsync**
 * CSD.Archiver.StartOperationAsync
 * Helpers.CreateIndexIso
 

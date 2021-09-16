@@ -1,0 +1,9 @@
+<Project>
+    <PropertyGroup>
+        <Version>2.0.0</Version>
+        <Product>Archiver</Product>
+        <Description>Cross platform, multi-destination backup and archiving utility</Description>
+        <Authors>Steve Cross</Authors>
+        <Copyright>Copyright (c) 2020-2021 Steve Cross &lt;flip@foxhollow.cc&gt;</Copyright>
+    </PropertyGroup>
+</Project>

@@ -92,10 +92,10 @@ namespace Archiver.Shared.Utilities
 
                         if (csdDetail != null)
                         {
-                            csdDetail.SyncStats();
-
                             foreach (CsdSourceFile file in csdDetail.Files)
                                 file.DestinationCsd = csdDetail;
+
+                            csdDetail.SyncStats();
                         }
 
 

@@ -211,7 +211,7 @@ namespace Archiver.Operations
                 // },
                 new CliMenuEntry<bool>() {
                     Name = "View Archive Summary",
-                    Task = Tape.TapeArchiveSummary.StartOperationAsync,
+                    Task = Tasks.Tape.TapeArchiveSummaryTask.StartTaskAsync,
                     SelectedValue = true, // do not show the "press enter to return to main menu" message
                     ForegroundColor = ConsoleColor.Blue
                 },
@@ -262,7 +262,7 @@ namespace Archiver.Operations
         //         },
                 new CliMenuEntry<bool>() {
                     Name = "View CSD Archive Summary",
-                    Task = CSD.ArchiveSummary.StartOperationAsync,
+                    Task = Tasks.CSD.CsdArchiveSummaryTask.StartTaskAsync,
                     SelectedValue = true, // do not show the "press enter to return to main menu" message
                     ForegroundColor = ConsoleColor.Blue
                 },
