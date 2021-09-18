@@ -36,7 +36,7 @@ namespace Archiver.Operations
     public static class MainMenu
     {
         private static bool _initialized = false;
-        private static CliMenu<bool> _menu; 
+        private static Menu _menu; 
 
         public async static Task StartOperationAsync(CancellationTokenSource cts)
             => await ShowMenuAsync(cts);
@@ -54,12 +54,15 @@ namespace Archiver.Operations
                 Terminal.Clear();
                 Terminal.InitHeader("Main Menu", "Archiver");
 
-                var results = await _menu.ShowAsync(false, cts.Token);
+                var results = await _menu.ShowAsync(cts.Token);
 
                 if (results == null)
                     return;
 
-                bool result = results.First();
+                if (results.First() == null)
+                    continue;
+
+                bool result = (bool)results.First();
 
                 if (result == false)
                 {
@@ -89,17 +92,17 @@ namespace Archiver.Operations
             {
                 _initialized = true;
 
-                List<CliMenuEntry<bool>> entries = new List<CliMenuEntry<bool>>();
+                List<MenuEntry> entries = new List<MenuEntry>();
 
                 entries.AddRange(BuildDiscMenu());
-                entries.Add(new CliMenuEntry<bool>() { Header = true });
+                entries.Add(new MenuEntry() { Header = true });
                 entries.AddRange(BuildTapeMenu());
-                entries.Add(new CliMenuEntry<bool>() { Header = true });
+                entries.Add(new MenuEntry() { Header = true });
                 entries.AddRange(BuildCsdMenu());
-                entries.Add(new CliMenuEntry<bool>() { Header = true });
+                entries.Add(new MenuEntry() { Header = true });
                 entries.AddRange(BuildUniversalMenu());
 
-                _menu = new CliMenu<bool>(entries);
+                _menu = new Menu(entries);
                 //_menu.MenuLabel = "Archiver, main menu...";
                 // _menu.OnCancel += () =>
                 // {
@@ -108,58 +111,58 @@ namespace Archiver.Operations
             }
         }
 
-        private static List<CliMenuEntry<bool>> BuildDiscMenu()
+        private static List<MenuEntry> BuildDiscMenu()
         {
             string discMenuAppend = String.Empty;
 
             if (SysInfo.IsOpticalDrivePresent == false)
                 discMenuAppend += " (drive not detected)";
                 
-            return new List<CliMenuEntry<bool>>()
+            return new List<MenuEntry>()
             {
-                new CliMenuEntry<bool>() {
+                new MenuEntry() {
                     Name = "Disc Operations" + discMenuAppend,
                     Header = true,
                     ShortcutKey = ConsoleKey.D
                 },
-                new CliMenuEntry<bool>() {
+                new MenuEntry() {
                     Name = "Search Disc Archive",
                     Task = Tasks.Disc.DiscSearcherTask.StartTaskAsync,
                     ForegroundColor = ConsoleColor.Green,
                     SelectedValue = true, // do not show the "press enter to return to main menu" message
                 },
                 //! not implemented
-                new CliMenuEntry<bool>() {
+                new MenuEntry() {
                     Name = "Restore entire disc(s)",
                     Task = NotImplementedAsync,
                     SelectedValue = true,
                     Disabled = !SysInfo.IsOpticalDrivePresent || true, // remove once implemented
                     ForegroundColor = ConsoleColor.Green
                 },
-                new CliMenuEntry<bool>() {
+                new MenuEntry() {
                     Name = "View Archive Summary",
                     Task = Tasks.Disc.DiscArchiveSummaryTask.StartTaskAsync,
                     SelectedValue = true, // do not show the "press enter to return to main menu" message
                     ForegroundColor = ConsoleColor.Blue
                 },
-                new CliMenuEntry<bool>() {
+                new MenuEntry() {
                     Name = "Verify Discs",
                     Task = Tasks.Disc.DiscVerificationTask.StartTaskAsync,
                     Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsOpticalDrivePresent,
                     ForegroundColor = ConsoleColor.DarkYellow
                 }
                 ,
-                new CliMenuEntry<bool>() {
+                new MenuEntry() {
                     Name = "Scan For Changes",
                     Task = Tasks.Disc.DiscArchiverTask.StartScanOnlyAsync,
                     ForegroundColor = ConsoleColor.DarkYellow
                 },
-                // new CliMenuEntry<bool>() {
+                // new MenuEntry() {
                 //     Name = "Scan For Renamed/Moved Files",
                 //     Task = Disc.ScanForFileRenames.StartOperationAsync,
                 //     ForegroundColor = ConsoleColor.DarkYellow
                 // },
-                new CliMenuEntry<bool>() {
+                new MenuEntry() {
                     Name = "Run Archive process",
                     Task = Tasks.Disc.DiscArchiverTask.StartOperationAsync,
                     Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsOpticalDrivePresent,
@@ -168,60 +171,60 @@ namespace Archiver.Operations
             };
         }
 
-        private static List<CliMenuEntry<bool>> BuildTapeMenu()
+        private static List<MenuEntry> BuildTapeMenu()
         {
             string tapeMenuAppend = String.Empty;
 
             if (SysInfo.IsTapeDrivePresent == false)
                 tapeMenuAppend += " (drive not detected)";
                 
-            return new List<CliMenuEntry<bool>>()
+            return new List<MenuEntry>()
             {
-                new CliMenuEntry<bool>() {
+                new MenuEntry() {
                     Name = "Tape Operations" + tapeMenuAppend,
                     Header = true,
                     ShortcutKey = ConsoleKey.T
                 },
-                new CliMenuEntry<bool>() {
+                new MenuEntry() {
                     Name = "Search Tape Archive",
                     Task = Tasks.Tape.TapeSearcherTask.StartTaskAsync,
                     ForegroundColor = ConsoleColor.Green,
                     SelectedValue = true, // do not show the "press enter to return to main menu" message
                 },
                 //! not implemented
-                new CliMenuEntry<bool>() {
+                new MenuEntry() {
                     Name = "Restore entire tape (to tar file)",
                     Task = Tape.RestoreTapeToTar.StartOperationAsync,
                     Disabled = !SysInfo.IsTapeDrivePresent || true, // remove once implemented
                     ForegroundColor = ConsoleColor.Green
                 },
                 //! not implemented
-                new CliMenuEntry<bool>() {
+                new MenuEntry() {
                     Name = "Restore entire tape (to original file structure)",
                     Task = NotImplementedAsync,
                     Disabled = !SysInfo.IsTapeDrivePresent || true, // remove once implemented
                     ForegroundColor = ConsoleColor.Green
                 },
-                // new CliMenuEntry<bool>() {
+                // new MenuEntry() {
                 //     Name = "Read Tape Summary",
                 //     Task = Tape.ShowTapeSummary.StartOperation,
                 //     Disabled = !SysInfo.IsTapeDrivePresent,
                 //     // SelectedValue = true, // do not show the "press enter to return to main menu" message
                 //     ForegroundColor = ConsoleColor.Blue
                 // },
-                new CliMenuEntry<bool>() {
+                new MenuEntry() {
                     Name = "View Archive Summary",
                     Task = Tasks.Tape.TapeArchiveSummaryTask.StartTaskAsync,
                     SelectedValue = true, // do not show the "press enter to return to main menu" message
                     ForegroundColor = ConsoleColor.Blue
                 },
-                // new CliMenuEntry<bool>() {
+                // new MenuEntry() {
                 //     Name = "Verify Tape",
                 //     Task = Tape.TapeVerification.StartOperation,
                 //     Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsTapeDrivePresent,
                 //     ForegroundColor = ConsoleColor.DarkYellow
                 // },
-                // new CliMenuEntry<bool>() {
+                // new MenuEntry() {
                 //     Name = "Run tape archive",
                 //     Task = Tape.TapeArchiver.StartOperation,
                 //     Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsTapeDrivePresent,
@@ -230,29 +233,29 @@ namespace Archiver.Operations
             };
         }
 
-        private static List<CliMenuEntry<bool>> BuildCsdMenu()
+        private static List<MenuEntry> BuildCsdMenu()
         {
-            return new List<CliMenuEntry<bool>>()
+            return new List<MenuEntry>()
             {
-                new CliMenuEntry<bool>() {
+                new MenuEntry() {
                     Name = "Cold Storage Disk (HDD) Operations",
                     Header = true,
                     ShortcutKey = ConsoleKey.C
                 },
-                new CliMenuEntry<bool>() {
+                new MenuEntry() {
                     Name = "Register CSD Drive",
                     Task = CSD.RegisterDrive.StartOperationAsync,
                     ForegroundColor = ConsoleColor.Green
                 },
         //         //! not implemented
-        //         new CliMenuEntry<bool>() {
+        //         new MenuEntry() {
         //             Name = "Restore entire CSD Drive",
         //             Task = NotImplemented,
         //             Disabled = true, // remove once implemented
         //             ForegroundColor = ConsoleColor.Green
         //         },
         //         //! not implemented
-        //         new CliMenuEntry<bool>() {
+        //         new MenuEntry() {
         //             Name = "Read CSD Drive Summary",
         //             Task = NotImplemented,         
         //             // Task = ShowTapeSummary.StartOperation,
@@ -260,28 +263,28 @@ namespace Archiver.Operations
         //             SelectedValue = true, // do not show the "press enter to return to main menu" message
         //             ForegroundColor = ConsoleColor.Blue
         //         },
-                new CliMenuEntry<bool>() {
+                new MenuEntry() {
                     Name = "View CSD Archive Summary",
                     Task = Tasks.CSD.CsdArchiveSummaryTask.StartTaskAsync,
                     SelectedValue = true, // do not show the "press enter to return to main menu" message
                     ForegroundColor = ConsoleColor.Blue
                 },
         //         //! not implemented
-        //         new CliMenuEntry<bool>() {
+        //         new MenuEntry() {
         //             Name = "Verify CSD Drive",
         //             Task = NotImplemented,
         //             // Task = TapeVerification.StartOperation,
         //             Disabled = SysInfo.IsReadonlyFilesystem || true, // remove once implemented
         //             ForegroundColor = ConsoleColor.DarkYellow
         //         },
-        //         new CliMenuEntry<bool>() {
+        //         new MenuEntry() {
         //             Name = "Clean CSD Drive - Remove files not in index",
         //             Task = CSD.Cleaner.StartOperation,
         //             // Task = TapeVerification.StartOperation,
         //             Disabled = SysInfo.IsReadonlyFilesystem, // remove once implemented
         //             ForegroundColor = ConsoleColor.DarkYellow
         //         },
-                new CliMenuEntry<bool>() {
+                new MenuEntry() {
                     Name = "Run CSD Archive Process",
                     Task = CSD.Archiver.StartOperationAsync,
                     Disabled = SysInfo.IsReadonlyFilesystem,
@@ -290,29 +293,29 @@ namespace Archiver.Operations
             };
         }
 
-        private static List<CliMenuEntry<bool>> BuildUniversalMenu()
+        private static List<MenuEntry> BuildUniversalMenu()
         {
-            return new List<CliMenuEntry<bool>>()
+            return new List<MenuEntry>()
             {
-                new CliMenuEntry<bool>() {
+                new MenuEntry() {
                     Name = "Universal Operations",
                     Header = true
                 },
-                // new CliMenuEntry<bool>() {
+                // new MenuEntry() {
                 //     Name = "Copy Tools to Local Disk",
                 //     Task = NotImplemented,
                 //     Disabled = !SysInfo.IsReadonlyFilesystem
                 // },
-                // new CliMenuEntry<bool>() {
+                // new MenuEntry() {
                 //     Name = "Create Index ISO",
                 //     Task = Helpers.CreateIndexIso,
                 //     Disabled = SysInfo.IsReadonlyFilesystem
                 // },
-                new CliMenuEntry<bool>() {
+                new MenuEntry() {
                     Name = "Explode",
                     Task = (cToken) => throw new InvalidOperationException("meow!!!!")
                 }//,
-                // new CliMenuEntry<bool>() {
+                // new MenuEntry() {
                 //     Name = "Exit",
                 //     Task = () => Environment.Exit(0)
                 // }

@@ -142,13 +142,13 @@ namespace Archiver.Utilities.CSD
             if (csd != null && drives.Count > 1)
                 return null;
 
-            List<CliMenuEntry<string>> entries = new List<CliMenuEntry<string>>();
+            List<MenuEntry> entries = new List<MenuEntry>();
 
             foreach (DriveInfo drive in drives)
             {
                 string driveLetter = drive.Name.TrimEnd('\\');
 
-                entries.Add(new CliMenuEntry<string>()
+                entries.Add(new MenuEntry()
                 {
                     Name = $"{driveLetter} (Volume name: {drive.VolumeLabel} | Format: {drive.DriveFormat})",
                     // Task = () => {
@@ -157,12 +157,12 @@ namespace Archiver.Utilities.CSD
                 });
             }
 
-            CliMenu<string> menu = new CliMenu<string>(entries);
+            Menu menu = new Menu(entries);
             // menu.MenuLabel = "Select drive...";
             // TODO: fix
             // menu.OnCancel += Operations.MainMenu.StartOperation;
 
-            menu.ShowAsync(true).RunSynchronously();
+            menu.ShowAsync().RunSynchronously(); // was true
 
             return selectedDrive;
         }

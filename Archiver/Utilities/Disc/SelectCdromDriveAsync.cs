@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Archiver.Shared.Models;
 using Archiver.Shared.Utilities;
@@ -23,14 +24,14 @@ namespace Archiver.Utilities.Disc
                 return drives[0];
 
             Terminal.Clear();
-            CliMenu<OpticalDrive> menu = new CliMenu<OpticalDrive>();
+            Menu menu = new Menu();
             menu.EnableCancel = true;
 
-            List<CliMenuEntry<OpticalDrive>> entries = new List<CliMenuEntry<OpticalDrive>>();
+            List<MenuEntry> entries = new List<MenuEntry>();
 
             foreach (OpticalDrive drive in drives)
             {
-                CliMenuEntry<OpticalDrive> newEntry = new CliMenuEntry<OpticalDrive>();
+                MenuEntry newEntry = new MenuEntry();
                 newEntry.Name = drive.Name + " (Disc Loaded: ";
                 newEntry.SelectedValue = drive;
 
@@ -44,7 +45,7 @@ namespace Archiver.Utilities.Disc
 
             menu.SetMenuItems(entries);
 
-            List<OpticalDrive> selectedDrives = await menu.ShowAsync(true);
+            List<OpticalDrive> selectedDrives = await menu.ShowAsync<OpticalDrive>(); //was true
 
             if (selectedDrives == null)
                 return null;

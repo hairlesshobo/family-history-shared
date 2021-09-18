@@ -234,20 +234,20 @@ namespace Archiver.Tasks.Disc
         private static async Task<Nullable<bool>> AskVerifyAllDiscsAsync()
         {
             Terminal.Clear();
-            CliMenu<bool> menu = new CliMenu<bool>(new List<CliMenuEntry<bool>>()
+            Menu menu = new Menu(new List<MenuEntry>()
             {
-                new CliMenuEntry<bool>() {
+                new MenuEntry() {
                     Name = "All Discs",
                     SelectedValue = true
                 },
-                new CliMenuEntry<bool>() {
+                new MenuEntry() {
                     Name = "Single Disc",
                     SelectedValue = false
                 }
             });
 
             menu.EnableCancel = true;
-            List<bool> result = await menu.ShowAsync(true);
+            List<bool> result = await menu.ShowAsync<bool>(); // was true
 
             if (result == null)
                 return null;
@@ -257,11 +257,11 @@ namespace Archiver.Tasks.Disc
 
         private static async Task<List<DiscDetail>> AskDiskToVerifyAsync(List<DiscDetail> allDiscs)
         {
-            List<CliMenuEntry<DiscDetail>> entries = new List<CliMenuEntry<DiscDetail>>();
+            List<MenuEntry> entries = new List<MenuEntry>();
 
             foreach (DiscDetail disc in allDiscs.Where(x => x.NewDisc == false).OrderBy(x => x.DiscNumber))
             {
-                entries.Add(new CliMenuEntry<DiscDetail>()
+                entries.Add(new MenuEntry()
                 {
                     // Name = $"{disc.DiscName} `R|`N `BDate Archived:`N {disc.ArchiveDTM.ToString("MM-dd-yyyy")} `R|`N `BData Size:`N {Formatting.GetFriendlySize(disc.DataSize).PadLeft(10)}",
                     Name = $"{disc.DiscName} | Date Archived: {disc.ArchiveDTM.ToString("MM-dd-yyyy")} | Data Size: {Formatting.GetFriendlySize(disc.DataSize).PadLeft(10)}",
@@ -269,11 +269,11 @@ namespace Archiver.Tasks.Disc
                 });
             }
 
-            CliMenu<DiscDetail> menu = new CliMenu<DiscDetail>(entries, true);
+            Menu menu = new Menu(entries, true);
             menu.LeftPad = 0;
             menu.EnableCancel = true;
             Terminal.Clear();
-            List<DiscDetail> discsToVerify = await menu.ShowAsync(true);
+            List<DiscDetail> discsToVerify = await menu.ShowAsync<DiscDetail>(); // was true
 
             return discsToVerify;
         }

@@ -81,7 +81,7 @@ namespace Archiver.Utilities.Tape
 
             string[] files = Directory.GetFiles(searchPath, "*.json");
 
-            List<CliMenuEntry<TapeSourceInfo>> entries = new List<CliMenuEntry<TapeSourceInfo>>();
+            List<MenuEntry> entries = new List<MenuEntry>();
             List<TapeSourceInfo> sources = new List<TapeSourceInfo>();
 
             foreach (string file in files)
@@ -91,13 +91,13 @@ namespace Archiver.Utilities.Tape
 
             foreach (TapeSourceInfo source in sources.OrderBy(x => x.ID))
             {
-                entries.Add(new CliMenuEntry<TapeSourceInfo>() {
+                entries.Add(new MenuEntry() {
                     Name = $"{source.ID.ToString().PadLeft(3)}: {source.Name}",
                     SelectedValue = source
                 });
             }
 
-            CliMenu<TapeSourceInfo> menu = new CliMenu<TapeSourceInfo>(entries);
+            Menu menu = new Menu(entries);
             // menu.MenuLabel = "Select tape...";
             // TODO: Fix
             // menu.OnCancel += Operations.MainMenu.StartOperation;
