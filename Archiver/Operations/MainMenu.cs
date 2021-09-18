@@ -122,8 +122,7 @@ namespace Archiver.Operations
             {
                 new MenuEntry() {
                     Name = "Disc Operations" + discMenuAppend,
-                    Header = true,
-                    ShortcutKey = ConsoleKey.D
+                    Header = true
                 },
                 new MenuEntry() {
                     Name = "Search Disc Archive",
@@ -182,8 +181,7 @@ namespace Archiver.Operations
             {
                 new MenuEntry() {
                     Name = "Tape Operations" + tapeMenuAppend,
-                    Header = true,
-                    ShortcutKey = ConsoleKey.T
+                    Header = true
                 },
                 new MenuEntry() {
                     Name = "Search Tape Archive",
@@ -239,8 +237,7 @@ namespace Archiver.Operations
             {
                 new MenuEntry() {
                     Name = "Cold Storage Disk (HDD) Operations",
-                    Header = true,
-                    ShortcutKey = ConsoleKey.C
+                    Header = true
                 },
                 new MenuEntry() {
                     Name = "Register CSD Drive",
