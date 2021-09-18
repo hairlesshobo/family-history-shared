@@ -35,26 +35,23 @@ namespace Archiver.Operations
 {
     public static class MainMenu
     {
-        private static bool _initialized = false;
-        private static Menu _menu; 
-
         public async static Task StartOperationAsync(CancellationTokenSource cts)
             => await ShowMenuAsync(cts);
 
         private async static Task ShowMenuAsync(CancellationTokenSource cts)
         {
-            BuildMenu();
-            _menu.QuitCallback = () => {
-                cts.Cancel();
-                return Task.CompletedTask;
-            };
-
             while (!cts.IsCancellationRequested)
             {
+                Terminal.Header.UpdateHeader("Main Menu", "Archiver");
                 Terminal.Clear();
-                Terminal.InitHeader("Main Menu", "Archiver");
 
-                var results = await _menu.ShowAsync(cts.Token);
+                Menu menu = BuildMenu();
+                menu.QuitCallback = () => {
+                    cts.Cancel();
+                    return Task.CompletedTask;
+                };
+
+                var results = await menu.ShowAsync(cts.Token);
 
                 if (results == null)
                     return;
@@ -62,9 +59,7 @@ namespace Archiver.Operations
                 if (results.First() == null)
                     continue;
 
-                bool result = (bool)results.First();
-
-                if (result == false)
+                if ((bool)results.First() == false)
                 {
                     Console.WriteLine();
                     Console.Write("Process complete, press ");
@@ -86,29 +81,19 @@ namespace Archiver.Operations
             }
         }
 
-        private static void BuildMenu()
+        private static Menu BuildMenu()
         {
-            if (_initialized == false)
-            {
-                _initialized = true;
+            List<MenuEntry> entries = new List<MenuEntry>();
 
-                List<MenuEntry> entries = new List<MenuEntry>();
+            entries.AddRange(BuildDiscMenu());
+            entries.Add(new MenuEntry() { Header = true });
+            entries.AddRange(BuildTapeMenu());
+            entries.Add(new MenuEntry() { Header = true });
+            entries.AddRange(BuildCsdMenu());
+            entries.Add(new MenuEntry() { Header = true });
+            entries.AddRange(BuildUniversalMenu());
 
-                entries.AddRange(BuildDiscMenu());
-                entries.Add(new MenuEntry() { Header = true });
-                entries.AddRange(BuildTapeMenu());
-                entries.Add(new MenuEntry() { Header = true });
-                entries.AddRange(BuildCsdMenu());
-                entries.Add(new MenuEntry() { Header = true });
-                entries.AddRange(BuildUniversalMenu());
-
-                _menu = new Menu(entries);
-                //_menu.MenuLabel = "Archiver, main menu...";
-                // _menu.OnCancel += () =>
-                // {
-                //     Environment.Exit(0);
-                // };
-            }
+            return new Menu(entries);
         }
 
         private static List<MenuEntry> BuildDiscMenu()
@@ -324,7 +309,7 @@ namespace Archiver.Operations
             // TODO: What to do with cToken here?
             TaskCompletionSource tcs = new TaskCompletionSource();
 
-            Terminal.InitHeader("Not Implemented", "Archiver");
+            Terminal.Header.UpdateHeader("Not Implemented", "Archiver");
             Terminal.InitStatusBar(
                 new StatusBarItem(
                     "Main Menu",
@@ -340,6 +325,8 @@ namespace Archiver.Operations
             Formatting.WriteLineC(ConsoleColor.Red, "This operation has not yet been implemented.");
 
             await tcs.Task;
+
+            Terminal.StatusBar.Reset();
         }
     }
 }

@@ -40,7 +40,7 @@ namespace Archiver.Tasks.Disc
 
             List<DiscDetail> discs = await Helpers.ReadDiscIndexAsync(cts.Token);
 
-            Terminal.InitHeader("Search Disc Archive", "Archiver");
+            Terminal.Header.UpdateHeader("Search Disc Archive", "Archiver");
             Terminal.InitStatusBar(
                 new StatusBarItem(
                     "Cancel",

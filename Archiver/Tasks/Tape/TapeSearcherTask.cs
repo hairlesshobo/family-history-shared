@@ -40,7 +40,7 @@ namespace Archiver.Tasks.Tape
 
             List<TapeDetail> tapes = await Helpers.ReadTapeIndexAsync(cToken);
 
-            Terminal.InitHeader("Search Tape Archive", "Archiver");
+            Terminal.Header.UpdateHeader("Search Tape Archive", "Archiver");
             Terminal.InitStatusBar(
                 new StatusBarItem(
                     "Cancel",
