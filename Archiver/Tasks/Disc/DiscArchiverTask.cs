@@ -393,8 +393,8 @@ namespace Archiver.Tasks.Disc
 
 
             // line 1
-            _textFileStatsHeader = new Text(ConsoleColor.Cyan, "Statistics", area: TerminalArea.LeftHalf); //left
-            _textDiscProcessHeader = new Text(ConsoleColor.Cyan, "Processing", area: TerminalArea.RightHalf); //right
+            _textFileStatsHeader = new Text("Statistics", foregroundColor: ConsoleColor.Cyan, area: TerminalArea.LeftHalf); //left
+            _textDiscProcessHeader = new Text("Processing", foregroundColor: ConsoleColor.Cyan, area: TerminalArea.RightHalf); //right
             Terminal.NextLine();
 
             // line 2

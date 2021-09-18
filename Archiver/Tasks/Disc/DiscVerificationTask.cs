@@ -121,12 +121,10 @@ namespace Archiver.Tasks.Disc
             Terminal.NextLine();
             Terminal.NextLine();
 
-            Text pendingLabel = new Text(ConsoleColor.Magenta, "Discs Pending Verification...");
+            Text pendingLabel = new Text("Discs Pending Verification...", foregroundColor: ConsoleColor.Magenta);
             Terminal.NextLine();
 
-            DataTable dataTable = new DataTable();
-            dataTable.ShowHeader = false;
-            dataTable.Columns = new List<DataTableColumn>()
+            List<DataTableColumn> columns = new List<DataTableColumn>()
             {
                 new DataTableColumn("DiscName", "Disc Name", 12),
                 new DataTableColumn(null, "Status", 20)
@@ -158,7 +156,7 @@ namespace Archiver.Tasks.Disc
                 }
             };
 
-            dataTable.DataStore = (IList)verifier.PendingDiscs;
+            DataTable dataTable = new DataTable((IList)verifier.PendingDiscs, columns, showHeader: true);
 
             NotificationBox box = new NotificationBox(5, 0);
             box.SetTextJustify(0, TextJustify.Center);
@@ -198,19 +196,19 @@ namespace Archiver.Tasks.Disc
             verifier.OnDiscVerificationComplete += async (disc, success) => {
                 hideProgress();
 
-                dataTable.DataStore = (IList)verifier.PendingDiscs;
+                dataTable.SetDataStore((IList)verifier.PendingDiscs);
                 dataTable.Redraw();
 
                 if (success)
                 {
-                    box.BorderColor = ConsoleColor.Green;
+                    box.SetBorderColors(ConsoleColor.Green, null);
                     box.SetLineColor(0, ConsoleColor.Green);
                     box.UpdateText(0, "Verification Successful");
                     box.UpdateText(1, $"Disc `{disc.DiscName}` was successfully verified!");   
                 }
                 else
                 {
-                    box.BorderColor = ConsoleColor.Red;
+                    box.SetBorderColors(ConsoleColor.Red, null);
                     box.SetLineColor(0, ConsoleColor.Red);
                     box.UpdateText(0, "Verification FAILED");
                     box.UpdateText(1, $"Disc `{disc.DiscName}` failed verification!");

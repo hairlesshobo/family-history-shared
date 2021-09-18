@@ -88,7 +88,7 @@ namespace Archiver.Utilities.Shared
             Terminal.NextLine();
             Terminal.NextLine();
             
-            ProgressBar progress = new ProgressBar(ProgressMode.ExplicitCountLeft);
+            ProgressBar progress = new ProgressBar(mode: ProgressMode.ExplicitCountLeft);
             Terminal.NextLine();
 
             text.Show();
