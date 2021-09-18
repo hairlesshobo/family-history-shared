@@ -234,7 +234,7 @@ namespace Archiver.Tasks.Disc
         private static async Task<Nullable<bool>> AskVerifyAllDiscsAsync()
         {
             Terminal.Clear();
-            Menu menu = new Menu(new List<MenuEntry>()
+            var entries = new List<MenuEntry>()
             {
                 new MenuEntry() {
                     Name = "All Discs",
@@ -244,9 +244,9 @@ namespace Archiver.Tasks.Disc
                     Name = "Single Disc",
                     SelectedValue = false
                 }
-            });
+            };
 
-            menu.EnableCancel = true;
+            Menu menu = new Menu(entries, enableCancel: true); 
             List<bool> result = await menu.ShowAsync<bool>(); // was true
 
             if (result == null)
@@ -269,9 +269,8 @@ namespace Archiver.Tasks.Disc
                 });
             }
 
-            Menu menu = new Menu(entries, true);
+            Menu menu = new Menu(entries, multiSelect: true, enableCancel: true);
             menu.LeftPad = 0;
-            menu.EnableCancel = true;
             Terminal.Clear();
             List<DiscDetail> discsToVerify = await menu.ShowAsync<DiscDetail>(); // was true
 

@@ -24,8 +24,6 @@ namespace Archiver.Utilities.Disc
                 return drives[0];
 
             Terminal.Clear();
-            Menu menu = new Menu();
-            menu.EnableCancel = true;
 
             List<MenuEntry> entries = new List<MenuEntry>();
 
@@ -43,7 +41,7 @@ namespace Archiver.Utilities.Disc
                 entries.Add(newEntry);
             }
 
-            menu.SetMenuItems(entries);
+            Menu menu = new Menu(entries, enableCancel: true);
 
             List<OpticalDrive> selectedDrives = await menu.ShowAsync<OpticalDrive>(); //was true
 
