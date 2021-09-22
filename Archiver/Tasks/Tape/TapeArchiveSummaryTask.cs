@@ -26,8 +26,8 @@ using Archiver.Shared.Classes.Tape;
 using Archiver.Shared.Operations.Disc;
 using Archiver.Shared.Operations.Tape;
 using Archiver.Utilities.Shared;
-using TerminalUI;
-using TerminalUI.Elements;
+using FoxHollow.TerminalUI;
+using FoxHollow.TerminalUI.Elements;
 
 namespace Archiver.Tasks.Tape
 {

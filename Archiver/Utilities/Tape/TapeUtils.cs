@@ -29,8 +29,8 @@ using ICSharpCode.SharpZipLib.Tar;
 using Newtonsoft.Json;
 using Archiver.Shared.TapeDrivers;
 using Archiver.Shared.Native;
-using TerminalUI.Elements;
-using TerminalUI.Types;
+using FoxHollow.TerminalUI.Elements;
+using FoxHollow.TerminalUI.Types;
 
 namespace Archiver.Utilities.Tape
 {

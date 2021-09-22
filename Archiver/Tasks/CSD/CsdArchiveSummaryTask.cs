@@ -26,8 +26,8 @@ using Archiver.Shared.Classes.CSD;
 using Archiver.Shared.Operations.Disc;
 using Archiver.Shared.Operations.CSD;
 using Archiver.Utilities.Shared;
-using TerminalUI;
-using TerminalUI.Elements;
+using FoxHollow.TerminalUI;
+using FoxHollow.TerminalUI.Elements;
 
 namespace Archiver.Tasks.CSD
 {

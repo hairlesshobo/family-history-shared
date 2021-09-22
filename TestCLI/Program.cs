@@ -36,10 +36,10 @@ using Archiver.Shared.Models;
 using Archiver.Shared.Models.Config;
 using Archiver.Shared.Native;
 using Archiver.Shared.Utilities;
+using FoxHollow.TerminalUI;
+using FoxHollow.TerminalUI.Elements;
+using FoxHollow.TerminalUI.Types;
 using LibSMB2Sharp;
-using TerminalUI;
-using TerminalUI.Elements;
-using TerminalUI.Types;
 
 namespace Archiver.TestCLI
 {
@@ -52,21 +52,7 @@ namespace Archiver.TestCLI
 
             try
             {
-                Console.OutputEncoding = Encoding.UTF8;
-                Console.CancelKeyPress += (sender, e) =>
-                {
-                    e.Cancel = true;
-                };
-                Console.TreatControlCAsInput = true;
-
-                Terminal.ResetColor();
-                Terminal.Clear(true);
-
-                Console.CursorVisible = false;
-
-                Terminal.InitHeader("", "TestCLI");
-                Terminal.InitStatusBar();
-                Terminal.RootPoint.MoveTo();
+                Terminal.Initialize("", "TestCLI");
 
                 // var detail = Windows.WMI.GetCdromDetail("A:");
 

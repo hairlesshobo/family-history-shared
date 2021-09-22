@@ -5,9 +5,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Archiver.Shared.Models;
 using Archiver.Shared.Utilities;
-using TerminalUI;
-using TerminalUI.Elements;
-using TerminalUI.Types;
+using FoxHollow.TerminalUI;
+using FoxHollow.TerminalUI.Elements;
+using FoxHollow.TerminalUI.Types;
 
 namespace Archiver.Utilities.Disc
 {

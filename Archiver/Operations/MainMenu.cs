@@ -26,9 +26,9 @@ using System.Threading.Tasks;
 using Archiver.Shared;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
-using TerminalUI;
-using TerminalUI.Elements;
-using TerminalUI.Types;
+using FoxHollow.TerminalUI;
+using FoxHollow.TerminalUI.Elements;
+using FoxHollow.TerminalUI.Types;
 using static Archiver.Shared.Utilities.Formatting;
 
 namespace Archiver.Operations

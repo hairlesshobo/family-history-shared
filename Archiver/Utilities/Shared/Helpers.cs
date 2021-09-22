@@ -34,9 +34,9 @@ using Archiver.Shared.Models;
 using Archiver.Shared.Utilities;
 using Archiver.Shared.Utilities.Disc;
 using Archiver.Utilities.Disc;
-using TerminalUI;
-using TerminalUI.Elements;
-using TerminalUI.Types;
+using FoxHollow.TerminalUI;
+using FoxHollow.TerminalUI.Elements;
+using FoxHollow.TerminalUI.Types;
 
 namespace Archiver.Utilities.Shared
 {

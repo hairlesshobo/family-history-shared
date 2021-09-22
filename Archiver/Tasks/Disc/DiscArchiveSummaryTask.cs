@@ -24,8 +24,8 @@ using System.Threading.Tasks;
 using Archiver.Shared.Classes.Disc;
 using Archiver.Shared.Operations.Disc;
 using Archiver.Utilities.Shared;
-using TerminalUI;
-using TerminalUI.Elements;
+using FoxHollow.TerminalUI;
+using FoxHollow.TerminalUI.Elements;
 
 namespace Archiver.Tasks.Disc
 {

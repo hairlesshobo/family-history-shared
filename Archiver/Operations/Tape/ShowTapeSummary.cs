@@ -23,7 +23,7 @@ using System.Threading.Tasks;
 using Archiver.Shared.Utilities;
 using Archiver.Utilities.Shared;
 using Archiver.Utilities.Tape;
-using TerminalUI.Elements;
+using FoxHollow.TerminalUI.Elements;
 
 namespace Archiver.Operations.Tape
 {
