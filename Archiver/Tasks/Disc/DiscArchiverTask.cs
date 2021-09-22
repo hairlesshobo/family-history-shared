@@ -23,15 +23,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Archiver.Shared.Classes.Disc;
-using Archiver.Shared.Operations.Disc;
-using Archiver.Shared.Utilities;
-using Archiver.Utilities.Shared;
+using FoxHollow.Archiver.Shared.Classes.Disc;
+using FoxHollow.Archiver.Shared.Operations.Disc;
+using FoxHollow.Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Utilities.Shared;
 using FoxHollow.TerminalUI;
 using FoxHollow.TerminalUI.Elements;
 using FoxHollow.TerminalUI.Types;
 
-namespace Archiver.Tasks.Disc
+namespace FoxHollow.Archiver.Tasks.Disc
 {
     internal static class DiscArchiverTask
     {

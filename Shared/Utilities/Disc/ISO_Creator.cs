@@ -23,7 +23,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Archiver.Shared.Utilities.Disc
+namespace FoxHollow.Archiver.Shared.Utilities.Disc
 {
 
     public class ISO_Creator

@@ -20,7 +20,7 @@
 
 using System;
 
-namespace Archiver.Shared.Structures
+namespace FoxHollow.Archiver.Shared.Structures
 {
     public struct Md5Progress 
     {

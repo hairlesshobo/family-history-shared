@@ -21,7 +21,7 @@
 using System;
 using System.Management;
 
-namespace Archiver.Shared.Native
+namespace FoxHollow.Archiver.Shared.Native
 {
     public static partial class Windows
     {

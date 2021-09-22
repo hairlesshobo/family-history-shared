@@ -22,11 +22,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Archiver.Shared.Classes.CSD;
-using Archiver.Shared.Utilities;
-using Archiver.Utilities.CSD;
+using FoxHollow.Archiver.Shared.Classes.CSD;
+using FoxHollow.Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Utilities.CSD;
 
-namespace Archiver.Operations.CSD
+namespace FoxHollow.Archiver.Operations.CSD
 {
     public static class Cleaner 
     {

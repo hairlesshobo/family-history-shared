@@ -25,11 +25,11 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using Archiver.Shared.Models;
-using Archiver.Shared.Models.Config;
-using Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Shared.Models;
+using FoxHollow.Archiver.Shared.Models.Config;
+using FoxHollow.Archiver.Shared.Utilities;
 
-namespace Archiver.Shared
+namespace FoxHollow.Archiver.Shared
 {
     /// <summary>
     ///     Indicates the mode that the application is currently running in

@@ -29,19 +29,19 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Archiver.Shared;
-using Archiver.Shared.Classes;
-using Archiver.Shared.Exceptions;
-using Archiver.Shared.Models;
-using Archiver.Shared.Models.Config;
-using Archiver.Shared.Native;
-using Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Shared;
+using FoxHollow.Archiver.Shared.Classes;
+using FoxHollow.Archiver.Shared.Exceptions;
+using FoxHollow.Archiver.Shared.Models;
+using FoxHollow.Archiver.Shared.Models.Config;
+using FoxHollow.Archiver.Shared.Native;
+using FoxHollow.Archiver.Shared.Utilities;
 using FoxHollow.TerminalUI;
 using FoxHollow.TerminalUI.Elements;
 using FoxHollow.TerminalUI.Types;
 using LibSMB2Sharp;
 
-namespace Archiver.TestCLI
+namespace FoxHollow.Archiver.TestCLI
 {
     class Program
     {

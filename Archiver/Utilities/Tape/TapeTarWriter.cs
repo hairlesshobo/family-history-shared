@@ -24,12 +24,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 using System.Threading;
-using Archiver.Shared;
-using Archiver.Shared.Classes.Tape;
-using Archiver.Shared.TapeDrivers;
+using FoxHollow.Archiver.Shared;
+using FoxHollow.Archiver.Shared.Classes.Tape;
+using FoxHollow.Archiver.Shared.TapeDrivers;
 using ICSharpCode.SharpZipLib.Tar;
 
-namespace Archiver.Utilities.Tape
+namespace FoxHollow.Archiver.Utilities.Tape
 {
     public delegate void TapeTarCompleteDelegate(string hash);
     public delegate void TapeTarProgressDelegate(TapeTarWriterProgress progress);

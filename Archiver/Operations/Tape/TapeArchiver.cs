@@ -19,10 +19,10 @@
  */
 
 using System;
-using Archiver.Shared.Classes.Tape;
-using Archiver.Utilities.Tape;
+using FoxHollow.Archiver.Shared.Classes.Tape;
+using FoxHollow.Archiver.Utilities.Tape;
 
-namespace Archiver.Operations.Tape
+namespace FoxHollow.Archiver.Operations.Tape
 {
     public static class TapeArchiver
     {

@@ -24,13 +24,13 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using Archiver.Shared.Classes;
-using Archiver.Shared.Exceptions;
-using Archiver.Shared.Models;
-using Archiver.Shared.Native;
+using FoxHollow.Archiver.Shared.Classes;
+using FoxHollow.Archiver.Shared.Exceptions;
+using FoxHollow.Archiver.Shared.Models;
+using FoxHollow.Archiver.Shared.Native;
 using Microsoft.Win32.SafeHandles;
 
-namespace Archiver.Shared.Utilities
+namespace FoxHollow.Archiver.Shared.Utilities
 {
     public static partial class OpticalDriveUtils
     {

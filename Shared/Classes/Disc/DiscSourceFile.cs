@@ -21,10 +21,10 @@
 using System;
 using System.IO;
 using System.Linq;
-using Archiver.Shared.Interfaces;
+using FoxHollow.Archiver.Shared.Interfaces;
 using Newtonsoft.Json;
 
-namespace Archiver.Shared.Classes.Disc
+namespace FoxHollow.Archiver.Shared.Classes.Disc
 {
     public class DiscSourceFile : DiscSourceFilePathDetail, ISourceFile
     {

@@ -23,15 +23,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Archiver.Shared;
-using Archiver.Shared.Utilities;
-using Archiver.Utilities.Shared;
+using FoxHollow.Archiver.Shared;
+using FoxHollow.Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Utilities.Shared;
 using FoxHollow.TerminalUI;
 using FoxHollow.TerminalUI.Elements;
 using FoxHollow.TerminalUI.Types;
-using static Archiver.Shared.Utilities.Formatting;
+using static FoxHollow.Archiver.Shared.Utilities.Formatting;
 
-namespace Archiver.Operations
+namespace FoxHollow.Archiver.Operations
 {
     public static class MainMenu
     {

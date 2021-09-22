@@ -27,11 +27,11 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Archiver.Shared.Classes.Tape;
-using Archiver.Shared.Exceptions;
-using Archiver.Shared.Models;
+using FoxHollow.Archiver.Shared.Classes.Tape;
+using FoxHollow.Archiver.Shared.Exceptions;
+using FoxHollow.Archiver.Shared.Models;
 
-namespace Archiver.Shared.Utilities
+namespace FoxHollow.Archiver.Shared.Utilities
 {
     public static partial class TapeUtilsNew
     {

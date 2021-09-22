@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Archiver.Shared.Models;
-using Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Shared.Models;
+using FoxHollow.Archiver.Shared.Utilities;
 using FoxHollow.TerminalUI;
 using FoxHollow.TerminalUI.Elements;
 using FoxHollow.TerminalUI.Types;
 
-namespace Archiver.Utilities.Disc
+namespace FoxHollow.Archiver.Utilities.Disc
 {
     public static partial class DiscTasks
     {

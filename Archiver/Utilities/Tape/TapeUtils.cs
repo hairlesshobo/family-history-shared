@@ -23,16 +23,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Archiver.Shared.Classes.Tape;
-using Archiver.Shared;
+using FoxHollow.Archiver.Shared.Classes.Tape;
+using FoxHollow.Archiver.Shared;
 using ICSharpCode.SharpZipLib.Tar;
 using Newtonsoft.Json;
-using Archiver.Shared.TapeDrivers;
-using Archiver.Shared.Native;
+using FoxHollow.Archiver.Shared.TapeDrivers;
+using FoxHollow.Archiver.Shared.Native;
 using FoxHollow.TerminalUI.Elements;
 using FoxHollow.TerminalUI.Types;
 
-namespace Archiver.Utilities.Tape
+namespace FoxHollow.Archiver.Utilities.Tape
 {
     public static class TapeUtils
     {

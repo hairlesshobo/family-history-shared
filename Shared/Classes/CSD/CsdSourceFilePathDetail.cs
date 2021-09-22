@@ -19,9 +19,9 @@
  */
 
 using System;
-using Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Shared.Utilities;
 
-namespace Archiver.Shared.Classes.CSD
+namespace FoxHollow.Archiver.Shared.Classes.CSD
 {
     public class CsdSourceFilePathDetail
     {

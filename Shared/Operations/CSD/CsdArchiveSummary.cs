@@ -21,11 +21,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Archiver.Shared.Classes.CSD;
-using Archiver.Shared.Models;
-using Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Shared.Classes.CSD;
+using FoxHollow.Archiver.Shared.Models;
+using FoxHollow.Archiver.Shared.Utilities;
 
-namespace Archiver.Shared.Operations.CSD
+namespace FoxHollow.Archiver.Shared.Operations.CSD
 {
     public class CsdArchiveSummary
     {

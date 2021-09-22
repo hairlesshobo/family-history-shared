@@ -20,7 +20,7 @@
 
 using System;
 
-namespace Archiver.Shared.Models
+namespace FoxHollow.Archiver.Shared.Models
 {
     public class TapeCartridgeDetails
     {

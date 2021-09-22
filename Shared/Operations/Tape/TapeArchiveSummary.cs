@@ -21,11 +21,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Archiver.Shared.Classes.Tape;
-using Archiver.Shared.Models;
-using Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Shared.Classes.Tape;
+using FoxHollow.Archiver.Shared.Models;
+using FoxHollow.Archiver.Shared.Utilities;
 
-namespace Archiver.Shared.Operations.Tape
+namespace FoxHollow.Archiver.Shared.Operations.Tape
 {
     public class TapeArchiveSummary
     {

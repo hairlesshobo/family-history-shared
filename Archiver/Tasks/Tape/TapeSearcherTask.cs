@@ -23,14 +23,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Archiver.Shared.Classes.Tape;
-using Archiver.Shared.Operations.Tape;
-using Archiver.Utilities.Shared;
+using FoxHollow.Archiver.Shared.Classes.Tape;
+using FoxHollow.Archiver.Shared.Operations.Tape;
+using FoxHollow.Archiver.Utilities.Shared;
 using FoxHollow.TerminalUI;
 using FoxHollow.TerminalUI.Elements;
 using FoxHollow.TerminalUI.Types;
 
-namespace Archiver.Tasks.Tape
+namespace FoxHollow.Archiver.Tasks.Tape
 {
     internal static class TapeSearcherTask
     {

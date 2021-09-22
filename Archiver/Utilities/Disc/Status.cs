@@ -20,11 +20,11 @@
 
 using System;
 using System.Linq;
-using Archiver.Shared.Classes.Disc;
-using Archiver.Shared.Utilities;
-using Archiver.Utilities.Shared;
+using FoxHollow.Archiver.Shared.Classes.Disc;
+using FoxHollow.Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Utilities.Shared;
 
-namespace Archiver.Utilities.Disc
+namespace FoxHollow.Archiver.Utilities.Disc
 {
     public static class Status
     {

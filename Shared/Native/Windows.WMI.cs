@@ -23,9 +23,9 @@ using System.IO;
 using System.Linq;
 using System.Management;
 using System.Runtime.Versioning;
-using Archiver.Shared.Exceptions;
+using FoxHollow.Archiver.Shared.Exceptions;
 
-namespace Archiver.Shared.Native
+namespace FoxHollow.Archiver.Shared.Native
 {
     public static partial class Windows
     {

@@ -25,20 +25,20 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Archiver.Shared;
-using Archiver.Shared.Classes.CSD;
-using Archiver.Shared.Classes.Disc;
-using Archiver.Shared.Classes.Tape;
-using Archiver.Shared.Interfaces;
-using Archiver.Shared.Models;
-using Archiver.Shared.Utilities;
-using Archiver.Shared.Utilities.Disc;
-using Archiver.Utilities.Disc;
+using FoxHollow.Archiver.Shared;
+using FoxHollow.Archiver.Shared.Classes.CSD;
+using FoxHollow.Archiver.Shared.Classes.Disc;
+using FoxHollow.Archiver.Shared.Classes.Tape;
+using FoxHollow.Archiver.Shared.Interfaces;
+using FoxHollow.Archiver.Shared.Models;
+using FoxHollow.Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Shared.Utilities.Disc;
+using FoxHollow.Archiver.Utilities.Disc;
 using FoxHollow.TerminalUI;
 using FoxHollow.TerminalUI.Elements;
 using FoxHollow.TerminalUI.Types;
 
-namespace Archiver.Utilities.Shared
+namespace FoxHollow.Archiver.Utilities.Shared
 {
     public class Helpers
     {

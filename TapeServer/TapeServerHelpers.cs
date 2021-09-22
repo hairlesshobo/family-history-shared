@@ -19,14 +19,14 @@
  */
 
 using System;
-using Archiver.Shared;
-using Archiver.Shared.Exceptions;
-using Archiver.Shared.Interfaces;
-using Archiver.Shared.Models.Config;
-using Archiver.Shared.Utilities;
-using Archiver.TapeServer.Providers;
+using FoxHollow.Archiver.Shared;
+using FoxHollow.Archiver.Shared.Exceptions;
+using FoxHollow.Archiver.Shared.Interfaces;
+using FoxHollow.Archiver.Shared.Models.Config;
+using FoxHollow.Archiver.Shared.Utilities;
+using FoxHollow.Archiver.TapeServer.Providers;
 
-namespace Archiver.TapeServer
+namespace FoxHollow.Archiver.TapeServer
 {
     public static partial class TapeServerHelpers
     {

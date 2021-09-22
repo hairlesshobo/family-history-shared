@@ -19,9 +19,9 @@
  */
 
 using System;
-using Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Shared.Utilities;
 
-namespace Archiver.Shared.Classes.Disc
+namespace FoxHollow.Archiver.Shared.Classes.Disc
 {
     public class DiscSourceFilePathDetail
     {

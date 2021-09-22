@@ -18,10 +18,10 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-using Archiver.Shared.Native;
-using Archiver.Shared.TapeDrivers;
+using FoxHollow.Archiver.Shared.Native;
+using FoxHollow.Archiver.Shared.TapeDrivers;
 
-namespace Archiver.Shared.Classes.Tape
+namespace FoxHollow.Archiver.Shared.Classes.Tape
 {
     public class TapeInfo
     {

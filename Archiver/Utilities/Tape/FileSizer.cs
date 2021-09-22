@@ -19,9 +19,9 @@
  */
 
 using System.Diagnostics;
-using Archiver.Shared.Classes.Tape;
+using FoxHollow.Archiver.Shared.Classes.Tape;
 
-namespace Archiver.Utilities.Tape
+namespace FoxHollow.Archiver.Utilities.Tape
 {
     public delegate void Sizer_ProgressChangedDelegate(long currentFile);
     public delegate void Sizer_CompleteDelegate();

@@ -23,9 +23,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Archiver.Shared.Classes.Disc;
+using FoxHollow.Archiver.Shared.Classes.Disc;
 
-namespace Archiver.Shared.Utilities.Disc
+namespace FoxHollow.Archiver.Shared.Utilities.Disc
 {
     public class FileDistributor
     {

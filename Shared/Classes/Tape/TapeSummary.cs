@@ -21,9 +21,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Shared.Utilities;
 
-namespace Archiver.Shared.Classes.Tape
+namespace FoxHollow.Archiver.Shared.Classes.Tape
 {
     public class TapeSummary
     {

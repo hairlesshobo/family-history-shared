@@ -23,11 +23,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Archiver.Shared.Interfaces;
-using Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Shared.Interfaces;
+using FoxHollow.Archiver.Shared.Utilities;
 using Newtonsoft.Json;
 
-namespace Archiver.Shared.Classes.Tape
+namespace FoxHollow.Archiver.Shared.Classes.Tape
 {
         public class TapeDetail : TapeSummary, IMediaDetail
     {

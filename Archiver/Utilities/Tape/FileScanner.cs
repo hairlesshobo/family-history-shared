@@ -23,10 +23,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Archiver.Shared.Classes.Tape;
-using Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Shared.Classes.Tape;
+using FoxHollow.Archiver.Shared.Utilities;
 
-namespace Archiver.Utilities.Tape
+namespace FoxHollow.Archiver.Utilities.Tape
 {
     public delegate void Scanner_ProgressChangedDelegate(long newFiles, long excludedFiles);
     public delegate void Scanner_CompleteDelegate();

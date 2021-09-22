@@ -18,7 +18,7 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-namespace Archiver.Shared.Structures
+namespace FoxHollow.Archiver.Shared.Structures
 {
     public struct FileCopyProgress 
     {

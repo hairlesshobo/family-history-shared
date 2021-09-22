@@ -22,10 +22,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Archiver.Shared.Exceptions;
-using Archiver.Shared.Models;
+using FoxHollow.Archiver.Shared.Exceptions;
+using FoxHollow.Archiver.Shared.Models;
 
-namespace Archiver.Shared.Utilities
+namespace FoxHollow.Archiver.Shared.Utilities
 {
     public static partial class OpticalDriveUtils
     {

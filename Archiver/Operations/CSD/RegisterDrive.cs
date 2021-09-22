@@ -24,13 +24,13 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Archiver.Shared.Classes.CSD;
-using Archiver.Shared.Utilities;
-using Archiver.Utilities.CSD;
-using Archiver.Utilities.Shared;
+using FoxHollow.Archiver.Shared.Classes.CSD;
+using FoxHollow.Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Utilities.CSD;
+using FoxHollow.Archiver.Utilities.Shared;
 using FoxHollow.TerminalUI;
 
-namespace Archiver.Operations.CSD
+namespace FoxHollow.Archiver.Operations.CSD
 {
     public static class RegisterDrive
     {

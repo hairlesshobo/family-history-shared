@@ -26,15 +26,15 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Archiver.Shared.Classes;
-using Archiver.Shared.Classes.Disc;
-using Archiver.Shared.Models;
-using Archiver.Shared.Structures;
-using Archiver.Shared.Utilities;
-using Archiver.Shared.Utilities.Disc;
+using FoxHollow.Archiver.Shared.Classes;
+using FoxHollow.Archiver.Shared.Classes.Disc;
+using FoxHollow.Archiver.Shared.Models;
+using FoxHollow.Archiver.Shared.Structures;
+using FoxHollow.Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Shared.Utilities.Disc;
 using Newtonsoft.Json;
 
-namespace Archiver.Shared.Operations.Disc
+namespace FoxHollow.Archiver.Shared.Operations.Disc
 {
     public class DiscArchiver
     {

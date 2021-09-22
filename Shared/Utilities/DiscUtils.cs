@@ -25,9 +25,9 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Archiver.Shared.Classes.Disc;
+using FoxHollow.Archiver.Shared.Classes.Disc;
 
-namespace Archiver.Shared.Utilities
+namespace FoxHollow.Archiver.Shared.Utilities
 {
     public class DiscUtils
     {

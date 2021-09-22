@@ -21,15 +21,15 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Archiver.Shared.Classes.Disc;
-using Archiver.Shared.Classes.CSD;
-using Archiver.Shared.Operations.Disc;
-using Archiver.Shared.Operations.CSD;
-using Archiver.Utilities.Shared;
+using FoxHollow.Archiver.Shared.Classes.Disc;
+using FoxHollow.Archiver.Shared.Classes.CSD;
+using FoxHollow.Archiver.Shared.Operations.Disc;
+using FoxHollow.Archiver.Shared.Operations.CSD;
+using FoxHollow.Archiver.Utilities.Shared;
 using FoxHollow.TerminalUI;
 using FoxHollow.TerminalUI.Elements;
 
-namespace Archiver.Tasks.CSD
+namespace FoxHollow.Archiver.Tasks.CSD
 {
     internal static class CsdArchiveSummaryTask
     {

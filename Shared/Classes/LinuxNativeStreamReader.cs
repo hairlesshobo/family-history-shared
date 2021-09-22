@@ -20,12 +20,12 @@
 
 using System;
 using System.IO;
-using Archiver.Shared.Exceptions;
-using Archiver.Shared.Models;
-using Archiver.Shared.Native;
-using Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Shared.Exceptions;
+using FoxHollow.Archiver.Shared.Models;
+using FoxHollow.Archiver.Shared.Native;
+using FoxHollow.Archiver.Shared.Utilities;
 
-namespace Archiver.Shared.Classes
+namespace FoxHollow.Archiver.Shared.Classes
 {
     /// <summary>
     ///     Class that is used to read from a device in Linux using native system calls

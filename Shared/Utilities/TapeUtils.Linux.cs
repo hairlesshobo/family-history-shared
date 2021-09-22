@@ -22,11 +22,11 @@ using System;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using Archiver.Shared.Exceptions;
-using Archiver.Shared.Models;
-using Archiver.Shared.TapeDrivers;
+using FoxHollow.Archiver.Shared.Exceptions;
+using FoxHollow.Archiver.Shared.Models;
+using FoxHollow.Archiver.Shared.TapeDrivers;
 
-namespace Archiver.Shared.Utilities
+namespace FoxHollow.Archiver.Shared.Utilities
 {
     public static partial class TapeUtilsNew
     {

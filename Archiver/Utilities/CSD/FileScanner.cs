@@ -21,11 +21,11 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Archiver.Shared;
-using Archiver.Shared.Classes.CSD;
-using Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Shared;
+using FoxHollow.Archiver.Shared.Classes.CSD;
+using FoxHollow.Archiver.Shared.Utilities;
 
-namespace Archiver.Utilities.CSD
+namespace FoxHollow.Archiver.Utilities.CSD
 {
     public delegate void Scanner_ProgressChangedDelegate(long newFiles, long existingFiles, long excludedFiles, double filesPerSecond);
     public delegate void Scanner_CompleteDelegate();

@@ -22,7 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Archiver.Shared.Classes.Disc
+namespace FoxHollow.Archiver.Shared.Classes.Disc
 {
     public class DiscSummary
     {

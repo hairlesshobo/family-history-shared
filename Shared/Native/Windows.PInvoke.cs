@@ -20,11 +20,11 @@
 
 using System;
 using System.Runtime.InteropServices;
-using Archiver.Shared.TapeDrivers;
+using FoxHollow.Archiver.Shared.TapeDrivers;
 using Microsoft.Win32.SafeHandles;
 using BOOL = System.Int32;
 
-namespace Archiver.Shared.Native
+namespace FoxHollow.Archiver.Shared.Native
 {
     public static partial class Windows
     {

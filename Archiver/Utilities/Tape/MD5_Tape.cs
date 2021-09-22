@@ -21,13 +21,13 @@
 using System;
 using System.Diagnostics;
 using System.Security.Cryptography;
-using Archiver.Shared;
-using Archiver.Shared.Classes.Tape;
-using Archiver.Shared.Models;
-using Archiver.Shared.Structures;
-using Archiver.Shared.TapeDrivers;
+using FoxHollow.Archiver.Shared;
+using FoxHollow.Archiver.Shared.Classes.Tape;
+using FoxHollow.Archiver.Shared.Models;
+using FoxHollow.Archiver.Shared.Structures;
+using FoxHollow.Archiver.Shared.TapeDrivers;
 
-namespace Archiver.Utilities.Tape
+namespace FoxHollow.Archiver.Utilities.Tape
 {
     public class MD5_Tape
     {

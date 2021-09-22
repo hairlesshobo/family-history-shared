@@ -20,7 +20,7 @@
 
 using System;
 
-namespace Archiver.Shared.Native
+namespace FoxHollow.Archiver.Shared.Native
 {
     public static partial class Linux
     {

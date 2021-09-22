@@ -21,15 +21,15 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Archiver.Shared.Classes.Disc;
-using Archiver.Shared.Classes.Tape;
-using Archiver.Shared.Operations.Disc;
-using Archiver.Shared.Operations.Tape;
-using Archiver.Utilities.Shared;
+using FoxHollow.Archiver.Shared.Classes.Disc;
+using FoxHollow.Archiver.Shared.Classes.Tape;
+using FoxHollow.Archiver.Shared.Operations.Disc;
+using FoxHollow.Archiver.Shared.Operations.Tape;
+using FoxHollow.Archiver.Utilities.Shared;
 using FoxHollow.TerminalUI;
 using FoxHollow.TerminalUI.Elements;
 
-namespace Archiver.Tasks.Tape
+namespace FoxHollow.Archiver.Tasks.Tape
 {
     internal static class TapeArchiveSummaryTask
     {

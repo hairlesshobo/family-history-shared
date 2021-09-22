@@ -24,12 +24,12 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Archiver.Shared;
-using Archiver.Shared.Classes;
-using Archiver.Shared.Classes.CSD;
-using Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Shared;
+using FoxHollow.Archiver.Shared.Classes;
+using FoxHollow.Archiver.Shared.Classes.CSD;
+using FoxHollow.Archiver.Shared.Utilities;
 
-namespace Archiver.Utilities.CSD
+namespace FoxHollow.Archiver.Utilities.CSD
 {
     public static class Processing
     {

@@ -21,12 +21,12 @@
 using System;
 using System.Linq;
 using System.Threading;
-using Archiver.Shared.Classes.Tape;
-using Archiver.Shared.Utilities;
-using Archiver.Utilities.Shared;
-using Archiver.Utilities.Tape;
+using FoxHollow.Archiver.Shared.Classes.Tape;
+using FoxHollow.Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Utilities.Shared;
+using FoxHollow.Archiver.Utilities.Tape;
 
-namespace Archiver.Operations.Tape
+namespace FoxHollow.Archiver.Operations.Tape
 {
     public static class TapeVerification
     {

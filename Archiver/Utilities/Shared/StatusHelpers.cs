@@ -19,9 +19,9 @@
  */
 
 using System;
-using Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Shared.Utilities;
 
-namespace Archiver.Utilities.Shared
+namespace FoxHollow.Archiver.Utilities.Shared
 {
     public static class StatusHelpers
     {

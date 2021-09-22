@@ -23,13 +23,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using Archiver.Shared;
-using Archiver.Shared.Models;
-using Archiver.Shared.Models.Config;
-using Archiver.Shared.Utilities;
-using Archiver.Shared.TapeDrivers;
+using FoxHollow.Archiver.Shared;
+using FoxHollow.Archiver.Shared.Models;
+using FoxHollow.Archiver.Shared.Models.Config;
+using FoxHollow.Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Shared.TapeDrivers;
 
-namespace Archiver.TapeServer
+namespace FoxHollow.Archiver.TapeServer
 {
     class Program
     {

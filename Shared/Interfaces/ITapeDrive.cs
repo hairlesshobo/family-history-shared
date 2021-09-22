@@ -19,9 +19,9 @@
  */
 
 using System;
-using Archiver.Shared.Models;
+using FoxHollow.Archiver.Shared.Models;
 
-namespace Archiver.Shared.Interfaces
+namespace FoxHollow.Archiver.Shared.Interfaces
 {
     public interface ITapeDrive 
     {

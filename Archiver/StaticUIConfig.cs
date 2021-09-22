@@ -20,7 +20,7 @@
 
 using System;
 
-namespace Archiver
+namespace FoxHollow.Archiver
 {
     public static class StaticUIConfig
     {

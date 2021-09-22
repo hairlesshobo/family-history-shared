@@ -20,11 +20,11 @@
 
 using System;
 using System.Runtime.InteropServices;
-using Archiver.Shared.Exceptions;
-using Archiver.Shared.Native;
-using static Archiver.Shared.Native.Linux;
+using FoxHollow.Archiver.Shared.Exceptions;
+using FoxHollow.Archiver.Shared.Native;
+using static FoxHollow.Archiver.Shared.Native.Linux;
 
-namespace Archiver.Shared.TapeDrivers
+namespace FoxHollow.Archiver.Shared.TapeDrivers
 {
     public partial class NativeLinuxTapeDriver : IDisposable
     {

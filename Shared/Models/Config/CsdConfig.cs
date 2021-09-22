@@ -20,10 +20,10 @@
 
 using System;
 using System.Collections.Generic;
-using Archiver.Shared.Interfaces;
-using Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Shared.Interfaces;
+using FoxHollow.Archiver.Shared.Utilities;
 
-namespace Archiver.Shared.Models.Config
+namespace FoxHollow.Archiver.Shared.Models.Config
 {
     public class CsdConfig : IValidatableConfig
     {

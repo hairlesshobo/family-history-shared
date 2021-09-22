@@ -21,9 +21,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Archiver.Shared.Classes.CSD;
+using FoxHollow.Archiver.Shared.Classes.CSD;
 
-namespace Archiver.Utilities.CSD
+namespace FoxHollow.Archiver.Utilities.CSD
 {
     public delegate void Distributor_ProgressChangedDelegate(long currentFile, int csdCount, double filesPerSecond);
     public delegate void Distributor_CompleteDelegate();

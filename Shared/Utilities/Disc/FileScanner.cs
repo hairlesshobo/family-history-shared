@@ -21,13 +21,13 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Archiver.Shared.Classes.Disc;
-using Archiver.Shared;
-using Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Shared.Classes.Disc;
+using FoxHollow.Archiver.Shared;
+using FoxHollow.Archiver.Shared.Utilities;
 using System.Threading.Tasks;
 using System.Threading;
 
-namespace Archiver.Shared.Utilities.Disc
+namespace FoxHollow.Archiver.Shared.Utilities.Disc
 {
     public class FileScanner
     {

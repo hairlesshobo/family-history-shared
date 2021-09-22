@@ -20,7 +20,7 @@
 
 using System;
 
-namespace Archiver.Shared.Exceptions
+namespace FoxHollow.Archiver.Shared.Exceptions
 {
     public class TapeDriveNotFoundException : Exception
     {

@@ -24,11 +24,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Archiver.Shared.Interfaces;
-using Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Shared.Interfaces;
+using FoxHollow.Archiver.Shared.Utilities;
 using Newtonsoft.Json;
 
-namespace Archiver.Shared.Classes.Disc
+namespace FoxHollow.Archiver.Shared.Classes.Disc
 {
     public class DiscVerificationResult
     {

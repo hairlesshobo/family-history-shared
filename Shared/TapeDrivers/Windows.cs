@@ -26,13 +26,13 @@ using Microsoft.Win32.SafeHandles;
 
 using System.Collections.Generic;
 using System.Text;
-using Archiver.Shared.Classes.Tape;
-using Archiver.Shared.Native;
+using FoxHollow.Archiver.Shared.Classes.Tape;
+using FoxHollow.Archiver.Shared.Native;
 
-using static Archiver.Shared.Native.Windows;
+using static FoxHollow.Archiver.Shared.Native.Windows;
 //using Bsw.Types.Logger; 
 
-namespace Archiver.Shared.TapeDrivers
+namespace FoxHollow.Archiver.Shared.TapeDrivers
 {
     /// <summary>
     /// Low level Tape operator

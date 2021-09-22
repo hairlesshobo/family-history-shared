@@ -21,7 +21,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Archiver.Shared.Native
+namespace FoxHollow.Archiver.Shared.Native
 {
     public static partial class Linux
     {

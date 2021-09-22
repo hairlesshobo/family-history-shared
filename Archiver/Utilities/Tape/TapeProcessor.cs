@@ -22,13 +22,13 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using Archiver.Shared;
-using Archiver.Shared.Classes.Tape;
-using Archiver.Shared.TapeDrivers;
-using Archiver.Shared.Utilities;
-using Archiver.Utilities.Shared;
+using FoxHollow.Archiver.Shared;
+using FoxHollow.Archiver.Shared.Classes.Tape;
+using FoxHollow.Archiver.Shared.TapeDrivers;
+using FoxHollow.Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Utilities.Shared;
 
-namespace Archiver.Utilities.Tape
+namespace FoxHollow.Archiver.Utilities.Tape
 {
     public class TapeProcessor
     {

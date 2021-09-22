@@ -20,9 +20,9 @@
 
 using System;
 using System.Collections.Generic;
-using Archiver.Shared.Interfaces;
+using FoxHollow.Archiver.Shared.Interfaces;
 
-namespace Archiver.Shared.Models.Config
+namespace FoxHollow.Archiver.Shared.Models.Config
 {
     public class TapeServerConfigPorts : IValidatableConfig
     {

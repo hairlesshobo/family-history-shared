@@ -21,11 +21,11 @@
 using System;
 using System.IO;
 using System.Linq;
-using Archiver.Shared.Exceptions;
-using Archiver.Shared.Interfaces;
-using Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Shared.Exceptions;
+using FoxHollow.Archiver.Shared.Interfaces;
+using FoxHollow.Archiver.Shared.Utilities;
 
-namespace Archiver.Shared.Classes.CSD
+namespace FoxHollow.Archiver.Shared.Classes.CSD
 {
     public class CsdSourceFile : CsdSourceFilePathDetail, ISourceFile
     {

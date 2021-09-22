@@ -25,15 +25,15 @@ using System.Linq;
 using System.Management;
 using System.Text;
 using System.Threading;
-using Archiver.Shared;
-using Archiver.Shared.Classes.CSD;
-using Archiver.Shared.Exceptions;
-using Archiver.Shared.Utilities;
-using Archiver.Utilities.Shared;
+using FoxHollow.Archiver.Shared;
+using FoxHollow.Archiver.Shared.Classes.CSD;
+using FoxHollow.Archiver.Shared.Exceptions;
+using FoxHollow.Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Utilities.Shared;
 using FoxHollow.TerminalUI.Elements;
 using FoxHollow.TerminalUI.Types;
 
-namespace Archiver.Utilities.CSD
+namespace FoxHollow.Archiver.Utilities.CSD
 {
     public static class CsdUtils
     {

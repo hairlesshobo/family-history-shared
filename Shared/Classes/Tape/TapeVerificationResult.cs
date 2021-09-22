@@ -20,7 +20,7 @@
 
 using System;
 
-namespace Archiver.Shared.Classes.Tape
+namespace FoxHollow.Archiver.Shared.Classes.Tape
 {
     public class TapeVerificationResult
     {

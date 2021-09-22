@@ -23,11 +23,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Archiver.Shared.Models;
-using Archiver.Shared.Models.Config;
+using FoxHollow.Archiver.Shared.Models;
+using FoxHollow.Archiver.Shared.Models.Config;
 using Microsoft.Extensions.Configuration;
 
-namespace Archiver.Shared.Utilities
+namespace FoxHollow.Archiver.Shared.Utilities
 {
     public static partial class ConfigUtils
     {

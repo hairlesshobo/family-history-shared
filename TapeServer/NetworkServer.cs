@@ -24,11 +24,11 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Archiver.Shared.Models;
-using Archiver.Shared.Models.Config;
-using Archiver.Shared.Interfaces;
+using FoxHollow.Archiver.Shared.Models;
+using FoxHollow.Archiver.Shared.Models.Config;
+using FoxHollow.Archiver.Shared.Interfaces;
 
-namespace Archiver.TapeServer
+namespace FoxHollow.Archiver.TapeServer
 {
     internal class NetworkServer
     {

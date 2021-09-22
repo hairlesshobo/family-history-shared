@@ -24,9 +24,9 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Archiver.Shared.Classes.Disc;
+using FoxHollow.Archiver.Shared.Classes.Disc;
 
-namespace Archiver.Shared.Operations.Disc
+namespace FoxHollow.Archiver.Shared.Operations.Disc
 {
     public class DiscSearcher
     {

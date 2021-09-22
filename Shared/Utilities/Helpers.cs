@@ -25,12 +25,12 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Archiver.Shared.Classes.CSD;
-using Archiver.Shared.Classes.Disc;
-using Archiver.Shared.Classes.Tape;
-using Archiver.Shared.Interfaces;
+using FoxHollow.Archiver.Shared.Classes.CSD;
+using FoxHollow.Archiver.Shared.Classes.Disc;
+using FoxHollow.Archiver.Shared.Classes.Tape;
+using FoxHollow.Archiver.Shared.Interfaces;
 
-namespace Archiver.Shared.Utilities
+namespace FoxHollow.Archiver.Shared.Utilities
 {
     public static class HelpersNew
     {

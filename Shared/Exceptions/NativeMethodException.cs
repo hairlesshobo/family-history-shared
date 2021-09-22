@@ -22,7 +22,7 @@ using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 
-namespace Archiver.Shared.Exceptions
+namespace FoxHollow.Archiver.Shared.Exceptions
 {
     public class NativeMethodException : Exception
     {

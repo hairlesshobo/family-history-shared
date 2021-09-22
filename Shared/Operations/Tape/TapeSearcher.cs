@@ -24,9 +24,9 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Archiver.Shared.Classes.Tape;
+using FoxHollow.Archiver.Shared.Classes.Tape;
 
-namespace Archiver.Shared.Operations.Tape
+namespace FoxHollow.Archiver.Shared.Operations.Tape
 {
     public class TapeSearcher
     {

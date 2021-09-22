@@ -20,10 +20,10 @@
 
 using System;
 using System.Runtime.InteropServices;
-using Archiver.Shared.Exceptions;
+using FoxHollow.Archiver.Shared.Exceptions;
 using Microsoft.Win32.SafeHandles;
 
-namespace Archiver.Shared.Utilities
+namespace FoxHollow.Archiver.Shared.Utilities
 {
     public static partial class DiskUtils
     {

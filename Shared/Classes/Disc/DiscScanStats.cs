@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace Archiver.Shared.Classes.Disc
+namespace FoxHollow.Archiver.Shared.Classes.Disc
 {
     public class DiscScanStats
     {

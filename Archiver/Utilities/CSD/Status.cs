@@ -21,11 +21,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Archiver.Shared.Classes.CSD;
-using Archiver.Shared.Utilities;
-using Archiver.Utilities.Shared;
+using FoxHollow.Archiver.Shared.Classes.CSD;
+using FoxHollow.Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Utilities.Shared;
 
-namespace Archiver.Utilities.CSD
+namespace FoxHollow.Archiver.Utilities.CSD
 {
     public static class Status
     {

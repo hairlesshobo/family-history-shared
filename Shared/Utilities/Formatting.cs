@@ -20,7 +20,7 @@
 
 using System;
 
-namespace Archiver.Shared.Utilities
+namespace FoxHollow.Archiver.Shared.Utilities
 {
     public static class Formatting
     {

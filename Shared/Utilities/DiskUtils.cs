@@ -21,11 +21,11 @@
 using System;
 using System.IO;
 using System.Text;
-using Archiver.Shared.Classes.Disc;
-using Archiver.Shared.Exceptions;
-using Archiver.Shared.Models;
+using FoxHollow.Archiver.Shared.Classes.Disc;
+using FoxHollow.Archiver.Shared.Exceptions;
+using FoxHollow.Archiver.Shared.Models;
 
-namespace Archiver.Shared.Utilities
+namespace FoxHollow.Archiver.Shared.Utilities
 {
     public static partial class DiskUtils
     {

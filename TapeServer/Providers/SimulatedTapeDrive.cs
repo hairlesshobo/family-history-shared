@@ -23,13 +23,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using Archiver.Shared;
-using Archiver.Shared.Models;
-using Archiver.Shared.Exceptions;
-using Archiver.Shared.Interfaces;
-using Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Shared;
+using FoxHollow.Archiver.Shared.Models;
+using FoxHollow.Archiver.Shared.Exceptions;
+using FoxHollow.Archiver.Shared.Interfaces;
+using FoxHollow.Archiver.Shared.Utilities;
 
-namespace Archiver.TapeServer.Providers
+namespace FoxHollow.Archiver.TapeServer.Providers
 {
     public class SimulatedTapeDrive : ITapeDrive
     {

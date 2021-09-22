@@ -23,7 +23,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 
-namespace Archiver.Utilities.Tape
+namespace FoxHollow.Archiver.Utilities.Tape
 {
     public class TapeBufferStatus
     {

@@ -25,11 +25,11 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Archiver.Shared.Interfaces;
-using Archiver.Shared.Structures;
-using Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Shared.Interfaces;
+using FoxHollow.Archiver.Shared.Structures;
+using FoxHollow.Archiver.Shared.Utilities;
 
-namespace Archiver.Shared.Classes
+namespace FoxHollow.Archiver.Shared.Classes
 {
     /// <summary>
     ///     Asynchronous file copier that provides progress information and 

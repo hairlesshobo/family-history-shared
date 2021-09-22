@@ -19,10 +19,10 @@
  */
 
 using System;
-using Archiver.Shared.Exceptions;
-using Archiver.Shared.Native;
+using FoxHollow.Archiver.Shared.Exceptions;
+using FoxHollow.Archiver.Shared.Native;
 
-namespace Archiver.Shared.Utilities
+namespace FoxHollow.Archiver.Shared.Utilities
 {
     public static partial class DiskUtils
     {

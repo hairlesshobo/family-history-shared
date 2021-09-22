@@ -20,11 +20,11 @@
 
 using System;
 using System.IO;
-using Archiver.Shared.Interfaces;
-using Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Shared.Interfaces;
+using FoxHollow.Archiver.Shared.Utilities;
 using Newtonsoft.Json;
 
-namespace Archiver.Shared.Classes.Tape
+namespace FoxHollow.Archiver.Shared.Classes.Tape
 {
     public class TapeSourceFile : ISourceFile
     {

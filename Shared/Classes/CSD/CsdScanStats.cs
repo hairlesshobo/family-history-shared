@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Archiver.Shared.Classes.CSD
+namespace FoxHollow.Archiver.Shared.Classes.CSD
 {
     public class CsdScanStats
     {

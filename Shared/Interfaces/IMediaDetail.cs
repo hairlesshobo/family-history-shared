@@ -20,7 +20,7 @@
 
 using System;
 
-namespace Archiver.Shared.Interfaces
+namespace FoxHollow.Archiver.Shared.Interfaces
 {
     public interface IMediaDetail
     {

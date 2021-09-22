@@ -23,9 +23,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Archiver.Shared.Structures;
+using FoxHollow.Archiver.Shared.Structures;
 
-namespace Archiver.Shared.Classes
+namespace FoxHollow.Archiver.Shared.Classes
 {
     /// <summary>
     ///     Class used to generate a MD5 hash from a stream

@@ -19,11 +19,11 @@
  */
 
 using System;
-using Archiver.Shared.Native;
+using FoxHollow.Archiver.Shared.Native;
 using Microsoft.Win32.SafeHandles;
-using static Archiver.Shared.Native.Windows;
+using static FoxHollow.Archiver.Shared.Native.Windows;
 
-namespace Archiver.Shared.Utilities
+namespace FoxHollow.Archiver.Shared.Utilities
 {
     public static partial class TapeUtilsNew
     {

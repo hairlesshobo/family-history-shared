@@ -23,10 +23,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
-using Archiver.Shared.Interfaces;
-using Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Shared.Interfaces;
+using FoxHollow.Archiver.Shared.Utilities;
 
-namespace Archiver.Shared.Models.Config
+namespace FoxHollow.Archiver.Shared.Models.Config
 {
     public class TapeServerConfig : IValidatableConfig
     {

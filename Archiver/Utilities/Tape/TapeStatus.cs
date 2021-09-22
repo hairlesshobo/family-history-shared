@@ -21,12 +21,12 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
-using Archiver.Shared.Classes.Tape;
-using Archiver.Shared.Utilities;
-using Archiver.Utilities;
-using Archiver.Utilities.Shared;
+using FoxHollow.Archiver.Shared.Classes.Tape;
+using FoxHollow.Archiver.Shared.Utilities;
+using FoxHollow.Archiver.Utilities;
+using FoxHollow.Archiver.Utilities.Shared;
 
-namespace Archiver.Utilities.Tape
+namespace FoxHollow.Archiver.Utilities.Tape
 {
     public class TapeStatus : IDisposable
     {

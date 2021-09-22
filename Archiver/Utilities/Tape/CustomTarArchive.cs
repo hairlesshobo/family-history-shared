@@ -21,10 +21,10 @@
 using System;
 using System.IO;
 using System.Security.Cryptography;
-using Archiver.Shared.Classes.Tape;
+using FoxHollow.Archiver.Shared.Classes.Tape;
 using ICSharpCode.SharpZipLib.Tar;
 
-namespace Archiver.Utilities.Tape
+namespace FoxHollow.Archiver.Utilities.Tape
 {
     public class CustomTarArchive : IDisposable
     {

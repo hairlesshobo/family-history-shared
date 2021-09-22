@@ -19,11 +19,11 @@
  */
 
 using System;
-using Archiver.Shared.Classes.CSD;
-using Archiver.Utilities.CSD;
-using Archiver.Utilities.Shared;
+using FoxHollow.Archiver.Shared.Classes.CSD;
+using FoxHollow.Archiver.Utilities.CSD;
+using FoxHollow.Archiver.Utilities.Shared;
 
-namespace Archiver.Operations.CSD
+namespace FoxHollow.Archiver.Operations.CSD
 {
     public static class ShowCsdSummary
     {
