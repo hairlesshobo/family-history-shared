@@ -432,3 +432,6 @@ $RECYCLE.BIN/
 !.vscode/launch.json
 !.vscode/extensions.json
 archiver.dbglog
+
+
+config/**/*.json

@@ -1,0 +1,109 @@
+{
+	"folders": [
+		{
+			"path": "../",
+		}
+	],
+	"settings": {
+		"files.exclude": {
+			"**/bin": true,
+			"**/obj": true
+		},
+	},
+	"launch": {
+		"version": "2.0.0",
+		"configurations": [
+			{
+				"name": "Launch ArchiverCLI",
+				"type": "coreclr",
+				"request": "launch",
+				"preLaunchTask": "build-archiver-cli",
+				"logging": {
+					"moduleLoad": false
+				},
+				// If you have changed target frameworks, make sure to update the program path.
+				"program": "${workspaceFolder}/bin/ArchiverCLI.dll",
+				"args": [],
+				"internalConsoleOptions": "neverOpen",
+				"cwd": "${workspaceFolder}",
+				// For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
+				"console": "externalTerminal",
+				"stopAtEntry": false
+			},
+			{
+				"name": "Launch TapeServer",
+				"type": "coreclr",
+				"request": "launch",
+				"preLaunchTask": "build-tapeserver",
+				"logging": {
+					"moduleLoad": false
+				},
+				// If you have changed target frameworks, make sure to update the program path.
+				"program": "${workspaceFolder}/bin/TapeServer.dll",
+				"args": [],
+				"cwd": "${workspaceFolder}",
+				// For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
+				"console": "externalTerminal",
+				"stopAtEntry": false
+			},
+			{
+				"name": "Launch TestCLI",
+				"type": "coreclr",
+				"request": "launch",
+				"preLaunchTask": "build-testcli",
+				"logging": {
+					"moduleLoad": false
+				},
+				// If you have changed target frameworks, make sure to update the program path.
+				"program": "${workspaceFolder}/bin/TestCLI.dll",
+				"args": [],
+				"cwd": "${workspaceFolder}",
+				// For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
+				"console": "externalTerminal",
+				"stopAtEntry": false
+			}
+		],
+		"compounds": []
+	},
+	"tasks": {
+		"version": "2.0.0",
+		"tasks": [
+			{
+				"label": "build-archiver-cli",
+				"command": "dotnet",
+				"type": "process",
+				"args": [
+					"build",
+					"${workspaceFolder}/source/Archiver.CLI/Archiver.CLI.csproj",
+					"/property:GenerateFullPaths=true",
+					"/consoleloggerparameters:NoSummary"
+				],
+				"problemMatcher": "$msCompile"
+			},
+			{
+				"label": "build-tapeserver",
+				"command": "dotnet",
+				"type": "process",
+				"args": [
+					"build",
+					"${workspaceFolder}/source/TapeServer/TapeServer.csproj",
+					"/property:GenerateFullPaths=true",
+					"/consoleloggerparameters:NoSummary"
+				],
+				"problemMatcher": "$msCompile"
+			},
+			{
+				"label": "build-testcli",
+				"command": "dotnet",
+				"type": "process",
+				"args": [
+					"build",
+					"${workspaceFolder}/source/TestCLI/TestCLI.csproj",
+					"/property:GenerateFullPaths=true",
+					"/consoleloggerparameters:NoSummary"
+				],
+				"problemMatcher": "$msCompile"
+			}
+		]
+	}
+}

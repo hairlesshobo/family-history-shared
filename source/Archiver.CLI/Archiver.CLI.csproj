@@ -7,7 +7,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <OutputPath>../../bin/</OutputPath>
     
-    <AssemblyName>ArchiverCLI.dll</AssemblyName>
+    <AssemblyName>ArchiverCLI</AssemblyName>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
