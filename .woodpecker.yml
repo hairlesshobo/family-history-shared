@@ -1,15 +1,13 @@
 pipeline:
 
-  init:
-    image: alpine
+  build:
+    image: mcr.microsoft.com/dotnet/sdk:5.0.401-alpine3.13
     commands:
-      - echo "hello world"
-
-  # build:
-  #   image: mcr.microsoft.com/dotnet/sdk:5.0.401-alpine3.13
-  #   commands:
-  #     - dotnet restore --no-cache
-  #     - dotnet build
+      - dotnet restore --no-cache
+      - dotnet build
+    when:
+      event: [push, tag]
+      branch: [master, develop]
 
   # generate_docs:
   #   image: alpine:3.12
