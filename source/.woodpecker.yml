@@ -3,6 +3,7 @@ pipeline:
   build:
     image: mcr.microsoft.com/dotnet/sdk:5.0.401-alpine3.13
     commands:
+      - cd ./source/
       - dotnet restore --no-cache
       - dotnet build
     when:
