@@ -1,9 +1,25 @@
 <Project>
     <PropertyGroup>
-        <Version>2.0.0</Version>
+        <Version>2.0.0-beta1</Version>
+
+        <Title>Archiver</Title>
         <Product>Archiver</Product>
-        <Description>Cross platform, multi-destination backup and archiving utility</Description>
+
+        <Description>
+        Cross platform, multi-destination backup and archiving utility
+        
+        This tool is designed to allow for data to easily be cataloged, backed up, 
+        and optionally "cold storage" archived using a variety of data backup 
+        destinations. The tool is also intended to have cross platform support.
+        </Description>
         <Authors>Steve Cross</Authors>
         <Copyright>Copyright (c) 2020-2021 Steve Cross &lt;flip@foxhollow.cc&gt;</Copyright>
+
+        <PackageLicenseExpression>GPL-2-or-later</PackageLicenseExpression>
+        <PackageProjectUrl>https://code.foxhollow.cc/archiver/</PackageProjectUrl>
+        <PackageReleaseNotes>https://code.foxhollow.cc/archiver/#/changelog</PackageReleaseNotes>
+        <RepositoryUrl>https://git.foxhollow.cc/hairlesshobo/Archiver.git</RepositoryUrl>
+        <RespositoryType>git</RespositoryType>
+        <PackageTags>console terminal data tape disc backup archive</PackageTags>
     </PropertyGroup>
 </Project>

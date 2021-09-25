@@ -78,7 +78,7 @@ namespace FoxHollow.Archiver.Tasks.Disc
             CancellationTokenSource cts = new CancellationTokenSource();
             DiscVerifier verifier = new DiscVerifier(selectedDrive, discsToVerify);
 
-            Terminal.InitStatusBar(
+            Terminal.StatusBar.ShowItems(
                 new StatusBarItem(
                     "Cancel",
                     (key) => {
@@ -88,9 +88,6 @@ namespace FoxHollow.Archiver.Tasks.Disc
                     Key.MakeKey(ConsoleKey.C, ConsoleModifiers.Control)
                 )
             );
-
-            TerminalPoint prevPoint = TerminalPoint.GetCurrent();
-            Terminal.RootPoint.MoveTo();
 
             Terminal.Clear();
 
@@ -146,17 +143,17 @@ namespace FoxHollow.Archiver.Tasks.Disc
                         
                     }
                 },
-                new DataTableColumn("DaysSinceLastVerify", null, 23)
+                new DataTableColumn("DaysSinceLastVerify", "Last Verify", 13)
                 {
-                    Format = (value) => $"Days Since Verify: {value.ToString().PadLeft(4)}"
+                    Format = (value) => $"{value} day(s)"
                 },
-                new DataTableColumn("DataSize", "Data Size", 25)
+                new DataTableColumn("DataSize", "Data Size", 12)
                 {
-                    Format = (value) => "Data Size: " + Formatting.GetFriendlySize((long)value)
+                    Format = (value) => Formatting.GetFriendlySize((long)value)
                 }
             };
 
-            DataTable dataTable = new DataTable((IList)verifier.PendingDiscs, columns, showHeader: true);
+            DataTable dataTable = new DataTable((IList)verifier.PendingDiscs, columns, rows: 6, showHeader: true);
 
             NotificationBox box = new NotificationBox(5, 0);
             box.SetTextJustify(0, TextJustify.Center);
