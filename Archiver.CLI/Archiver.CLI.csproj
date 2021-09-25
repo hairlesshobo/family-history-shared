@@ -1,12 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <PackageId>ArchiverCLI</PackageId>
+    <PackageId>Archiver.CLI</PackageId>
 
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <OutputPath>../../bin/</OutputPath>
     
+    <AssemblyName>ArchiverCLI.dll</AssemblyName>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
