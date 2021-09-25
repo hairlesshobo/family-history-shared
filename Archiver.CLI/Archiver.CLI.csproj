@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Shared\Shared.csproj" />
+    <ProjectReference Include="..\Archiver.Shared\Archiver.Shared.csproj" />
     <!-- <ProjectReference Include="..\..\..\..\code\TerminalUI\src\TerminalUI.csproj" /> -->
   </ItemGroup>
 
