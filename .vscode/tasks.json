@@ -32,7 +32,7 @@
             },
             "args": [
                 "build",
-                "${workspaceFolder}/Archiver/Archiver.csproj",
+                "${workspaceFolder}/ArchiverCLI/ArchiverCLI.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],

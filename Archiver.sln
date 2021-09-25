@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.6.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Archiver", "Archiver\Archiver.csproj", "{331E1442-781D-4869-B95A-D741610068BA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiverCLI", "ArchiverCLI\ArchiverCLI.csproj", "{331E1442-781D-4869-B95A-D741610068BA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TapeServer", "TapeServer\TapeServer.csproj", "{4CB06A8B-1B5F-4984-BE68-6ED810952CBF}"
 EndProject
