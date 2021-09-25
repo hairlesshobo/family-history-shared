@@ -97,6 +97,8 @@ namespace FoxHollow.Archiver.Shared.Classes
         {
             _type = StreamSourceType.Disk;
             _devicePath = drive.FullPath;
+
+            Init();
         }
 
         /// <summary>
