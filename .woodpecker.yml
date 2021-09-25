@@ -1,0 +1,83 @@
+pipeline:
+
+  init:
+    image: alpine
+    commands:
+      - echo "hello world"
+
+  # build:
+  #   image: mcr.microsoft.com/dotnet/sdk:5.0.401-alpine3.13
+  #   commands:
+  #     - dotnet restore --no-cache
+  #     - dotnet build
+
+  # generate_docs:
+  #   image: alpine:3.12
+  #   commands:
+  #     - ./scripts/generate_docs.sh
+  #   when:
+  #     event: push
+  #     branch: [master, develop]
+
+  # deploy_docs:
+  #   image: drillster/drone-rsync
+  #   source: ./docs/
+  #   target: ~/html/terminal-ui/
+  #   delete: true
+  #   args: "--verbose"
+  #   secrets:
+  #     - source: doc_deploy_key
+  #       target: plugin_key
+  #     - source: doc_deploy_server
+  #       target: plugin_hosts
+  #     - source: doc_deploy_user
+  #       target: plugin_user
+  #   when:
+  #     event: push
+  #     branch: [master, develop]
+
+  # prepare_publish:
+  #   image: alpine:3.12
+  #   commands:
+  #     - apk update && apk add --no-cache zip
+  #     - ./scripts/prepare_publish.sh
+  #   when:
+  #     event: tag
+  #     tag: release/*
+
+  # gitea_release:
+  #   image: plugins/gitea-release
+  #   base_url: https://git.foxhollow.cc
+  #   title: "TerminalUI ${DRONE_TAG##release/}"
+  #   # Generate release notes somehow and include link to nuget
+  #   # https://www.nuget.org/packages/FoxHollow.LibSMB2Sharp/1.0.0-beta1
+  #   note: RELEASE_NOTES.md
+  #   # find some way to programmatically set the draft flag
+  #   # draft: true
+  #   files:
+  #     - dist/*
+  #   checksum:
+  #     - md5
+  #     - sha1
+  #     - sha256
+  #     - sha512
+  #     - adler32
+  #     - crc32
+  #   secrets:
+  #     - source: release_key
+  #       target: plugin_api_key
+  #   when:
+  #     event: tag
+  #     tag: release/*
+
+  # publish_nuget:
+  #   image: mcr.microsoft.com/dotnet/sdk:5.0.401-alpine3.13
+  #   commands:
+  #     # uncomment below line to activate
+  #     # - dotnet nuget push dist/*.nupkg --api-key $NUGET_PUBLISH_KEY
+  #     - dotnet nuget push ./dist/*.nupkg --api-key $NUGET_PUBLISH_KEY --source https://api.nuget.org/v3/index.json
+  #   secrets: [nuget_publish_key]
+  #   when:
+  #     event: tag
+  #     tag: release/*
+
