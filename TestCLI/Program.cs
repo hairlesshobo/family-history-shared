@@ -36,10 +36,10 @@ using FoxHollow.Archiver.Shared.Models;
 using FoxHollow.Archiver.Shared.Models.Config;
 using FoxHollow.Archiver.Shared.Native;
 using FoxHollow.Archiver.Shared.Utilities;
+// using FoxHollow.LibSMB2Sharp;
 using FoxHollow.TerminalUI;
 using FoxHollow.TerminalUI.Elements;
 using FoxHollow.TerminalUI.Types;
-using LibSMB2Sharp;
 
 namespace FoxHollow.Archiver.TestCLI
 {
@@ -91,62 +91,63 @@ namespace FoxHollow.Archiver.TestCLI
                 //! WMI reported size: 24,935,110,656
                 //! windows explorer reported size: 24,935,110,656
 
-                var kvtElapsedTime = new KeyValueText("Elapsed Time", null, -16);
-                Terminal.NextLine();
+                // var kvtElapsedTime = new KeyValueText("Elapsed Time", null, -16);
+                // Terminal.NextLine();
 
-                var kvtVerified = new KeyValueText("Verified", Formatting.GetFriendlySize(0), -16);
-                Terminal.NextLine();
+                // var kvtVerified = new KeyValueText("Verified", Formatting.GetFriendlySize(0), -16);
+                // Terminal.NextLine();
 
-                var kvtCurrentRate = new KeyValueText("Current Rate", Formatting.GetFriendlyTransferRate(0), -16);
-                Terminal.NextLine();
+                // var kvtCurrentRate = new KeyValueText("Current Rate", Formatting.GetFriendlyTransferRate(0), -16);
+                // Terminal.NextLine();
 
-                var kvtAvgRate = new KeyValueText("Average Rate", Formatting.GetFriendlyTransferRate(0), -16);
-                Terminal.NextLine();
-                Terminal.NextLine();
+                // var kvtAvgRate = new KeyValueText("Average Rate", Formatting.GetFriendlyTransferRate(0), -16);
+                // Terminal.NextLine();
+                // Terminal.NextLine();
 
-                var progressBar = new ProgressBar();
-                Terminal.NextLine();
-                Terminal.NextLine();
+                // var progressBar = new ProgressBar();
+                // Terminal.NextLine();
+                // Terminal.NextLine();
 
-                kvtElapsedTime.Show();
-                kvtVerified.Show();
-                kvtCurrentRate.Show();
-                kvtAvgRate.Show();
-                progressBar.Show();
+                // kvtElapsedTime.Show();
+                // kvtVerified.Show();
+                // kvtCurrentRate.Show();
+                // kvtAvgRate.Show();
+                // progressBar.Show();
 
-                Stopwatch sw = Stopwatch.StartNew();
+                // Stopwatch sw = Stopwatch.StartNew();
 
                 Task terminalTask = Terminal.StartAsync();
 
                 Task mainTask = Task.Run(async () => 
                 {
-                    //smb://den;admin@nas.cz.foxhollow.cc/Studio/Video/Final Discs/EVA Basketball DVDs/2007/07-11-20 -- Episcopal.iso
-                    using (Smb2Context smb2 = new Smb2Context(connectionString: "smb://den;admin@nas.cz.foxhollow.cc/Movies", password: "Lh2Oog2y"))
-                    {
-                        Smb2Share share = smb2.OpenShare();
+                    await Task.Delay(2000);
+                //     //smb://den;admin@nas.cz.foxhollow.cc/Studio/Video/Final Discs/EVA Basketball DVDs/2007/07-11-20 -- Episcopal.iso
+                //     using (Smb2Context smb2 = new Smb2Context(connectionString: "smb://den;admin@nas.cz.foxhollow.cc/Movies", password: "Lh2Oog2y"))
+                //     {
+                //         Smb2Share share = smb2.OpenShare();
 
-                        Smb2FileEntry entry = share.GetFile("/HD/Guardians of the Galaxy/Guardians of the Galaxy.mkv");
+                //         Smb2FileEntry entry = share.GetFile("/HD/Guardians of the Galaxy/Guardians of the Galaxy.mkv");
                         
-                        using (Stream reader = entry.OpenReader())
-                        {
-                            Md5StreamGenerator generator = new Md5StreamGenerator(reader, (int)smb2.MaxReadSize);
-                            generator.OnProgressChanged += (progress) =>
-                            {
-                                kvtVerified.UpdateValue($"{Formatting.GetFriendlySize(progress.TotalBytesProcessed)} / {Formatting.GetFriendlySize(progress.TotalBytes)}");
-                                kvtAvgRate.UpdateValue(Formatting.GetFriendlyTransferRate(progress.AverageRate));
-                                kvtCurrentRate.UpdateValue(Formatting.GetFriendlyTransferRate(progress.InstantRate));
+                //         using (Stream reader = entry.OpenReader())
+                //         {
+                //             Md5StreamGenerator generator = new Md5StreamGenerator(reader, (int)smb2.MaxReadSize);
+                //             generator.OnProgressChanged += (progress) =>
+                //             {
+                //                 kvtVerified.UpdateValue($"{Formatting.GetFriendlySize(progress.TotalBytesProcessed)} / {Formatting.GetFriendlySize(progress.TotalBytes)}");
+                //                 kvtAvgRate.UpdateValue(Formatting.GetFriendlyTransferRate(progress.AverageRate));
+                //                 kvtCurrentRate.UpdateValue(Formatting.GetFriendlyTransferRate(progress.InstantRate));
 
-                                progressBar.UpdateProgress(progress.PercentCompleted);
-                                kvtElapsedTime.UpdateValue(sw.Elapsed.ToString());
-                            };
+                //                 progressBar.UpdateProgress(progress.PercentCompleted);
+                //                 kvtElapsedTime.UpdateValue(sw.Elapsed.ToString());
+                //             };
 
-                            string hash = await generator.GenerateAsync(cts.Token);
+                //             string hash = await generator.GenerateAsync(cts.Token);
 
-                            sw.Stop();
+                //             sw.Stop();
 
-                            bool discValid = (knownHash.ToLower() == hash.ToLower());
-                        }
-                    }
+                //             bool discValid = (knownHash.ToLower() == hash.ToLower());
+                //         }
+                //     }
                 });
 
 
