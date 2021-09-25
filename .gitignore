@@ -435,3 +435,10 @@ archiver.dbglog
 
 
 config/**/*.json
+/index.txt
+/json/*.json
+/tools/**/*.exe
+/tools/**/*.dll
+/tools/cdbxp/*
+!/tools/cdbxp/README.md
+!Archiver.lnk

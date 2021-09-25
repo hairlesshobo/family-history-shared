@@ -1,0 +1,38 @@
+Tape Name: <%TAPE_NAME%>
+
+Date written: <%WRITE_DATE%>
+
+               File Count: <%FILE_COUNT%>
+          Directory Count: <%DIR_COUNT%>
+
+   Uncompressed Data Size: <%SIZE_FRIENDLY%> (<%SIZE_BYTES%> bytes)
+Uncompressed Archive Size: <%ARCHIVE_SIZE_FRIENDLY%> (<%ARCHIVE_SIZE_BYTES%> bytes)
+
+Directions for Windows:
+===============================================================
+  * Insert index disc and run the Archiver application
+  * Choose from menu items under "Tape Operations" section to
+    read or list files on tape
+===============================================================
+
+Directions for Linux:
+===============================================================
+  How to read list of files:
+    mt -f /dev/nst0 asf 2
+    tar tvf /dev/nst0 --blocking-factor=512
+
+  How to read list of files on tape, and save the list to a file:
+    mt -f /dev/nst0 asf 2
+    tar tvf /dev/nst0 --blocking-factor=512 2> /dev/null > file_list.txt
+
+  How to extract all files on tape to current directory
+    mt -f /dev/nst0 asf 2
+    tar xvf /dev/nst0 --blocking-factor=512
+
+  Copy tape to local tar file:
+    mt -f /dev/nst0 asf 2
+    dd if=/dev/nst0 of=tape.tar bs=256K status=progress
+===============================================================
+
+List of directories:
+<%DIRECTORY_LIST%>
