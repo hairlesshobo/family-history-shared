@@ -27,7 +27,7 @@ My overall goals for this application (in no particular order) are as follows:
 
 ## To-Do List
 For a more detailed list of outstanding items that I plan to work on,
-see the [complete todo list](todo.md)
+see the [complete todo list](./docs/todo.md)
 
 ## History
 In 2020, I got very serious about protecting my data. I do not like the 
