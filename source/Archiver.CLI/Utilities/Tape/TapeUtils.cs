@@ -135,6 +135,7 @@ namespace FoxHollow.Archiver.CLI.Utilities.Tape
             }
         }
 
+        // TODO: make async
         public static string ReadTxtSummaryFromTape()
         {
             using (NativeWindowsTapeDriver tape = new NativeWindowsTapeDriver(SysInfo.TapeDrive))

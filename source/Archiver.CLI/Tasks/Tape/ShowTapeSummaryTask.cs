@@ -19,18 +19,23 @@
  */
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using FoxHollow.Archiver.CLI.Utilities.Shared;
 using FoxHollow.Archiver.CLI.Utilities.Tape;
 using FoxHollow.Archiver.Shared.Utilities;
+using FoxHollow.TerminalUI;
 using FoxHollow.TerminalUI.Elements;
 
-namespace FoxHollow.Archiver.CLI.Operations.Tape
+namespace FoxHollow.Archiver.CLI.Tasks.Tape
 {
-    public static class ShowTapeSummary
+    public static class ShowTapeSummaryTask
     {
-        public static async Task StartOperationAsync()
+        public static async Task StartTaskAsync(CancellationToken cToken)
         {
+            Terminal.Clear();
+            Terminal.Header.UpdateLeft("Tape Summary");
+
             if (TapeUtils.IsTapeLoaded() == false)
             {
                 Formatting.WriteC(ConsoleColor.Red, "ERROR: ");
@@ -38,9 +43,10 @@ namespace FoxHollow.Archiver.CLI.Operations.Tape
             }
             else
             {
+                // TODO: make this a class that async reads line by line like TapeArchiveSummaryTask?
                 string text = TapeUtils.ReadTxtSummaryFromTape();
 
-                using (Pager pager = new Pager())
+                using (Pager pager = Pager.StartNew())
                 {
                     pager.AutoScroll = false;
                     pager.ShowLineNumbers = true;
@@ -48,7 +54,7 @@ namespace FoxHollow.Archiver.CLI.Operations.Tape
                     foreach (string line in text.Split("\n"))
                         pager.AppendLine(line);
 
-                    await pager.RunAsync();
+                    await pager.WaitForQuitAsync();
                 }
             }
         }

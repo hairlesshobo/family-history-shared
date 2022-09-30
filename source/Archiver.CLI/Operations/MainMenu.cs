@@ -129,6 +129,7 @@ namespace FoxHollow.Archiver.CLI.Operations
                     SelectedValue = true, // do not show the "press enter to return to main menu" message
                     ForegroundColor = ConsoleColor.Blue
                 },
+                // TODO: Add "View disc summary"
                 new MenuEntry() {
                     Name = "Verify Discs",
                     Task = Tasks.Disc.DiscVerificationTask.StartTaskAsync,
@@ -188,13 +189,13 @@ namespace FoxHollow.Archiver.CLI.Operations
                     Disabled = !SysInfo.IsTapeDrivePresent || true, // remove once implemented
                     ForegroundColor = ConsoleColor.Green
                 },
-                // new MenuEntry() {
-                //     Name = "Read Tape Summary",
-                //     Task = Tape.ShowTapeSummary.StartOperation,
-                //     Disabled = !SysInfo.IsTapeDrivePresent,
-                //     // SelectedValue = true, // do not show the "press enter to return to main menu" message
-                //     ForegroundColor = ConsoleColor.Blue
-                // },
+                new MenuEntry() {
+                    Name = "Read Tape Summary",
+                    Task = Tasks.Tape.ShowTapeSummaryTask.StartTaskAsync,
+                    Disabled = !SysInfo.IsTapeDrivePresent,
+                    SelectedValue = true, // do not show the "press enter to return to main menu" message
+                    ForegroundColor = ConsoleColor.Blue
+                },
                 new MenuEntry() {
                     Name = "View Archive Summary",
                     Task = Tasks.Tape.TapeArchiveSummaryTask.StartTaskAsync,

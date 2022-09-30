@@ -37,7 +37,7 @@ namespace FoxHollow.Archiver.CLI.Tasks.Tape
             List<TapeDetail> allTapes = await Helpers.ReadTapeIndexAsync(cToken);
             
             Terminal.Clear();
-            Terminal.Header.UpdateLeft("Disc Archive Summary");
+            Terminal.Header.UpdateLeft("Tape Archive Summary");
 
             TapeArchiveSummary summary = new TapeArchiveSummary();
 

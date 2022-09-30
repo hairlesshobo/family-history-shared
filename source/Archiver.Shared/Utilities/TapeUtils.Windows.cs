@@ -29,6 +29,7 @@ namespace FoxHollow.Archiver.Shared.Utilities
     {
         private static bool WindowsIsTapeDrivePresent()
         {
+            // TODO: Why is the native tape driver class not being used here?
             SafeFileHandle handle = Windows.CreateFile(
                 SysInfo.TapeDrive,
                 GENERIC_READ | GENERIC_WRITE,
@@ -39,8 +40,11 @@ namespace FoxHollow.Archiver.Shared.Utilities
                 IntPtr.Zero
                 );
 
-            if (handle.IsInvalid)
+            if (handle != null && handle.IsInvalid)
                 return false;
+
+            if (!handle.IsClosed)
+                handle.Close();
 
             return true;
         }
