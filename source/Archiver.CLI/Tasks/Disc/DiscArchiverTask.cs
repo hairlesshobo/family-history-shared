@@ -35,6 +35,12 @@ namespace FoxHollow.Archiver.CLI.Tasks.Disc
 {
     internal static class DiscArchiverTask
     {
+        internal static Task StartScanOnlyTaskAsync(CancellationToken cToken = default)
+            => RunArchiveAsync(true, cToken);
+
+        internal static Task StartTaskAsync(CancellationToken cToken = default)
+            => RunArchiveAsync(false, cToken);
+
         private static CancellationTokenSource _cts;
 
         private static void UpdateElapsed(DiscScanStats stats)
@@ -337,12 +343,6 @@ namespace FoxHollow.Archiver.CLI.Tasks.Disc
             _kvtDiscProgress.UpdateValue($"{completeDiscs} / {newDiscs}");
             _kvtDiscProgress.Show();
         }
-
-        internal static Task StartScanOnlyAsync(CancellationToken cToken = default)
-            => RunArchiveAsync(true, cToken);
-
-        internal static Task StartOperationAsync(CancellationToken cToken = default)
-            => RunArchiveAsync(false, cToken);
 
 
         private static Text _textFileStatsHeader;

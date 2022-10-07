@@ -84,7 +84,7 @@ namespace FoxHollow.Archiver.Shared.Classes
         /// <exception>
         public string Md5Hash 
         { 
-            get => (this.Complete ? throw new InvalidOperationException("The hash has not yet been generated") : _hash);
+            get => (this.Complete ? _hash : throw new InvalidOperationException("The hash has not yet been generated"));
             private set => _hash = value;
         }
 

@@ -139,17 +139,17 @@ namespace FoxHollow.Archiver.CLI.Operations
                 ,
                 new MenuEntry() {
                     Name = "Scan For Changes",
-                    Task = Tasks.Disc.DiscArchiverTask.StartScanOnlyAsync,
+                    Task = Tasks.Disc.DiscArchiverTask.StartScanOnlyTaskAsync,
                     ForegroundColor = ConsoleColor.DarkYellow
                 },
                 // new MenuEntry() {
                 //     Name = "Scan For Renamed/Moved Files",
-                //     Task = Disc.ScanForFileRenames.StartOperationAsync,
+                //     Task = Tasks.Disc.ScanForFileRenamesTask.StartTaskAsync,
                 //     ForegroundColor = ConsoleColor.DarkYellow
                 // },
                 new MenuEntry() {
                     Name = "Run Archive process",
-                    Task = Tasks.Disc.DiscArchiverTask.StartOperationAsync,
+                    Task = Tasks.Disc.DiscArchiverTask.StartTaskAsync,
                     Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsOpticalDrivePresent,
                     ForegroundColor = ConsoleColor.Red
                 }
@@ -178,7 +178,7 @@ namespace FoxHollow.Archiver.CLI.Operations
                 //! not implemented
                 new MenuEntry() {
                     Name = "Restore entire tape (to tar file)",
-                    Task = Tape.RestoreTapeToTar.StartOperationAsync,
+                    Task = Tasks.Tape.RestoreToTarTask.StartTaskAsync,
                     Disabled = !SysInfo.IsTapeDrivePresent || true, // remove once implemented
                     ForegroundColor = ConsoleColor.Green
                 },
@@ -198,19 +198,20 @@ namespace FoxHollow.Archiver.CLI.Operations
                 },
                 new MenuEntry() {
                     Name = "View Archive Summary",
-                    Task = Tasks.Tape.TapeArchiveSummaryTask.StartTaskAsync,
+                    Task = Tasks.Tape.ShowArchiveSummaryTask.StartTaskAsync,
                     SelectedValue = true, // do not show the "press enter to return to main menu" message
                     ForegroundColor = ConsoleColor.Blue
                 },
-                // new MenuEntry() {
-                //     Name = "Verify Tape",
-                //     Task = Tape.TapeVerification.StartOperation,
-                //     Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsTapeDrivePresent,
-                //     ForegroundColor = ConsoleColor.DarkYellow
-                // },
+                new MenuEntry() {
+                    Name = "Verify Tape",
+                    Task = Tasks.Tape.TapeVerificationTask.StartTaskAsync,
+                    Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsTapeDrivePresent,
+                    SelectedValue = true, // do not show the "press enter to return to main menu" message
+                    ForegroundColor = ConsoleColor.DarkYellow
+                },
                 // new MenuEntry() {
                 //     Name = "Run tape archive",
-                //     Task = Tape.TapeArchiver.StartOperation,
+                //     Task = Tasks.Tap.ArchiverTask.StartTaskAsync,
                 //     Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsTapeDrivePresent,
                 //     ForegroundColor = ConsoleColor.Red
                 // }
@@ -227,49 +228,47 @@ namespace FoxHollow.Archiver.CLI.Operations
                 },
                 new MenuEntry() {
                     Name = "Register CSD Drive",
-                    Task = CSD.RegisterDrive.StartOperationAsync,
+                    Task = Tasks.CSD.RegisterDriveTask.StartTaskAsync,
                     ForegroundColor = ConsoleColor.Green
                 },
-        //         //! not implemented
-        //         new MenuEntry() {
-        //             Name = "Restore entire CSD Drive",
-        //             Task = NotImplemented,
-        //             Disabled = true, // remove once implemented
-        //             ForegroundColor = ConsoleColor.Green
-        //         },
-        //         //! not implemented
-        //         new MenuEntry() {
-        //             Name = "Read CSD Drive Summary",
-        //             Task = NotImplemented,         
-        //             // Task = ShowTapeSummary.StartOperation,
-        //             Disabled = true, // remove once implemented
-        //             SelectedValue = true, // do not show the "press enter to return to main menu" message
-        //             ForegroundColor = ConsoleColor.Blue
-        //         },
+                // //! not implemented
+                // new MenuEntry() {
+                //     Name = "Restore entire CSD Drive",
+                //     Task = NotImplemented,
+                //     Disabled = true, // remove once implemented
+                //     ForegroundColor = ConsoleColor.Green
+                // },
+                // //! not implemented
+                // new MenuEntry() {
+                //     Name = "Read CSD Drive Summary",
+                //     Task = Tasks.CSD.ShowDriveSummaryTask.StartTaskAsync,         
+                //     Disabled = true, // remove once implemented
+                //     SelectedValue = true, // do not show the "press enter to return to main menu" message
+                //     ForegroundColor = ConsoleColor.Blue
+                // },
                 new MenuEntry() {
                     Name = "View CSD Archive Summary",
-                    Task = Tasks.CSD.CsdArchiveSummaryTask.StartTaskAsync,
+                    Task = Tasks.CSD.ShowArchiveSummaryTask.StartTaskAsync,
                     SelectedValue = true, // do not show the "press enter to return to main menu" message
                     ForegroundColor = ConsoleColor.Blue
                 },
-        //         //! not implemented
-        //         new MenuEntry() {
-        //             Name = "Verify CSD Drive",
-        //             Task = NotImplemented,
-        //             // Task = TapeVerification.StartOperation,
-        //             Disabled = SysInfo.IsReadonlyFilesystem || true, // remove once implemented
-        //             ForegroundColor = ConsoleColor.DarkYellow
-        //         },
-        //         new MenuEntry() {
-        //             Name = "Clean CSD Drive - Remove files not in index",
-        //             Task = CSD.Cleaner.StartOperation,
-        //             // Task = TapeVerification.StartOperation,
-        //             Disabled = SysInfo.IsReadonlyFilesystem, // remove once implemented
-        //             ForegroundColor = ConsoleColor.DarkYellow
-        //         },
+                // //! not implemented
+                // new MenuEntry() {
+                //     Name = "Verify CSD Drive",
+                //     // Task = Tasks.CSD.VerifyTask.StartTaskAsync,
+                //     Task = NotImplementedAsync,
+                //     Disabled = SysInfo.IsReadonlyFilesystem || true, // remove once implemented
+                //     ForegroundColor = ConsoleColor.DarkYellow
+                // },
+                // new MenuEntry() {
+                //     Name = "Clean CSD Drive - Remove files not in index",
+                //     Task = Tasks.CSD.CleanerTask.StartTaskAsync,
+                //     Disabled = SysInfo.IsReadonlyFilesystem, // remove once implemented
+                //     ForegroundColor = ConsoleColor.DarkYellow
+                // },
                 new MenuEntry() {
                     Name = "Run CSD Archive Process",
-                    Task = CSD.Archiver.StartOperationAsync,
+                    Task = Tasks.CSD.ArchiverTask.StartTaskAsync,
                     Disabled = SysInfo.IsReadonlyFilesystem,
                     ForegroundColor = ConsoleColor.Red
                 }

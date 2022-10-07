@@ -123,6 +123,8 @@ namespace FoxHollow.Archiver.Shared.Classes.Disc
         public void SaveToIndex()
             => this.SaveToJson();
 
+        // TODO: got this error last time this was called:
+        // RunSynchronously may not be called on a task not bound to a delegate, such as the task returned from an asynchronous method.
         public void SaveToJson(string destinationDir = null, string fileName = null)
             => SaveToJsonAsync(destinationDir, fileName).RunSynchronously();
 

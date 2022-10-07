@@ -21,6 +21,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using FoxHollow.Archiver.CLI.Utilities;
 using FoxHollow.Archiver.CLI.Utilities.Disc;
@@ -28,13 +29,19 @@ using FoxHollow.Archiver.CLI.Utilities.Shared;
 using FoxHollow.Archiver.Shared.Classes.Disc;
 using FoxHollow.Archiver.Shared.Utilities;
 
-namespace FoxHollow.Archiver.CLI.Operations.Disc
+namespace FoxHollow.Archiver.CLI.Tasks.Disc
 {
-    public static class ScanForFileRenames
+    public static class ScanForFileRenamesTask
     {
-        public static Task StartOperationAsync()
+        public static Task StartTaskAsync(CancellationToken cToken)
         {
             return Task.CompletedTask;
+
+            // TODO: This needs more in-depth scanning, such as with file fingerprints.
+            //       but this may not necessarily need to be implemented until server
+            //       indexing is built
+
+            // TODO: Implement
 
             // DiscGlobals._destinationDiscs = await Helpers.ReadDiscIndexAsync();
             // Console.Clear();

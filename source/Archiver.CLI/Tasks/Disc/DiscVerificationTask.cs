@@ -38,6 +38,8 @@ namespace FoxHollow.Archiver.CLI.Tasks.Disc
 {
     internal static class DiscVerificationTask
     {
+        // TODO: Show results after process is complete
+        // TODO: Allow verification even if last date is < required verification period
         internal static async Task StartTaskAsync(CancellationToken cToken)
         {
             // todo: use cToken here

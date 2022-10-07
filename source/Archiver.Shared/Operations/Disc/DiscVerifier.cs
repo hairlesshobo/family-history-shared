@@ -118,7 +118,7 @@ namespace FoxHollow.Archiver.Shared.Operations.Disc
                     bool discValid = (disc.Hash.ToLower() == hash.ToLower());
 
                     disc.RecordVerification(DateTime.UtcNow, discValid);
-                    disc.SaveToIndex();
+                    await disc.SaveToIndexAsync();
 
                     _pendingDiscIds.Remove(disc.DiscNumber);
                     _completedDiscIds.Add(disc.DiscNumber);

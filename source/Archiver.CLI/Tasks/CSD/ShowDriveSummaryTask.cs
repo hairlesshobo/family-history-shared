@@ -19,16 +19,19 @@
  */
 
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using FoxHollow.Archiver.CLI.Utilities.CSD;
 using FoxHollow.Archiver.CLI.Utilities.Shared;
 using FoxHollow.Archiver.Shared.Classes.CSD;
 
-namespace FoxHollow.Archiver.CLI.Operations.CSD
+namespace FoxHollow.Archiver.CLI.Tasks.CSD
 {
-    public static class ShowCsdSummary
+    public static class ShowDriveSummaryTask
     {
-        public static void StartOperation()
+        public static Task StartTaskAsync(CancellationToken cToken)
         {
+            return Task.CompletedTask;
             // string drive = CsdUtils.SelectDrive();
 
             // if (drive != null)

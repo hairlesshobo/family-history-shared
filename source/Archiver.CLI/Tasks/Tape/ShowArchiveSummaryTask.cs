@@ -22,24 +22,24 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using FoxHollow.Archiver.CLI.Utilities.Shared;
-using FoxHollow.Archiver.Shared.Classes.CSD;
-using FoxHollow.Archiver.Shared.Operations.CSD;
+using FoxHollow.Archiver.Shared.Classes.Tape;
+using FoxHollow.Archiver.Shared.Operations.Tape;
 using FoxHollow.TerminalUI;
 using FoxHollow.TerminalUI.Elements;
 
-namespace FoxHollow.Archiver.CLI.Tasks.CSD
+namespace FoxHollow.Archiver.CLI.Tasks.Tape
 {
-    internal static class CsdArchiveSummaryTask
+    internal static class ShowArchiveSummaryTask
     {
         internal static async Task StartTaskAsync(CancellationToken cToken)
         {
             // TODO: use cToken here
-            List<CsdDetail> allTapes = await Helpers.ReadCsdIndexAsync(cToken);
+            List<TapeDetail> allTapes = await Helpers.ReadTapeIndexAsync(cToken);
             
             Terminal.Clear();
-            Terminal.Header.UpdateLeft("Disc Archive Summary");
+            Terminal.Header.UpdateLeft("Tape Archive Summary");
 
-            CsdArchiveSummary summary = new CsdArchiveSummary();
+            TapeArchiveSummary summary = new TapeArchiveSummary();
 
             using (Pager pager = Pager.StartNew())
             {

@@ -19,27 +19,31 @@
  */
 
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using FoxHollow.Archiver.CLI.Utilities.Tape;
 using FoxHollow.Archiver.Shared.Classes.Tape;
 
-namespace FoxHollow.Archiver.CLI.Operations.Tape
+namespace FoxHollow.Archiver.CLI.Tasks.Tape
 {
-    public static class TapeArchiver
+    public static class ArchiverTask
     {
-        public static void StartOperation()
+        public static Task StartTaskAsync(CancellationToken cToken)
         {
-            if (TapeUtils.IsTapeLoaded() == false)
-                Console.WriteLine("ERROR: No tape detected in drive. Insert tape and run process again.");
-            else
-            {
-                TapeSourceInfo tape = TapeUtils.SelectTape();
+            return Task.CompletedTask;
 
-                if (tape != null)
-                {
-                    TapeProcessor processor = new TapeProcessor(tape);
-                    processor.ProcessTape();
-                }
-            }
+            // if (TapeUtils.IsTapeLoaded() == false)
+            //     Console.WriteLine("ERROR: No tape detected in drive. Insert tape and run process again.");
+            // else
+            // {
+            //     TapeSourceInfo tape = TapeUtils.SelectTape();
+
+            //     if (tape != null)
+            //     {
+            //         TapeProcessor processor = new TapeProcessor(tape);
+            //         processor.ProcessTape();
+            //     }
+            // }
         }
     }
 }

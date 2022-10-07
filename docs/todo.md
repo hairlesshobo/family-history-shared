@@ -1,3 +1,21 @@
+## V2 MVP Testing
+- [ ] Disc Archive
+  - [ ] Search disc archive
+  - [ ] view archive summary
+  - [ ] Verify discs
+  - [ ] Scan for changes
+  - [ ] Run disc archive
+- [ ] Tape Backups
+  - [ ] Search tape archive
+  - [ ] Read tape summary
+  - [ ] View archive summary
+  - [ ] Verify tape
+  - [ ] Run tape archive
+- [ ] CSD Archive
+  - [ ] Register CSD drive
+  - [ ] View CSD Archive summary
+  - [ ] Run CSD Archive process
+
 ## Async conversion
 The following tasks need to have their UI and task code split and updated to be fully async compatible:
 

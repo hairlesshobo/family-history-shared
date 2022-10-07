@@ -21,17 +21,24 @@
 using System;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using FoxHollow.Archiver.CLI.Utilities.Shared;
 using FoxHollow.Archiver.CLI.Utilities.Tape;
 using FoxHollow.Archiver.Shared.Classes.Tape;
 using FoxHollow.Archiver.Shared.Utilities;
+using FoxHollow.TerminalUI;
 
-namespace FoxHollow.Archiver.CLI.Operations.Tape
+namespace FoxHollow.Archiver.CLI.Tasks.Tape
 {
-    public static class TapeVerification
+    public static class TapeVerificationTask
     {
-        public static void StartOperation()
+        // TODO: Add ability to verify single or verify all tapes
+        public static async Task StartTaskAsync(CancellationToken cToken)
         {
+            // todo: use cToken here
+            Terminal.Header.UpdateLeft("Tape Summary");
+            Terminal.Clear();
+            
             Console.WriteLine("Reading tape information...");
             Console.WriteLine();
 
@@ -39,15 +46,15 @@ namespace FoxHollow.Archiver.CLI.Operations.Tape
             {
                 Formatting.WriteC(ConsoleColor.Red, "ERROR: ");
                 Console.WriteLine("No tape is present in the drive, please insert tape and run this operation again.");
-                Console.ReadLine();
             }
             else
             {
                 if (TapeUtils.TapeHasJsonRecord() == false)
                 {
                     Formatting.WriteC(ConsoleColor.Red, "ERROR: ");
-                    Console.WriteLine("This tape does not contain a summary json record and therefore cannot be verified. Please insert a different tape and run this operation again.");
-                    Console.ReadLine();
+                    Console.WriteLine("This tape does not contain a summary json record and therefore cannot be verified.");
+                    Console.WriteLine();
+                    Console.WriteLine("Please insert a different tape and run this operation again.");
                 }
                 else
                 {

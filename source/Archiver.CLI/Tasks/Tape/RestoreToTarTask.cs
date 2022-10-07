@@ -27,11 +27,11 @@ using FoxHollow.Archiver.CLI.Utilities.Tape;
 using FoxHollow.Archiver.Shared.Classes.Tape;
 using FoxHollow.Archiver.Shared.Utilities;
 
-namespace FoxHollow.Archiver.CLI.Operations.Tape
+namespace FoxHollow.Archiver.CLI.Tasks.Tape
 {
-    public static class RestoreTapeToTar
+    public static class RestoreToTarTask
     {
-        public static Task StartOperationAsync(CancellationToken cToken)
+        public static Task StartTaskAsync(CancellationToken cToken)
         {
             return Task.CompletedTask;
             // Console.WriteLine("Reading tape information...");

@@ -30,11 +30,11 @@ using FoxHollow.Archiver.Shared.Classes.CSD;
 using FoxHollow.Archiver.Shared.Utilities;
 using FoxHollow.TerminalUI;
 
-namespace FoxHollow.Archiver.CLI.Operations.CSD
+namespace FoxHollow.Archiver.CLI.Tasks.CSD
 {
-    public static class RegisterDrive
+    public static class RegisterDriveTask
     {
-        public static async Task StartOperationAsync(CancellationToken cToken)
+        public static async Task StartTaskAsync(CancellationToken cToken)
         {
             // TODO: use cToken here
             List<CsdDetail> allCsds = await Helpers.ReadCsdIndexAsync(cToken);

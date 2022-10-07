@@ -28,18 +28,18 @@ using FoxHollow.Archiver.Shared.Classes.CSD;
 using FoxHollow.Archiver.Shared.Utilities;
 using FoxHollow.TerminalUI;
 
-namespace FoxHollow.Archiver.CLI.Operations.CSD
+namespace FoxHollow.Archiver.CLI.Tasks.CSD
 {
-    public static class Archiver
+    public static class ArchiverTask
     {
-        private static async Task RunArchive(bool askBeforeArchive, CancellationToken cToken)
+        private static async Task RunArchiveAsync(bool askBeforeArchive, CancellationToken cToken)
         {
             // TODO: use cToken here
             CsdScanStats stats = new CsdScanStats(await Helpers.ReadCsdIndexAsync(cToken));
             Status.SetStats(stats);
 
-            Terminal.Clear();
             Terminal.Header.UpdateLeft("CSD Archiver");
+            Terminal.Clear();
 
             // Formatting.WriteLineC(ConsoleColor.Magenta, "Preparing...");
 
@@ -117,10 +117,10 @@ namespace FoxHollow.Archiver.CLI.Operations.CSD
             }
         }
 
-        public static Task StartScanOnlyAsync(CancellationToken cToken)
-            => RunArchive(true, cToken);
+        public static Task StartScanOnlyTaskAsync(CancellationToken cToken)
+            => RunArchiveAsync(true, cToken);
 
-        public static Task StartOperationAsync(CancellationToken cToken)
-            => RunArchive(false, cToken);
+        public static Task StartTaskAsync(CancellationToken cToken)
+            => RunArchiveAsync(false, cToken);
     }
 }
