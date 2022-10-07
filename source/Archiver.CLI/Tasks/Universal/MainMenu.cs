@@ -111,6 +111,7 @@ namespace FoxHollow.Archiver.CLI.Tasks.Universal
                 },
                 new MenuEntry() {
                     Name = "Search Disc Archive",
+                    HelpText = "Search the entire disc archive for one or more files",
                     Task = Tasks.Disc.DiscSearcherTask.StartTaskAsync,
                     ForegroundColor = ConsoleColor.Green,
                     SelectedValue = true, // do not show the "press enter to return to main menu" message
@@ -118,42 +119,49 @@ namespace FoxHollow.Archiver.CLI.Tasks.Universal
                 //! not implemented
                 new MenuEntry() {
                     Name = "Restore entire disc(s)",
+                    HelpText = "Restore the entire contents of one or more discs to the local hard drive",
                     Task = NotImplementedAsync,
                     SelectedValue = true,
                     Disabled = !SysInfo.IsOpticalDrivePresent || true, // TODO: remove once implemented
                     ForegroundColor = ConsoleColor.Green
                 },
                 new MenuEntry() {
-                    Name = "View Archive Summary",
-                    Task = Tasks.Disc.DiscArchiveSummaryTask.StartTaskAsync,
-                    SelectedValue = true, // do not show the "press enter to return to main menu" message
-                    ForegroundColor = ConsoleColor.Blue
-                },
-                new MenuEntry() {
                     Name = "View disc summary",
+                    HelpText = "View a summary of the disc currently in the drive",
                     Task = NotImplementedAsync, // Tasks.Disc.ShowDiscSummaryTask.StartTaskAsync,
                     Disabled = !SysInfo.IsOpticalDrivePresent || true, // TODO: remove once implemented
                     ForegroundColor = ConsoleColor.Blue
                 },
                 new MenuEntry() {
+                    Name = "View Archive Summary",
+                    HelpText = "View a summary of the entire disc archive",
+                    Task = Tasks.Disc.DiscArchiveSummaryTask.StartTaskAsync,
+                    SelectedValue = true, // do not show the "press enter to return to main menu" message
+                    ForegroundColor = ConsoleColor.Blue
+                },
+                new MenuEntry() {
                     Name = "Verify Discs",
+                    HelpText = "Verify the integrity of one or more archive discs",
                     Task = Tasks.Disc.DiscVerificationTask.StartTaskAsync,
                     Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsOpticalDrivePresent,
                     ForegroundColor = ConsoleColor.DarkYellow
                 },
                 new MenuEntry() {
                     Name = "Scan For Changes",
+                    HelpText = "Scan for any files that need to be added to the disc archive",
                     Task = Tasks.Disc.DiscArchiverTask.StartScanOnlyTaskAsync,
                     ForegroundColor = ConsoleColor.DarkYellow
                 },
                 new MenuEntry() {
                     Name = "Scan For Renamed/Moved Files",
+                    HelpText = "Scan for any files currently in index that were likely renamed or moved",
                     Task = NotImplementedAsync, // Tasks.Disc.ScanForFileRenamesTask.StartTaskAsync,
                     Disabled = true, // TODO: Remove once implemented
                     ForegroundColor = ConsoleColor.DarkYellow
                 },
                 new MenuEntry() {
                     Name = "Run Archive process",
+                    HelpText = "Scan for new files to add to archive and generate ISO files to write to discs",
                     Task = Tasks.Disc.DiscArchiverTask.StartTaskAsync,
                     Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsOpticalDrivePresent,
                     ForegroundColor = ConsoleColor.Red
@@ -176,6 +184,7 @@ namespace FoxHollow.Archiver.CLI.Tasks.Universal
                 },
                 new MenuEntry() {
                     Name = "Search Tape Archive",
+                    HelpText = "Search the entire tape archive for one or more files",
                     Task = Tasks.Tape.TapeSearcherTask.StartTaskAsync,
                     ForegroundColor = ConsoleColor.Green,
                     SelectedValue = true, // do not show the "press enter to return to main menu" message
@@ -183,6 +192,7 @@ namespace FoxHollow.Archiver.CLI.Tasks.Universal
                 //! not implemented
                 new MenuEntry() {
                     Name = "Restore entire tape (to tar file)",
+                    HelpText = "Restore the contents of a single tape to a tar file on the local hard drive",
                     Task = NotImplementedAsync, // Tasks.Tape.RestoreToTarTask.StartTaskAsync,
                     Disabled = !SysInfo.IsTapeDrivePresent || true, // TODO: remove once implemented
                     ForegroundColor = ConsoleColor.Green
@@ -190,12 +200,14 @@ namespace FoxHollow.Archiver.CLI.Tasks.Universal
                 //! not implemented
                 new MenuEntry() {
                     Name = "Restore entire tape (to original file structure)",
+                    HelpText = "Restore the contents of a single tape to a directory on the local hard drive",
                     Task = NotImplementedAsync, // Tasks.Taepe.RestoreToFilesTask.StartTaskAsync,
                     Disabled = !SysInfo.IsTapeDrivePresent || true, // TODO: remove once implemented
                     ForegroundColor = ConsoleColor.Green
                 },
                 new MenuEntry() {
-                    Name = "Read Tape Summary",
+                    Name = "View Tape Summary",
+                    HelpText = "View a summary of the tape currently in the drive",
                     Task = Tasks.Tape.ShowTapeSummaryTask.StartTaskAsync,
                     Disabled = !SysInfo.IsTapeDrivePresent,
                     SelectedValue = true, // do not show the "press enter to return to main menu" message
@@ -203,12 +215,14 @@ namespace FoxHollow.Archiver.CLI.Tasks.Universal
                 },
                 new MenuEntry() {
                     Name = "View Archive Summary",
+                    HelpText = "View a summary of the entire tape archive",
                     Task = Tasks.Tape.ShowArchiveSummaryTask.StartTaskAsync,
                     SelectedValue = true, // do not show the "press enter to return to main menu" message
                     ForegroundColor = ConsoleColor.Blue
                 },
                 new MenuEntry() {
                     Name = "Verify Tape",
+                    HelpText = "Verify the integrity of archive tape currently in the drive",
                     Task = Tasks.Tape.TapeVerificationTask.StartTaskAsync,
                     Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsTapeDrivePresent,
                     SelectedValue = true, // do not show the "press enter to return to main menu" message
@@ -216,6 +230,7 @@ namespace FoxHollow.Archiver.CLI.Tasks.Universal
                 },
                 new MenuEntry() {
                     Name = "Run tape archive",
+                    HelpText = "Select and write a tape with the newest files currently available",
                     Task = Tasks.Tape.ArchiverTask.StartTaskAsync,
                     Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsTapeDrivePresent || true, // TODO: Remove once converted
                     ForegroundColor = ConsoleColor.Red
@@ -233,45 +248,52 @@ namespace FoxHollow.Archiver.CLI.Tasks.Universal
                 },
                 new MenuEntry() {
                     Name = "Register CSD Drive",
+                    HelpText = "Register a new drive to be used for CSD storage",
                     Task = Tasks.CSD.RegisterDriveTask.StartTaskAsync,
                     ForegroundColor = ConsoleColor.Green
                 },
                 //! not implemented
                 new MenuEntry() {
                     Name = "Restore entire CSD Drive",
+                    HelpText = "Restore the contents of a CSD drive to the local hard drive",
                     Task = NotImplementedAsync,
                     Disabled = true, // TODO: remove once implemented
                     ForegroundColor = ConsoleColor.Green
                 },
+                //! not implemented
+                new MenuEntry() {
+                    Name = "View CSD Drive Summary",
+                    HelpText = "View a summary of the currently connect CSD drive",
+                    Task = NotImplementedAsync, // Tasks.CSD.ShowDriveSummaryTask.StartTaskAsync,         
+                    Disabled = true, // TODO: remove once implemented
+                    SelectedValue = true, // do not show the "press enter to return to main menu" message
+                    ForegroundColor = ConsoleColor.Blue
+                },
                 new MenuEntry() {
                     Name = "View CSD Archive Summary",
+                    HelpText = "View a summary of the entire CSD archive",
                     Task = Tasks.CSD.ShowArchiveSummaryTask.StartTaskAsync,
                     SelectedValue = true, // do not show the "press enter to return to main menu" message
                     ForegroundColor = ConsoleColor.Blue
                 },
                 //! not implemented
                 new MenuEntry() {
-                    Name = "View CSD Drive Summary",
-                    Task = NotImplementedAsync, // Tasks.CSD.ShowDriveSummaryTask.StartTaskAsync,         
-                    Disabled = true, // TODO: remove once implemented
-                    SelectedValue = true, // do not show the "press enter to return to main menu" message
-                    ForegroundColor = ConsoleColor.Blue
-                },
-                //! not implemented
-                new MenuEntry() {
                     Name = "Verify CSD Drive",
+                    HelpText = "Verify the integrity of the files on the currently connected CSD drive",
                     Task = NotImplementedAsync, // Tasks.CSD.VerifyTask.StartTaskAsync,
                     Disabled = SysInfo.IsReadonlyFilesystem || true, // TODO: remove once implemented
                     ForegroundColor = ConsoleColor.DarkYellow
                 },
                 new MenuEntry() {
-                    Name = "Clean CSD Drive - Remove files not in index",
+                    Name = "Clean CSD Drive",
+                    HelpText = "Remove any files on the connected CSD drive that are not in the index",
                     Task = NotImplementedAsync, // Tasks.CSD.CleanerTask.StartTaskAsync,
                     Disabled = SysInfo.IsReadonlyFilesystem, // TODO: remove once implemented
                     ForegroundColor = ConsoleColor.Red
                 },
                 new MenuEntry() {
                     Name = "Run CSD Archive Process",
+                    HelpText = "Scan for and archive new files to the CSD archive",
                     Task = Tasks.CSD.ArchiverTask.StartTaskAsync,
                     Disabled = SysInfo.IsReadonlyFilesystem,
                     ForegroundColor = ConsoleColor.Red
@@ -290,11 +312,13 @@ namespace FoxHollow.Archiver.CLI.Tasks.Universal
                 //! not implemented
                 new MenuEntry() {
                     Name = "Copy Tools to Local Disk",
+                    HelpText = "Install a copy of the archiver tool to the local hard drive",
                     Task = NotImplementedAsync,
                     Disabled = !SysInfo.IsReadonlyFilesystem || true // TODO: Remove once implemented 
                 },
                 new MenuEntry() {
                     Name = "Create Index ISO",
+                    HelpText = "Generate an ISO of the archiver index to burn to disc for safe storage",
                     Task = NotImplementedAsync, // Helpers.CreateIndexIso,
                     Disabled = SysInfo.IsReadonlyFilesystem || true // TODO: Remove once implemented
                 }//,
