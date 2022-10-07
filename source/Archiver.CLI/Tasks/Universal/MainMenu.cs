@@ -31,11 +31,11 @@ using FoxHollow.TerminalUI.Elements;
 using FoxHollow.TerminalUI.Types;
 using static FoxHollow.Archiver.Shared.Utilities.Formatting;
 
-namespace FoxHollow.Archiver.CLI.Operations
+namespace FoxHollow.Archiver.CLI.Tasks.Universal
 {
     public static class MainMenu
     {
-        public async static Task StartOperationAsync(CancellationTokenSource cts)
+        public async static Task StartTaskAsync(CancellationTokenSource cts)
             => await ShowMenuAsync(cts);
 
         private async static Task ShowMenuAsync(CancellationTokenSource cts)
@@ -120,7 +120,7 @@ namespace FoxHollow.Archiver.CLI.Operations
                     Name = "Restore entire disc(s)",
                     Task = NotImplementedAsync,
                     SelectedValue = true,
-                    Disabled = !SysInfo.IsOpticalDrivePresent || true, // remove once implemented
+                    Disabled = !SysInfo.IsOpticalDrivePresent || true, // TODO: remove once implemented
                     ForegroundColor = ConsoleColor.Green
                 },
                 new MenuEntry() {
@@ -129,24 +129,29 @@ namespace FoxHollow.Archiver.CLI.Operations
                     SelectedValue = true, // do not show the "press enter to return to main menu" message
                     ForegroundColor = ConsoleColor.Blue
                 },
-                // TODO: Add "View disc summary"
+                new MenuEntry() {
+                    Name = "View disc summary",
+                    Task = NotImplementedAsync, // Tasks.Disc.ShowDiscSummaryTask.StartTaskAsync,
+                    Disabled = !SysInfo.IsOpticalDrivePresent || true, // TODO: remove once implemented
+                    ForegroundColor = ConsoleColor.Blue
+                },
                 new MenuEntry() {
                     Name = "Verify Discs",
                     Task = Tasks.Disc.DiscVerificationTask.StartTaskAsync,
                     Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsOpticalDrivePresent,
                     ForegroundColor = ConsoleColor.DarkYellow
-                }
-                ,
+                },
                 new MenuEntry() {
                     Name = "Scan For Changes",
                     Task = Tasks.Disc.DiscArchiverTask.StartScanOnlyTaskAsync,
                     ForegroundColor = ConsoleColor.DarkYellow
                 },
-                // new MenuEntry() {
-                //     Name = "Scan For Renamed/Moved Files",
-                //     Task = Tasks.Disc.ScanForFileRenamesTask.StartTaskAsync,
-                //     ForegroundColor = ConsoleColor.DarkYellow
-                // },
+                new MenuEntry() {
+                    Name = "Scan For Renamed/Moved Files",
+                    Task = NotImplementedAsync, // Tasks.Disc.ScanForFileRenamesTask.StartTaskAsync,
+                    Disabled = true, // TODO: Remove once implemented
+                    ForegroundColor = ConsoleColor.DarkYellow
+                },
                 new MenuEntry() {
                     Name = "Run Archive process",
                     Task = Tasks.Disc.DiscArchiverTask.StartTaskAsync,
@@ -178,15 +183,15 @@ namespace FoxHollow.Archiver.CLI.Operations
                 //! not implemented
                 new MenuEntry() {
                     Name = "Restore entire tape (to tar file)",
-                    Task = Tasks.Tape.RestoreToTarTask.StartTaskAsync,
-                    Disabled = !SysInfo.IsTapeDrivePresent || true, // remove once implemented
+                    Task = NotImplementedAsync, // Tasks.Tape.RestoreToTarTask.StartTaskAsync,
+                    Disabled = !SysInfo.IsTapeDrivePresent || true, // TODO: remove once implemented
                     ForegroundColor = ConsoleColor.Green
                 },
                 //! not implemented
                 new MenuEntry() {
                     Name = "Restore entire tape (to original file structure)",
-                    Task = NotImplementedAsync,
-                    Disabled = !SysInfo.IsTapeDrivePresent || true, // remove once implemented
+                    Task = NotImplementedAsync, // Tasks.Taepe.RestoreToFilesTask.StartTaskAsync,
+                    Disabled = !SysInfo.IsTapeDrivePresent || true, // TODO: remove once implemented
                     ForegroundColor = ConsoleColor.Green
                 },
                 new MenuEntry() {
@@ -209,12 +214,12 @@ namespace FoxHollow.Archiver.CLI.Operations
                     SelectedValue = true, // do not show the "press enter to return to main menu" message
                     ForegroundColor = ConsoleColor.DarkYellow
                 },
-                // new MenuEntry() {
-                //     Name = "Run tape archive",
-                //     Task = Tasks.Tap.ArchiverTask.StartTaskAsync,
-                //     Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsTapeDrivePresent,
-                //     ForegroundColor = ConsoleColor.Red
-                // }
+                new MenuEntry() {
+                    Name = "Run tape archive",
+                    Task = Tasks.Tape.ArchiverTask.StartTaskAsync,
+                    Disabled = SysInfo.IsReadonlyFilesystem || !SysInfo.IsTapeDrivePresent || true, // TODO: Remove once converted
+                    ForegroundColor = ConsoleColor.Red
+                }
             };
         }
 
@@ -231,41 +236,40 @@ namespace FoxHollow.Archiver.CLI.Operations
                     Task = Tasks.CSD.RegisterDriveTask.StartTaskAsync,
                     ForegroundColor = ConsoleColor.Green
                 },
-                // //! not implemented
-                // new MenuEntry() {
-                //     Name = "Restore entire CSD Drive",
-                //     Task = NotImplemented,
-                //     Disabled = true, // remove once implemented
-                //     ForegroundColor = ConsoleColor.Green
-                // },
-                // //! not implemented
-                // new MenuEntry() {
-                //     Name = "Read CSD Drive Summary",
-                //     Task = Tasks.CSD.ShowDriveSummaryTask.StartTaskAsync,         
-                //     Disabled = true, // remove once implemented
-                //     SelectedValue = true, // do not show the "press enter to return to main menu" message
-                //     ForegroundColor = ConsoleColor.Blue
-                // },
+                //! not implemented
+                new MenuEntry() {
+                    Name = "Restore entire CSD Drive",
+                    Task = NotImplementedAsync,
+                    Disabled = true, // TODO: remove once implemented
+                    ForegroundColor = ConsoleColor.Green
+                },
                 new MenuEntry() {
                     Name = "View CSD Archive Summary",
                     Task = Tasks.CSD.ShowArchiveSummaryTask.StartTaskAsync,
                     SelectedValue = true, // do not show the "press enter to return to main menu" message
                     ForegroundColor = ConsoleColor.Blue
                 },
-                // //! not implemented
-                // new MenuEntry() {
-                //     Name = "Verify CSD Drive",
-                //     // Task = Tasks.CSD.VerifyTask.StartTaskAsync,
-                //     Task = NotImplementedAsync,
-                //     Disabled = SysInfo.IsReadonlyFilesystem || true, // remove once implemented
-                //     ForegroundColor = ConsoleColor.DarkYellow
-                // },
-                // new MenuEntry() {
-                //     Name = "Clean CSD Drive - Remove files not in index",
-                //     Task = Tasks.CSD.CleanerTask.StartTaskAsync,
-                //     Disabled = SysInfo.IsReadonlyFilesystem, // remove once implemented
-                //     ForegroundColor = ConsoleColor.DarkYellow
-                // },
+                //! not implemented
+                new MenuEntry() {
+                    Name = "View CSD Drive Summary",
+                    Task = NotImplementedAsync, // Tasks.CSD.ShowDriveSummaryTask.StartTaskAsync,         
+                    Disabled = true, // TODO: remove once implemented
+                    SelectedValue = true, // do not show the "press enter to return to main menu" message
+                    ForegroundColor = ConsoleColor.Blue
+                },
+                //! not implemented
+                new MenuEntry() {
+                    Name = "Verify CSD Drive",
+                    Task = NotImplementedAsync, // Tasks.CSD.VerifyTask.StartTaskAsync,
+                    Disabled = SysInfo.IsReadonlyFilesystem || true, // TODO: remove once implemented
+                    ForegroundColor = ConsoleColor.DarkYellow
+                },
+                new MenuEntry() {
+                    Name = "Clean CSD Drive - Remove files not in index",
+                    Task = NotImplementedAsync, // Tasks.CSD.CleanerTask.StartTaskAsync,
+                    Disabled = SysInfo.IsReadonlyFilesystem, // TODO: remove once implemented
+                    ForegroundColor = ConsoleColor.Red
+                },
                 new MenuEntry() {
                     Name = "Run CSD Archive Process",
                     Task = Tasks.CSD.ArchiverTask.StartTaskAsync,
@@ -283,23 +287,20 @@ namespace FoxHollow.Archiver.CLI.Operations
                     Name = "Universal Operations",
                     Header = true
                 },
-                // new MenuEntry() {
-                //     Name = "Copy Tools to Local Disk",
-                //     Task = NotImplemented,
-                //     Disabled = !SysInfo.IsReadonlyFilesystem
-                // },
-                // new MenuEntry() {
-                //     Name = "Create Index ISO",
-                //     Task = Helpers.CreateIndexIso,
-                //     Disabled = SysInfo.IsReadonlyFilesystem
-                // },
+                //! not implemented
                 new MenuEntry() {
-                    Name = "Explode",
-                    Task = (cToken) => throw new InvalidOperationException("meow!!!!")
+                    Name = "Copy Tools to Local Disk",
+                    Task = NotImplementedAsync,
+                    Disabled = !SysInfo.IsReadonlyFilesystem || true // TODO: Remove once implemented 
+                },
+                new MenuEntry() {
+                    Name = "Create Index ISO",
+                    Task = NotImplementedAsync, // Helpers.CreateIndexIso,
+                    Disabled = SysInfo.IsReadonlyFilesystem || true // TODO: Remove once implemented
                 }//,
                 // new MenuEntry() {
-                //     Name = "Exit",
-                //     Task = () => Environment.Exit(0)
+                //     Name = "Explode",
+                //     Task = (cToken) => throw new InvalidOperationException("meow!!!!")
                 // }
             };
         }

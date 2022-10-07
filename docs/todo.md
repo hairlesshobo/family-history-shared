@@ -1,20 +1,112 @@
 ## V2 MVP Testing
 - [ ] Disc Archive
-  - [ ] Search disc archive
-  - [ ] view archive summary
+  - [x] Search disc archive
+    - [x] task separation
+    - [x] UI task async
+    - [x] Terminal UI conversion
+    - [x] back end task async
+    - [x] runs without exception
+
+  - [x] view archive summary
+    - [x] task separation
+    - [x] UI task async
+    - [x] Terminal UI conversion
+    - [x] back end task async
+    - [ ] runs without exception
+
   - [ ] Verify discs
+    - [ ] task separation
+    - [ ] UI task async
+    - [ ] Terminal UI conversion
+    - [ ] back end task async
+    - [ ] runs without exception
+    - !!! UI issues found
+
   - [ ] Scan for changes
+    - [ ] task separation
+    - [ ] UI task async
+    - [ ] Terminal UI conversion
+    - [ ] back end task async
+    - [ ] runs without exception
+
   - [ ] Run disc archive
+    - [ ] task separation
+    - [ ] UI task async
+    - [ ] Terminal UI conversion
+    - [ ] back end task async
+    - [ ] runs without exception
+
+
+
 - [ ] Tape Backups
   - [ ] Search tape archive
+    - [ ] task separation
+    - [ ] UI task async
+    - [ ] Terminal UI conversion
+    - [ ] back end task async
+    - [ ] runs without exception
+
   - [ ] Read tape summary
+    - [ ] task separation
+    - [ ] UI task async
+    - [ ] Terminal UI conversion
+    - [ ] back end task async
+    - [ ] runs without exception
+
   - [ ] View archive summary
+    - [ ] task separation
+    - [ ] UI task async
+    - [ ] Terminal UI conversion
+    - [ ] back end task async
+    - [ ] runs without exception
+
   - [ ] Verify tape
+    - [ ] task separation
+    - [ ] UI task async
+    - [ ] Terminal UI conversion
+    - [ ] back end task async
+    - [ ] runs without exception
+
   - [ ] Run tape archive
+    - [ ] task separation
+    - [ ] UI task async
+    - [ ] Terminal UI conversion
+    - [ ] back end task async
+    - [ ] runs without exception
+
+
+
 - [ ] CSD Archive
   - [ ] Register CSD drive
+    - [ ] task separation
+    - [ ] UI task async
+    - [ ] Terminal UI conversion
+    - [ ] back end task async
+    - [ ] runs without exception
+
   - [ ] View CSD Archive summary
+    - [ ] task separation
+    - [ ] UI task async
+    - [ ] Terminal UI conversion
+    - [ ] back end task async
+    - [ ] runs without exception
+
   - [ ] Run CSD Archive process
+    - [ ] task separation
+    - [ ] UI task async
+    - [ ] Terminal UI conversion
+    - [ ] back end task async
+    - [ ] runs without exception
+
+
+
+- [ ] Universal tools
+  - [ ] Create index ISO
+    - [ ] task separation
+    - [ ] UI task async
+    - [ ] Terminal UI conversion
+    - [ ] back end task async
+    - [ ] runs without exception
 
 ## Async conversion
 The following tasks need to have their UI and task code split and updated to be fully async compatible:

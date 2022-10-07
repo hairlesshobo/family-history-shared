@@ -18,7 +18,7 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-using FoxHollow.Archiver.CLI.Operations;
+using FoxHollow.Archiver.CLI.Tasks;
 using FoxHollow.Archiver.Shared;
 using FoxHollow.Archiver.Shared.Utilities;
 using FoxHollow.TerminalUI;
@@ -32,7 +32,7 @@ namespace FoxHollow.Archiver.CLI
             Utils.RequireSupportedOS();
             SysInfo.InitPlatform();
 
-            Terminal.Run("Loading...", "Archiver", MainMenu.StartOperationAsync);
+            Terminal.Run("Loading...", "Archiver", Tasks.Universal.MainMenu.StartTaskAsync);
         }
     }
 }
