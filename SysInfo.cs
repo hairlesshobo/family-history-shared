@@ -19,7 +19,9 @@
  */
 
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using FoxHollow.FHM.Shared.Models;
 
@@ -30,6 +32,26 @@ namespace FoxHollow.FHM.Shared
         public static string ExecutionRoot { get; private set; }
         public static OSType OSType { get; private set; } = OSType.Unknown;
         public static bool OSSupported { get; private set; } = true;
+
+        /// <summary>
+        ///     CPU architecture of the currently running system
+        /// </summary>
+        public static Architecture Architecture => System.Runtime.InteropServices.RuntimeInformation.OSArchitecture;
+
+        /// <summary>
+        ///     User-friendly description of the currently running system
+        /// </summary>
+        public static string Description => System.Runtime.InteropServices.RuntimeInformation.OSDescription;
+
+        /// <summary>
+        ///     Identifier for the runtime
+        /// </summary>
+        public static string Identifier => System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier;
+
+        /// <summary>
+        ///     Process ID of the currently running application
+        /// </summary>
+        public static int PID => Process.GetCurrentProcess().Id;
 
         static SysInfo()
         {
