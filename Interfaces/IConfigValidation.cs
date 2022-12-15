@@ -20,9 +20,9 @@
 
 using System;
 using System.Collections.Generic;
-using FoxHollow.Archiver.Shared.Models;
+using FoxHollow.FHM.Shared.Models;
 
-namespace FoxHollow.Archiver.Shared.Interfaces
+namespace FoxHollow.FHM.Shared.Interfaces
 {
     public interface IValidatableConfig
     {

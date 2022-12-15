@@ -20,7 +20,7 @@
 
 using System;
 
-namespace FoxHollow.Archiver.Shared.Interfaces
+namespace FoxHollow.FHM.Shared.Interfaces
 {
     public interface ISourceFile
     {

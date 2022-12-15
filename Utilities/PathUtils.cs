@@ -22,10 +22,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using FoxHollow.Archiver.Shared.Exceptions;
-using FoxHollow.Archiver.Shared.Models;
+using FoxHollow.FHM.Shared.Exceptions;
+using FoxHollow.FHM.Shared.Models;
 
-namespace FoxHollow.Archiver.Shared.Utilities
+namespace FoxHollow.FHM.Shared.Utilities
 {
     // TODO: move to a separate library
     public static partial class PathUtils
@@ -131,13 +131,13 @@ namespace FoxHollow.Archiver.Shared.Utilities
 
             // if path starts with ./ or ../, prepend the path our executable is in
             if (inPath.StartsWith("./") || inPath.StartsWith("../"))
-                inPath = $"{SysInfo.Directories.Bin}/{inPath}";
+                inPath = $"{SysInfo.ExecutionRoot}/{inPath}";
 
             // a bare filename is provided with no leading ./, ../, or / is provided..
             // we prepend current directory.. but only if there is also no
             // ':' present, which would indicate a protocol was provided
             if (!inPath.StartsWith('/') && inPath.IndexOf(':') < 0)
-                inPath = $"{SysInfo.Directories.Bin}/{inPath}";
+                inPath = $"{SysInfo.ExecutionRoot}/{inPath}";
 
             // if there is a protocol or drive provided, store it for later
             string protocolOrDrive = String.Empty;

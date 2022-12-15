@@ -19,19 +19,22 @@
  */
 
 using System;
-using FoxHollow.Archiver.Shared.Native;
+using FoxHollow.FHM.Shared.Native;
 using Microsoft.Win32.SafeHandles;
-using static FoxHollow.Archiver.Shared.Native.Windows;
+using static FoxHollow.FHM.Shared.Native.Windows;
 
-namespace FoxHollow.Archiver.Shared.Utilities
+namespace FoxHollow.FHM.Shared.Utilities
 {
     public static partial class TapeUtilsNew
     {
         private static bool WindowsIsTapeDrivePresent()
         {
             // TODO: Why is the native tape driver class not being used here?
+            // TODO: This should scan for any tape drive, not just the one specified in config
+            //       validatoin of specified tape drive should be done during app init
             SafeFileHandle handle = Windows.CreateFile(
-                SysInfo.TapeDrive,
+                // SysInfo.TapeDrive,
+                @"\\.\Tape0",
                 GENERIC_READ | GENERIC_WRITE,
                 0,
                 IntPtr.Zero,

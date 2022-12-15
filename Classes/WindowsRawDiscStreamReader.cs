@@ -23,13 +23,13 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using FoxHollow.Archiver.Shared.Exceptions;
-using FoxHollow.Archiver.Shared.Models;
-using FoxHollow.Archiver.Shared.Native;
-using FoxHollow.Archiver.Shared.Utilities;
+using FoxHollow.FHM.Shared.Exceptions;
+using FoxHollow.FHM.Shared.Models;
+using FoxHollow.FHM.Shared.Native;
+using FoxHollow.FHM.Shared.Utilities;
 using Microsoft.Win32.SafeHandles;
 
-namespace FoxHollow.Archiver.Shared.Classes
+namespace FoxHollow.FHM.Shared.Classes
 {
 
     public class WindowsRawDiscStreamReader : Stream

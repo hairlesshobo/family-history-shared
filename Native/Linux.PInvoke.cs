@@ -20,9 +20,9 @@
 
 using System;
 using System.Runtime.InteropServices;
-using FoxHollow.Archiver.Shared.Exceptions;
+using FoxHollow.FHM.Shared.Exceptions;
 
-namespace FoxHollow.Archiver.Shared.Native
+namespace FoxHollow.FHM.Shared.Native
 {
     public static partial class Linux
     {

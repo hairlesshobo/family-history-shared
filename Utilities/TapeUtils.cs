@@ -19,19 +19,12 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text;
-using System.Text.Json;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
-using FoxHollow.Archiver.Shared.Classes.Tape;
-using FoxHollow.Archiver.Shared.Exceptions;
-using FoxHollow.Archiver.Shared.Models;
+using FoxHollow.FHM.Shared.Exceptions;
+using FoxHollow.FHM.Shared.Models;
 
-namespace FoxHollow.Archiver.Shared.Utilities
+namespace FoxHollow.FHM.Shared.Utilities
 {
     public static partial class TapeUtilsNew
     {
@@ -72,13 +65,13 @@ namespace FoxHollow.Archiver.Shared.Utilities
         // TODO: Find a way to split this that works for archiver and tape server
         public static bool IsTapeDrivePresent()
         {
-            if (SysInfo.Config.Tape.Driver.ToLower() != "auto-remote")
-            {
+            // if (SysInfo.Config.Tape.Driver.ToLower() != "auto-remote")
+            // {
                 if (SysInfo.OSType == OSType.Windows)
                     return WindowsIsTapeDrivePresent();
                 else if (SysInfo.OSType == OSType.Linux)
                     return LinuxIsTapeDrivePresent();
-            }
+            // }
 
             return false;
         }

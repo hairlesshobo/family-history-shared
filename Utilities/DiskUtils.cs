@@ -18,14 +18,10 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-using System;
-using System.IO;
-using System.Text;
-using FoxHollow.Archiver.Shared.Classes.Disc;
-using FoxHollow.Archiver.Shared.Exceptions;
-using FoxHollow.Archiver.Shared.Models;
+using FoxHollow.FHM.Shared.Exceptions;
+using FoxHollow.FHM.Shared.Models;
 
-namespace FoxHollow.Archiver.Shared.Utilities
+namespace FoxHollow.FHM.Shared.Utilities
 {
     public static partial class DiskUtils
     {

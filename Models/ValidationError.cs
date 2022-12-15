@@ -21,7 +21,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace FoxHollow.Archiver.Shared.Models
+namespace FoxHollow.FHM.Shared.Models
 {
     public static class Extensions
     {

@@ -20,7 +20,7 @@
 
 using System;
 
-namespace FoxHollow.Archiver.Shared.Utilities
+namespace FoxHollow.FHM.Shared.Utilities
 {
     public static class ConsoleUtils
     {

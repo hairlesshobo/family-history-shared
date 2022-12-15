@@ -22,15 +22,17 @@ using System;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using FoxHollow.Archiver.Shared.Exceptions;
-using FoxHollow.Archiver.Shared.Models;
-using FoxHollow.Archiver.Shared.TapeDrivers;
+using FoxHollow.FHM.Shared.Exceptions;
+using FoxHollow.FHM.Shared.Models;
+using FoxHollow.FHM.Shared.TapeDrivers;
 
-namespace FoxHollow.Archiver.Shared.Utilities
+namespace FoxHollow.FHM.Shared.Utilities
 {
     public static partial class TapeUtilsNew
     {
         private static bool LinuxIsTapeDrivePresent()
-            => File.Exists(SysInfo.TapeDrive);
+            // TODO: This should scan for any tape drive, not just use the one in config
+            => false;
+            // => File.Exists(SysInfo.TapeDrive);
     }
 }

@@ -19,9 +19,9 @@
  */
 
 using System;
-using FoxHollow.Archiver.Shared.Models;
+using FoxHollow.FHM.Shared.Models;
 
-namespace FoxHollow.Archiver.Shared.Utilities
+namespace FoxHollow.FHM.Shared.Utilities
 {
     public static partial class Utils
     {

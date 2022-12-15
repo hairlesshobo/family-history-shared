@@ -20,7 +20,7 @@
 
 using System;
 
-namespace FoxHollow.Archiver.Shared.Exceptions
+namespace FoxHollow.FHM.Shared.Exceptions
 {
     public class TapeDriveNotOpenException : Exception
     {

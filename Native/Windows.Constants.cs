@@ -20,7 +20,7 @@
 
 using System;
 
-namespace FoxHollow.Archiver.Shared.Native
+namespace FoxHollow.FHM.Shared.Native
 {
     public static partial class Windows
     {

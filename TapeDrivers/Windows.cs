@@ -24,15 +24,12 @@ using System.Runtime.InteropServices;
 
 using Microsoft.Win32.SafeHandles;
 
-using System.Collections.Generic;
-using System.Text;
-using FoxHollow.Archiver.Shared.Classes.Tape;
-using FoxHollow.Archiver.Shared.Native;
+using FoxHollow.FHM.Shared.Native;
 
-using static FoxHollow.Archiver.Shared.Native.Windows;
+using static FoxHollow.FHM.Shared.Native.Windows;
 //using Bsw.Types.Logger; 
 
-namespace FoxHollow.Archiver.Shared.TapeDrivers
+namespace FoxHollow.FHM.Shared.TapeDrivers
 {
     /// <summary>
     /// Low level Tape operator
