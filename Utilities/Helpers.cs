@@ -40,5 +40,24 @@ namespace FoxHollow.FHM.Shared.Utilities
 
             return nearestMultiple;
         }
+
+        static JsonSerializerOptions jsonSerializerOptoins = new JsonSerializerOptions()
+        {
+            ReadCommentHandling = JsonCommentHandling.Skip
+        };
+
+        public static async Task<TResult> ReadJsonFileAsync<TResult>(string filePath, bool required = true)
+        {
+            
+            // if it doesn't exists and is required, let File.OpenRead throw an exception below
+            if (!File.Exists(filePath) && !required)
+                return default(TResult);
+
+            using (FileStream stream = File.OpenRead(filePath))
+            {
+                var config = await JsonSerializer.DeserializeAsync<TResult>(stream, jsonSerializerOptoins);
+                return config;
+            }
+        }
     }
 }
