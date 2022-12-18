@@ -25,6 +25,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using FoxHollow.FHM.Shared;
 using FoxHollow.FHM.Shared.Interfaces;
 
 namespace FoxHollow.FHM.Shared.Utilities
@@ -40,11 +41,7 @@ namespace FoxHollow.FHM.Shared.Utilities
 
             return nearestMultiple;
         }
-
-        static JsonSerializerOptions jsonSerializerOptoins = new JsonSerializerOptions()
-        {
-            ReadCommentHandling = JsonCommentHandling.Skip
-        };
+        
 
         public static async Task<TResult> ReadJsonFileAsync<TResult>(string filePath, bool required = true)
         {
@@ -55,7 +52,7 @@ namespace FoxHollow.FHM.Shared.Utilities
 
             using (FileStream stream = File.OpenRead(filePath))
             {
-                var config = await JsonSerializer.DeserializeAsync<TResult>(stream, jsonSerializerOptoins);
+                var config = await JsonSerializer.DeserializeAsync<TResult>(stream, Static.DefaultJso);
                 return config;
             }
         }
