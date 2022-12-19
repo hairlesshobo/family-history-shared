@@ -10,7 +10,7 @@ namespace FoxHollow.FHM.Shared.Models.Video
     public class RawSidecar
     {
         private string RawMediaPath { get; set; }
-        private string RawSidecarPath => (!String.IsNullOrWhiteSpace(this.RawMediaPath) ? $"{this.RawMediaPath}.yml" : null);
+        private string RawSidecarPath => (!String.IsNullOrWhiteSpace(this.RawMediaPath) ? $"{this.RawMediaPath}.yaml" : null);
         private bool NewSidecar { get; set; } = false;
 
         public uint Version { get; set; } = 1;
@@ -21,11 +21,11 @@ namespace FoxHollow.FHM.Shared.Models.Video
         public RawSidecarHash Hash { get; set; } = new RawSidecarHash();
         public RawSidecarDetails Details { get; set; } = new RawSidecarDetails();
 
-        public static async Task<RawSidecar> LoadOrGenerateAsync(string filePath, CancellationToken ctk = default)
+        public static async Task<RawSidecar> LoadOrGenerateAsync(string filePath, bool regenerate = false, CancellationToken ctk = default)
         {
-            string rawSidecarPath = $"{filePath}.yml";
+            string rawSidecarPath = $"{filePath}.yaml";
 
-            if (File.Exists(rawSidecarPath))
+            if (File.Exists(rawSidecarPath) && !regenerate)
             {
                 Console.WriteLine("Loading existing raw sidecar");
                 return Yaml.LoadFromFile<RawSidecar>(rawSidecarPath);
