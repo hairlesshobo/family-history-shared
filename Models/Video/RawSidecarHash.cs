@@ -15,6 +15,6 @@ namespace FoxHollow.FHM.Shared.Models.Video
         [YamlMember(Alias = "sha1")]
         public string SHA1 { get; set; }
         
-        public string Fingerprint { get; set; }
+        // public string Fingerprint { get; set; }
     }
 }
