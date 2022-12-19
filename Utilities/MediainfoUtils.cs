@@ -11,25 +11,62 @@ namespace FoxHollow.FHM.Shared.Utilities
 {
     public static class MediainfoUtils
     {
-        public static async Task<JsonNode> GetMediainfoAsync(string filePath)
+        /// <summary>
+        ///     Gets the MediaInfo as a JsonNode object, optionally using and creating
+        ///     a `.mediainfo` sidecar, if useSidecar is enabled
+        /// </summary>
+        /// <param name="filePath">
+        ///     Full path to the media file to read the mediainfo for
+        /// </param>
+        /// <param name="useSidecar">
+        ///     If true (default), it will attempt to read a .mediainfo sidecar, if present, and 
+        ///     create a sidecar if it does not already exist
+        /// </param>
+        /// <param name="refreshSidecar">
+        ///     If true, the mediainfo sidecar will be refreshed, even if it already exists
+        /// </param>
+        /// <returns>Task that returns the JsonNode</returns>
+        public static async Task<JsonNode> GetMediainfoAsync(string filePath, bool useSidecar = true, bool refreshSidecar = false)
         {
             if (!File.Exists(filePath))
                 throw new FileNotFoundException(filePath);
 
-            using(var process = new Process())
+            // attempt to load an existing mediainfo sidecar, if present
+            string sidecarPath = $"{filePath}.mediainfo";
+
+            // Sidecar exists and we are instructed to use it
+            if (useSidecar && !refreshSidecar && File.Exists(sidecarPath))
             {
-                process.StartInfo.FileName = "mediainfo";
-                process.StartInfo.ArgumentList.Add("--Output=JSON");
-                process.StartInfo.ArgumentList.Add(filePath);
-                process.StartInfo.RedirectStandardOutput = true;
-                process.StartInfo.RedirectStandardError = true;
-                process.Start();
+                Console.WriteLine("Using existing sidecar");
 
-                var output = await JsonSerializer.DeserializeAsync<JsonNode>(process.StandardOutput.BaseStream);
+                using (var sidecarFileHandle = File.Open(sidecarPath, FileMode.Open, FileAccess.Read))
+                    return await JsonSerializer.DeserializeAsync<JsonNode>(sidecarFileHandle);
+            }
+            else
+            {
+                Console.WriteLine("Calling mediainfo");
 
-                await process.WaitForExitAsync();
+                using(var process = new Process())
+                {
+                    process.StartInfo.FileName = "mediainfo";
+                    process.StartInfo.ArgumentList.Add("--Output=JSON");
+                    process.StartInfo.ArgumentList.Add(filePath);
+                    process.StartInfo.RedirectStandardOutput = true;
+                    process.StartInfo.RedirectStandardError = true;
+                    process.Start();
 
-                return output;
+                    JsonNode mediainfo = await JsonSerializer.DeserializeAsync<JsonNode>(process.StandardOutput.BaseStream);
+
+                    if (useSidecar)
+                    {
+                        Console.WriteLine("Writing mediainfo sidecar");
+                        await File.WriteAllTextAsync(sidecarPath, mediainfo.ToJsonString(Static.DefaultJso));
+                    }
+
+                    await process.WaitForExitAsync();
+
+                    return mediainfo;
+                }
             }
         }
 
@@ -51,13 +88,6 @@ namespace FoxHollow.FHM.Shared.Utilities
             JsonObject generalTrack = MediainfoUtils.FindTrack((JsonArray)tracks, "general");
             JsonObject videoTrack = MediainfoUtils.FindTrack((JsonArray)tracks, "video");
             JsonObject audioTrack = MediainfoUtils.FindTrack((JsonArray)tracks, "audio");
-
-
-
-            Console.WriteLine(generalTrack.ToJsonString());
-
-            // Console.WriteLine(sidecar.MediaInfo["creatingLibrary"]?["meow"]?.ToJsonString());
-
 
             // build sidecar model
             var sidecar = new RawSidecar()
@@ -82,7 +112,15 @@ namespace FoxHollow.FHM.Shared.Utilities
                     FrameRate = Double.Parse(videoTrack["FrameRate"].GetValue<string>()),
                     FrameCount = ulong.Parse(videoTrack["FrameCount"].GetValue<string>()),
                     ScanType = GetScanType(videoTrack["ScanType"].GetValue<string>())
-
+                },
+                Audio = new RawSidecarAudio()
+                {
+                    Format = audioTrack["Format"].GetValue<string>(),
+                    BitrateMode = GetBitrateMode(audioTrack["BitRate_Mode"].GetValue<string>()),
+                    Bitrate = uint.Parse(audioTrack["BitRate"].GetValue<string>()),
+                    SamplingRate = uint.Parse(audioTrack["SamplingRate"].GetValue<string>()),
+                    Channels = byte.Parse(audioTrack["Channels"].GetValue<string>()),
+                    BitDepth = byte.Parse(audioTrack["BitDepth"]?.GetValue<string>() ?? "16")
                 }
             };
 

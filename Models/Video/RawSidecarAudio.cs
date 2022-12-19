@@ -12,8 +12,8 @@ namespace FoxHollow.FHM.Shared.Models.Video
         */
         public string Format { get; set; }
         public BitrateMode BitrateMode { get; set; }
-        public uint SampingRate { get; set; }
         public uint Bitrate { get; set; }
+        public uint SamplingRate { get; set; }
         public byte Channels { get; set; } = 2;
         public byte BitDepth { get; set; } = 16;
     }
