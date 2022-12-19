@@ -157,6 +157,7 @@ namespace FoxHollow.FHM.Shared.Classes
                 long lastSampleCopyTotal = 0;
                 long sampleCount = 0;
 
+                // TODO: convert to using ReadAsync
                 while ((currentBlockSize = _stream.Read(buffer, 0, buffer.Length)) > 0)
                 {
                     if (cToken.IsCancellationRequested)

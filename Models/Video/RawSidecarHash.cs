@@ -1,3 +1,5 @@
+using YamlDotNet.Serialization;
+
 namespace FoxHollow.FHM.Shared.Models.Video
 {
     public class RawSidecarHash
@@ -7,8 +9,12 @@ namespace FoxHollow.FHM.Shared.Models.Video
             sha1: f5101da5ec1281ab583c5d82c704a3f9878e7b56
             fingerprint: # generate "quick" fingerprint
         */
+        [YamlMember(Alias = "md5")]
         public string MD5 { get; set; }
+
+        [YamlMember(Alias = "sha1")]
         public string SHA1 { get; set; }
+        
         public string Fingerprint { get; set; }
     }
 }

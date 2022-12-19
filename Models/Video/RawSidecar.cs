@@ -9,6 +9,5 @@ namespace FoxHollow.FHM.Shared.Models.Video
         public RawSidecarAudio Audio { get; set; } = new RawSidecarAudio();
         public RawSidecarHash Hash { get; set; } = new RawSidecarHash();
         public RawSidecarInferred Inferred { get; set; } = new RawSidecarInferred();
-        public JsonNode MediaInfo { get; set; }
     }
 }
