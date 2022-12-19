@@ -159,20 +159,18 @@ namespace FoxHollow.FHM.Shared.Classes
             this.BlockSize = blockSize;
         }
 
-        /// <summary>
-        ///     Asynchronously generate the MD5 hash
-        /// </summary>
-        /// <param name="cToken">Token that allows to cancel the process</param>
-        /// <returns>Task that returns a generated MD5 hash</returns>
-        public Task<Hashes> GenerateAsync(CancellationToken cToken)
-            => Task.Run(() => Generate(cToken));
+        // TODO: Add fingerprint support.
+        // Fingerprint support will require to know the size of the stream before it is read,
+        // on-the-fly fingerprint generation will not work because of the nature of a fingerprint
+        // selecting only samples of the data. This will require a new constructor that
+        // accepts the StreamSize and automatically enables GenerateFingerprint.
 
         /// <summary>
-        ///     Generate the MD5 hash
+        ///     Asynchronously generate the hashes
         /// </summary>
         /// <param name="cToken">Token that allows to cancel the process</param>
-        /// <returns>The generated MD5 hash</returns>
-        private Hashes Generate(CancellationToken cToken = default)
+        /// <returns>Task that returns a generated hashes object</returns>
+        public async Task<Hashes> GenerateAsync(CancellationToken cToken = default)
         {
             if (this.Complete)
                 return _hashes;
@@ -202,7 +200,7 @@ namespace FoxHollow.FHM.Shared.Classes
             long sampleCount = 0;
 
             // TODO: convert to using ReadAsync
-            while ((currentBlockSize = _stream.Read(buffer, 0, buffer.Length)) > 0)
+            while ((currentBlockSize = await _stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
             {
                 if (cToken.IsCancellationRequested)
                     return null;
@@ -246,20 +244,29 @@ namespace FoxHollow.FHM.Shared.Classes
 
             this.OnProgressChanged(progress);
 
-            md5.TransformFinalBlock(new byte[] { }, 0, 0);
+            string md5Hash = null;
+            string sha1Hash = null;
 
-            string md5Hash = (_generateMd5 ? BitConverter.ToString(md5.Hash).Replace("-","").ToLower() : null);
-            string sha1Hash = (_generateSha1 ? BitConverter.ToString(sha1.Hash).Replace("-","").ToLower() : null);
-            
+            if (_generateMd5)
+            {
+                md5.TransformFinalBlock(new byte[] { }, 0, 0);
+
+                md5Hash = (_generateMd5 ? BitConverter.ToString(md5.Hash).Replace("-","").ToLower() : null);
+
+                md5.Dispose();
+            }
+
+            if (_generateSha1)
+            {
+                sha1.TransformFinalBlock(new byte[] { }, 0, 0);
+
+                sha1Hash = (_generateSha1 ? BitConverter.ToString(sha1.Hash).Replace("-","").ToLower() : null);
+
+                sha1.Dispose();
+            }
+
             this._hashes = new Hashes(md5Hash, sha1Hash);
             this.Complete = true;
-
-            // dispose
-            if (md5 != null)
-                md5.Dispose();
-
-            if (sha1 != null)
-                sha1.Dispose();
 
             return _hashes;
         }
