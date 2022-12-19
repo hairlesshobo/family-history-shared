@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace FoxHollow.FHM.Shared.Classes
 {
-    public class FileScanner
+    public class TreeWalker
     {
         public string RootDirectory { get; private set; }
         public List<string> IncludePaths { get; set; }
         public List<string> ExcludePaths { get; set; }
         public List<string> Extensions { get; set; }
 
-        public FileScanner(string rootDir)
+        public TreeWalker(string rootDir)
         {
             this.RootDirectory = rootDir;
             this.IncludePaths = new List<string>();
