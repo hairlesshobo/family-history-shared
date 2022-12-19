@@ -22,7 +22,7 @@ using System;
 
 namespace FoxHollow.FHM.Shared.Structures
 {
-    public struct Md5Progress 
+    public struct HashGenerationProgress 
     {
         // TODO: Rename others to to ElapsedTime
         /// <summary>
