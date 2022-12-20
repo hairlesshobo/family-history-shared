@@ -30,6 +30,7 @@ namespace FoxHollow.FHM.Shared
     public static class SysInfo
     {
         public static string ExecutionRoot { get; private set; }
+        public static string PythonRoot { get; private set; }
         public static string ConfigRoot { get; private set; }
         public static OSType OSType { get; private set; } = OSType.Unknown;
         public static bool OSSupported { get; private set; } = true;
@@ -58,6 +59,7 @@ namespace FoxHollow.FHM.Shared
         {
             SysInfo.ExecutionRoot = AppContext.BaseDirectory;
             SysInfo.ConfigRoot = Path.GetFullPath(Path.Combine(SysInfo.ExecutionRoot, "../config"));
+            SysInfo.PythonRoot = Path.GetFullPath(Path.Combine(SysInfo.ExecutionRoot, "../source/python"));
 
             if (OperatingSystem.IsWindows())
                 SysInfo.OSType = OSType.Windows;
