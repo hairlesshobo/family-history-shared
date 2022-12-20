@@ -17,4 +17,10 @@
     <PackageReference Include="YamlDotNet" Version="12.2.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="python/**/*.*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>  
+  </ItemGroup>
+
 </Project>
