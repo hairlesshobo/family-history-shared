@@ -104,11 +104,8 @@ namespace FoxHollow.FHM.Shared.Utilities.Serialization
         /// <param name="filePath">Full path to the yaml file that is to be read</param>
         /// <typeparam name="TResult">Type that the document is to be loaded into</typeparam>
         /// <returns>.NET Object represented by the provided YAML document</returns>
-        public static TResult LoadFromFile<TResult>(ILogger logger, string filePath)
+        public static TResult LoadFromFile<TResult>(string filePath)
         {
-            if (logger == null)
-                logger = NullLogger.Instance;
-
             if (!File.Exists(filePath))
                 throw new FileNotFoundException($"Provided file path does not exist: {filePath}");
 
