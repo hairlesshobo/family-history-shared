@@ -64,11 +64,11 @@ namespace FoxHollow.FHM.Shared.Classes
                     if (this.ExcludePaths.Any(x => entry.Path.Contains(x)))
                         continue;
 
-                    FileInfo info = new FileInfo(entry.Path);
+                    entry.FileInfo = new FileInfo(entry.Path);
 
                     // If we are filtering by extension, lets make sure the file uses that extension
                     if (this.Extensions.Count() > 0)
-                        if (!this.Extensions.Any(x => info.Extension.TrimStart('.') == x))
+                        if (!this.Extensions.Any(x => entry.FileInfo.Extension.TrimStart('.') == x))
                             continue;
 
                     yield return entry;
@@ -82,6 +82,7 @@ namespace FoxHollow.FHM.Shared.Classes
             public FileEntryType EntryType { get; private set; }
             public int RelativeDepth { get; private set; }
             public string RootPath { get; private set; }
+            public FileInfo FileInfo { get; internal set; }
 
             public FileSystemEntry(string path, FileEntryType entryType, int depth)
             {
