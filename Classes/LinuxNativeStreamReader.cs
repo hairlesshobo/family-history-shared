@@ -55,7 +55,7 @@ namespace FoxHollow.FHM.Shared.Classes
 
         private string _devicePath = null;
         private int _handle = -1;
-        private bool _eofReached = false;
+        // private bool _eofReached = false;
         private ulong _position = 0;
         private StreamSourceType _type;
         private long _length = -1;
@@ -133,8 +133,8 @@ namespace FoxHollow.FHM.Shared.Classes
             if (result < 0)
                 throw new NativeMethodException("Read");
 
-            if (result == 0)
-                _eofReached = true;
+            // if (result == 0)
+            //     _eofReached = true;
 
             return result;
         }

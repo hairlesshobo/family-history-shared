@@ -5,12 +5,15 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using FoxHollow.FHM.Shared.Classes;
 using FoxHollow.FHM.Shared.Models;
 using FoxHollow.FHM.Shared.Models.Video;
 
 namespace FoxHollow.FHM.Shared.Utilities
 {
+    // TODO: convert to service
     public static class MediainfoUtils
     {
         /// <summary>
@@ -28,8 +31,11 @@ namespace FoxHollow.FHM.Shared.Utilities
         ///     If true, the mediainfo sidecar will be refreshed, even if it already exists
         /// </param>
         /// <returns>Task that returns the JsonNode</returns>
-        public static async Task<JsonNode> GetMediainfoAsync(string filePath, bool useSidecar = true, bool refreshSidecar = false)
+        public static async Task<JsonNode> GetMediainfoAsync(ILogger logger, string filePath, bool useSidecar = true, bool refreshSidecar = false)
         {
+            if (logger == null)
+                logger = NullLogger.Instance;
+
             if (!File.Exists(filePath))
                 throw new FileNotFoundException(filePath);
 
@@ -39,14 +45,14 @@ namespace FoxHollow.FHM.Shared.Utilities
             // Sidecar exists and we are instructed to use it
             if (useSidecar && !refreshSidecar && File.Exists(sidecarPath))
             {
-                Console.WriteLine("Using existing raw mediainfo sidecar");
+                logger.LogDebug("Using existing raw mediainfo sidecar");
 
                 using (var sidecarFileHandle = File.Open(sidecarPath, FileMode.Open, FileAccess.Read))
                     return await JsonSerializer.DeserializeAsync<JsonNode>(sidecarFileHandle);
             }
             else
             {
-                Console.WriteLine("Calling mediainfo");
+                logger.LogDebug("Calling mediainfo");
 
                 using(var process = new Process())
                 {
@@ -79,8 +85,11 @@ namespace FoxHollow.FHM.Shared.Utilities
         /// <param name="filePath">Full path to the file</param>
         /// <param name="ctk">Optional cancellation token used to cancel the in-progress generation</param>
         /// <returns>Model used to generate raw sidecar file</returns>
-        public static async Task<RawSidecar> GenerateRawSidecarAsync(string filePath, CancellationToken ctk = default)
+        public static async Task<RawSidecar> GenerateRawSidecarAsync(ILogger logger, string filePath, CancellationToken ctk = default)
         {
+            if (logger == null)
+                logger = NullLogger.Instance;
+
             if (ctk == default(CancellationToken))
                 ctk = CancellationToken.None;
 
@@ -88,7 +97,7 @@ namespace FoxHollow.FHM.Shared.Utilities
                 throw new FileNotFoundException(filePath);
 
             var fileInfo = new FileInfo(filePath);
-            var mediainfo = await MediainfoUtils.GetMediainfoAsync(filePath);
+            var mediainfo = await MediainfoUtils.GetMediainfoAsync(logger, filePath);
 
             var tracks = mediainfo["media"]?["track"];
 

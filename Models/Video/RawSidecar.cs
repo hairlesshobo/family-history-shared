@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using FoxHollow.FHM.Shared.Utilities;
 using FoxHollow.FHM.Shared.Utilities.Serialization;
 
@@ -21,28 +23,34 @@ namespace FoxHollow.FHM.Shared.Models.Video
         public RawSidecarHash Hash { get; set; } = new RawSidecarHash();
         public RawSidecarDetails Details { get; set; } = new RawSidecarDetails();
 
-        public static async Task<RawSidecar> LoadOrGenerateAsync(string filePath, bool regenerate = false, CancellationToken ctk = default)
+        public static async Task<RawSidecar> LoadOrGenerateAsync(ILogger logger, string filePath, bool regenerate = false, CancellationToken ctk = default)
         {
+            if (logger == null)
+                logger = NullLogger.Instance;
+
             string rawSidecarPath = $"{filePath}.yaml";
 
             if (File.Exists(rawSidecarPath) && !regenerate)
             {
-                Console.WriteLine("Loading existing raw sidecar");
-                return Yaml.LoadFromFile<RawSidecar>(rawSidecarPath);
+                logger.LogDebug("Loading existing raw sidecar");
+                return Yaml.LoadFromFile<RawSidecar>(logger, rawSidecarPath);
             }
             else
             {
-                Console.WriteLine("Generating and loading new raw sidecar");
-                return await FromMediaFileAsync(filePath, ctk);
+                logger.LogDebug("Generating and loading new raw sidecar");
+                return await FromMediaFileAsync(logger, filePath, ctk);
             }
         }
 
-        public static async Task<RawSidecar> FromMediaFileAsync(string filePath, CancellationToken ctk = default)
+        public static async Task<RawSidecar> FromMediaFileAsync(ILogger logger, string filePath, CancellationToken ctk = default)
         {
+            if (logger == null)
+                logger = NullLogger.Instance;
+
             if (!File.Exists(filePath))
                 throw new FileNotFoundException($"The specified raw media file does not exist: {filePath}");
 
-            var newSidecar = await MediainfoUtils.GenerateRawSidecarAsync(filePath);
+            var newSidecar = await MediainfoUtils.GenerateRawSidecarAsync(logger, filePath);
             newSidecar.RawMediaPath = filePath;
 
             // Automatically write the generated sidecar to disc

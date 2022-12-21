@@ -48,7 +48,7 @@ namespace FoxHollow.FHM.Shared.Classes
             set => throw new NotImplementedException(); 
         }
 
-        private string _devicePath = null;
+        // private string _devicePath = null;
         private SafeFileHandle _handle = null;
         private long _position = 0;
         private long _length = -1;

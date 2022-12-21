@@ -120,7 +120,7 @@ namespace FoxHollow.FHM.Shared.Classes
             // generate the fingerprint hash
             string hash;
 
-            using (SHA256 shaM = new SHA256Managed())
+            using (SHA256 shaM = SHA256.Create())
             {
                 byte[] hashArray = shaM.ComputeHash(dataSample);
                 hash = BitConverter.ToString(hashArray).Replace("-","").ToLower();

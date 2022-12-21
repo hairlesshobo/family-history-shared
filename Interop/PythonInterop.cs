@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace FoxHollow.FHM.Shared.Interop
 {
@@ -15,6 +16,8 @@ namespace FoxHollow.FHM.Shared.Interop
     {
         private readonly string[] _knownCommands = new string[] { "identify-camera" };
         private Process _process;
+        private IServiceProvider _services;
+        protected ILogger _logger;
 
 
         public string Command { get; private set; }
@@ -25,10 +28,12 @@ namespace FoxHollow.FHM.Shared.Interop
 
         public event ProgressChangedDelegate OnProgressChanged;
 
-        public PythonInterop(string command, params string[] args)
+        public PythonInterop(IServiceProvider services, string command, params string[] args)
         {
             if (!_knownCommands.Contains(command))
                 throw new UnknownCommandException(command);
+
+            _services = services ?? throw new ArgumentNullException(nameof(services));
 
             this.Command = command;
             this.Arguments = args;
@@ -68,8 +73,6 @@ namespace FoxHollow.FHM.Shared.Interop
 
         private void MonitorStderr()
         {
-            ILogger logger = NullLogger.Instance;
-
             while (!_process.StandardError.EndOfStream)
             {
                 string line = _process.StandardError.ReadLine();
@@ -77,12 +80,18 @@ namespace FoxHollow.FHM.Shared.Interop
                 if (String.IsNullOrWhiteSpace(line))
                     continue;
 
-                // TODO: handle other python log types
-
                 if (line.StartsWith("DEBUG:"))
-                    logger.LogDebug(line);
+                    _logger.LogDebug(line.Substring(line.IndexOf(':', 6) + 1));
+                else if (line.StartsWith("INFO:"))
+                    _logger.LogInformation(line.Substring(line.IndexOf(':', 5) + 1));
+                else if (line.StartsWith("WARNING:"))
+                    _logger.LogWarning(line.Substring(line.IndexOf(':', 8) + 1));
+                else if (line.StartsWith("ERROR:"))
+                    _logger.LogError(line.Substring(line.IndexOf(':', 6) + 1));
+                else if (line.StartsWith("CRITICAL:"))
+                    _logger.LogCritical(line.Substring(line.IndexOf(':', 9) + 1));
                 else
-                    Console.WriteLine(line);
+                    throw new Exception($"Unknown log level: {line.Substring(0, (line.Length < 10 ? line.Length : 10))}");
             }
         }
 
