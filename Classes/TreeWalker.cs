@@ -31,6 +31,7 @@ namespace FoxHollow.FHM.Shared.Classes
         public List<string> IncludePaths { get; set; }
         public List<string> ExcludePaths { get; set; }
         public List<string> Extensions { get; set; }
+        public bool GroupSidecars { get; set; } = true;
 
         internal TreeWalker(IServiceProvider services, string rootDir)
         {
@@ -69,11 +70,44 @@ namespace FoxHollow.FHM.Shared.Classes
                                       .Select(x => new FileSystemEntry(x, FileEntryType.Directory, depth))
                                       .ToList();
 
-            var fileEntries = Directory.GetFiles(directory)
-                                       .Order()
-                                       .Select(x => new FileSystemEntry(x, FileEntryType.File, depth))
-                                       .ToList();
 
+            var fileEntriesFullList = Directory.GetFiles(directory)
+                                               .Order()
+                                               .Select(x => new FileSystemEntry(x, FileEntryType.File, depth))
+                                               .ToList();
+
+            var fileEntries = new List<FileSystemEntry>();
+
+            foreach (var fileEntry in fileEntriesFullList)
+            {
+                // If any include paths were provided, lets make sure that this file
+                // path matches, otherwise we skip to the next file
+                if (this.IncludePaths.Count() > 0)
+                    if (!this.IncludePaths.Any(x => fileEntry.Path.StartsWith(x)))
+                        continue;
+
+                // lets make sure this file path doesn't match any provided excludes
+                if (this.ExcludePaths.Any(x => fileEntry.Path.Contains(x)))
+                    continue;
+
+                fileEntry.FileInfo = new FileInfo(fileEntry.Path);
+
+                // If we are filtering by extension, lets make sure the file uses that extension
+                if (this.Extensions.Count() > 0)
+                    if (!this.Extensions.Any(x => fileEntry.FileInfo.Extension.TrimStart('.') == x))
+                        continue;
+
+                fileEntries.Add(fileEntry);
+            }
+
+            // Populate a list of entries that are not used
+            var fileEntriesUnmatched = fileEntriesFullList.Where(x => !fileEntries.Contains(x)).ToList();
+
+            foreach (var fileEntry in fileEntries)
+            {
+                fileEntry.RelatedFiles = fileEntriesUnmatched.Where(x => x.CollectionName == fileEntry.CollectionName)
+                                                             .ToList();
+            }            
 
             // iterate through each directory
             foreach (var dirEntry in dirEntries)
@@ -110,23 +144,6 @@ namespace FoxHollow.FHM.Shared.Classes
             {
                 entry.RenameDir = (newName) => renameDirLambda(entry, newName);
 
-                // If any include paths were provided, lets make sure that this file
-                // path matches, otherwise we skip to the next file
-                if (this.IncludePaths.Count() > 0)
-                    if (!this.IncludePaths.Any(x => entry.Path.StartsWith(x)))
-                        continue;
-
-                // lets make sure this file path doesn't match any provided excludes
-                if (this.ExcludePaths.Any(x => entry.Path.Contains(x)))
-                    continue;
-
-                entry.FileInfo = new FileInfo(entry.Path);
-
-                // If we are filtering by extension, lets make sure the file uses that extension
-                if (this.Extensions.Count() > 0)
-                    if (!this.Extensions.Any(x => entry.FileInfo.Extension.TrimStart('.') == x))
-                        continue;
-
                 yield return entry;
             }
         }
@@ -134,18 +151,33 @@ namespace FoxHollow.FHM.Shared.Classes
         public class FileSystemEntry
         {
             public string Path { get; internal set; }
+            public string CollectionName { get; private set; }
             public FileEntryType EntryType { get; private set; }
             public int RelativeDepth { get; private set; }
             public string RootPath { get; private set; }
             public FileInfo FileInfo { get; internal set; }
-            public Action<string> RenameDir { get; internal set; }
+            public Action<string> RenameDir { get; internal set; } = (discard) => {};
+            public List<FileSystemEntry> RelatedFiles { get; internal set; } = new List<FileSystemEntry>();
 
             public FileSystemEntry(string path, FileEntryType entryType, int depth)
             {
                 this.Path = path;
                 this.EntryType = entryType;
                 this.RelativeDepth = depth;
+                
+                var cleanPath = PathUtils.CleanPath(path);
+                var lastDirSeparator = cleanPath.LastIndexOf('/');
+                var fileName = cleanPath.Substring(lastDirSeparator + 1);
+                var firstDecimal = fileName.IndexOf('.');
+
+                if (firstDecimal == -1)
+                    firstDecimal = fileName.Length;
+                
+                this.CollectionName = fileName.Substring(0, firstDecimal);
             }
+
+            public override string ToString()
+                => System.IO.Path.GetFileName(this.Path);
         }
 
         public enum FileEntryType
