@@ -86,9 +86,8 @@ public class TreeWalker
     ///     Recursive function used for walking the media tree
     /// </summary>
     /// <param name="directory">Directory to scan</param>
-    /// <param name="depth">Current depth level, relative to the root</param>
     /// <returns>Collections of media files, group by the collection name</returns>
-    private async IAsyncEnumerable<MediaFileCollection> ScanDirectoryAsync(string directory, int depth = 0)
+    private async IAsyncEnumerable<MediaFileCollection> ScanDirectoryAsync(string directory)
     {
         // First we recurse into sub directories before we begin to process files in this directory
         // we use .ToList() to ensure that the list of directories doesn't change while we are
@@ -101,7 +100,7 @@ public class TreeWalker
         foreach (var dirPath in dirPaths)
         {
             // recurse into directories
-            await foreach (var subCollection in ScanDirectoryAsync(dirPath, depth + 1))
+            await foreach (var subCollection in ScanDirectoryAsync(dirPath))
                 yield return subCollection;
         }
 
@@ -112,19 +111,25 @@ public class TreeWalker
         // without processing duplicates or missing files, and also prevents exceptions
         // from being thown due to missing files if a directory is renamed from within
         // without special handling.
-        var fileEntries = Directory.GetFiles(directory)
+        var filePaths = Directory.GetFiles(directory)
                                             .Order()
-                                            .Select(x => new MediaFileEntry(x, depth))
-
                                             .ToList();
         // start with an empty list
         var collections = new List<MediaFileCollection>();
+        var fileEntries = new List<MediaFileEntry>();
 
-        // Loop through all file entries looking for exclusions, inclusions, collection
+        // Loop through all files looking for exclusions, inclusions, collection
         // grouping and file processing
-        foreach (var fileEntry in fileEntries)
+        foreach (var filePath in filePaths)
         {
-            fileEntry.RootPath = this.RootDirectory;
+            var fileEntry = new MediaFileEntry()
+            {
+                Path = filePath,
+                RootPath = this.RootDirectory,
+                RelativeDepth = PathUtils.GetRelativeDepth(this.RootDirectory, directory)
+            };
+
+            fileEntries.Add(fileEntry);
 
             var collectionName = this.GetCollectionName(fileEntry.Path);
 
@@ -195,9 +200,50 @@ public class TreeWalker
             _logger.LogInformation($"Renaming '{oldPath}' to '{newPath}'");
 
             Directory.Move(oldPath, newPath);
-            fileEntries.ForEach(x => x.Path = x.Path.Replace(oldPath, newPath));
 
-            collection.Directory = new DirectoryInfo(newPath);
+            var newDirInfo = new DirectoryInfo(newPath);
+
+            fileEntries.ForEach(x => x.Path = x.Path.Replace(oldPath, newPath));
+            collections.ForEach(x => x.Directory = newDirInfo);
+        };
+
+        Action<MediaFileCollection, string> moveCollectionLambda = (collection, newDirPath) =>
+        {
+            if (!Directory.Exists(newDirPath))
+                throw new DirectoryNotFoundException($"Unable to move collection, directory does not exist: {newDirPath}");
+
+            var newDirInfo = new DirectoryInfo(newDirPath);
+
+            var errors = new List<KeyValuePair<string,string>>();
+            var actions = new List<Action>();
+
+            foreach (var entry in collection.Entries)
+            {
+                var destFilePath = Path.Combine(newDirInfo.FullName, entry.FileInfo.Name);
+
+                if (File.Exists(destFilePath))
+                    errors.Add(new KeyValuePair<string, string>("PathAlreadyExists", destFilePath));
+
+                actions.Add(() =>
+                {
+                    entry.FileInfo.MoveTo(destFilePath, false);
+                    entry.Path = entry.FileInfo.FullName;
+                    entry.RelativeDepth = PathUtils.GetRelativeDepth(this.RootDirectory, entry.FileInfo.Directory.FullName);
+                });
+            }
+
+            // no errors encountered, apply the actions
+            if (errors.Count() == 0)
+                actions.ForEach(x => x());
+            else
+            {
+                throw new Exception(
+                    "Cannot move collection, the following errors were encountered:" + Environment.NewLine +
+                    string.Join(Environment.NewLine, errors.Select(x => $"  [{x.Key}] {x.Value}"))
+                );
+            }
+
+            collection.Directory = newDirInfo;
         };
 
 
@@ -210,6 +256,7 @@ public class TreeWalker
                 continue;
 
             collection.RenameDir = (newName) => renameDirLambda(collection, newName);
+            collection.MoveCollection = (newPath) => moveCollectionLambda(collection, newPath);
 
             yield return collection;
         }

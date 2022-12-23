@@ -13,7 +13,7 @@ public class MediaFileEntry
     ///     Folder depth this file exists, relative to the root directory of the 
     ///     <see cref="FoxHollow.FHM.Shared.Classes.TreeWalker" /> instance
     /// </summary>
-    public int RelativeDepth { get; private set; }
+    public int RelativeDepth { get; internal set; }
 
     /// <summary>
     ///     Root path the <see cref="FoxHollow.FHM.Shared.Classes.TreeWalker" /> operates on
@@ -35,18 +35,6 @@ public class MediaFileEntry
     ///     Collection to which this media file belongs
     /// </summary>
     public MediaFileCollection Collection { get; internal set; }
-
-    
-    /// <summary>
-    ///     Constructor to be called by <see cref="FoxHollow.FHM.Shared.Classes.TreeWalker" />
-    /// </summary>
-    /// <param name="path">Full path to the media file</param>
-    /// <param name="depth">Directory depth, relative to the root of the tree walker instance</param>
-    internal MediaFileEntry(string path, int depth)
-    {
-        this.Path = path;
-        this.RelativeDepth = depth;
-    }
 
     /// <summary>
     ///     Custom string representation

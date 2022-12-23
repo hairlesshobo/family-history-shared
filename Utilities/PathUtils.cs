@@ -39,6 +39,35 @@ namespace FoxHollow.FHM.Shared.Utilities
 
             throw new UnsupportedOperatingSystemException();
         }
+
+
+        /// <summary>
+        ///     Calculate the relative depth between two directories
+        /// </summary>
+        /// <param name="root"></param>
+        /// <param name="testDir"></param>
+        /// <returns>Numerical depth difference between the root and test directory</returns>
+        public static int GetRelativeDepth(string root, string testDir)
+        {
+            root = PathUtils.CleanPath(root);
+            testDir = PathUtils.CleanPath(testDir);
+
+            int depth = 0;
+
+            if (testDir.StartsWith(root))
+            {
+                int substr = root.Length;
+
+                if (substr > testDir.Length)
+                    return -1;
+
+                var testPart = testDir.Substring(substr);
+
+                depth = testPart.Count((tChar) => tChar == '/');
+            }
+
+            return depth;
+            }
         
 
         /// <summary>
