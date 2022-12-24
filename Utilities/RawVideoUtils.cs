@@ -101,6 +101,7 @@ namespace FoxHollow.FHM.Shared.Utilities
             var general = new RawSidecarGeneral()
             {
                 FileName = fileInfo.Name,
+                FileModifyDtm = fileInfo.LastWriteTimeUtc,
                 ContainerFormat = generalTrack["Format"].GetValue<string>(),
                 Size = fileInfo.Length,
                 Duration = TimeSpan.FromSeconds(Double.Parse(generalTrack["Duration"].GetValue<string>()))

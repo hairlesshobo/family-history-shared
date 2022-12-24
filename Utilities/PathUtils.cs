@@ -49,6 +49,7 @@ namespace FoxHollow.FHM.Shared.Utilities
         /// <returns>Numerical depth difference between the root and test directory</returns>
         public static int GetRelativeDepth(string root, string testDir)
         {
+            // TODO: Convert this to traverse upwards until it finds the matching dir
             root = PathUtils.CleanPath(root);
             testDir = PathUtils.CleanPath(testDir);
 
@@ -67,7 +68,27 @@ namespace FoxHollow.FHM.Shared.Utilities
             }
 
             return depth;
+        }
+
+        public static DirectoryInfo FindDirectoryAtRelativeDepth(string root, string test, int desiredDepth)
+        {
+            DirectoryInfo rootDirInfo = new DirectoryInfo(root);
+            DirectoryInfo testDirInfo = new DirectoryInfo(test);
+
+            DirectoryInfo desiredDirInfo = testDirInfo;
+
+            int currentDepth = PathUtils.GetRelativeDepth(rootDirInfo.FullName, testDirInfo.FullName);
+
+            for (int i = currentDepth; i > desiredDepth; i--)
+            {
+                if (desiredDirInfo == null)
+                    throw new DirectoryNotFoundException($"Unable to find directory at relative depth {desiredDepth}");
+
+                desiredDirInfo = desiredDirInfo.Parent;
             }
+
+            return desiredDirInfo;
+        }
         
 
         /// <summary>

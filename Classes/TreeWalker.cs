@@ -140,6 +140,7 @@ public class TreeWalker
             if (collection == null)
             {
                 collection = new MediaFileCollection(collectionName, directory);
+                collection.RootDirectoryPath = this.RootDirectory;
                 collections.Add(collection);
             }
 
@@ -183,70 +184,7 @@ public class TreeWalker
             }
         }
 
-
-        // Lambda that is passed on each yield that allows the current directory to be renamed
-        // without throwing off iteration
-        Action<MediaFileCollection, string> renameDirLambda = (collection, newName) =>
-        {
-            if (newName.Contains('/') || newName.Contains('\\'))
-                throw new ArgumentException("When renaming a media directory, only the new name must be provided.. not a full path!");
-
-            var oldPath = collection.Directory.FullName;
-            var newPath = PathUtils.CleanPath(Path.Combine(collection.Directory.Parent.FullName, newName));
-
-            if (File.Exists(newPath) || Directory.Exists(newPath))
-                throw new PathAlreadyExistsException(newPath);
-
-            _logger.LogInformation($"Renaming '{oldPath}' to '{newPath}'");
-
-            Directory.Move(oldPath, newPath);
-
-            var newDirInfo = new DirectoryInfo(newPath);
-
-            fileEntries.ForEach(x => x.Path = x.Path.Replace(oldPath, newPath));
-            collections.ForEach(x => x.Directory = newDirInfo);
-        };
-
-        Action<MediaFileCollection, string> moveCollectionLambda = (collection, newDirPath) =>
-        {
-            if (!Directory.Exists(newDirPath))
-                throw new DirectoryNotFoundException($"Unable to move collection, directory does not exist: {newDirPath}");
-
-            var newDirInfo = new DirectoryInfo(newDirPath);
-
-            var errors = new List<KeyValuePair<string,string>>();
-            var actions = new List<Action>();
-
-            foreach (var entry in collection.Entries)
-            {
-                var destFilePath = Path.Combine(newDirInfo.FullName, entry.FileInfo.Name);
-
-                if (File.Exists(destFilePath))
-                    errors.Add(new KeyValuePair<string, string>("PathAlreadyExists", destFilePath));
-
-                actions.Add(() =>
-                {
-                    entry.FileInfo.MoveTo(destFilePath, false);
-                    entry.Path = entry.FileInfo.FullName;
-                    entry.RelativeDepth = PathUtils.GetRelativeDepth(this.RootDirectory, entry.FileInfo.Directory.FullName);
-                });
-            }
-
-            // no errors encountered, apply the actions
-            if (errors.Count() == 0)
-                actions.ForEach(x => x());
-            else
-            {
-                throw new Exception(
-                    "Cannot move collection, the following errors were encountered:" + Environment.NewLine +
-                    string.Join(Environment.NewLine, errors.Select(x => $"  [{x.Key}] {x.Value}"))
-                );
-            }
-
-            collection.Directory = newDirInfo;
-        };
-
-
+        //
         // iterate through each file entry and yield execution back to the caller
         foreach (var collection in collections)
         {
@@ -254,9 +192,6 @@ public class TreeWalker
             // need to emit it back to the caller
             if (collection.Entries.Where(x => !x.Ignored).Count() == 0)
                 continue;
-
-            collection.RenameDir = (newName) => renameDirLambda(collection, newName);
-            collection.MoveCollection = (newPath) => moveCollectionLambda(collection, newPath);
 
             yield return collection;
         }

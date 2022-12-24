@@ -10,6 +10,7 @@ namespace FoxHollow.FHM.Shared.Models.Video
         //   capture_dtm: 2022-11-24T16:45:01 # UTC
         //   duration: 00:02:01.48 # hh:mm:ss.ss
         public string FileName { get; set; }
+        public DateTime FileModifyDtm { get; set; }
         public string ContainerFormat { get; set; }
         public long Size { get; set; }
         public DateTime CaptureDtm { get; set; }
