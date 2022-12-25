@@ -24,7 +24,7 @@ namespace FoxHollow.FHM.Shared.Utilities
             _logger = services.GetRequiredService<ILogger<RawVideoUtils>>();
         }
 
-        public async Task<RawSidecar> LoadOrGenerateAsync(string filePath, bool regenerate = false, CancellationToken ctk = default)
+        public async Task<RawSidecar> LoadOrGenerateRawVideoMetadataAsync(string filePath, bool regenerate = false, CancellationToken ctk = default)
         {
             string rawSidecarPath = $"{filePath}.yaml";
 
@@ -36,17 +36,17 @@ namespace FoxHollow.FHM.Shared.Utilities
             else
             {
                 _logger.LogDebug("Generating and loading new raw sidecar");
-                return await FromMediaFileAsync(filePath, ctk);
+                return await CreateSidecarFromMediaFileAsync(filePath, ctk);
             }
         }
 
-        public async Task<RawSidecar> FromMediaFileAsync(string filePath, CancellationToken ctk = default)
+        public async Task<RawSidecar> CreateSidecarFromMediaFileAsync(string mediaFilePath, CancellationToken ctk = default)
         {
-            if (!File.Exists(filePath))
-                throw new FileNotFoundException($"The specified raw media file does not exist: {filePath}");
+            if (!File.Exists(mediaFilePath))
+                throw new FileNotFoundException($"The specified raw media file does not exist: {mediaFilePath}");
 
-            var newSidecar = await this.GenerateRawSidecarAsync(filePath);
-            newSidecar.RawMediaPath = filePath;
+            var newSidecar = await this.CreateSidecarFromMediainfoAsync(mediaFilePath);
+            newSidecar.RawMediaPath = mediaFilePath;
 
             // Automatically write the generated sidecar to disc
             newSidecar.WriteSidecar();
@@ -54,25 +54,26 @@ namespace FoxHollow.FHM.Shared.Utilities
             return newSidecar;
         }
 
-                /// <summary>
+
+        /// <summary>
         ///     Generates the model that is to be stored in the sidecar file
         ///     of any raw family video
         /// </summary>
-        /// <param name="filePath">Full path to the file</param>
+        /// <param name="mediaFilePath">Full path to the file</param>
         /// <param name="ctk">Optional cancellation token used to cancel the in-progress generation</param>
         /// <returns>Model used to generate raw sidecar file</returns>
-        public async Task<RawSidecar> GenerateRawSidecarAsync(string filePath, CancellationToken ctk = default)
+        public async Task<RawSidecar> CreateSidecarFromMediainfoAsync(string mediaFilePath, CancellationToken ctk = default)
         {
             var mediainfoUtils = _services.GetRequiredService<MediainfoUtils>();
             
             if (ctk == default(CancellationToken))
                 ctk = CancellationToken.None;
 
-            if (!File.Exists(filePath))
-                throw new FileNotFoundException(filePath);
+            if (!File.Exists(mediaFilePath))
+                throw new FileNotFoundException(mediaFilePath);
 
-            var fileInfo = new FileInfo(filePath);
-            var mediainfo = await mediainfoUtils.GetMediainfoAsync(filePath);
+            var fileInfo = new FileInfo(mediaFilePath);
+            var mediainfo = await mediainfoUtils.GetMediainfoAsync(mediaFilePath);
 
             var tracks = mediainfo["media"]?["track"];
 
