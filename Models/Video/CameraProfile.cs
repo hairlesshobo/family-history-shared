@@ -7,11 +7,12 @@ namespace FoxHollow.FHM.Shared.Models.Video
     public class CameraProfile
     {
         /*     
-            "ID": "sony_hvr_z1u",
-            "CommissionDate": null,
-            "DecommissionDate": null,
-            "Name": "Sony HVR-Z1U",
-            "Hints": []
+            "id": "sony_hvr_z1u",
+            "commission_date": null,
+            "decommission_date": null,
+            "name": "Sony HVR-Z1U",
+            "capture_person": "Steve Cross",
+            "hints": []
         */
 
         [JsonPropertyName("id")]
@@ -25,6 +26,9 @@ namespace FoxHollow.FHM.Shared.Models.Video
 
         [JsonPropertyName("decommission_date")]
         public Nullable<DateTime> DecommissionDate { get; set; }
+
+        [JsonPropertyName("capture_person")]
+        public string CapturePerson { get; set; }
 
         [JsonPropertyName("hints")]
         public List<CameraHint> Hints { get; set; } = new List<CameraHint>();
