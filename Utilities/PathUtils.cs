@@ -70,6 +70,20 @@ namespace FoxHollow.FHM.Shared.Utilities
             return depth;
         }
 
+        /// <summary>
+        ///     Lookup the directory at the depth relative to the specified root directory.
+        /// 
+        ///     An example of this:
+        ///         root = /home/user/source
+        ///         test = /home/user/source/some/sub/path/far/below/the/root
+        ///         depth = 2
+        /// 
+        ///     The result would be /home/user/source/some/sub
+        /// </summary>
+        /// <param name="root">The root directory to use as depth "0"</param>
+        /// <param name="test">A path that is a below the root directory to use as the test directory</param>
+        /// <param name="desiredDepth">depth location desired to be found</param>
+        /// <returns>Full path to the directory at the specified depth</returns>
         public static DirectoryInfo FindDirectoryAtRelativeDepth(string root, string test, int desiredDepth)
         {
             DirectoryInfo rootDirInfo = new DirectoryInfo(root);
@@ -269,6 +283,34 @@ namespace FoxHollow.FHM.Shared.Utilities
             }
 
             return validatedPaths.ToArray();
+        }
+
+        /// <summary>
+        ///     Return the path, relative to the root directory. 
+        /// 
+        ///     Note: The path will be cleaned and the return relative path will
+        ///     not begin with a './' or '/'
+        /// 
+        ///     Example: 
+        ///         root = /home/user/source
+        ///         fullPath = /home/user/source/some/sub/path
+        /// 
+        ///         return: some/sub/path
+        /// </summary>
+        /// <param name="root">Path to use as the root path</param>
+        /// <param name="fullPath">Full path to resolve to root relative</param>
+        /// <returns>Root relative path without preceeding './' or '/'</returns>
+        public static string GetRootRelativePath(string root, string fullPath)
+        {
+            root = PathUtils.CleanPath(root);
+            fullPath = PathUtils.CleanPath(fullPath);
+
+            if (!fullPath.StartsWith(root))
+                throw new ArgumentException($"Provided path must begin with the provided root path", nameof(fullPath));
+
+            var rootRelativePath = fullPath.Substring(root.Length).TrimStart('/');
+
+            return rootRelativePath;
         }
     }
 }

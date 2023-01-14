@@ -11,12 +11,12 @@ public class MediaFileEntry
 
     /// <summary>
     ///     Folder depth this file exists, relative to the root directory of the 
-    ///     <see cref="FoxHollow.FHM.Shared.Classes.TreeWalker" /> instance
+    ///     <see cref="FoxHollow.FHM.Shared.Classes.RawVideoTreeWalker" /> instance
     /// </summary>
     public int RelativeDepth { get; internal set; }
 
     /// <summary>
-    ///     Root path the <see cref="FoxHollow.FHM.Shared.Classes.TreeWalker" /> operates on
+    ///     Root path the <see cref="FoxHollow.FHM.Shared.Classes.RawVideoTreeWalker" /> operates on
     /// </summary>
     public string RootPath { get; internal set; }
 
@@ -27,7 +27,7 @@ public class MediaFileEntry
 
     /// <summary>
     ///     Flag that indicates whether this media file entry is considered to be "ignored"
-    ///     by the <see cref="FoxHollow.FHM.Shared.Classes.TreeWalker" />.
+    ///     by the <see cref="FoxHollow.FHM.Shared.Classes.RawVideoTreeWalker" />.
     /// </summary>
     public bool Ignored { get; internal set; }
 

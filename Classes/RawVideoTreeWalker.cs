@@ -13,7 +13,7 @@ namespace FoxHollow.FHM.Shared.Classes;
 /// <summary>
 ///     Class used to walk a media tree when organizing it
 /// </summary>
-public class TreeWalker
+public class RawVideoTreeWalker
 {
     private IServiceProvider _services;
     private ILogger _logger;
@@ -46,14 +46,14 @@ public class TreeWalker
 
 
     /// <summary>
-    ///     Constructor that is called by the <see cref="TreeWalkerFactory" />
+    ///     Constructor that is called by the <see cref="RawVideoTreeWalkerFactory" />
     /// </summary>
     /// <param name="services">DI service provider</param>
     /// <param name="rootDir">Root directory where walking should begin</param>
-    internal TreeWalker(IServiceProvider services, string rootDir)
+    internal RawVideoTreeWalker(IServiceProvider services, string rootDir)
     {
         _services = services ?? throw new ArgumentNullException(nameof(services));
-        _logger = _services.GetRequiredService<ILogger<TreeWalker>>();
+        _logger = _services.GetRequiredService<ILogger<RawVideoTreeWalker>>();
 
         if (string.IsNullOrWhiteSpace(rootDir))
             throw new ArgumentException($"'{nameof(rootDir)}' cannot be null or whitespace.", nameof(rootDir));
@@ -195,6 +195,33 @@ public class TreeWalker
 
             yield return collection;
         }
+    }
+
+    /// <summary>
+    ///     Function used to walk all raw home video scenes
+    /// </summary>
+    /// <returns>Collections of media files, group by the collection name</returns>
+    public IEnumerable<MediaFileRawScene> FindRawVideoScenes()
+    {
+        // First we recurse into sub directories before we begin to process files in this directory
+        // we use .ToList() to ensure that the list of directories doesn't change while we are
+        // looping.
+        var dirPaths = Directory.GetDirectories(this.RootDirectory, "*", new EnumerationOptions() { RecurseSubdirectories = true })
+                                .Order()
+                                .Where(x => PathUtils.GetRelativeDepth(this.RootDirectory, x) == 3)
+                                .ToList();
+
+
+        // If any include paths were configured, Lets filter to only scenes matching the includes 
+        if (this.IncludePaths.Count() > 0)
+            dirPaths = dirPaths.Where(x => this.IncludePaths.Any(y => x.StartsWith(y))).ToList();
+
+
+        // filter out any configured excludes
+        dirPaths = dirPaths.Where(x => !this.ExcludePaths.Any(y => x.Contains(y))).ToList();
+
+        foreach (var dirPath in dirPaths)
+            yield return new MediaFileRawScene(_services, this.RootDirectory, dirPath);
     }
 
     /// <summary>
