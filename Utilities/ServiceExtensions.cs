@@ -9,7 +9,7 @@ public static class ServiceExtensions
 {
     public static void AddFhmServices(this ServiceCollection collection)
     {
-        collection.AddScoped<RawVideoTreeWalkerFactory>();
+        collection.AddScoped<MediaTreeWalkerFactory>();
         collection.AddScoped<RawVideoUtils>();
         collection.AddScoped<MediainfoUtils>();
         collection.AddScoped<CamProfileService>();

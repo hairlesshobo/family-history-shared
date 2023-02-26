@@ -13,7 +13,7 @@ namespace FoxHollow.FHM.Shared.Classes;
 /// <summary>
 ///     Class used to walk a media tree when organizing it
 /// </summary>
-public class RawVideoTreeWalker
+public class MediaTreeWalker
 {
     private IServiceProvider _services;
     private ILogger _logger;
@@ -46,14 +46,14 @@ public class RawVideoTreeWalker
 
 
     /// <summary>
-    ///     Constructor that is called by the <see cref="RawVideoTreeWalkerFactory" />
+    ///     Constructor that is called by the <see cref="MediaTreeWalkerFactory" />
     /// </summary>
     /// <param name="services">DI service provider</param>
     /// <param name="rootDir">Root directory where walking should begin</param>
-    internal RawVideoTreeWalker(IServiceProvider services, string rootDir)
+    internal MediaTreeWalker(IServiceProvider services, string rootDir)
     {
         _services = services ?? throw new ArgumentNullException(nameof(services));
-        _logger = _services.GetRequiredService<ILogger<RawVideoTreeWalker>>();
+        _logger = _services.GetRequiredService<ILogger<MediaTreeWalker>>();
 
         if (string.IsNullOrWhiteSpace(rootDir))
             throw new ArgumentException($"'{nameof(rootDir)}' cannot be null or whitespace.", nameof(rootDir));
@@ -124,17 +124,7 @@ public class RawVideoTreeWalker
         // grouping and file processing
         foreach (var filePath in filePaths)
         {
-            var fileEntry = new MediaFileEntry()
-            {
-                Name = Path.GetFileName(filePath),
-                Path = filePath,
-                RootPath = this.RootDirectory,
-                RelativeDepth = PathUtils.GetRelativeDepth(this.RootDirectory, directory)
-            };
-
-            fileEntries.Add(fileEntry);
-
-            var collectionName = this.GetCollectionName(fileEntry.Path);
+            var collectionName = MediaFileCollection.GetCollectionName(filePath);
 
             // look for an existing collection
             var collection = collections.FirstOrDefault(x => x.Name == collectionName);
@@ -146,6 +136,18 @@ public class RawVideoTreeWalker
                 collection.RootDirectoryPath = this.RootDirectory;
                 collections.Add(collection);
             }
+
+            // TODO: Move the below to shared logic in MediaFileEntry class
+
+            var fileEntry = new MediaFileEntry()
+            {
+                Name = Path.GetFileName(filePath),
+                Path = filePath,
+                RootPath = this.RootDirectory,
+                RelativeDepth = PathUtils.GetRelativeDepth(this.RootDirectory, directory)
+            };
+
+            fileEntries.Add(fileEntry);
 
             // Add the current file entry to the identified (or created) collection
             collection.Entries.Add(fileEntry);
@@ -225,24 +227,5 @@ public class RawVideoTreeWalker
 
         foreach (var dirPath in dirPaths)
             yield return new MediaFileRawScene(_services, this.RootDirectory, dirPath);
-    }
-
-    /// <summary>
-    ///     Given a full file path, this will extract the "collection name", that is the 
-    ///     base filename without any extension
-    /// </summary>
-    /// <param name="filePath">Full file path</param>
-    /// <returns>Collection name</returns>
-    private string GetCollectionName(string filePath)
-    {
-        var cleanPath = PathUtils.CleanPath(filePath);
-        var lastDirSeparator = cleanPath.LastIndexOf('/');
-        var fileName = cleanPath.Substring(lastDirSeparator + 1);
-        var firstDecimal = fileName.IndexOf('.');
-
-        if (firstDecimal == -1)
-            firstDecimal = fileName.Length;
-
-        return fileName.Substring(0, firstDecimal);
     }
 }
