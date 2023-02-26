@@ -61,7 +61,7 @@ public class PhotoProcessor
             // TODO: status update here
             _logger.LogInformation($"{entry.Path}");
 
-            if (new string[] { "tiff", "tif" }.Contains(entry.FileInfo.Extension.ToLower()))
+            if (new string[] { "tiff", "tif" }.Contains(entry.FileInfo.Extension.TrimStart('.').ToLower()))
                 await ProcessTiffPhoto(entry);
         }
 
