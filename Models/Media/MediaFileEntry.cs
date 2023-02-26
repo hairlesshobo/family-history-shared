@@ -1,9 +1,15 @@
 using System.IO;
+using FoxHollow.FHM.Shared.Classes;
 
 namespace FoxHollow.FHM.Shared.Models;
 
 public class MediaFileEntry
 {
+    /// <summary>
+    ///     Name of the file
+    /// </summary>
+    public string Name { get; internal set; }
+
     /// <summary>
     ///     Full path to the MediaFile
     /// </summary>
@@ -42,4 +48,10 @@ public class MediaFileEntry
     /// <returns>Name of the media file</returns>
     public override string ToString()
         => System.IO.Path.GetFileName(this.Path);
+
+    public void RefreshFileInfo()
+    {
+        if (FileInfo != null)
+            this.FileInfo = new FileInfo(this.FileInfo.FullName);
+    }
 }

@@ -55,7 +55,7 @@ namespace FoxHollow.FHM.Shared.Utilities.Serialization
             if (File.Exists(filePath) && !overwrite)
                 throw new Exception($"Destination path already exists: {filePath}");
 
-            using (var fileHandle = File.OpenWrite(filePath))
+            using (var fileHandle = File.Open(filePath, FileMode.Create, FileAccess.Write))
                 Yaml.DumpToStream(model, fileHandle);
         }
 
@@ -96,7 +96,7 @@ namespace FoxHollow.FHM.Shared.Utilities.Serialization
                 return deserializer.Deserialize<TResult>(reader);
             }
         }
-        
+
         /// <summary>
         ///     Read the file located at the provided filePath and deserialize the YAML
         ///     document into a native .NET object of type TResult

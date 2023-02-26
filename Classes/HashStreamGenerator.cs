@@ -39,8 +39,6 @@ namespace FoxHollow.FHM.Shared.Classes
         private const int _defaultBlockSize = 1024 * 1024; // 1MB default block
         private int _blockSize = _defaultBlockSize;
         private Stream _stream;
-        private string _md5Hash = null;
-        private string _sha1Hash = null;
         private bool _generateMd5 = true;
         private bool _generateSha1 = false;
         private Hashes _hashes = null;
@@ -90,8 +88,7 @@ namespace FoxHollow.FHM.Shared.Classes
         /// <exception>
         public string Md5Hash 
         { 
-            get => (this.Complete ? _md5Hash : throw new InvalidOperationException("The hash has not yet been generated"));
-            private set => _md5Hash = value;
+            get => (this.Complete ? _hashes.Md5Hash : throw new InvalidOperationException("The hash has not yet been generated"));
         }
 
         /// <summary>
@@ -103,8 +100,7 @@ namespace FoxHollow.FHM.Shared.Classes
         /// <exception>
         public string Sha1Hash
         {
-            get => (this.Complete ? _sha1Hash : throw new InvalidOperationException("The hash has not yet been generated"));
-            private set => _sha1Hash = value;
+            get => (this.Complete ? _hashes.Sha1Hash : throw new InvalidOperationException("The hash has not yet been generated"));
         }
 
 

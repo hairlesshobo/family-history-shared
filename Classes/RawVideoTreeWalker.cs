@@ -57,7 +57,7 @@ public class RawVideoTreeWalker
 
         if (string.IsNullOrWhiteSpace(rootDir))
             throw new ArgumentException($"'{nameof(rootDir)}' cannot be null or whitespace.", nameof(rootDir));
-        
+
         if (!Directory.Exists(rootDir))
             throw new DirectoryNotFoundException(rootDir);
 
@@ -112,8 +112,10 @@ public class RawVideoTreeWalker
         // from being thown due to missing files if a directory is renamed from within
         // without special handling.
         var filePaths = Directory.GetFiles(directory)
-                                            .Order()
-                                            .ToList();
+                                 .Where(x => !Path.GetFileName(x).StartsWith("."))
+                                 .Order()
+                                 .ToList();
+
         // start with an empty list
         var collections = new List<MediaFileCollection>();
         var fileEntries = new List<MediaFileEntry>();
@@ -124,6 +126,7 @@ public class RawVideoTreeWalker
         {
             var fileEntry = new MediaFileEntry()
             {
+                Name = Path.GetFileName(filePath),
                 Path = filePath,
                 RootPath = this.RootDirectory,
                 RelativeDepth = PathUtils.GetRelativeDepth(this.RootDirectory, directory)
@@ -239,7 +242,7 @@ public class RawVideoTreeWalker
 
         if (firstDecimal == -1)
             firstDecimal = fileName.Length;
-        
+
         return fileName.Substring(0, firstDecimal);
     }
 }
