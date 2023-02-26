@@ -24,6 +24,11 @@ public class MediaTreeWalker
     public string RootDirectory { get; private set; }
 
     /// <summary>
+    ///     If true, the tree walker will recurse into subdirectories. Default: true
+    /// </summary>
+    public bool Recursive { get; set; } = true;
+
+    /// <summary>
     ///     List of paths that are included. If any entries exist in this list,
     ///     then only paths that match an entry in this list will be processed.
     /// </summary>
@@ -89,21 +94,25 @@ public class MediaTreeWalker
     /// <returns>Collections of media files, group by the collection name</returns>
     private async IAsyncEnumerable<MediaFileCollection> ScanDirectoryAsync(string directory)
     {
-        // First we recurse into sub directories before we begin to process files in this directory
-        // we use .ToList() to ensure that the list of directories doesn't change while we are
-        // looping.
-        var dirPaths = Directory.GetDirectories(directory)
-                                .Order()
-                                .ToList();
-
-        // iterate through each directory
-        foreach (var dirPath in dirPaths)
+        if (this.Recursive)
         {
-            // recurse into directories
-            await foreach (var subCollection in ScanDirectoryAsync(dirPath))
-                yield return subCollection;
+            // First we recurse into sub directories before we begin to process files in this directory
+            // we use .ToList() to ensure that the list of directories doesn't change while we are
+            // looping.
+            var dirPaths = Directory.GetDirectories(directory)
+                                    .Order()
+                                    .ToList();
+
+            // iterate through each directory
+            foreach (var dirPath in dirPaths)
+            {
+                // recurse into directories
+                await foreach (var subCollection in ScanDirectoryAsync(dirPath))
+                    yield return subCollection;
+            }
         }
 
+        // TODO: extract the below logic to a separate "GroupByCollection" method or similar that accepts a directory path
 
         // Pre-populate a list of files. For effeciency, you would think it
         // best to use IEnumerable but in this case, we need to pull the full list into

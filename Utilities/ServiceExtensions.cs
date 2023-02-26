@@ -11,6 +11,7 @@ public static class ServiceExtensions
     {
         collection.AddScoped<MediaTreeWalkerFactory>();
         collection.AddScoped<RawVideoUtils>();
+        collection.AddScoped<PhotoUtils>();
         collection.AddScoped<MediainfoUtils>();
         collection.AddScoped<CamProfileService>();
     }
