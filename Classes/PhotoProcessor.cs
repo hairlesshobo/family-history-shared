@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using FoxHollow.FHM.Shared.Models;
@@ -30,6 +31,12 @@ public class PhotoProcessor
     {
         _services = provider;
         _logger = provider.GetRequiredService<ILogger<PhotoProcessor>>();
+    }
+
+    public async Task ProcessPhotosNoVerify(CancellationToken ctk)
+    {
+        var queue = await ProcessPhotos(ctk);
+        await queue.ExecuteAll();
     }
 
     public async Task<ActionQueue> ProcessPhotos(CancellationToken ctk)
@@ -62,13 +69,18 @@ public class PhotoProcessor
             _logger.LogInformation($"{entry.Path}");
 
             if (new string[] { "tiff", "tif" }.Contains(entry.FileInfo.Extension.TrimStart('.').ToLower()))
-                await ProcessTiffPhoto(entry);
+            {
+                var action = ProcessTiffPhoto(entry);
+
+                if (action != null)
+                    actionQueue.Add(action);
+            }
         }
 
         return actionQueue;
     }
 
-    private async Task ProcessTiffPhoto(MediaFileEntry entry)
+    private VerifiableAction ProcessTiffPhoto(MediaFileEntry entry)
     {
         PhotoSidecar sidecar = PhotoSidecar.FromExisting(entry.FileInfo.FullName);
         bool process = false;
@@ -80,26 +92,29 @@ public class PhotoProcessor
             // if the known size in the sidecar doesn't match the current file size, force a reprocess
             if (sidecar.General.Size != entry.FileInfo.Length)
             {
-                _logger.LogInformation($"Size changed since last scan, reprocessing");
+                _logger.LogInformation($"Size changed since last scan, needs reprocessing");
                 process = true;
             }
 
             // If this is a known uncompressed tiff file, for some reason, we force a reprocess
             if (sidecar.Format.Format.Equals("image/tiff") && sidecar.Format.Compression.Equals("NoCompression"))
             {
-                _logger.LogInformation($"Found uncompressed tiff, reprocessing");
+                _logger.LogInformation($"Found uncompressed tiff, needs reprocessing");
                 process = true;
             }
         }
         else
         {
-            _logger.LogInformation($"Generating new sidecar");
+            _logger.LogInformation($"No sidecar found, needs to be created");
 
             sidecar = new PhotoSidecar(entry.Path);
             process = true;
         }
 
-        if (process)
+        if (!process)
+            return null;
+
+        return new VerifiableAction(entry, $"Process {entry.Path}", async (action, ctk) =>
         {
             using (var mimage = new MagickImage(entry.FileInfo))
             {
@@ -178,7 +193,7 @@ public class PhotoProcessor
 
             _logger.LogInformation("Writing sidecar file");
             sidecar.WriteSidecar();
-        }
+        });
     }
 
     private PhotoSidecarPreviewImage GeneratePreviewImage(MagickImage image, int size, string pathNoExtension, string extension)
