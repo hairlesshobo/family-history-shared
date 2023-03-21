@@ -2,7 +2,7 @@ using System;
 
 namespace FoxHollow.FHM.Shared.Models;
 
-public class PhotoSidecarPreviewImage
+public class PhotoSidecarPreviewImage_V1
 {
     /// <summary>
     ///     File extension this preview image is stored as

@@ -2,7 +2,7 @@ using System;
 
 namespace FoxHollow.FHM.Shared.Models;
 
-public class PhotoSidecarGeneral
+public class PhotoSidecarGeneral_V1
 {
     //   file_name: Tape 1-2022_11_24-16_45_01.m2t
     //   container_format: MPEG-TS / HDV 1080i

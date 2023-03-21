@@ -2,7 +2,7 @@ using YamlDotNet.Serialization;
 
 namespace FoxHollow.FHM.Shared.Models;
 
-public class PhotoSidecarHash
+public class PhotoSidecarHash_V1
 {
     /*
         md5: ee89f300725e6b2e0c0080f41bbb2ab2

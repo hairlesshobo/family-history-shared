@@ -2,7 +2,7 @@ using System;
 
 namespace FoxHollow.FHM.Shared.Models;
 
-public class PhotoSidecarFormat
+public class PhotoSidecarFormat_V1
 {
     public string Format { get; set; }
     public int Width { get; set; }

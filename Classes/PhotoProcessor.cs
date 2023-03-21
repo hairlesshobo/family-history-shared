@@ -6,6 +6,7 @@ using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using FoxHollow.FHM.Shared.Models;
+using FoxHollow.FHM.Shared.Services;
 using ImageMagick;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -15,6 +16,7 @@ namespace FoxHollow.FHM.Shared.Classes;
 public class PhotoProcessor
 {
     private IServiceProvider _services;
+    private SidecarUtilsService _sidecarUtils;
     private ILogger _logger;
 
     public string Directory { get; set; }
@@ -31,6 +33,7 @@ public class PhotoProcessor
     {
         _services = provider;
         _logger = provider.GetRequiredService<ILogger<PhotoProcessor>>();
+        _sidecarUtils = provider.GetRequiredService<SidecarUtilsService>();
     }
 
     public async Task ProcessPhotosNoVerify(CancellationToken ctk)
@@ -82,7 +85,7 @@ public class PhotoProcessor
 
     private VerifiableAction ProcessTiffPhoto(MediaFileEntry entry)
     {
-        PhotoSidecar sidecar = PhotoSidecar.FromExisting(entry.FileInfo.FullName);
+        var sidecar = _sidecarUtils.FromExisting<PhotoSidecar_V1>(entry.FileInfo.FullName);
         bool process = false;
 
         if (sidecar != null)
@@ -107,7 +110,7 @@ public class PhotoProcessor
         {
             _logger.LogInformation($"No sidecar found, needs to be created");
 
-            sidecar = new PhotoSidecar(entry.Path);
+            sidecar = new PhotoSidecar_V1(entry.Path);
             process = true;
         }
 
@@ -192,13 +195,13 @@ public class PhotoProcessor
             }
 
             _logger.LogInformation("Writing sidecar file");
-            sidecar.WriteSidecar();
+            _sidecarUtils.WriteSidecar(sidecar, entry.FileInfo.FullName);
         });
     }
 
-    private PhotoSidecarPreviewImage GeneratePreviewImage(MagickImage image, int size, string pathNoExtension, string extension)
+    private PhotoSidecarPreviewImage_V1 GeneratePreviewImage(MagickImage image, int size, string pathNoExtension, string extension)
     {
-        var previewImageObj = new PhotoSidecarPreviewImage();
+        var previewImageObj = new PhotoSidecarPreviewImage_V1();
         using (var previewImage = (MagickImage)image.Clone())
         {
             var outputPath = $"{pathNoExtension}{extension}";
@@ -217,7 +220,7 @@ public class PhotoProcessor
         return previewImageObj;
     }
 
-    private async Task ProcessImageHashes(PhotoSidecar sidecar, MagickImage mimage, bool forceProcess)
+    private async Task ProcessImageHashes(PhotoSidecar_V1 sidecar, MagickImage mimage, bool forceProcess)
     {
         if (String.IsNullOrWhiteSpace(sidecar.Hash.MD5) || String.IsNullOrWhiteSpace(sidecar.Hash.SHA1) || forceProcess)
         {

@@ -14,6 +14,7 @@ public static class ServiceExtensions
     public static void AddFhmServices(this ServiceCollection collection)
     {
         collection.AddScoped<MediaTreeWalkerFactory>();
+        collection.AddScoped<SidecarUtilsService>();
         collection.AddScoped<RawVideoUtils>();
         collection.AddScoped<PhotoUtils>();
         collection.AddScoped<MediainfoUtils>();

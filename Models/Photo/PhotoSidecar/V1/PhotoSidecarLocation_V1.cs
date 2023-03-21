@@ -3,7 +3,7 @@ using YamlDotNet.Serialization;
 
 namespace FoxHollow.FHM.Shared.Models;
 
-public class PhotoSidecarLocation
+public class PhotoSidecarLocation_V1
 {
     // latitude: 
     // longitude:
