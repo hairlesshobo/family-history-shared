@@ -1,4 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project 
+  xmlns:xsi="http://schemas.microsoft.com/developer/msbuild/2003"
+  Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>library</OutputType>
@@ -7,6 +9,7 @@
     <Nullable>disable</Nullable>
     
     <OutputPath>../../bin/</OutputPath>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 

@@ -1,4 +1,4 @@
-/**
+/*
  *  Archiver - Cross platform, multi-destination backup and archiving utility
  * 
  *  Copyright (c) 2020-2021 Steve Cross <flip@foxhollow.cc>
@@ -78,7 +78,7 @@ namespace FoxHollow.FHM.Shared
 }
 
 
-/**
+/*
  *  Archiver - Cross platform, multi-destination backup and archiving utility
  * 
  *  Copyright (c) 2020-2021 Steve Cross <flip@foxhollow.cc>

@@ -1,4 +1,4 @@
-/**
+/*
  *  Archiver - Cross platform, multi-destination backup and archiving utility
  * 
  *  Copyright (c) 2020-2021 Steve Cross <flip@foxhollow.cc>
@@ -20,13 +20,20 @@
 
 using System;
 
-namespace FoxHollow.FHM.Shared.Exceptions
-{
-    public class TapeDriveNotFoundException : Exception
-    {
-        public TapeDriveNotFoundException(string drive) : base($"Unable to find the following tape drive: {drive}")
-        {
+namespace FoxHollow.FHM.Shared.Exceptions;
 
-        }
+/// <summary>
+///     Exception that occurs when an attempt is made to access a non-existant
+///     tape drive
+/// </summary>
+public class TapeDriveNotFoundException : Exception
+{
+    /// <summary>
+    ///     Constructor that accepts a tape drive
+    /// </summary>
+    /// <param name="drive">Tape drive that does not exist</param>
+    public TapeDriveNotFoundException(string drive) : base($"Unable to find the following tape drive: {drive}")
+    {
+
     }
 }

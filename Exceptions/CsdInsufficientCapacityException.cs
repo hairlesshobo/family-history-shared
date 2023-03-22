@@ -1,4 +1,4 @@
-/**
+/*
  *  Archiver - Cross platform, multi-destination backup and archiving utility
  * 
  *  Copyright (c) 2020-2021 Steve Cross <flip@foxhollow.cc>
@@ -20,11 +20,17 @@
 
 using System;
 
-namespace FoxHollow.FHM.Shared.Exceptions
+namespace FoxHollow.FHM.Shared.Exceptions;
+
+/// <summary>
+///     Exception that is thrown if there is insufficient capacity on a CSD store
+/// </summary>
+public class CsdInsufficientCapacityException : Exception
 {
-    public class CsdInsufficientCapacityException : Exception
-    {
-        public CsdInsufficientCapacityException(string message) : base(message)
-        { }
-    }
+    /// <summary>
+    ///     Constructor that accepts a message
+    /// </summary>
+    /// <param name="message">Exception message</param>
+    public CsdInsufficientCapacityException(string message) : base(message)
+    { }
 }

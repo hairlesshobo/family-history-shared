@@ -1,4 +1,4 @@
-/**
+/*
  *  Archiver - Cross platform, multi-destination backup and archiving utility
  * 
  *  Copyright (c) 2020-2021 Steve Cross <flip@foxhollow.cc>
@@ -22,12 +22,18 @@ using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 
-namespace FoxHollow.FHM.Shared.Exceptions
+namespace FoxHollow.FHM.Shared.Exceptions;
+
+/// <summary>
+///     Exception that is thrown any time an error occurs while calling a native method
+/// </summary>
+public class NativeMethodException : Exception
 {
-    public class NativeMethodException : Exception
-    {
-        public NativeMethodException(string methodName)
-            : base($"Native API method failed : call to {methodName} failed with error code {Marshal.GetLastWin32Error()}", new Win32Exception())
-        { }
-    }
+    /// <summary>
+    ///     Constructor that accepts a method name that failed
+    /// </summary>
+    /// <param name="methodName">Exception message</param>
+    public NativeMethodException(string methodName)
+        : base($"Native API method failed : call to {methodName} failed with error code {Marshal.GetLastWin32Error()}", new Win32Exception())
+    { }
 }

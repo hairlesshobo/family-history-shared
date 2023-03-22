@@ -1,4 +1,4 @@
-/**
+/*
  *  Archiver - Cross platform, multi-destination backup and archiving utility
  * 
  *  Copyright (c) 2020-2021 Steve Cross <flip@foxhollow.cc>
@@ -37,6 +37,10 @@ namespace FoxHollow.FHM.Shared.Classes
     /// </summary>
     public class CustomFileCopier
     {
+        /// <summary>
+        ///     Delegat that is usd any time a progress change message is broadcast
+        /// </summary>
+        /// <param name="progress">Object describing progress</param>
         public delegate void ProgressChangedDelegate(FileCopyProgress progress);
 
         /// <summary>
