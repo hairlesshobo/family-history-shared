@@ -21,11 +21,8 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-
-using Microsoft.Win32.SafeHandles;
-
 using FoxHollow.FHM.Shared.Native;
-
+using Microsoft.Win32.SafeHandles;
 using static FoxHollow.FHM.Shared.Native.Windows;
 //using Bsw.Types.Logger; 
 
@@ -154,9 +151,16 @@ namespace FoxHollow.FHM.Shared.TapeDrivers
                 return true;
         }
 
+        /// <summary>
+        ///     Rewind the tape to the beginning
+        /// </summary>
         public void RewindTape()
             => SetTapeBlockPosition(0);
 
+
+        /// <summary>
+        ///     Eject the tape from the tape drive
+        /// </summary>
         public void EjectTape()
         {
             int result = Windows.PrepareTape(m_handleValue, TAPE_UNLOAD, FALSE);
@@ -168,7 +172,6 @@ namespace FoxHollow.FHM.Shared.TapeDrivers
         /// <summary>
         /// Writes to the tape given stream starting from given postion
         /// </summary>
-        /// <param name="startPos"></param>
         /// <param name="stream"></param>
         public void Write(byte[] stream)
         {
@@ -225,7 +228,7 @@ namespace FoxHollow.FHM.Shared.TapeDrivers
         /// <summary>
         /// Sets new tape position (current seek)
         /// </summary>
-        /// <param name="logicalBlock">Block number of current file on tape to seek to</param>
+        /// <param name="fileNumber">File on tape to seek to</param>
         public void SetTapeFilePosition(long fileNumber)
         {
             int errorCode = 0;
@@ -259,6 +262,10 @@ namespace FoxHollow.FHM.Shared.TapeDrivers
                 throw new TapeOperatorWin32Exception("SetTapePosition", Marshal.GetLastWin32Error());
         }
 
+
+        /// <summary>
+        ///     Write a new file mark to the tape
+        /// </summary>
         public void WriteFilemark()
         {
             int errorCode = 0;
@@ -267,6 +274,9 @@ namespace FoxHollow.FHM.Shared.TapeDrivers
                 throw new TapeOperatorWin32Exception("WriteTapemark", Marshal.GetLastWin32Error());
         }
 
+        /// <summary>
+        ///     Enable compression in the tape drive
+        /// </summary>
         public void SetDriveCompression()
         {
             TapeDriveInfo info = this.DriveInfo;
@@ -307,33 +317,15 @@ namespace FoxHollow.FHM.Shared.TapeDrivers
 
         #region Public properties
 
-        public FileStream Stream
-        {
-            get
-            {
-                return m_stream;
-            }
-        }
+        /// <summary>
+        ///     Stream for the tape
+        /// </summary>
+        public FileStream Stream => m_stream;
 
         /// <summary>
-        /// Returns opened file handle
+        ///     Returns opened file handle
         /// </summary>
-        public SafeFileHandle Handle
-        {
-            get
-            {
-                // If the handle is valid,
-                // return it.
-                if (!m_handleValue.IsInvalid)
-                {
-                    return m_handleValue;
-                }
-                else
-                {
-                    return null;
-                }
-            }// GET
-        }
+        public SafeFileHandle Handle => (!m_handleValue.IsInvalid ? m_handleValue : null);
 
         /// <summary>
         /// Returns default block size for current device
@@ -348,14 +340,14 @@ namespace FoxHollow.FHM.Shared.TapeDrivers
             }
         }
 
-        public uint BlockSize
-        {
-            get
-            {
-                return _blockSize;
-            }
-        }
+        /// <summary>
+        ///     Configured block size when accessing tape
+        /// </summary>
+        public uint BlockSize => _blockSize;
 
+        /// <summary>
+        ///     Drive info
+        /// </summary>
         public TapeDriveInfo DriveInfo
         {
             get

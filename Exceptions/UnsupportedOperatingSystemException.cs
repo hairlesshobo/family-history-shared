@@ -20,11 +20,17 @@
 
 using System;
 
-namespace FoxHollow.FHM.Shared.Exceptions
+namespace FoxHollow.FHM.Shared.Exceptions;
+
+/// <summary>
+///     Exception that is thrown when attempting to execute the operation on
+///     an unsupported operating system
+/// </summary>
+public class UnsupportedOperatingSystemException : Exception
 {
-    public class UnsupportedOperatingSystemException : Exception
-    {
-        public UnsupportedOperatingSystemException() : base("The current operating system is unsupported")
-        { }
-    }
+    /// <summary>
+    ///     Default constructor
+    /// </summary>
+    public UnsupportedOperatingSystemException() : base("The current operating system is unsupported")
+    { }
 }

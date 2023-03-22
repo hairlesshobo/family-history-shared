@@ -20,14 +20,25 @@
 
 using System;
 
-namespace FoxHollow.FHM.Shared.Exceptions
-{
-    public class TapeDriveNotOpenException : Exception
-    {
-        public TapeDriveNotOpenException(string methodName) : base($"Unable to perform {methodName} operation, the tape drive is not open")
-        { }
+namespace FoxHollow.FHM.Shared.Exceptions;
 
-        public TapeDriveNotOpenException() : base($"Unable to perform requested operation, the tape drive is not open")
-        { }
-    }
+/// <summary>
+///     Exception that is thrown any time an attempt is mde to perform
+///     an operation on a tape drive that has not yet been opened or
+///     has already been closed
+/// </summary>
+public class TapeDriveNotOpenException : Exception
+{
+    /// <summary>
+    ///     Constructor that accepts the method name that was attempted to be called
+    /// </summary>
+    /// <param name="methodName">Name of method that was called</param>
+    public TapeDriveNotOpenException(string methodName) : base($"Unable to perform {methodName} operation, the tape drive is not open")
+    { }
+
+    /// <summary>
+    ///     Default constructor
+    /// </summary>
+    public TapeDriveNotOpenException() : base($"Unable to perform requested operation, the tape drive is not open")
+    { }
 }

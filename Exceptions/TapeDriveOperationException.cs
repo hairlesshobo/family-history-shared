@@ -20,12 +20,19 @@
 
 using System;
 
-namespace FoxHollow.FHM.Shared.Exceptions
+namespace FoxHollow.FHM.Shared.Exceptions;
+
+/// <summary>
+///     An exception occurred during a tape drive operation
+/// </summary>
+public class TapeDriveOperationException : Exception
 {
-    public class TapeDriveOperationException : Exception
-    {
-        public TapeDriveOperationException(string methodName, Exception innerException)
-            : base($"Tape drive operation {methodName} failed. See inner exception", innerException)
-        { }
-    }
+    /// <summary>
+    ///     Constructor that accepts method name and inner exception
+    /// </summary>
+    /// <param name="methodName">Name of method that threw exception</param>
+    /// <param name="innerException">Inner exception that occurred during method execution</param>
+    public TapeDriveOperationException(string methodName, Exception innerException)
+        : base($"Tape drive operation {methodName} failed. See inner exception", innerException)
+    { }
 }
