@@ -1,40 +1,38 @@
-/*
- *  Archiver - Cross platform, multi-destination backup and archiving utility
- * 
- *  Copyright (c) 2020-2021 Steve Cross <flip@foxhollow.cc>
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *  
- *  You should have received a copy of the GNU General Public License along
- *  with this program; if not, write to the Free Software Foundation, Inc.,
- *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- */
+//==========================================================================
+//  Family History Manager - https://code.foxhollow.cc/fhm/
+//
+//  A cross platform tool to help organize and preserve all types
+//  of family history
+//==========================================================================
+//  Copyright (c) 2020-2023 Steve Cross <flip@foxhollow.cc>
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//==========================================================================
 
-using System;
+namespace FoxHollow.FHM.Shared.Models;
 
-namespace FoxHollow.FHM.Shared.Models
+public class OpticalDrive
 {
-    public class OpticalDrive
-    {
-        public string Name { get; set; }
-        public string FullPath { get; set; }
-        public string MountPoint { get; set; }
-        public string VolumeLabel { get; set; }
+    public string Name { get; set; }
+    public string FullPath { get; set; }
+    public string MountPoint { get; set; }
+    public string VolumeLabel { get; set; }
 
-        // TODO: Figure out what format is and decide if it is needed
-        public string VolumeFormat { get; set; }
-        public bool IsReady { get; set; }
-        public bool IsDiscLoaded { get; set; }
+    // TODO: Figure out what format is and decide if it is needed
+    public string VolumeFormat { get; set; }
+    public bool IsReady { get; set; }
+    public bool IsDiscLoaded { get; set; }
 
-        // TODO: Detect drive capabilities
-        public OpticalDriveCapabilities Capabilities => new OpticalDriveCapabilities();
-    }
+    // TODO: Detect drive capabilities
+    public OpticalDriveCapabilities Capabilities => new OpticalDriveCapabilities();
 }

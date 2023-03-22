@@ -1,102 +1,102 @@
-/*
- *  Archiver - Cross platform, multi-destination backup and archiving utility
- * 
- *  Copyright (c) 2020-2021 Steve Cross <flip@foxhollow.cc>
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *  
- *  You should have received a copy of the GNU General Public License along
- *  with this program; if not, write to the Free Software Foundation, Inc.,
- *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- */
+//==========================================================================
+//  Family History Manager - https://code.foxhollow.cc/fhm/
+//
+//  A cross platform tool to help organize and preserve all types
+//  of family history
+//==========================================================================
+//  Copyright (c) 2020-2023 Steve Cross <flip@foxhollow.cc>
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//==========================================================================
 
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Text.Json;
 using FoxHollow.FHM.Shared.Models;
 
-namespace FoxHollow.FHM.Shared
+namespace FoxHollow.FHM.Shared;
+
+public static class SysInfo
 {
-    public static class SysInfo
+    public static string ExecutionRoot { get; private set; }
+    public static string PythonRoot { get; private set; }
+    public static string ConfigRoot { get; private set; }
+    public static OSType OSType { get; private set; } = OSType.Unknown;
+    public static bool OSSupported { get; private set; } = true;
+
+    /// <summary>
+    ///     CPU architecture of the currently running system
+    /// </summary>
+    public static Architecture Architecture => System.Runtime.InteropServices.RuntimeInformation.OSArchitecture;
+
+    /// <summary>
+    ///     User-friendly description of the currently running system
+    /// </summary>
+    public static string Description => System.Runtime.InteropServices.RuntimeInformation.OSDescription;
+
+    /// <summary>
+    ///     Identifier for the runtime
+    /// </summary>
+    public static string Identifier => System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier;
+
+    /// <summary>
+    ///     Process ID of the currently running application
+    /// </summary>
+    public static int PID => Process.GetCurrentProcess().Id;
+
+    static SysInfo()
     {
-        public static string ExecutionRoot { get; private set; }
-        public static string PythonRoot { get; private set; }
-        public static string ConfigRoot { get; private set; }
-        public static OSType OSType { get; private set; } = OSType.Unknown;
-        public static bool OSSupported { get; private set; } = true;
+        SysInfo.ExecutionRoot = AppContext.BaseDirectory;
+        SysInfo.ConfigRoot = Path.GetFullPath(Path.Combine(SysInfo.ExecutionRoot, "../config"));
+        SysInfo.PythonRoot = Path.GetFullPath(Path.Combine(SysInfo.ExecutionRoot, "python"));
 
-        /// <summary>
-        ///     CPU architecture of the currently running system
-        /// </summary>
-        public static Architecture Architecture => System.Runtime.InteropServices.RuntimeInformation.OSArchitecture;
+        if (OperatingSystem.IsWindows())
+            SysInfo.OSType = OSType.Windows;
+        else if (OperatingSystem.IsLinux())
+            SysInfo.OSType = OSType.Linux;
+        else if (OperatingSystem.IsFreeBSD())
+            SysInfo.OSType = OSType.FreeBSD;
+        else if (OperatingSystem.IsMacOS())
+            SysInfo.OSType = OSType.OSX;
 
-        /// <summary>
-        ///     User-friendly description of the currently running system
-        /// </summary>
-        public static string Description => System.Runtime.InteropServices.RuntimeInformation.OSDescription;
-
-        /// <summary>
-        ///     Identifier for the runtime
-        /// </summary>
-        public static string Identifier => System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier;
-
-        /// <summary>
-        ///     Process ID of the currently running application
-        /// </summary>
-        public static int PID => Process.GetCurrentProcess().Id;
-
-        static SysInfo()
-        {
-            SysInfo.ExecutionRoot = AppContext.BaseDirectory;
-            SysInfo.ConfigRoot = Path.GetFullPath(Path.Combine(SysInfo.ExecutionRoot, "../config"));
-            SysInfo.PythonRoot = Path.GetFullPath(Path.Combine(SysInfo.ExecutionRoot, "python"));
-
-            if (OperatingSystem.IsWindows())
-                SysInfo.OSType = OSType.Windows;
-            else if (OperatingSystem.IsLinux())
-                SysInfo.OSType = OSType.Linux;
-            else if (OperatingSystem.IsFreeBSD())
-                SysInfo.OSType = OSType.FreeBSD;
-            else if (OperatingSystem.IsMacOS())
-                SysInfo.OSType = OSType.OSX;
-            
-            // TODO: update any code that checks for supported platform to instead reference SysInfo.OSSupported
-            if (SysInfo.OSType == OSType.FreeBSD || SysInfo.OSType == OSType.OSX || SysInfo.OSType == OSType.Unknown)
-                SysInfo.OSSupported = false;
-        }
+        // TODO: update any code that checks for supported platform to instead reference SysInfo.OSSupported
+        if (SysInfo.OSType == OSType.FreeBSD || SysInfo.OSType == OSType.OSX || SysInfo.OSType == OSType.Unknown)
+            SysInfo.OSSupported = false;
     }
 }
 
 
-/*
- *  Archiver - Cross platform, multi-destination backup and archiving utility
- * 
- *  Copyright (c) 2020-2021 Steve Cross <flip@foxhollow.cc>
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *  
- *  You should have received a copy of the GNU General Public License along
- *  with this program; if not, write to the Free Software Foundation, Inc.,
- *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- */
+//==========================================================================
+//  Family History Manager - https://code.foxhollow.cc/fhm/
+//
+//  A cross platform tool to help organize and preserve all types
+//  of family history
+//==========================================================================
+//  Copyright (c) 2020-2023 Steve Cross <flip@foxhollow.cc>
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//==========================================================================
 
 // using System;
 // using System.Collections.Generic;
@@ -172,7 +172,7 @@ namespace FoxHollow.FHM.Shared
 //         ///     (such as a cdrom)
 //         /// </summary>
 //         public static bool IsReadonlyFilesystem => _isReadonlyFilesystem;
-        
+
 //         /// <summary>
 //         ///     Flag indicating whether one or more tape drives were detected on the local system
 //         /// </summary>
@@ -202,8 +202,8 @@ namespace FoxHollow.FHM.Shared
 //         ///     Process ID of the currently running application
 //         /// </summary>
 //         public static int PID => Process.GetCurrentProcess().Id;
-        
-        
+
+
 //         /// <summary>
 //         ///     Static constructor
 //         /// </summary>
@@ -215,7 +215,7 @@ namespace FoxHollow.FHM.Shared
 //                 _osType = OSType.Windows;
 //             else if (OperatingSystem.IsLinux())
 //                 _osType = OSType.Linux;
-            
+
 //             // these are commented out because we have not yet built support for them into the app. For now, they will 
 //             // be identified as "Unknown" and the app will not lauch on an unknown platform.
 //             // else if (OperatingSystem.IsFreeBSD())
@@ -304,7 +304,7 @@ namespace FoxHollow.FHM.Shared
 
 //                 case "TestCLI":
 //                     return SysInfoMode.TestCLI;
-                
+
 //                 default:
 //                     return SysInfoMode.Unknown;
 //             }
