@@ -21,9 +21,33 @@
 
 namespace FoxHollow.FHM.Shared.Models;
 
-public enum ScanType
+/// <summary>
+///     Operating system type
+/// </summary>
+public enum OSType
 {
-    Unknown,
-    Progressive,
-    Interlaced
+    /// <summary>
+    ///     Microsoft Windows
+    /// </summary>
+    Windows = 0,
+
+    /// <summary>
+    ///     GNU/Linux
+    /// </summary>
+    Linux = 1,
+
+    /// <summary>
+    ///     Mac OS
+    /// </summary>
+    OSX = 2,
+
+    /// <summary>
+    ///     FreeBSD
+    /// </summary>
+    FreeBSD = 3,
+
+    /// <summary>
+    ///     Unknown/other operating system
+    /// </summary>
+    Unknown = 99
 }

@@ -21,11 +21,26 @@
 
 namespace FoxHollow.FHM.Shared.Models;
 
+/// <summary>
+///     Simple model that describes file hashes in more than one format
+/// </summary>
 public class Hashes
 {
+    /// <summary>
+    ///     MD5 hash
+    /// </summary>
     public string Md5Hash { get; private set; }
+
+    /// <summary>
+    ///     SHA1 hash
+    /// </summary>
     public string Sha1Hash { get; private set; }
 
+    /// <summary>
+    ///     Create a new instance by providing the required hashes
+    /// </summary>
+    /// <param name="md5">MD5 hash to set</param>
+    /// <param name="sha1">SHA1 hash to set</param>
     public Hashes(string md5 = null, string sha1 = null)
     {
         this.Md5Hash = md5;

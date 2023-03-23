@@ -117,6 +117,10 @@ public class VerifiableAction
         this.DurationMs = sw.ElapsedMilliseconds;
     }
 
+    /// <summary>
+    ///     Execute the action synchronously
+    /// </summary>
+    /// <param name="ctk">Cancellation token used to abort execution</param>
     public void Execute(CancellationToken ctk = default)
         => this.ExecuteAsync(ctk).RunSynchronously();
 }

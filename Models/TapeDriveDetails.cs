@@ -21,8 +21,18 @@
 
 namespace FoxHollow.FHM.Shared.Models;
 
+/// <summary>
+///     Details of tape drive
+/// </summary>
 public class TapeDriveDetails
 {
+    /// <summary>
+    ///     Type of drive
+    /// </summary>
     string DriveType { get; }
+
+    /// <summary>
+    ///     Is a tape currently loaded in the drive?
+    /// </summary>
     public bool TapeLoaded { get; set; } = false;
 }

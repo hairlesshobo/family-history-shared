@@ -35,6 +35,11 @@ namespace FoxHollow.FHM.Shared.Classes;
 /// </summary>
 public class HashStreamGenerator
 {
+    /// <summary>
+    ///     Delegate that describes the function called any time a progress message
+    ///     is generated during hash generation
+    /// </summary>
+    /// <param name="progress">Object that describes current progress</param>
     public delegate void ProgressChangedDelegate(HashGenerationProgress progress);
 
     private const int _defaultBlockSize = 1024 * 1024; // 1MB default block
@@ -86,7 +91,7 @@ public class HashStreamGenerator
     /// </summary>
     /// <exception cref="InvalidOperationException">
     ///     Will be thrown if an attempt is made to read the hash prior to generating it
-    /// <exception>
+    /// </exception>
     public string Md5Hash
     {
         get => (this.Complete ? _hashes.Md5Hash : throw new InvalidOperationException("The hash has not yet been generated"));
@@ -98,7 +103,7 @@ public class HashStreamGenerator
     /// </summary>
     /// <exception cref="InvalidOperationException">
     ///     Will be thrown if an attempt is made to read the hash prior to generating it
-    /// <exception>
+    /// </exception>
     public string Sha1Hash
     {
         get => (this.Complete ? _hashes.Sha1Hash : throw new InvalidOperationException("The hash has not yet been generated"));

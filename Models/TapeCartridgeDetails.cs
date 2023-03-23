@@ -21,7 +21,13 @@
 
 namespace FoxHollow.FHM.Shared.Models;
 
+/// <summary>
+///     Details of an inserted tape cartridge
+/// </summary>
 public class TapeCartridgeDetails
 {
+    /// <summary>
+    ///     Capacity, in bytes, of the inserted tape cartridge
+    /// </summary>
     public long Capacity { get; set; }
 }

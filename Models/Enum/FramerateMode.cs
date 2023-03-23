@@ -19,11 +19,28 @@
 //  limitations under the License.
 //==========================================================================
 
+using YamlDotNet.Serialization;
+
 namespace FoxHollow.FHM.Shared.Models;
 
-public enum BitrateMode
+/// <summary>
+///     Video framerate type
+/// </summary>
+public enum FramerateMode
 {
+    /// <summary>
+    ///     Unknown framerate mode
+    /// </summary>
+    [YamlMember()]
     Unknown,
+
+    /// <summary>
+    ///     This video was encoded using a constant framerate
+    /// </summary> 
     Constant,
+
+    /// <summary>
+    ///     This video was encoded using a variable framerate strategy
+    /// </summary>
     Variable
 }

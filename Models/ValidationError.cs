@@ -24,8 +24,20 @@ using System.Collections.Generic;
 
 namespace FoxHollow.FHM.Shared.Models;
 
-public static class Extensions
+/// <summary>
+///     Extensions for working with ValidationError class
+/// </summary>
+public static class ValidationErrorExtensions
 {
+    /// <summary>
+    ///     Extension method for adding a new validation error to an existing list
+    ///     of validation errors
+    /// </summary>
+    /// <param name="errorList">Existing list of validation errors</param>
+    /// <param name="prefix">prefix</param>
+    /// <param name="field">field</param>
+    /// <param name="error">Error message</param>
+    /// <returns>The list being operated on</returns>
     public static List<ValidationError> AddValidationError(this List<ValidationError> errorList, string prefix, string field, string error)
     {
         errorList.Add(new ValidationError()
@@ -38,8 +50,18 @@ public static class Extensions
     }
 }
 
+/// <summary>
+///     Class that describes a validation error
+/// </summary>
 public class ValidationError
 {
+    /// <summary>
+    ///     The field th error occurred on
+    /// </summary>
     public string Field { get; set; }
+
+    /// <summary>
+    ///     The error that occurred
+    /// </summary>
     public string Error { get; set; }
 }

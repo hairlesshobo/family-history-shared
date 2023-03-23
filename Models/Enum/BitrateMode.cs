@@ -21,11 +21,23 @@
 
 namespace FoxHollow.FHM.Shared.Models;
 
-public enum OSType
+/// <summary>
+///     Bitrate encoding mode of a video
+/// </summary>
+public enum BitrateMode
 {
-    Windows = 0,
-    Linux = 1,
-    OSX = 2,
-    FreeBSD = 3,
-    Unknown = 99
+    /// <summary>
+    ///     Unknown bitrate mode
+    /// </summary>
+    Unknown,
+
+    /// <summary>
+    ///     Encoded using a constant bitrate encoding scheme
+    /// </summary>
+    Constant,
+
+    /// <summary>
+    ///     Encoded using a variable bitrate encoding scheme
+    /// </summary>
+    Variable
 }

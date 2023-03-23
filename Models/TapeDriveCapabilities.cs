@@ -21,6 +21,9 @@
 
 namespace FoxHollow.FHM.Shared.Models;
 
+/// <summary>
+///     A description of the capabilities of a tape drive
+/// </summary>
 public class TapeDriveCapabilities
 {
 }

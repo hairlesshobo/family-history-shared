@@ -28,7 +28,8 @@ namespace FoxHollow.FHM.Shared.Classes;
 /// <summary>
 ///     FlexibleDate provies a mechanism to specify a date, or a range of dates,
 ///     in a format much more flexible than typically allowed by computer programs.
-///     
+/// </summary>
+/// <example>
 ///     Here are a number of examples that can be parsed by this class:
 ///        - about 1983
 ///        - abt  1967
@@ -56,7 +57,7 @@ namespace FoxHollow.FHM.Shared.Classes;
 ///     dates. If the provided date is an exact date (including year, month, and day)
 ///     then the begin and end dates will match, otherwise the range will be the best
 ///     approximation of begin and end date range, based on the provided input string.
-/// </summary>
+/// </example>
 public class FlexibleDate
 {
     /// <summary>
@@ -91,6 +92,9 @@ public class FlexibleDate
     /// </summary>
     public bool IsExact { get; private set; } = false;
 
+    /// <summary>
+    ///     Flexible date string, as provided to the class when initialized
+    /// </summary>
     public string InputDateString { get; private set; }
 
     /// <summary>
@@ -460,8 +464,23 @@ public class FlexibleDateParseException : Exception
 /// </summary>
 public enum FlexibleDateSeason
 {
+    /// <summary>
+    ///     Represents the winter season
+    /// </summary> 
     Winter = 0,
+
+    /// <summary>
+    ///     Represents the spring season
+    /// </summary>
     Spring = 1,
+
+    /// <summary>
+    ///     Represents the summer season
+    /// </summary>
     Summer = 2,
+
+    /// <summary>
+    ///     Represents the autumn (fall) season
+    /// </summary>
     Autumn = 3
 }

@@ -26,34 +26,28 @@ using System.Threading.Tasks;
 
 namespace FoxHollow.FHM.Shared.Classes;
 
+/// <summary>
+///     This stream is a memory stream that loads from a file, but
+///     it does so in a lazy manner. This means that the stream is only
+///     populated upon the first attempt to read from the stream.
+/// </summary>
 public class LazyMemoryStream : MemoryStream
 {
     private FileInfo _fileInfo;
     private bool _fileRead;
 
-    public override bool CanTimeout => base.CanTimeout;
-
-    public override int ReadTimeout { get => base.ReadTimeout; set => base.ReadTimeout = value; }
-    public override int WriteTimeout { get => base.WriteTimeout; set => base.WriteTimeout = value; }
-
-    public override bool CanRead => base.CanRead;
-
-    public override bool CanSeek => base.CanSeek;
-
-    public override bool CanWrite => base.CanWrite;
-
-    public override int Capacity { get => base.Capacity; set => base.Capacity = value; }
-
-    public override long Length => base.Length;
-
-    public override long Position { get => base.Position; set => base.Position = value; }
-
+    /// <summary>
+    ///     Initialize a new instance of the lazy memory stream, loading
+    ///     data from the provided file info
+    /// </summary>
+    /// <param name="fileInfo">FileInfo object that points to the file to load</param>
     public LazyMemoryStream(FileInfo fileInfo)
     {
         _fileInfo = fileInfo ?? throw new ArgumentNullException(nameof(fileInfo));
         this.SetLength(_fileInfo.Length);
     }
 
+    /// <inheritdoc />
     public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
     {
         LoadFromFile();
@@ -61,66 +55,19 @@ public class LazyMemoryStream : MemoryStream
         return base.BeginRead(buffer, offset, count, callback, state);
     }
 
+    /// <inheritdoc />
     public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
     {
         throw new NotSupportedException();
     }
 
-    public override void Close()
-    {
-        base.Close();
-    }
-
-    public override void CopyTo(Stream destination, int bufferSize)
-    {
-        base.CopyTo(destination, bufferSize);
-    }
-
-    public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
-    {
-        return base.CopyToAsync(destination, bufferSize, cancellationToken);
-    }
-
-    public override ValueTask DisposeAsync()
-    {
-        return base.DisposeAsync();
-    }
-
-    public override int EndRead(IAsyncResult asyncResult)
-    {
-        return base.EndRead(asyncResult);
-    }
-
+    /// <inheritdoc />
     public override void EndWrite(IAsyncResult asyncResult)
     {
         throw new NotSupportedException();
     }
 
-    public override bool Equals(object obj)
-    {
-        return base.Equals(obj);
-    }
-
-    public override void Flush()
-    {
-        base.Flush();
-    }
-
-    public override Task FlushAsync(CancellationToken cancellationToken)
-    {
-        return base.FlushAsync(cancellationToken);
-    }
-
-    public override byte[] GetBuffer()
-    {
-        return base.GetBuffer();
-    }
-
-    public override int GetHashCode()
-    {
-        return base.GetHashCode();
-    }
-
+    /// <inheritdoc />
     public override int Read(byte[] buffer, int offset, int count)
     {
         LoadFromFile();
@@ -128,6 +75,7 @@ public class LazyMemoryStream : MemoryStream
         return base.Read(buffer, offset, count);
     }
 
+    /// <inheritdoc />
     public override int Read(Span<byte> buffer)
     {
         LoadFromFile();
@@ -135,6 +83,7 @@ public class LazyMemoryStream : MemoryStream
         return base.Read(buffer);
     }
 
+    /// <inheritdoc />
     public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
     {
         LoadFromFile();
@@ -142,6 +91,7 @@ public class LazyMemoryStream : MemoryStream
         return base.ReadAsync(buffer, offset, count, cancellationToken);
     }
 
+    /// <inheritdoc />
     public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
     {
         LoadFromFile();
@@ -149,6 +99,7 @@ public class LazyMemoryStream : MemoryStream
         return base.ReadAsync(buffer, cancellationToken);
     }
 
+    /// <inheritdoc />
     public override int ReadByte()
     {
         LoadFromFile();
@@ -156,67 +107,49 @@ public class LazyMemoryStream : MemoryStream
         return base.ReadByte();
     }
 
-    public override long Seek(long offset, SeekOrigin loc)
-    {
-        return base.Seek(offset, loc);
-    }
-
-    public override void SetLength(long value)
-    {
-        base.SetLength(value);
-    }
-
-    public override byte[] ToArray()
-    {
-        return base.ToArray();
-    }
-
-    public override string ToString()
-    {
-        return base.ToString();
-    }
-
+    /// <inheritdoc />
     public override bool TryGetBuffer(out ArraySegment<byte> buffer)
     {
         this.LoadFromFile();
         return base.TryGetBuffer(out buffer);
     }
 
+    /// <inheritdoc />
     public override void Write(byte[] buffer, int offset, int count)
     {
         throw new NotSupportedException();
     }
 
+    /// <inheritdoc />
     public override void Write(ReadOnlySpan<byte> buffer)
     {
         throw new NotSupportedException();
     }
 
+    /// <inheritdoc />
     public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
     {
         throw new NotSupportedException();
     }
 
+    /// <inheritdoc />
     public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
     {
         throw new NotSupportedException();
     }
 
+    /// <inheritdoc />
     public override void WriteByte(byte value)
     {
         throw new NotSupportedException();
     }
 
+    /// <inheritdoc />
     public override void WriteTo(Stream stream)
     {
         LoadFromFile();
 
         base.WriteTo(stream);
-    }
-
-    protected override void Dispose(bool disposing)
-    {
-        base.Dispose(disposing);
     }
 
     /// <summary>

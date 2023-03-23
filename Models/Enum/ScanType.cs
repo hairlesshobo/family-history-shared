@@ -19,14 +19,25 @@
 //  limitations under the License.
 //==========================================================================
 
-using YamlDotNet.Serialization;
-
 namespace FoxHollow.FHM.Shared.Models;
 
-public enum FramerateMode
+/// <summary>
+///     Description of scan type used by video file
+/// </summary>
+public enum ScanType
 {
-    [YamlMember()]
+    /// <summary>
+    ///     Unknown scan type
+    /// </summary>
     Unknown,
-    Constant,
-    Variable
+
+    /// <summary>
+    ///     Progressive scan
+    /// </summary> 
+    Progressive,
+
+    /// <summary>
+    ///     Interlaced scan
+    /// </summary>
+    Interlaced
 }

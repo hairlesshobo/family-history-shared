@@ -33,35 +33,88 @@ using Microsoft.Extensions.Logging;
 
 namespace FoxHollow.FHM.Shared.Classes;
 
+/// <summary>
+///     Class used to organize photos
+/// </summary>
 public class PhotoProcessor
 {
     private IServiceProvider _services;
     private SidecarUtilsService _sidecarUtils;
     private ILogger _logger;
 
+    /// <summary>
+    ///     Directory to perform the operation on
+    /// </summary>
     public string Directory { get; set; }
+
+    /// <summary>
+    ///     Whether to recurse into sub directoties when processing photos
+    /// </summary>
     public bool Recursive { get; set; }
+
+    /// <summary>
+    ///     Max size, in pixels, of the thumbnail to generate
+    /// </summary>
     public int ThumbnailSize { get; set; } = 150;
+
+    /// <summary>
+    ///     Extension to use when writing the generated thumbnail file
+    /// </summary>
     public string ThumbnailExtension { get; set; } = ".jtmb";
+
+    /// <summary>
+    ///     Max sizea, in pixels, of the preview image to generate
+    /// </summary>
     public int PreviewSize { get; set; } = 1200;
+
+    /// <summary>
+    ///     Extension to use when writing the generated thumbnail file
+    /// </summary>
     public string PreviewExtension { get; set; } = ".jprv";
+
+    /// <summary>
+    ///     List of paths to include when scanning. If values are provided, then only
+    ///     paths that match at least one value here will be processed
+    /// </summary>
     public List<string> IncludePaths { get; set; } = new List<string>();
+
+    /// <summary>
+    ///     List of paths to exclude when scanning
+    /// </summary>
     public List<string> ExcludePaths { get; set; } = new List<string>();
+
+    /// <summary>
+    ///     List of file extensions to operate on when scanning
+    /// </summary>
     public List<string> IncludeExtensions { get; set; } = new List<string>();
 
-    public PhotoProcessor(IServiceProvider provider)
+    /// <summary>
+    ///     Constructor that requires the DI container
+    /// </summary>
+    /// <param name="services">DI container</param>
+    public PhotoProcessor(IServiceProvider services)
     {
-        _services = provider;
-        _logger = provider.GetRequiredService<ILogger<PhotoProcessor>>();
-        _sidecarUtils = provider.GetRequiredService<SidecarUtilsService>();
+        _services = services;
+        _logger = services.GetRequiredService<ILogger<PhotoProcessor>>();
+        _sidecarUtils = services.GetRequiredService<SidecarUtilsService>();
     }
 
+    /// <summary>
+    ///     Process photos and do not require verification after scanning
+    /// </summary>
+    /// <param name="ctk">Token used to cancel a running process</param>
+    /// <returns>task</returns>
     public async Task ProcessPhotosNoVerify(CancellationToken ctk)
     {
         var queue = await ProcessPhotos(ctk);
         await queue.ExecuteAll();
     }
 
+    /// <summary>
+    ///     Begin to process the photos at the provided directory
+    /// </summary>
+    /// <param name="ctk">Token used to cancel a running process</param>
+    /// <returns>An action queue needed to apply the pending actions</returns>
     public async Task<ActionQueue> ProcessPhotos(CancellationToken ctk)
     {
         if (String.IsNullOrWhiteSpace(this.Directory))

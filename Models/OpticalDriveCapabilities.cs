@@ -21,6 +21,9 @@
 
 namespace FoxHollow.FHM.Shared.Models;
 
+/// <summary>
+///     A description of the capabilities of an optical drive
+/// </summary>
 public class OpticalDriveCapabilities
 {
 
