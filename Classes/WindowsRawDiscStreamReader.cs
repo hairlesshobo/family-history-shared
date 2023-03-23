@@ -28,143 +28,141 @@ using FoxHollow.FHM.Shared.Native;
 using FoxHollow.FHM.Shared.Utilities;
 using Microsoft.Win32.SafeHandles;
 
-namespace FoxHollow.FHM.Shared.Classes
+namespace FoxHollow.FHM.Shared.Classes;
+
+public class WindowsRawDiscStreamReader : Stream
 {
+    public override bool CanRead => true;
 
-    public class WindowsRawDiscStreamReader : Stream
+    public override bool CanSeek => throw new NotImplementedException(); //(_type == StreamSourceType.Disk || _type == StreamSourceType.File);
+
+    public override bool CanWrite => false;
+
+    public override long Length => _length >= 0 ? _length : throw new NotSupportedException();
+
+    public override long Position
     {
-        public override bool CanRead => true;
+        get => _position;
+        set => throw new NotImplementedException();
+    }
 
-        public override bool CanSeek => throw new NotImplementedException(); //(_type == StreamSourceType.Disk || _type == StreamSourceType.File);
+    // private string _devicePath = null;
+    private SafeFileHandle _handle = null;
+    private long _position = 0;
+    private long _length = -1;
+    private const int _bytesPerSector = 2048;
+    private const int _readSectorCount = 256;
+    private OpticalDrive _drive;
 
-        public override bool CanWrite => false;
+    public WindowsRawDiscStreamReader(OpticalDrive drive)
+    {
+        _drive = drive ?? throw new ArgumentNullException(nameof(drive));
 
-        public override long Length => _length >= 0 ? _length : throw new NotSupportedException();
+        _handle = Windows.CreateFile(
+            _drive.FullPath,
+            Native.Windows.EFileAccess.GenericRead,
+            Native.Windows.EFileShare.Read | Native.Windows.EFileShare.Write,
+            IntPtr.Zero,
+            Native.Windows.ECreationDisposition.OpenExisting,
+            Native.Windows.EFileAttributes.Write_Through
+                | Native.Windows.EFileAttributes.NoBuffering
+                | Native.Windows.EFileAttributes.RandomAccess,
+            IntPtr.Zero
+        );
 
-        public override long Position 
-        { 
-            get => _position;
-            set => throw new NotImplementedException(); 
-        }
+        if (_handle.IsInvalid)
+            throw new NativeMethodException("CreateFile");
 
-        // private string _devicePath = null;
-        private SafeFileHandle _handle = null;
-        private long _position = 0;
-        private long _length = -1;
-        private const int _bytesPerSector = 2048;
-        private const int _readSectorCount = 256;
-        private OpticalDrive _drive;
+        DiskUtils.Windows.SetAllowExtendedIO(_handle);
 
-        public WindowsRawDiscStreamReader(OpticalDrive drive)
+        _length = DiskUtils.Windows.GetLengthInformation(_handle).Length;
+    }
+
+    public override void Flush()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override int Read(byte[] buffer, int offset, int count)
+    {
+        if (offset != 0)
+            throw new ArgumentOutOfRangeException(nameof(offset), offset, "Specifying a non-zero offset is not supported");
+
+        // if the user is asking for more bytes than we have left.. decrease the count to
+        // equal the number of bytes remaining
+        if ((_length - _position) < count)
+            count = (int)(_length - _position);
+
+        if (count == 0)
+            return 0;
+
+        IntPtr ptr = IntPtr.Zero;
+
+        try
         {
-            _drive = drive ?? throw new ArgumentNullException(nameof(drive));
+            uint bytesRead = 0;
 
-            _handle = Windows.CreateFile(
-                _drive.FullPath,
-                Native.Windows.EFileAccess.GenericRead,
-                Native.Windows.EFileShare.Read | Native.Windows.EFileShare.Write,
-                IntPtr.Zero,
-                Native.Windows.ECreationDisposition.OpenExisting,
-                Native.Windows.EFileAttributes.Write_Through
-                    | Native.Windows.EFileAttributes.NoBuffering
-                    | Native.Windows.EFileAttributes.RandomAccess,
+            ptr = Marshal.AllocHGlobal(count);
+
+            // TODO: is this actually needed?
+            Array.Fill(buffer, (byte)0);
+
+            bool result = Native.Windows.ReadFile(
+                _handle,
+                ptr,
+                (uint)count,
+                ref bytesRead,
                 IntPtr.Zero
             );
 
-            if (_handle.IsInvalid)
-                throw new NativeMethodException("CreateFile");
-
-            DiskUtils.Windows.SetAllowExtendedIO(_handle);
-
-            _length = DiskUtils.Windows.GetLengthInformation(_handle).Length;
-        }
-
-        public override void Flush()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override int Read(byte[] buffer, int offset, int count)
-        {
-            if (offset != 0)
-                throw new ArgumentOutOfRangeException(nameof(offset), offset, "Specifying a non-zero offset is not supported");
-
-            // if the user is asking for more bytes than we have left.. decrease the count to
-            // equal the number of bytes remaining
-            if ((_length - _position) < count)
-                count = (int)(_length - _position);
-
-            if (count == 0)
+            //* There has to be a better way to detect EOF
+            if (result == false && bytesRead == 0 && Marshal.GetLastWin32Error() == Windows.ERROR_SECTOR_NOT_FOUND)
                 return 0;
 
-            IntPtr ptr = IntPtr.Zero;
+            if (result == false)
+                throw new NativeMethodException("ReadFile");
 
-            try
-            {
-                uint bytesRead = 0;
+            if (bytesRead > 0)
+                Marshal.Copy(ptr, buffer, 0, (int)bytesRead);
 
-                ptr = Marshal.AllocHGlobal(count);
-                
-                // TODO: is this actually needed?
-                Array.Fill(buffer, (byte)0);
+            _position += bytesRead;
 
-                bool result = Native.Windows.ReadFile(
-                    _handle,
-                    ptr,
-                    (uint)count,
-                    ref bytesRead,
-                    IntPtr.Zero
-                );
+            return (int)bytesRead;
 
-                //* There has to be a better way to detect EOF
-                if (result == false && bytesRead == 0 && Marshal.GetLastWin32Error() == Windows.ERROR_SECTOR_NOT_FOUND)
-                    return 0;
-
-                if (result == false)
-                    throw new NativeMethodException("ReadFile");
-
-                if (bytesRead > 0)
-                    Marshal.Copy(ptr, buffer, 0, (int)bytesRead);
-
-                _position += bytesRead;
-
-                return (int)bytesRead;
-
-            }
-            finally
-            {
-                if (ptr != IntPtr.Zero)
-                    Marshal.FreeHGlobal(ptr);
-            }
         }
-
-        public override long Seek(long offset, SeekOrigin origin)
+        finally
         {
-            throw new NotImplementedException();
+            if (ptr != IntPtr.Zero)
+                Marshal.FreeHGlobal(ptr);
         }
+    }
 
-        public override void SetLength(long value)
-        {
-            throw new NotImplementedException();
-        }
+    public override long Seek(long offset, SeekOrigin origin)
+    {
+        throw new NotImplementedException();
+    }
 
-        public override void Write(byte[] buffer, int offset, int count)
-            => throw new NotSupportedException();
+    public override void SetLength(long value)
+    {
+        throw new NotImplementedException();
+    }
 
-        public override void Close()
-        {
-            base.Close();
+    public override void Write(byte[] buffer, int offset, int count)
+        => throw new NotSupportedException();
 
-            if (_handle != null)
-                _handle.Close();
-        }
+    public override void Close()
+    {
+        base.Close();
 
-        protected override void Dispose(bool disposing)
-        {
-            if (_handle != null)
-                _handle.Dispose();
-            
-            base.Dispose(disposing);
-        }
+        if (_handle != null)
+            _handle.Close();
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (_handle != null)
+            _handle.Dispose();
+
+        base.Dispose(disposing);
     }
 }

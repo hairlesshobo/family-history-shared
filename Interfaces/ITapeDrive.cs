@@ -22,37 +22,36 @@
 using System;
 using FoxHollow.FHM.Shared.Models;
 
-namespace FoxHollow.FHM.Shared.Interfaces
+namespace FoxHollow.FHM.Shared.Interfaces;
+
+public interface ITapeDrive
 {
-    public interface ITapeDrive 
-    {
-        /**** Information ****/
-        TapeDriveCapabilities GetCapabilities();
-        TapeDriveDetails GetDriveDetails();
-        TapeCartridgeDetails GetTapeInfo();
+    /**** Information ****/
+    TapeDriveCapabilities GetCapabilities();
+    TapeDriveDetails GetDriveDetails();
+    TapeCartridgeDetails GetTapeInfo();
 
-        /**** Drive Administration ****/
-        void LoadTape();
-        void RewindTape();
-        void EjectTape();
+    /**** Drive Administration ****/
+    void LoadTape();
+    void RewindTape();
+    void EjectTape();
 
-        /**** Drive Configuration ****/
-        void SetDriveCompression(bool newStatus);
+    /**** Drive Configuration ****/
+    void SetDriveCompression(bool newStatus);
 
-        /**** High Level Tape IO Methods ****/
-        void WriteText(string text, int filePosition);
+    /**** High Level Tape IO Methods ****/
+    void WriteText(string text, int filePosition);
 
-        /**** Tape IO Methods ****/
-        void WriteBlock(byte[] block);
-        bool ReadBlock(byte[] buffer, Nullable<long> startPosition);
-        bool ReadBlock(byte[] buffer);
-        void WriteFilemark();
+    /**** Tape IO Methods ****/
+    void WriteBlock(byte[] block);
+    bool ReadBlock(byte[] buffer, Nullable<long> startPosition);
+    bool ReadBlock(byte[] buffer);
+    void WriteFilemark();
 
 
-        /**** Tape Positioning Methods ****/
-        void SeekToFilePosition(long fileNumber);
-        void SeekToEndOfData();
-        void SeekToBlock(long logicalBlock);
-        long GetBlockPosition();
-    }
+    /**** Tape Positioning Methods ****/
+    void SeekToFilePosition(long fileNumber);
+    void SeekToEndOfData();
+    void SeekToBlock(long logicalBlock);
+    long GetBlockPosition();
 }

@@ -25,56 +25,55 @@ using System.Text.RegularExpressions;
 using FoxHollow.FHM.Shared.Exceptions;
 using FoxHollow.FHM.Shared.Models;
 
-namespace FoxHollow.FHM.Shared.Utilities
+namespace FoxHollow.FHM.Shared.Utilities;
+
+public static partial class TapeUtilsNew
 {
-    public static partial class TapeUtilsNew
+    public static string CleanTapeDrivePath(string path)
     {
-        public static string CleanTapeDrivePath(string path)
+        // Clean up windows path name
+        if (SysInfo.OSType == OSType.Windows)
+            path = path.Replace('/', '\\');
+
+        // provide mapping from tapeX to OS specific tape path or from "auto" to first tape of the current platform
+        if (path.ToLower() == "auto" || Regex.Match(path, @"tape\d+", RegexOptions.IgnoreCase).Success)
         {
-            // Clean up windows path name
+            string tapeNum = "0";
+
+            if (path.ToLower() != "auto")
+                tapeNum = path.Substring(4);
+
             if (SysInfo.OSType == OSType.Windows)
-                path = path.Replace('/', '\\');
-
-            // provide mapping from tapeX to OS specific tape path or from "auto" to first tape of the current platform
-            if (path.ToLower() == "auto" || Regex.Match(path, @"tape\d+", RegexOptions.IgnoreCase).Success)
-            {
-                string tapeNum = "0";
-                
-                if (path.ToLower() != "auto")
-                    tapeNum = path.Substring(4);
-
-                if (SysInfo.OSType == OSType.Windows)
-                    path = @$"\\.\Tape{tapeNum}";
-                else if (SysInfo.OSType == OSType.Linux)
-                    path = $"/dev/nst{tapeNum}";
-                else
-                    throw new UnsupportedOperatingSystemException();
-            }
-
-            return path;
+                path = @$"\\.\Tape{tapeNum}";
+            else if (SysInfo.OSType == OSType.Linux)
+                path = $"/dev/nst{tapeNum}";
+            else
+                throw new UnsupportedOperatingSystemException();
         }
 
-        public static byte[] GetStringPaddedBytes(string Input, uint BlockSize)
-        {
-            byte[] rawData = Encoding.UTF8.GetBytes(Input);
-            int lengthNeeded = (int)HelpersNew.RoundToNextMultiple(rawData.Length, (int)BlockSize);
-            Array.Resize(ref rawData, lengthNeeded);
+        return path;
+    }
 
-            return rawData;
-        }
+    public static byte[] GetStringPaddedBytes(string Input, uint BlockSize)
+    {
+        byte[] rawData = Encoding.UTF8.GetBytes(Input);
+        int lengthNeeded = (int)HelpersNew.RoundToNextMultiple(rawData.Length, (int)BlockSize);
+        Array.Resize(ref rawData, lengthNeeded);
 
-        // TODO: Find a way to split this that works for archiver and tape server
-        public static bool IsTapeDrivePresent()
-        {
-            // if (SysInfo.Config.Tape.Driver.ToLower() != "auto-remote")
-            // {
-                if (SysInfo.OSType == OSType.Windows)
-                    return WindowsIsTapeDrivePresent();
-                else if (SysInfo.OSType == OSType.Linux)
-                    return LinuxIsTapeDrivePresent();
-            // }
+        return rawData;
+    }
 
-            return false;
-        }
+    // TODO: Find a way to split this that works for archiver and tape server
+    public static bool IsTapeDrivePresent()
+    {
+        // if (SysInfo.Config.Tape.Driver.ToLower() != "auto-remote")
+        // {
+        if (SysInfo.OSType == OSType.Windows)
+            return WindowsIsTapeDrivePresent();
+        else if (SysInfo.OSType == OSType.Linux)
+            return LinuxIsTapeDrivePresent();
+        // }
+
+        return false;
     }
 }

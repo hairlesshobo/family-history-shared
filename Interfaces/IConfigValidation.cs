@@ -22,10 +22,9 @@
 using System.Collections.Generic;
 using FoxHollow.FHM.Shared.Models;
 
-namespace FoxHollow.FHM.Shared.Interfaces
+namespace FoxHollow.FHM.Shared.Interfaces;
+
+public interface IValidatableConfig
 {
-    public interface IValidatableConfig
-    {
-        List<ValidationError> Validate(string prefix = null);
-    }
+    List<ValidationError> Validate(string prefix = null);
 }
