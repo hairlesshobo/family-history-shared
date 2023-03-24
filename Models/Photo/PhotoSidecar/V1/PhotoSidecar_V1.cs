@@ -23,17 +23,37 @@ using System;
 
 namespace FoxHollow.FHM.Shared.Models;
 
+/// <summary>
+///     Class that represents a sidecar file for a photo, version 1
+/// </summary>
 public class PhotoSidecar_V1
 {
     // private string PhotoPath { get; set; }
     // private string PhotoSidecarPath => SidecarUtilsService.GetSidecarPath(this.PhotoPath);
+    
+    /// <summary>
+    ///     Private field that represents that this sidecar is new and has not yet
+    ///     been written to a file
+    /// </summary>
+    /// <value></value>
     private bool NewSidecar { get; set; } = false;
 
     #region Public Properties
+    /// <summary>
+    ///     The version of this sidecar
+    /// </summary>
     public uint Version { get; set; } = 1;
+
+    /// <summary>
+    ///     Most recent date and time that this sidecar was generated
+    /// </summary>
     public DateTime GeneratedDtm { get; set; } = DateTime.UtcNow;
 
+    /// <summary>
+    ///     Object that describes the visual contents of this photograph
+    /// </summary>
     public PhotoSidecarInformation_V1 Information { get; set; } = new PhotoSidecarInformation_V1();
+    
     public PhotoSidecarGeneral_V1 General { get; set; } = new PhotoSidecarGeneral_V1();
     public PhotoSidecarFormat_V1 Format { get; set; } = new PhotoSidecarFormat_V1();
     public PhotoSidecarHash_V1 Hash { get; set; } = new PhotoSidecarHash_V1();

@@ -23,6 +23,9 @@ using FoxHollow.FHM.Shared.Classes;
 
 namespace FoxHollow.FHM.Shared.Models;
 
+/// <summary>
+///     Object that describes the visual contents of this photograph, version 1
+/// </summary>
 public class PhotoSidecarInformation_V1
 {
     public FlexibleDate TakenDate { get; set; }
