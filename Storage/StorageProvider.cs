@@ -37,9 +37,9 @@ public abstract class StorageProvider : IStorageProvider
 
     public abstract StorageProviderInfo Information { get; }
 
-    public abstract bool Connected { get; }
+    public bool Connected { get; protected set; }
 
-    public abstract ProviderDirectory RootDirectory { get; protected set; }
+    public ProviderDirectory RootDirectory { get; protected set; }
 
     public StorageProvider(IServiceProvider services, ProviderConfigCollection config)
     {

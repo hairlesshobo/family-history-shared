@@ -28,12 +28,13 @@ namespace FoxHollow.FHM.Shared.Storage;
 /// </summary>
 public sealed class ProviderFile : ProviderEntryBase
 {
-    string BaseName { get; }
-
+    public ProviderDirectory Parent { get; private set; }
+    
     long Length { get; }
 
     /// <inheritdoc />
     public ProviderFile(IStorageProvider provider, string path) : base(provider, path)
     {
+        this.IsFile = true;
     }
 }

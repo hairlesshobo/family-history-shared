@@ -25,15 +25,28 @@ using System.IO;
 
 namespace FoxHollow.FHM.Shared.Storage;
 
-public class ProviderConfigCollection : Dictionary<string, string>
+public class ProviderConfigCollection
 {
-    // private ProviderConfigValue[] _values;
+    private Dictionary<string, ProviderConfigValue> _values;
 
-    // public string this[string key] 
-    // {
-    //     get
-    //     {
-    //         return "meow";
-    //     } 
-    // }
+    public string this[string key] 
+    {
+        get
+        {
+            return _values.GetValueOrDefault(key)?.Value;
+        } 
+    }
+
+    public ProviderConfigCollection()
+    {
+        _values = new Dictionary<string, ProviderConfigValue>();
+    }
+
+    public void Add(ProviderConfigValue config)
+    {
+        if (String.IsNullOrWhiteSpace(config.ID))
+            throw new ArgumentOutOfRangeException("No ID was provided for config value");
+
+        _values.Add(config.ID, config);
+    }
 }

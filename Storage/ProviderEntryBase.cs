@@ -20,6 +20,7 @@
 //==========================================================================
 
 using System;
+using System.IO;
 using FoxHollow.FHM.Shared.Utilities;
 
 namespace FoxHollow.FHM.Shared.Storage;
@@ -47,9 +48,14 @@ public abstract class ProviderEntryBase
     public DateTime LastAccessTimeUtc { get; }
     public DateTime CreationTimeUtc { get; }
     public string Name { get; }
+    public string BaseName { get; }
+
     public string Path { get; private set; }
     public string RawPath { get; }
     public string Extension { get; }
+
+    public bool IsFile { get; protected set; }
+    public bool IsDirectory { get; protected set; }
 
     /// <summary>
     ///     Constructor that requires a storage provider and entry path

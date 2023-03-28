@@ -61,11 +61,12 @@ public class StorageProviderInfo
     /// <param name="name">User-friendly name of the storage provider</param>
     /// <param name="description">User-friendly description of the storage provider</param>
     /// <param name="protocols">List of protocols supported by the storage provider</param>
-    internal StorageProviderInfo(string id, string name, string description, string[] protocols)
+    internal StorageProviderInfo(string id, string name, string description, string[] protocols, ProviderConfigProperty[] config)
     {
         this.ID = id ?? throw new ArgumentNullException(nameof(id));
         this.Name = name;
         this.Description = description;
         this.Protocols = protocols;
+        this.ConfigProperties = config;
     }
 }

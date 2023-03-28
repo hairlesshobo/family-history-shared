@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -36,15 +37,18 @@ public class LocalStorageProvider : StorageProvider
         "local",
         "Local Storage",
         "Provider used to interact with data stored locally",
-        new string[] { "file" }
+        new string[] { "file" },
+        new ProviderConfigProperty[] {
+            new ProviderConfigProperty()
+            {
+                ID = "RootPath",
+                Name = "Root Path",
+                Description = "Path on the local disk to use as the root of the storage",
+                IsSecret = false
+            }
+        }
     );
 
-
-    /// <ineritdoc />
-    public override bool Connected => throw new NotImplementedException();
-
-    /// <inheritdoc />
-    public override ProviderDirectory RootDirectory { get; protected set; }
 
     /// <summary>
     ///     Constructor that requires DI container
@@ -52,12 +56,18 @@ public class LocalStorageProvider : StorageProvider
     /// <param name="services">DI container</param>
     public LocalStorageProvider(IServiceProvider services, ProviderConfigCollection config)
         : base(services, config)
-    { }
+    { 
+        RequireValidConfig();
+    }
 
     /// <ineritdoc />
     public override void Connect()
     {
-        this.RootDirectory = new ProviderDirectory(this, "/");
+        if (!this.Connected)
+        {
+            this.RootDirectory = new ProviderDirectory(this, this.Config["RootPath"]);
+            this.Connected = true;
+        }
     }
 
     /// <ineritdoc />
@@ -77,5 +87,13 @@ public class LocalStorageProvider : StorageProvider
 
         foreach (var entry in Directory.EnumerateFiles(path))
             yield return new ProviderFile(this, entry);
+    }
+
+    private void RequireValidConfig()
+    {
+        if (this.Config["RootPath"] == null)
+            throw new ConfigurationErrorsException("'RootPath' is required by LocalStorageProvider");
+
+        
     }
 }

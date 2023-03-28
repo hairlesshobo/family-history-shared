@@ -26,9 +26,17 @@ namespace FoxHollow.FHM.Shared.Storage;
 
 public class ProviderConfigValue
 {
-    public string ID { get; set; }
+    public string ID { get; private set; }
 
     // TODO: make capable of handling different types?
-    public string Value { get; set; }
-    
+    public string Value { get; private set; }
+
+    public ProviderConfigValue(string id, string value)
+    {
+        if (string.IsNullOrWhiteSpace(id))
+            throw new ArgumentException($"'{nameof(id)}' cannot be null or whitespace.", nameof(id));
+
+        this.ID = id;
+        this.Value = value;
+    }
 }
