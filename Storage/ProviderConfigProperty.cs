@@ -20,30 +20,15 @@
 //==========================================================================
 
 using System;
-using System.Collections.Generic;
+using System.IO;
 
 namespace FoxHollow.FHM.Shared.Storage;
 
-/// <summary>
-///     Interface that describes a directory in the backend storage
-/// </summary>
-public sealed class ProviderDirectory : ProviderEntryBase
+public class ProviderConfigProperty
 {
-    string BaseName { get; }
-
-    long Length { get; }
-
-    /// <inheritdoc />
-    public ProviderDirectory(IStorageProvider provider, string path) : base(provider, path)
-    {
-    }
-
-    /// <summary>
-    ///     List the contents of a directory at the specified path
-    /// </summary>
-    /// <returns>Asynchronous enumerable of contents of directory, if it exists</returns>
-    public IAsyncEnumerable<ProviderEntryBase> ListDirectoryAsync()
-        // TODO: reference this.Path instead
-        => this.Provider.ListDirectory(this._providedPath);
-
+    public string ID { get; set; }
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public bool IsSecret { get; set; }
+    
 }

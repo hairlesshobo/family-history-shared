@@ -56,4 +56,6 @@ public interface IStorageProvider
     ///     Asynchronously make the connectoin to the backend storage provider
     /// </summary>
     Task ConnectAsync();
+
+    IAsyncEnumerable<ProviderEntryBase> ListDirectory(string path);
 }

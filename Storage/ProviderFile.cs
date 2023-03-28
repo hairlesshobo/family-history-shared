@@ -31,4 +31,9 @@ public sealed class ProviderFile : ProviderEntryBase
     string BaseName { get; }
 
     long Length { get; }
+
+    /// <inheritdoc />
+    public ProviderFile(IStorageProvider provider, string path) : base(provider, path)
+    {
+    }
 }

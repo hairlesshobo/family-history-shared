@@ -20,26 +20,53 @@
 //==========================================================================
 
 using System;
+using FoxHollow.FHM.Shared.Utilities;
 
 namespace FoxHollow.FHM.Shared.Storage;
 
+/// <summary>
+///     Abstract class used as a base for both ProviderDirectory and ProviderFile
+/// </summary>
 public abstract class ProviderEntryBase
 {
     /// <summary>
+    ///     Path provided to constructor, used internally only
+    /// </summary>
+    protected string _providedPath;
+
+    /// <summary>
     ///     Handle to the storage provider this file belongs to
     /// </summary>
-    IStorageProvider Provider { get; }
+    public IStorageProvider Provider { get; }
     
     // string FullPath { get; }
     // string OriginalPath { get; }
     // string LinkTarget { get; }
 
-    DateTime LastWriteTimeUtc { get; }
-    DateTime LastAccessTimeUtc { get; }
-    DateTime CreationTimeUtc { get; }
-    string Name { get; }
-    string Path { get; }
-    string RawPath { get; }
-    string Extension { get; }
+    public DateTime LastWriteTimeUtc { get; }
+    public DateTime LastAccessTimeUtc { get; }
+    public DateTime CreationTimeUtc { get; }
+    public string Name { get; }
+    public string Path { get; private set; }
+    public string RawPath { get; }
+    public string Extension { get; }
+
+    /// <summary>
+    ///     Constructor that requires a storage provider and entry path
+    /// </summary>
+    /// <param name="provider">Storage provider handle</param>
+    /// <param name="path">Entry path</param>
+    public ProviderEntryBase(IStorageProvider provider, string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
+
+        this.Provider = provider ?? throw new ArgumentNullException(nameof(provider));
+        this._providedPath = path;
+
+        this.Path = PathUtils.CleanPath(path);
+        this.Name = PathUtils.GetFileName(this.Path);
+        this.Extension = PathUtils.GetExtension(this.Path);
+    }
 
 }

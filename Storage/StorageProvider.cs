@@ -21,29 +21,35 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace FoxHollow.FHM.Shared.Storage;
 
 /// <summary>
-///     Interface that describes a directory in the backend storage
+///     Interface that describes a storage provider used for accessing the
+///     backend data of the family history repository
 /// </summary>
-public sealed class ProviderDirectory : ProviderEntryBase
+public abstract class StorageProvider : IStorageProvider
 {
-    string BaseName { get; }
+    protected IServiceProvider Services { get; }
+    protected ProviderConfigCollection Config { get; }
 
-    long Length { get; }
+    public abstract StorageProviderInfo Information { get; }
 
-    /// <inheritdoc />
-    public ProviderDirectory(IStorageProvider provider, string path) : base(provider, path)
+    public abstract bool Connected { get; }
+
+    public abstract ProviderDirectory RootDirectory { get; protected set; }
+
+    public StorageProvider(IServiceProvider services, ProviderConfigCollection config)
     {
+        this.Services = services ?? throw new ArgumentNullException(nameof(services));
+        this.Config = config ?? throw new ArgumentNullException(nameof(config));
     }
 
-    /// <summary>
-    ///     List the contents of a directory at the specified path
-    /// </summary>
-    /// <returns>Asynchronous enumerable of contents of directory, if it exists</returns>
-    public IAsyncEnumerable<ProviderEntryBase> ListDirectoryAsync()
-        // TODO: reference this.Path instead
-        => this.Provider.ListDirectory(this._providedPath);
+    public abstract void Connect();
 
+    public abstract Task ConnectAsync();
+
+    public abstract IAsyncEnumerable<ProviderEntryBase> ListDirectory(string path);
 }

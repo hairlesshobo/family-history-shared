@@ -143,7 +143,14 @@ public static partial class PathUtils
     /// <param name="inPath">Path to clean</param>
     /// <returns>Clean path</returns>
     public static string CleanPath(string inPath)
-        => inPath.Replace(@"\", "/").TrimEnd('/');
+    {
+        string replacedPath = inPath.Replace(@"\", "/");
+        
+        if (!String.Equals(replacedPath, "/"))
+            replacedPath = replacedPath.TrimEnd('/');
+
+        return replacedPath;
+    }
 
     /// <summary>
     ///     Dirty the path (convert it to windows-style \)
@@ -312,5 +319,20 @@ public static partial class PathUtils
         var rootRelativePath = fullPath.Substring(root.Length).TrimStart('/');
 
         return rootRelativePath;
+    }
+
+    /// <summary>
+    ///     Get the extension portion of the path
+    /// </summary>
+    /// <param name="path">File name or full path</param>
+    /// <returns>Extension of the path, with preceeding '.'</returns>
+    public static string GetExtension(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            throw new ArgumentException($"'{nameof(path)}' cannot be null or whitespace.", nameof(path));
+
+        string[] parts = path.Split('.');
+
+        return "." + parts[parts.Length-1];
     }
 }

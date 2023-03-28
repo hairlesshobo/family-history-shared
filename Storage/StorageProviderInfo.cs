@@ -50,6 +50,11 @@ public class StorageProviderInfo
     public readonly string[] Protocols;
 
     /// <summary>
+    ///     Configuration properties that are used by the storage provider
+    /// </summary>
+    public readonly ProviderConfigProperty[] ConfigProperties;
+
+    /// <summary>
     ///     Constructor used to create new storage provider info
     /// </summary>
     /// <param name="id">Unique ID of the storage provider. Alphanumeric only, no spaces</param>

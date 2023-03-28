@@ -32,7 +32,7 @@
     <Nullable>disable</Nullable>
     
     <OutputPath>../../bin/</OutputPath>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 

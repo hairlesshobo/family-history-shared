@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace FoxHollow.FHM.Shared.Storage;
@@ -28,28 +29,53 @@ namespace FoxHollow.FHM.Shared.Storage;
 /// <summary>
 ///     Storage provider used to interact with data stored locally
 /// </summary>
-public class LocalStorageProvider : IStorageProvider
+public class LocalStorageProvider : StorageProvider
 {
     /// <ineritdoc />
-    public StorageProviderInfo Information { get; } = new StorageProviderInfo(
+    public override StorageProviderInfo Information { get; } = new StorageProviderInfo(
         "local",
         "Local Storage",
         "Provider used to interact with data stored locally",
         new string[] { "file" }
     );
 
-    /// <ineritdoc />
-    public bool Connected => throw new NotImplementedException();
 
     /// <ineritdoc />
-    public void Connect()
+    public override bool Connected => throw new NotImplementedException();
+
+    /// <inheritdoc />
+    public override ProviderDirectory RootDirectory { get; protected set; }
+
+    /// <summary>
+    ///     Constructor that requires DI container
+    /// </summary>
+    /// <param name="services">DI container</param>
+    public LocalStorageProvider(IServiceProvider services, ProviderConfigCollection config)
+        : base(services, config)
+    { }
+
+    /// <ineritdoc />
+    public override void Connect()
     {
-        throw new NotImplementedException();
+        this.RootDirectory = new ProviderDirectory(this, "/");
     }
 
     /// <ineritdoc />
-    public Task ConnectAsync()
+    public override Task ConnectAsync()
     {
-        throw new NotImplementedException();
+        this.Connect();
+
+        return Task.CompletedTask;
+    }
+
+    /// <ineritdoc />
+    public override async IAsyncEnumerable<ProviderEntryBase> ListDirectory(string path)
+    {
+        // TODO: actually make this async
+        foreach (var entry in Directory.EnumerateDirectories(path))
+            yield return new ProviderDirectory(this, entry);
+
+        foreach (var entry in Directory.EnumerateFiles(path))
+            yield return new ProviderFile(this, entry);
     }
 }
