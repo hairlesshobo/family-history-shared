@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -45,6 +46,8 @@ public abstract class StorageProvider : IStorageProvider
     {
         this.Services = services ?? throw new ArgumentNullException(nameof(services));
         this.Config = config ?? throw new ArgumentNullException(nameof(config));
+
+        this.RequireValidConfig();
     }
 
     public abstract void Connect();
@@ -52,4 +55,10 @@ public abstract class StorageProvider : IStorageProvider
     public abstract Task ConnectAsync();
 
     public abstract IAsyncEnumerable<ProviderEntryBase> ListDirectory(string path);
+
+    protected virtual void RequireValidConfig()
+    {
+        if (this.Config["RepositoryID"] == null)
+            throw new ConfigurationErrorsException("'RepositoryID' is required by StorageProvider");
+    }
 }

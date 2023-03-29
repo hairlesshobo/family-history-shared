@@ -57,7 +57,6 @@ public class LocalStorageProvider : StorageProvider
     public LocalStorageProvider(IServiceProvider services, ProviderConfigCollection config)
         : base(services, config)
     { 
-        RequireValidConfig();
     }
 
     /// <ineritdoc />
@@ -89,11 +88,11 @@ public class LocalStorageProvider : StorageProvider
             yield return new ProviderFile(this, entry);
     }
 
-    private void RequireValidConfig()
+    protected override void RequireValidConfig()
     {
+        base.RequireValidConfig();
+        
         if (this.Config["RootPath"] == null)
             throw new ConfigurationErrorsException("'RootPath' is required by LocalStorageProvider");
-
-        
     }
 }
