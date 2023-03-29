@@ -21,41 +21,36 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
 
 namespace FoxHollow.FHM.Shared.Storage;
 
-/// <summary>
-///     Interface that describes a storage provider used for accessing the
-///     backend data of the family history repository
-/// </summary>
-public interface IStorageProvider
+public class StorageManager
 {
-    // /// <summary>
-    // ///     Information regarding the storage provider
-    // /// </summary>
-    // StorageProviderInfo Information { get; }
+    private Dictionary<string, Type> _providerTypes;
+    private IServiceProvider _services;
 
-    /// <summary>
-    ///     Has the storage driver been connected?
-    /// </summary>
-    bool Connected { get; }
+    public StorageManager(IServiceProvider services)
+    {
+        _services = services ?? throw new ArgumentNullException(nameof(services));
+        _providerTypes = new Dictionary<string, Type>();
+    }
 
-    /// <summary>
-    ///     Handle to the root directory of the storage provider
-    /// </summary>
-    ProviderDirectory RootDirectory { get; }
+    public void RegisterProvider<TProvider>()
+        where TProvider : StorageProvider
+    {
+        var providerType = typeof(TProvider);
 
-    /// <summary>
-    ///     Make the initial connection to the backend storage provider
-    /// </summary>
-    void Connect();
+        if (!_providerTypes.Values. .Contains(providerType))
+            _providerTypes.Add(providerType);
+    }
 
-    /// <summary>
-    ///     Asynchronously make the connectoin to the backend storage provider
-    /// </summary>
-    Task ConnectAsync();
+    public void AddRepository(string providerID, ProviderConfigCollection config)
+    {
 
-    IAsyncEnumerable<ProviderEntryBase> ListDirectory(string path);
+    }
+
+    public IStorageProvider GetRepository(string id)
+    {
+        
+    }
 }

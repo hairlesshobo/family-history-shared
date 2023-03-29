@@ -36,7 +36,7 @@ public abstract class StorageProvider : IStorageProvider
     protected IServiceProvider Services { get; }
     protected ProviderConfigCollection Config { get; }
 
-    public abstract StorageProviderInfo Information { get; }
+    public static StorageProviderInfo Information;
 
     public bool Connected { get; protected set; }
 

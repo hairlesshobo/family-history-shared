@@ -32,29 +32,31 @@ namespace FoxHollow.FHM.Shared.Storage;
 /// </summary>
 public class LocalStorageProvider : StorageProvider
 {
-    /// <ineritdoc />
-    public override StorageProviderInfo Information { get; } = new StorageProviderInfo(
-        "local",
-        "Local Storage",
-        "Provider used to interact with data stored locally",
-        new string[] { "file" },
-        new ProviderConfigProperty[] {
-            new ProviderConfigProperty()
-            {
-                ID = "RootPath",
-                Name = "Root Path",
-                Description = "Path on the local disk to use as the root of the storage",
-                IsSecret = false
+    static LocalStorageProvider()
+    {
+        Information = new StorageProviderInfo(
+            "local",
+            "Local Storage",
+            "Provider used to interact with data stored locally",
+            new string[] { "file" },
+            new ProviderConfigProperty[] {
+                new ProviderConfigProperty()
+                {
+                    ID = "RootPath",
+                    Name = "Root Path",
+                    Description = "Path on the local disk to use as the root of the storage",
+                    IsSecret = false
+                }
             }
-        }
-    );
+        );
+    }
 
 
-    /// <summary>
-    ///     Constructor that requires DI container
-    /// </summary>
-    /// <param name="services">DI container</param>
-    public LocalStorageProvider(IServiceProvider services, ProviderConfigCollection config)
+/// <summary>
+///     Constructor that requires DI container
+/// </summary>
+/// <param name="services">DI container</param>
+public LocalStorageProvider(IServiceProvider services, ProviderConfigCollection config)
         : base(services, config)
     { 
     }
