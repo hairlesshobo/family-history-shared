@@ -331,8 +331,49 @@ public static partial class PathUtils
         if (string.IsNullOrWhiteSpace(path))
             throw new ArgumentException($"'{nameof(path)}' cannot be null or whitespace.", nameof(path));
 
-        string[] parts = path.Split('.');
+        // Clean the path to be used for testing
+        var testPath = CleanPath(path);
 
-        return "." + parts[parts.Length-1];
+        if (testPath.Contains('/'))
+        {
+            var testPathParts = testPath.Split('/');
+            testPath = testPathParts[testPathParts.Length - 1];
+        }
+
+        // no extension found
+        if (!testPath.Contains('.'))
+            return "";
+
+        string[] parts = testPath.Split('.');
+
+        string lastPart = parts[parts.Length - 1];
+
+        return "." + lastPart;
+    }
+
+    /// <summary>
+    ///     Strip the protocol portion of a path (smb://, file://, etc.)
+    /// </summary>
+    /// <param name="path">The path to strip the protocol from</param>
+    /// <returns>A path without a preceeding protocol</returns>
+    public static string StripProtocol(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            throw new ArgumentException($"'{nameof(path)}' cannot be null or whitespace.", nameof(path));
+
+        if (!path.Contains("://"))
+            return path;
+
+        var parts = path.Split("://");
+        var newPath = parts[1];
+
+        // working with a windows style path
+        if (newPath.Length >= 2 && newPath[1] == ':')
+            return newPath;
+
+        if (!newPath.StartsWith('/'))
+            newPath = '/' + newPath;
+
+        return newPath;
     }
 }
