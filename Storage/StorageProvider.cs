@@ -36,11 +36,12 @@ public abstract class StorageProvider : IStorageProvider
     protected IServiceProvider Services { get; }
     protected ProviderConfigCollection Config { get; }
 
-    public static StorageProviderInfo Information;
 
     public bool Connected { get; protected set; }
 
     public ProviderDirectory RootDirectory { get; protected set; }
+
+    public string RepositoryID { get; private set; }
 
     public StorageProvider(IServiceProvider services, ProviderConfigCollection config)
     {
@@ -48,6 +49,8 @@ public abstract class StorageProvider : IStorageProvider
         this.Config = config ?? throw new ArgumentNullException(nameof(config));
 
         this.RequireValidConfig();
+
+        this.RepositoryID = this.Config["RepositoryID"];
     }
 
     public abstract void Connect();

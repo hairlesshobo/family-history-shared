@@ -20,33 +20,19 @@
 //==========================================================================
 
 using System;
-using FoxHollow.FHM.Shared.Classes;
-using FoxHollow.FHM.Shared.Services;
-using FoxHollow.FHM.Shared.Storage;
-using Microsoft.Extensions.DependencyInjection;
 
-namespace FoxHollow.FHM.Shared.Utilities;
+namespace FoxHollow.FHM.Shared.Storage;
 
-public static class ServiceExtensions
+/// <summary>
+///     Exception that is thrown when an attempt is made to fetch a StorageRepository
+///     that does not exist
+/// </summary>
+public class StorageRepositoryNotFoundException : Exception
 {
-    public static void AddFhmStartupServices(this ServiceCollection collection)
-    {
-        collection.AddSingleton<IEventLoggerEventService>(new EventLoggerEventService());
-    }
-
-    public static void AddFhmServices(this ServiceCollection collection)
-    {
-        collection.AddScoped<MediaTreeWalkerFactory>();
-        collection.AddScoped<SidecarUtilsService>();
-        collection.AddScoped<RawVideoUtils>();
-        collection.AddScoped<PhotoUtils>();
-        collection.AddScoped<MediainfoUtils>();
-        collection.AddScoped<CamProfileService>();
-        collection.AddSingleton<StorageManager>(services => new StorageManager(services));
-    }
-
-    public static void InitFhmPlatform(IServiceProvider services)
-    {
-        StorageManager.InitStorageProviders(services);
-    }
+    /// <summary>
+    ///     Constructor that accepts a path
+    /// </summary>
+    /// <param name="repositoryID">Path that already exists</param>
+    public StorageRepositoryNotFoundException(string repositoryID) : base($"Repository with ID '{repositoryID}' does not exist")
+    { }
 }
