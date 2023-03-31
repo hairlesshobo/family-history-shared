@@ -21,6 +21,7 @@
 
 using System.IO;
 using System.Text.Json.Serialization;
+using FoxHollow.FHM.Shared.Storage;
 
 namespace FoxHollow.FHM.Shared.Models;
 
@@ -48,10 +49,10 @@ public class MediaFileEntry
     public string RootPath { get; internal set; }
 
     /// <summary>
-    ///     <see cref="System.IO.FileInfo" /> object describing the media file
+    ///     <see cref="FoxHollow.FHM.Shared.Storage.StorageFile" /> object describing the media file
     /// </summary>
     [JsonIgnore]
-    public FileInfo FileInfo { get; internal set; }
+    public StorageFile FileEntry { get; internal set; }
 
     /// <summary>
     ///     Flag that indicates whether this media file entry is considered to be "ignored"
@@ -74,7 +75,7 @@ public class MediaFileEntry
 
     public void RefreshFileInfo()
     {
-        if (FileInfo != null)
-            this.FileInfo = new FileInfo(this.FileInfo.FullName);
+        if (FileEntry != null)
+            this.FileEntry = new FileInfo(this.FileEntry.FullName);
     }
 }

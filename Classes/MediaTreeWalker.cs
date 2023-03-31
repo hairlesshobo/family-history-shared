@@ -24,7 +24,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using FoxHollow.FHM.Shared.Models;
+using FoxHollow.FHM.Shared.Storage;
 using FoxHollow.FHM.Shared.Utilities;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -41,12 +43,17 @@ public class MediaTreeWalker
     /// <summary>
     ///     Root Directory from which tree walking takes place
     /// </summary>
-    public string RootDirectory { get; private set; }
+    public StorageDirectory RootDirectory { get; private set; }
 
     /// <summary>
     ///     If true, the tree walker will recurse into subdirectories. Default: true
     /// </summary>
     public bool Recursive { get; set; } = true;
+
+    /// <summary>
+    ///     If true, the tree walker will ignore files beginning with a "."
+    /// </summary>
+    public bool IgnoreHiddenFiles { get; set; } = true;
 
     /// <summary>
     ///     List of paths that are included. If any entries exist in this list,
@@ -75,16 +82,16 @@ public class MediaTreeWalker
     /// </summary>
     /// <param name="services">DI service provider</param>
     /// <param name="rootDir">Root directory where walking should begin</param>
-    internal MediaTreeWalker(IServiceProvider services, string rootDir)
+    internal MediaTreeWalker(IServiceProvider services, StorageDirectory rootDir)
     {
         _services = services ?? throw new ArgumentNullException(nameof(services));
         _logger = _services.GetRequiredService<ILogger<MediaTreeWalker>>();
 
-        if (string.IsNullOrWhiteSpace(rootDir))
-            throw new ArgumentException($"'{nameof(rootDir)}' cannot be null or whitespace.", nameof(rootDir));
+        if (rootDir == null)
+            throw new ArgumentException($"'{nameof(rootDir)}' cannot be null", nameof(rootDir));
 
-        if (!Directory.Exists(rootDir))
-            throw new DirectoryNotFoundException(rootDir);
+        // if (!Directory.Exists(rootDir))
+        //     throw new DirectoryNotFoundException(rootDir);
 
 
         this.RootDirectory = rootDir;
@@ -112,22 +119,33 @@ public class MediaTreeWalker
     /// </summary>
     /// <param name="directory">Directory to scan</param>
     /// <returns>Collections of media files, group by the collection name</returns>
-    private async IAsyncEnumerable<MediaFileCollection> ScanDirectoryAsync(string directory)
+    private async IAsyncEnumerable<MediaFileCollection> ScanDirectoryAsync(StorageDirectory directory)
     {
+        List<StorageDirectory> dirEntries = new List<StorageDirectory>();
+        List<StorageFile> fileEntries = new List<StorageFile>();
+        
+        // TODO: Add WithCancellation() here?
+        await foreach (var entry in directory.ListDirectoryAsync())
+        {
+            if (entry is StorageDirectory)
+                dirEntries.Add((StorageDirectory)entry);
+            else
+                fileEntries.Add((StorageFile)entry);
+        }
+            
         if (this.Recursive)
         {
             // First we recurse into sub directories before we begin to process files in this directory
             // we use .ToList() to ensure that the list of directories doesn't change while we are
             // looping.
-            var dirPaths = Directory.GetDirectories(directory)
-                                    .Order()
-                                    .ToList();
+            var dirs = dirEntries.OrderBy(x => x.Name)
+                                  .ToList();
 
             // iterate through each directory
-            foreach (var dirPath in dirPaths)
+            foreach (var dir in dirs)
             {
                 // recurse into directories
-                await foreach (var subCollection in ScanDirectoryAsync(dirPath))
+                await foreach (var subCollection in ScanDirectoryAsync(dir))
                     yield return subCollection;
             }
         }
@@ -140,20 +158,20 @@ public class MediaTreeWalker
         // without processing duplicates or missing files, and also prevents exceptions
         // from being thown due to missing files if a directory is renamed from within
         // without special handling.
-        var filePaths = Directory.GetFiles(directory)
-                                 .Where(x => !Path.GetFileName(x).StartsWith("."))
-                                 .Order()
-                                 .ToList();
+        var files = fileEntries.OrderBy(x => x.Name).ToList();
+
+        if (this.IgnoreHiddenFiles)
+            files = files.Where(x => !x.Name.StartsWith(".")).ToList();
 
         // start with an empty list
         var collections = new List<MediaFileCollection>();
-        var fileEntries = new List<MediaFileEntry>();
+        var mediaFileEntries = new List<MediaFileEntry>();
 
         // Loop through all files looking for exclusions, inclusions, collection
         // grouping and file processing
-        foreach (var filePath in filePaths)
+        foreach (var fileEntry in files)
         {
-            var collectionName = MediaFileCollection.GetCollectionName(filePath);
+            var collectionName = MediaFileCollection.GetCollectionName(fileEntry.Path);
 
             // look for an existing collection
             var collection = collections.FirstOrDefault(x => x.Name == collectionName);
@@ -168,51 +186,51 @@ public class MediaTreeWalker
 
             // TODO: Move the below to shared logic in MediaFileEntry class
 
-            var fileEntry = new MediaFileEntry()
+            var mediaFileEntry = new MediaFileEntry()
             {
-                Name = Path.GetFileName(filePath),
-                Path = filePath,
+                Name = Path.GetFileName(fileEntry),
+                Path = fileEntry,
                 RootPath = this.RootDirectory,
                 RelativeDepth = PathUtils.GetRelativeDepth(this.RootDirectory, directory)
             };
 
-            fileEntries.Add(fileEntry);
+            mediaFileEntries.Add(mediaFileEntry);
 
             // Add the current file entry to the identified (or created) collection
-            collection.Entries.Add(fileEntry);
-            fileEntry.Collection = collection;
+            collection.Entries.Add(mediaFileEntry);
+            mediaFileEntry.Collection = collection;
 
 
             // If any include paths were provided, lets make sure that this file
             // path matches, otherwise we skip to the next file
             if (this.IncludePaths.Count() > 0)
             {
-                if (!this.IncludePaths.Any(x => fileEntry.Path.StartsWith(x)))
+                if (!this.IncludePaths.Any(x => mediaFileEntry.Path.StartsWith(x)))
                 {
                     // this is in case we change the ignore logic in the future, w can know for each
                     // entry whether it was ignored or not
-                    fileEntry.Ignored = true;
+                    mediaFileEntry.Ignored = true;
                     continue;
                 }
             }
 
             // Generate the FileInfo object for this entry. We do this after the "IncludePaths"
             // filter above for performance reasons
-            fileEntry.FileInfo = new FileInfo(fileEntry.Path);
+            mediaFileEntry.FileEntry = new FileInfo(mediaFileEntry.Path);
 
             // lets make sure this file path doesn't match any provided excludes
-            if (this.ExcludePaths.Any(x => fileEntry.Path.Contains(x)))
+            if (this.ExcludePaths.Any(x => mediaFileEntry.Path.Contains(x)))
             {
-                fileEntry.Ignored = true;
+                mediaFileEntry.Ignored = true;
                 continue;
             }
 
             // If we are filtering by extension, lets make sure the file uses that extension
             if (this.IncludeExtensions.Count() > 0)
             {
-                if (!this.IncludeExtensions.Any(x => fileEntry.FileInfo.Extension.TrimStart('.') == x))
+                if (!this.IncludeExtensions.Any(x => mediaFileEntry.FileEntry.Extension.TrimStart('.') == x))
                 {
-                    fileEntry.Ignored = true;
+                    mediaFileEntry.Ignored = true;
                     continue;
                 }
             }

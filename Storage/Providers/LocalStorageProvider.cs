@@ -67,7 +67,7 @@ public class LocalStorageProvider : StorageProvider
     {
         if (!this.Connected)
         {
-            this.RootDirectory = new ProviderDirectory(this, this.Config["RootPath"]);
+            this.RootDirectory = new StorageDirectory(this, this.Config["RootPath"]);
             this.Connected = true;
         }
     }
@@ -81,16 +81,23 @@ public class LocalStorageProvider : StorageProvider
     }
 
     /// <ineritdoc />
-    public override async IAsyncEnumerable<ProviderEntryBase> ListDirectory(string path)
+    public override IEnumerable<StorageEntryBase> ListDirectory(string path)
     {
-        // TODO: actually make this async
+        // TODO: actually make this async?
         foreach (var entry in Directory.EnumerateDirectories(path))
-            yield return new ProviderDirectory(this, entry);
+            yield return new StorageDirectory(this, entry);
 
         foreach (var entry in Directory.EnumerateFiles(path))
-            yield return new ProviderFile(this, entry);
+            yield return new StorageFile(this, entry);
+    }
 
-        await Task.CompletedTask;
+    /// <ineritdoc />
+    public override StorageDirectory GetDirectory(string path)
+    {
+        if (!Directory.Exists(path))
+            return null;
+
+        return new StorageDirectory(this, path);
     }
 
     protected override void RequireValidConfig()
@@ -99,5 +106,15 @@ public class LocalStorageProvider : StorageProvider
 
         if (this.Config["RootPath"] == null)
             throw new ConfigurationErrorsException("'RootPath' is required by LocalStorageProvider");
+    }
+
+    public override StorageDirectory CreateDirectory(string path)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override bool Exists(string path)
+    {
+        throw new NotImplementedException();
     }
 }

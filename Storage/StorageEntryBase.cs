@@ -28,7 +28,7 @@ namespace FoxHollow.FHM.Shared.Storage;
 /// <summary>
 ///     Abstract class used as a base for both ProviderDirectory and ProviderFile
 /// </summary>
-public abstract class ProviderEntryBase
+public abstract class StorageEntryBase
 {
     /// <summary>
     ///     Path provided to constructor, used internally only
@@ -38,7 +38,7 @@ public abstract class ProviderEntryBase
     /// <summary>
     ///     Handle to the storage provider this file belongs to
     /// </summary>
-    public IStorageProvider Provider { get; }
+    public StorageProvider Provider { get; }
     
     // string FullPath { get; }
     // string OriginalPath { get; }
@@ -62,7 +62,7 @@ public abstract class ProviderEntryBase
     /// </summary>
     /// <param name="provider">Storage provider handle</param>
     /// <param name="path">Entry path</param>
-    public ProviderEntryBase(IStorageProvider provider, string path)
+    public StorageEntryBase(StorageProvider provider, string path)
     {
         if (string.IsNullOrWhiteSpace(path))
             throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));

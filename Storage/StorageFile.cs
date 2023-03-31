@@ -26,15 +26,20 @@ namespace FoxHollow.FHM.Shared.Storage;
 /// <summary>
 ///     Interface that describes a file in the backend storage
 /// </summary>
-public sealed class ProviderFile : ProviderEntryBase
+public sealed class StorageFile : StorageEntryBase
 {
-    public ProviderDirectory Parent { get; private set; }
+    public StorageDirectory Directory { get; private set; }
     
     long Length { get; }
 
     /// <inheritdoc />
-    public ProviderFile(IStorageProvider provider, string path) : base(provider, path)
+    public StorageFile(StorageProvider provider, string path) : base(provider, path)
     {
         this.IsFile = true;
+    }
+
+    public void MoveTo(string destPath, bool overwrite)
+    {
+        throw new NotImplementedException();
     }
 }

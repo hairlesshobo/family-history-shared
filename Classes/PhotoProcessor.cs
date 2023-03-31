@@ -27,6 +27,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FoxHollow.FHM.Shared.Models;
 using FoxHollow.FHM.Shared.Services;
+using FoxHollow.FHM.Shared.Storage;
 using ImageMagick;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -45,7 +46,7 @@ public class PhotoProcessor
     /// <summary>
     ///     Directory to perform the operation on
     /// </summary>
-    public string Directory { get; set; }
+    public StorageDirectory Directory { get; set; }
 
     /// <summary>
     ///     Whether to recurse into sub directoties when processing photos
@@ -117,48 +118,60 @@ public class PhotoProcessor
     /// <returns>An action queue needed to apply the pending actions</returns>
     public async Task<ActionQueue> ProcessPhotos(CancellationToken ctk)
     {
-        if (String.IsNullOrWhiteSpace(this.Directory))
-            throw new ArgumentNullException(nameof(this.Directory));
+        _logger.LogInformation("Starting to process photos");
 
         // TODO: actually use the cancellation token
         var actionQueue = new ActionQueue();
 
-        var treeWalkerFactory = _services.GetRequiredService<MediaTreeWalkerFactory>();
-
-        var treeWalker = treeWalkerFactory.GetWalker(this.Directory);
-        treeWalker.Recursive = this.Recursive;
-        treeWalker.IncludePaths = this.IncludePaths;
-        treeWalker.ExcludePaths = this.ExcludePaths;
-        treeWalker.IncludeExtensions = this.IncludeExtensions;
-
-        await foreach (var collection in treeWalker.StartScanAsync())
+        try
         {
-            var entries = collection.Entries.Where(x => x.Ignored == false);
+            if (this.Directory == null)
+                throw new ArgumentNullException(nameof(this.Directory));
 
-            // TODO: build media type priority logic
-            if (entries.Count() > 1)
-                throw new Exception("More than one non-ignore media file entries, unknown how to proceed!");
+            var treeWalkerFactory = _services.GetRequiredService<MediaTreeWalkerFactory>();
 
-            var entry = entries.First();
+            var treeWalker = treeWalkerFactory.GetWalker(this.Directory);
+            treeWalker.Recursive = this.Recursive;
+            treeWalker.IncludePaths = this.IncludePaths;
+            treeWalker.ExcludePaths = this.ExcludePaths;
+            treeWalker.IncludeExtensions = this.IncludeExtensions;
 
-            // TODO: status update here
-            _logger.LogInformation($"{entry.Path}");
-
-            if (new string[] { "tiff", "tif" }.Contains(entry.FileInfo.Extension.TrimStart('.').ToLower()))
+            await foreach (var collection in treeWalker.StartScanAsync())
             {
-                var action = ProcessTiffPhoto(entry);
+                var entries = collection.Entries.Where(x => x.Ignored == false);
 
-                if (action != null)
-                    actionQueue.Add(action);
+                // TODO: build media type priority logic
+                if (entries.Count() > 1)
+                    throw new Exception("More than one non-ignore media file entries, unknown how to proceed!");
+
+                var entry = entries.First();
+
+                // TODO: status update here
+                _logger.LogInformation($"{entry.Path}");
+
+                if (new string[] { "tiff", "tif" }.Contains(entry.FileEntry.Extension.TrimStart('.').ToLower()))
+                {
+                    var action = ProcessTiffPhoto(entry);
+
+                    if (action != null)
+                        actionQueue.Add(action);
+                }
             }
         }
+        catch (TaskCanceledException)
+        {
+            _logger.LogInformation("Photo processing CANCELLED!");
+            return new ActionQueue();
+        }
+
+        _logger.LogInformation("Photo processing complete!");
 
         return actionQueue;
     }
 
     private VerifiableAction ProcessTiffPhoto(MediaFileEntry entry)
     {
-        var sidecar = _sidecarUtils.FromExisting<PhotoSidecar_V1>(entry.FileInfo.FullName);
+        var sidecar = _sidecarUtils.FromExisting<PhotoSidecar_V1>(entry.FileEntry.FullName);
         bool process = false;
 
         if (sidecar != null)
@@ -166,7 +179,7 @@ public class PhotoProcessor
             _logger.LogInformation($"Reading existing sidecar file");
 
             // if the known size in the sidecar doesn't match the current file size, force a reprocess
-            if (sidecar.General.Size != entry.FileInfo.Length)
+            if (sidecar.General.Size != entry.FileEntry.Length)
             {
                 _logger.LogInformation($"Size changed since last scan, needs reprocessing");
                 process = true;
@@ -192,7 +205,7 @@ public class PhotoProcessor
 
         return new VerifiableAction(entry, $"Process {entry.Path}", async (action, ctk) =>
         {
-            using (var mimage = new MagickImage(entry.FileInfo))
+            using (var mimage = new MagickImage(entry.FileEntry))
             {
                 if (mimage.FormatInfo.MimeType != "image/tiff")
                 {
@@ -207,7 +220,7 @@ public class PhotoProcessor
                     if (mimage.Compression == CompressionMethod.NoCompression)
                     {
                         process = true;
-                        var tmpPath = Path.Combine(entry.FileInfo.Directory.FullName, $"{entry.FileInfo.Name}.ltmp");
+                        var tmpPath = Path.Combine(entry.FileEntry.Directory.FullName, $"{entry.FileEntry.Name}.ltmp");
 
                         if (File.Exists(tmpPath))
                         {
@@ -226,13 +239,13 @@ public class PhotoProcessor
                         {
                             _logger.LogInformation("Compressed MD5 verification successful, replacing uncompressed image");
 
-                            var bakPath = Path.Combine(entry.FileInfo.Directory.FullName, $"{entry.FileInfo.Name}.bak");
+                            var bakPath = Path.Combine(entry.FileEntry.Directory.FullName, $"{entry.FileEntry.Name}.bak");
 
                             // For now, we move the file to a .bak file (in the future, we'll make it configurable to either move or remove)
-                            File.Move(entry.FileInfo.FullName, bakPath);
+                            File.Move(entry.FileEntry.FullName, bakPath);
 
                             // Move the compressed image into place
-                            File.Move(tmpPath, entry.FileInfo.FullName);
+                            File.Move(tmpPath, entry.FileEntry.FullName);
                             entry.RefreshFileInfo();
 
                             imageMd5 = compressedMd5;
@@ -241,9 +254,9 @@ public class PhotoProcessor
                             _logger.LogWarning("MD5 mismatch between compressed and uncompressed image!");
                     }
 
-                    sidecar.General.Size = entry.FileInfo.Length;
-                    sidecar.General.OriginalFileName = entry.FileInfo.Name;
-                    sidecar.General.FileModifyDtm = entry.FileInfo.LastWriteTimeUtc;
+                    sidecar.General.Size = entry.FileEntry.Length;
+                    sidecar.General.OriginalFileName = entry.FileEntry.Name;
+                    sidecar.General.FileModifyDtm = entry.FileEntry.LastWriteTimeUtc;
 
                     await ProcessImageHashes(sidecar, mimage, process);
 
@@ -268,7 +281,7 @@ public class PhotoProcessor
             }
 
             _logger.LogInformation("Writing sidecar file");
-            _sidecarUtils.WriteSidecar(sidecar, entry.FileInfo.FullName);
+            _sidecarUtils.WriteSidecar(sidecar, entry.FileEntry.FullName);
         });
     }
 

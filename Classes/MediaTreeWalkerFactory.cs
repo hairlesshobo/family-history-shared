@@ -20,6 +20,7 @@
 //==========================================================================
 
 using System;
+using FoxHollow.FHM.Shared.Storage;
 
 namespace FoxHollow.FHM.Shared.Classes;
 
@@ -44,6 +45,6 @@ public class MediaTreeWalkerFactory
     /// </summary>
     /// <param name="rootDir">Root directory the tree walker will operate on</param>
     /// <returns>New <see cref="MediaTreeWalker" /> instance</returns>
-    public MediaTreeWalker GetWalker(string rootDir)
+    public MediaTreeWalker GetWalker(StorageDirectory rootDir)
         => new MediaTreeWalker(_services, rootDir);
 }

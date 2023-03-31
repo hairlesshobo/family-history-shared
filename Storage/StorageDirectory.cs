@@ -21,41 +21,49 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace FoxHollow.FHM.Shared.Storage;
 
 /// <summary>
-///     Interface that describes a storage provider used for accessing the
-///     backend data of the family history repository
+///     Interface that describes a directory in the backend storage
 /// </summary>
-public interface IStorageProvider
+public sealed class StorageDirectory : StorageEntryBase
 {
-    // /// <summary>
-    // ///     Information regarding the storage provider
-    // /// </summary>
-    // StorageProviderInfo Information { get; }
+    /// <summary>
+    ///     Parent directory to which this directory belongs
+    /// </summary>
+    public StorageDirectory Parent { get; private set; }
+
+    /// <inheritdoc />
+    internal StorageDirectory(StorageProvider provider, string path) : base(provider, path)
+    {
+        this.IsDirectory = true;
+    }
 
     /// <summary>
-    ///     Has the storage driver been connected?
+    ///     List the contents of a directory at the specified path
     /// </summary>
-    bool Connected { get; }
+    /// <returns>Enumerable of contents of directory, if it exists</returns>
+    public IEnumerable<StorageEntryBase> ListDirectory()
+        // TODO: reference this.Path instead
+        => this.Provider.ListDirectory(this._providedPath);
 
-    /// <summary>
-    ///     Handle to the root directory of the storage provider
-    /// </summary>
-    ProviderDirectory RootDirectory { get; }
+    public IEnumerable<StorageFile> ListFiles()
+    {
+        foreach (var entry in this.ListDirectory())
+        {
+            if (entry is StorageFile)
+                yield return (StorageFile)entry;
+        }
+    }
 
-    /// <summary>
-    ///     Make the initial connection to the backend storage provider
-    /// </summary>
-    void Connect();
-
-    /// <summary>
-    ///     Asynchronously make the connectoin to the backend storage provider
-    /// </summary>
-    Task ConnectAsync();
-
-    IAsyncEnumerable<ProviderEntryBase> ListDirectory(string path);
+    public IEnumerable<StorageFile> ListFiles(string filter)
+    {
+        foreach (var entry in this.ListFiles())
+        {
+            if (entry.Name.Contains(filter))
+                yield return entry;
+        }
+    }
 }

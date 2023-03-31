@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json.Serialization;
+using FoxHollow.FHM.Shared.Storage;
 using FoxHollow.FHM.Shared.Utilities;
 
 namespace FoxHollow.FHM.Shared.Models;
@@ -39,10 +40,10 @@ public class MediaFileCollection
     public string Name { get; private set; }
 
     /// <summary>
-    ///     DirectoryInfo object in which the media file collection resides
+    ///     StorageDirectory object in which the media file collection resides
     /// </summary>
     [JsonIgnore]
-    public DirectoryInfo Directory { get; internal set; }
+    public StorageDirectory Directory { get; internal set; }
 
     /// <summary>
     ///     Root path in which the collection resides. This is the top level directory
@@ -60,17 +61,17 @@ public class MediaFileCollection
     ///     Constructor used to initialize a new media file collection, to be called by TreeWalker
     /// </summary>
     /// <param name="collectionName">Name of the collection</param>
-    /// <param name="directoryPath">Full path to the directory in which the collection resides</param>
-    internal MediaFileCollection(string collectionName, string directoryPath)
+    /// <param name="directory">StorageDirectory in which the collection resides</param>
+    internal MediaFileCollection(string collectionName, StorageDirectory directory)
     {
         if (string.IsNullOrWhiteSpace(collectionName))
             throw new ArgumentException($"'{nameof(collectionName)}' cannot be null or whitespace.", nameof(collectionName));
 
-        if (string.IsNullOrWhiteSpace(directoryPath))
-            throw new ArgumentException($"'{nameof(directoryPath)}' cannot be null or whitespace.", nameof(directoryPath));
+        if (directory == null)
+            throw new ArgumentException($"'{nameof(directory)}' cannot be null", nameof(directory));
 
         this.Name = collectionName;
-        this.Directory = new DirectoryInfo(directoryPath);
+        this.Directory = directory; //new DirectoryInfo(directory);
     }
 
     /// <summary>
@@ -85,31 +86,38 @@ public class MediaFileCollection
     /// </param>
     public void MoveCollection(string newDirPath, bool createDir = false)
     {
-        // if instructed to do so, create the directory if it does not already exist
-        if (createDir && !Path.Exists(newDirPath))
-            System.IO.Directory.CreateDirectory(newDirPath);
+        var sp = this.Directory.Provider;
 
-        // throw an error if the path exists but it is not a directory
-        if (!System.IO.Directory.Exists(newDirPath))
-            throw new DirectoryNotFoundException($"Unable to move collection, directory does not exist: {newDirPath}");
+        StorageDirectory newDir;
 
-        var newDirInfo = new DirectoryInfo(newDirPath);
+        if (sp.Exists(newDirPath))
+            newDir = sp.GetDirectory(newDirPath);
+        else
+        {
+            // if instructed to do so, create the directory
+            if (createDir)
+                newDir = sp.CreateDirectory(newDirPath);
+            else
+                // TODO: Create StorageDirectoryNotFoundException()
+                throw new DirectoryNotFoundException($"Unable to move collection, directory does not exist: {newDirPath}");
+        }
 
         var errors = new List<KeyValuePair<string, string>>();
         var actions = new List<Action>();
 
         foreach (var entry in this.Entries)
         {
-            var destFilePath = Path.Combine(newDirInfo.FullName, entry.FileInfo.Name);
+            // TODO: convert to PathUtils equivalent
+            var destFilePath = Path.Combine(newDir.Path, entry.FileEntry.Name);
 
-            if (File.Exists(destFilePath))
+            if (sp.Exists(destFilePath))
                 errors.Add(new KeyValuePair<string, string>("PathAlreadyExists", destFilePath));
 
             actions.Add(() =>
             {
-                entry.FileInfo.MoveTo(destFilePath, false);
-                entry.Path = entry.FileInfo.FullName;
-                entry.RelativeDepth = PathUtils.GetRelativeDepth(this.RootDirectoryPath, entry.FileInfo.Directory.FullName);
+                entry.FileEntry.MoveTo(destFilePath, false);
+                entry.Path = entry.FileEntry.Path;
+                entry.RelativeDepth = PathUtils.GetRelativeDepth(this.RootDirectoryPath, entry.FileEntry.Directory.Path);
             });
         }
 
@@ -124,7 +132,7 @@ public class MediaFileCollection
             );
         }
 
-        this.Directory = newDirInfo;
+        this.Directory = newDir;
     }
 
     /// <summary>
@@ -153,11 +161,12 @@ public class MediaFileCollection
         return fileName.Substring(0, firstDecimal);
     }
 
-    public static MediaFileCollection FromFile(string filePath)
-        => MediaFileCollection.FromFile(new FileInfo(filePath));
+    // TODO: use storage manager to pull a file with preceeding repo id?
+    // public static MediaFileCollection FromFile(string filePath)
+    //     => MediaFileCollection.FromFile(new FileInfo(filePath));
 
-    public static MediaFileCollection FromFile(FileInfo fileInfo)
-        => MediaFileCollection.FromFile(fileInfo, new string[] { });
+    public static MediaFileCollection FromFile(StorageFile file)
+        => MediaFileCollection.FromFile(file, new string[] { });
 
     // TODO: Finish implementing
     //
@@ -165,28 +174,27 @@ public class MediaFileCollection
     //   - move MediaFileEntry setup code to static MediaFileEntry method
     //   - implement include, exclude logic in MediaFileEntry method
     //   - implement media type prioritization
-    public static MediaFileCollection FromFile(FileInfo fileInfo, string[] includeExtensions)
+    public static MediaFileCollection FromFile(StorageFile fileInfo, string[] includeExtensions)
     {
         var collectionName = MediaFileCollection.GetCollectionName(fileInfo.Name);
-        var collection = new MediaFileCollection(collectionName, fileInfo.Directory.FullName);
+        var collection = new MediaFileCollection(collectionName, fileInfo.Directory);
 
-        var filePaths = new List<string>();
-        filePaths.Add(fileInfo.FullName);
-        filePaths.AddRange(System.IO.Directory
-                                    .GetFiles(fileInfo.Directory.FullName, $"{collectionName}*")
-                                    .Where(x => !String.Equals(x, fileInfo.FullName)));
+        var fileEntries = new List<StorageFile>();
+        fileEntries.Add(fileInfo);
+        fileEntries.AddRange(fileInfo.Directory.ListFiles(collectionName)
+                                             .Where(x => !String.Equals(x.Path, fileInfo.Path)));
 
-        foreach (var filePath in filePaths)
+        foreach (var fileEntry in fileEntries)
         {
-            Console.WriteLine(filePath);
+            Console.WriteLine(fileEntry);
 
-            var fileEntry = new MediaFileEntry()
+            var mediaFileEntry = new MediaFileEntry()
             {
-                Name = Path.GetFileName(filePath),
-                Path = filePath,
+                Name = fileEntry.Name,
+                Path = fileEntry.Path,
                 RootPath = null, //this.RootDirectory,
                 RelativeDepth = 0, //PathUtils.GetRelativeDepth(this.RootDirectory, directory)
-                FileInfo = new FileInfo(filePath)
+                FileEntry = fileEntry
             };
 
             // // If any include paths were provided, lets make sure that this file
@@ -216,14 +224,14 @@ public class MediaFileCollection
             // If we are filtering by extension, lets make sure the file uses that extension
             if (includeExtensions.Count() > 0)
             {
-                if (!includeExtensions.Any(x => fileEntry.FileInfo.Extension.TrimStart('.') == x))
+                if (!includeExtensions.Any(x => mediaFileEntry.FileEntry.Extension.TrimStart('.') == x))
                 {
-                    fileEntry.Ignored = true;
+                    mediaFileEntry.Ignored = true;
                     continue;
                 }
             }
 
-            collection.Entries.Add(fileEntry);
+            collection.Entries.Add(mediaFileEntry);
         }
 
         return collection;
